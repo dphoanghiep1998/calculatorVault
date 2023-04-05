@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.main.home.setting.FragmentSetting">
+
+    <LinearLayout
+        android:id="@+id/container_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_container_setting"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <include
+            android:id="@+id/item_general"
+            layout="@layout/layout_item_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <include
+            android:id="@+id/item_safe"
+            layout="@layout/layout_item_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <include
+            android:id="@+id/item_disguise_icon"
+            layout="@layout/layout_item_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <include
+            android:id="@+id/item_private_camera"
+            layout="@layout/layout_item_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <include
+            android:id="@+id/item_advanced"
+            layout="@layout/layout_item_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginTop="@dimen/_12sdp"
+        android:id="@+id/container_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_container_setting"
+        app:layout_constraintTop_toBottomOf="@id/container_1">
+
+        <include
+            android:id="@+id/item_retrieve_lost_files"
+            layout="@layout/layout_item_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <include
+            android:id="@+id/item_backup"
+            layout="@layout/layout_item_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <include
+            android:id="@+id/item_device_migration"
+            layout="@layout/layout_item_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginTop="@dimen/_12sdp"
+        android:id="@+id/container_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_container_setting"
+        app:layout_constraintTop_toBottomOf="@id/container_2">
+
+        <include
+            android:id="@+id/item_language"
+            layout="@layout/layout_item_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginTop="@dimen/_12sdp"
+        android:id="@+id/container_4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_container_setting"
+
+        app:layout_constraintTop_toBottomOf="@id/container_3">
+
+        <include
+            android:id="@+id/item_clear_cache"
+            layout="@layout/layout_item_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <include
+            android:id="@+id/item_preventing_lost_file_help"
+            layout="@layout/layout_item_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <include
+            android:id="@+id/item_faq"
+            layout="@layout/layout_item_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

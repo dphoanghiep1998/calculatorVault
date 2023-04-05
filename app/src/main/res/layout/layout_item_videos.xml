@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginVertical="@dimen/_2sdp"
+    android:layout_marginHorizontal="@dimen/_2sdp">
+
+    <com.neko.hiepdph.calculatorvault.common.customview.RoundedImageView
+        android:id="@+id/imv_thumb"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_item_image_corner_10"
+        app:cornerRadiusBotLeft="10dp"
+        app:cornerRadiusBotRight="10dp"
+        app:cornerRadiusTopLeft="10dp"
+        app:cornerRadiusTopRight="10dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <CheckBox
+        android:id="@+id/check_box"
+        android:layout_width="@dimen/_20sdp"
+        android:layout_height="@dimen/_20sdp"
+        android:button="@null"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:layout_margin="@dimen/_2sdp"
+        android:background="@drawable/bg_checkbox_pick_selector"
+        android:paddingHorizontal="@dimen/_6sdp"
+        android:paddingVertical="@dimen/_6sdp"
+        app:layout_constraintEnd_toEndOf="@id/imv_thumb"
+        app:layout_constraintTop_toTopOf="@id/imv_thumb" />
+
+    <TextView
+        android:id="@+id/tv_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_6sdp"
+        android:layout_marginBottom="@dimen/_6sdp"
+        android:background="@drawable/bg_blur_corner"
+        android:drawablePadding="@dimen/_4sdp"
+        android:fontFamily="@font/app_font_400"
+        android:paddingHorizontal="@dimen/_4sdp"
+        android:paddingVertical="@dimen/_2sdp"
+        android:textColor="@color/neutral_01"
+        android:textSize="@dimen/_8sdp"
+        app:drawableStartCompat="@drawable/ic_video_duration"
+        app:layout_constraintBottom_toBottomOf="@id/imv_thumb"
+        app:layout_constraintStart_toStartOf="@id/imv_thumb" />
+</androidx.constraintlayout.widget.ConstraintLayout>

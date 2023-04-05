@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.setuplock.FragmentSetupLock">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_12sdp"
+        android:fontFamily="@font/app_font_500"
+        android:text="@string/calculator"
+        android:textColor="@color/neutral_06"
+        android:textSize="@dimen/_20sdp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_goneMarginStart="@dimen/_12sdp" />
+
+    <TextView
+        android:id="@+id/tv_question"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:fontFamily="@font/app_font_400"
+        android:text="@string/question"
+        android:textColor="@color/neutral_06"
+        android:textSize="@dimen/_16sdp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_title" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/container_question"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_12sdp"
+        android:layout_marginEnd="@dimen/_12sdp"
+        android:clickable="true"
+        android:foreground="@drawable/fg_ripple_effect"
+        android:gravity="center"
+        app:hintEnabled="false"
+        app:layout_constraintBottom_toBottomOf="@id/tv_question"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tv_question"
+        app:layout_constraintTop_toTopOf="@id/tv_question">
+
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/question"
+            style="@style/AutoCompleteLayoutStyle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_neutral03_corner_border"
+            android:clickable="true"
+            android:focusable="false"
+            android:fontFamily="@font/app_font_500"
+            android:maxLines="2"
+            android:text="@string/lock_ask_1"
+            android:textColor="@color/neutral_06"
+            android:textSize="@dimen/_14sdp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+    <TextView
+        android:id="@+id/tv_answer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_40sdp"
+        android:fontFamily="@font/app_font_400"
+        android:text="@string/answer"
+        android:textColor="@color/neutral_06"
+        android:textSize="@dimen/_16sdp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_question" />
+
+    <EditText
+        android:id="@+id/edt_answer"
+        android:layout_width="0dp"
+        android:hint="@string/hint_lock_instruction"
+        android:textColorHint="@color/neutral_04"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_neutral03_corner_border"
+        android:fontFamily="@font/app_font_400"
+        android:minHeight="@dimen/_36sdp"
+        android:maxLength="50"
+        android:paddingHorizontal="@dimen/_12sdp"
+        android:paddingVertical="@dimen/_6sdp"
+        android:textColor="@color/neutral_06"
+        android:textSize="@dimen/_14sdp"
+        app:layout_constraintBottom_toBottomOf="@id/tv_answer"
+        app:layout_constraintEnd_toEndOf="@id/container_question"
+        app:layout_constraintStart_toStartOf="@id/container_question"
+        app:layout_constraintTop_toTopOf="@id/tv_answer" />
+
+    <TextView
+        android:id="@+id/tv_instruction_setup_lock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:fontFamily="@font/app_font_400"
+        android:text="@string/instruction_setup_lock"
+        android:textColor="@color/neutral_05"
+        android:textSize="@dimen/_16sdp"
+        app:layout_constraintTop_toBottomOf="@id/edt_answer" />
+
+    <TextView
+        android:id="@+id/btn_confim"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_item_calculator_special"
+        android:paddingHorizontal="@dimen/_30sdp"
+        android:paddingVertical="@dimen/_12sdp"
+        android:text="@string/custom_ok"
+        android:textColor="@color/neutral_01"
+        android:textSize="@dimen/_16sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_12sdp"
+        app:layout_constraintTop_toBottomOf="@id/tv_instruction_setup_lock" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

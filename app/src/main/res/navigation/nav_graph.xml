@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/fragmentVault"
+    android:id="@+id/nav_graph">
+
+    <fragment
+        android:id="@+id/fragmentVault"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.vault.FragmentVault"
+        android:label="@string/vault">
+        <action
+            android:id="@+id/action_fragmentVault_to_fragmentPersistent"
+            app:destination="@id/fragmentPersistent" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentBrowser"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.browser.FragmentBrowser"
+        android:label="@string/browser"
+        tools:layout="@layout/fragment_browser" />
+    <fragment
+        android:id="@+id/fragmentSetting"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.setting.FragmentSetting"
+        android:label="@string/setting"
+        tools:layout="@layout/fragment_setting" />
+    <fragment
+        android:id="@+id/fragmentLanguage"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.language.FragmentLanguage"
+        android:label="@string/language"
+        tools:layout="@layout/fragment_language" />
+    <fragment
+        android:id="@+id/fragmentNote"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.note.FragmentNote"
+        android:label="@string/note"
+        tools:layout="@layout/fragment_note">
+        <action
+            android:id="@+id/action_fragmentNote_to_fragmentAddNote"
+            app:destination="@id/fragmentAddNote" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentRecycleBin"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.recyclebin.FragmentRecycleBin"
+        android:label="@string/recycle_bin"
+        tools:layout="@layout/fragment_recycle_bin" />
+    <fragment
+        android:id="@+id/fragmentPersistent"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.FragmentPersistent"
+        tools:layout="@layout/fragment_persistent">
+        <argument
+            android:name="type"
+            app:argType="string" />
+        <argument
+            android:name="title"
+            app:argType="string" />
+        <argument
+            android:name="vaultPath"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_fragmentPersistent_to_fragmentAddFile"
+            app:destination="@id/fragmentAddFile" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentAddFile"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.FragmentAddFile"
+        tools:layout="@layout/fragment_add_file">
+        <argument
+            android:name="type"
+            app:argType="string" />
+
+        <argument
+            android:name="title"
+            app:argType="string" />
+        <argument
+            android:name="vaultPath"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_fragmentAddFile_to_fragmentListItem"
+            app:destination="@id/fragmentListItem" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentListItem"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item.FragmentListItem">
+
+        <argument
+            android:name="fileType"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="vaultPath"
+            app:argType="string" />
+        <argument
+            android:name="groupItem"
+            app:argType="com.neko.hiepdph.calculatorvault.data.model.GroupItem" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentAddNote"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.note.FragmentAddNote"
+        tools:layout="@layout/fragment_add_note" />
+</navigation>

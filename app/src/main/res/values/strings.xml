@@ -1,0 +1,138 @@
+<resources>
+    <string name="app_name">CalculatorVault</string>
+
+    <array name="stringLang" translatable="false">
+        <item>English</item>
+        <item>Français</item>
+        <item>भारत</item>
+        <item>Indonesia</item>
+        <item>日本</item>
+        <item>Brazil</item>
+        <item>Tiếng Việt</item>
+        <item>한국인</item>
+        <item>Türkiye</item>
+        <item>España</item>
+        <item>Italia</item>
+        <item>Deutsch</item>
+    </array>
+    <array name="valueLang" translatable="false">
+        <item>en</item>
+        <item>fr</item>
+        <item>hi</item>
+        <item>in</item>
+        <item>ja</item>
+        <item>pt</item>
+        <item>vi</item>
+        <item>ko</item>
+        <item>tr</item>
+        <item>es</item>
+        <item>it</item>
+        <item>de</item>
+    </array>
+
+    <string name="ENGLISH" translatable="false">English</string>
+    <string name="JAPANESE" translatable="false">日本</string>
+    <string name="KOREAN" translatable="false">"한국인 </string>
+    <string name="FRENCH" translatable="false">Français</string>
+    <string name="ITALIA" translatable="false">Italia</string>
+    <string name="GERMAN" translatable="false">Deutsch</string>
+    <string name="VIETNAM" translatable="false">Tiếng Việt</string>
+    <string name="INDONESIA" translatable="false">Indonesia</string>
+    <string name="BRAZIL" translatable="false">Brazil</string>
+    <string name="TURKEY" translatable="false">Türkiye</string>
+    <string name="SPAIN" translatable="false">España</string>
+    <string name="INDIA" translatable="false">भारत</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="calculator">Calculator</string>
+    <string name="choose_theme">Choose Theme</string>
+    <string name="custom">Custom</string>
+    <string name="cancel">Cancel</string>
+    <string name="custom_ok">Ok</string>
+    <string name="back">Back</string>
+    <string name="vault">Vault</string>
+    <string name="pictures">Pictures</string>
+    <string name="videos">Videos</string>
+    <string name="audios">Audios</string>
+    <string name="documents">Documents</string>
+    <string name="list">List</string>
+    <string name="sort">Sort</string>
+    <string name="delete">Delete</string>
+    <string name="delete_instruction">Are you sure to delete %s ?</string>
+    <string name="yes">Yes</string>
+    <string name="unlock">Unlock</string>
+    <string name="unlock_instruction">Are you sure to unlock the selected %s ?</string>
+    <string name="new_folder">New Folder</string>
+    <string name="enter_name">Enter album\'s name</string>
+    <string name="item">item</string>
+    <string name="grid">Grid</string>
+    <string name="invalid_folder_name">Invalid folder\'s name</string>
+    <string name="rename">Rename</string>
+    <string name="delete_success">Delete success!</string>
+    <string name="delete_failed">Delete failed!</string>
+    <string name="create_success">Create success!</string>
+    <string name="create_failed">Create failed</string>
+    <string name="invalid_expression">Invalid expression</string>
+    <string name="browser">Browser</string>
+    <string name="note">Note</string>
+    <string name="recycle_bin">Recycle Bin</string>
+    <string name="setting">Setting</string>
+    <string name="language">Language</string>
+    <string name="dark_theme">Dark Theme</string>
+    <string name="rate_app">Rate App</string>
+    <string name="share_app">Share App</string>
+    <string name="about_us">About Us</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="drawer_text">Calculator - Hide photos</string>
+    <string name="move_to_vault">Move to Vault</string>
+    <string name="files">Files</string>
+    <string name="pdf">PDF</string>
+    <string name="ppt">PPT</string>
+    <string name="word">Word</string>
+    <string name="excel">Excel</string>
+    <string name="text">Text</string>
+    <string name="csv">CSV</string>
+    <string name="zip">ZIP</string>
+    <string name="name">Name</string>
+    <string name="size">Size</string>
+    <string name="random">Random</string>
+    <string name="ascending">Ascending</string>
+    <string name="descending">Descending</string>
+    <string name="library">Library</string>
+    <string name="audios_album">Audios album</string>
+    <string name="lock_ask_1">Where are you from ?</string>
+    <string name="question">Question :</string>
+    <string name="answer">Answer :</string>
+    <string name="instruction_setup_lock">Security questions allow you to reset your password if you forget it in the future. Please choose a question that is easy for you to remember. Once the answer is forgotten, the encrypted data may be lost.</string>
+    <string name="hint_lock_instruction">Enter your answer with no more than 50 letters</string>
+    <string name="lock_ask_2">What is your favorite number?</string>
+    <string name="lock_ask_3">What is your favorite color?</string>
+    <string name="lock_ask_4">What do you do in your free time?</string>
+    <string name="important_tip">Important tips</string>
+    <string name="tips_instruction">In case you forget your password, simply enter a number ‘11223344’ into Calculator and press ’=’ button, then retrieve your password by entering the answer of your security question.</string>
+    <string name="never_show">Never show</string>
+    <string name="go_it">Go it</string>
+    <string name="allow">Allow</string>
+    <string name="permission_title">Calculator - Vault needs file permission, this permission will be used for hidden features: Videos, Pictures, Music, Files...</string>
+    <string name="general">General</string>
+    <string name="safe">Safe</string>
+    <string name="disguise_icon">Disguise Icon</string>
+    <string name="private_camera">Private Camera</string>
+    <string name="advanced">Advanced</string>
+    <string name="retrive_lost_files">Retrieve Lost Files</string>
+    <string name="backup">Back up</string>
+    <string name="device_migration">Device Migration</string>
+    <string name="change_language">Change Language</string>
+    <string name="clear_cache">Clear Cache</string>
+    <string name="preventing_lost_files_help">Preventing Lost Files Help</string>
+    <string name="FAQ">FAQ</string>
+    <string name="recycle_bin_instruction">The files in the Recycle Bin will be automatically deleted after 60 days.</string>
+    <string name="play">Play</string>
+    <string name="info">Info</string>
+    <string name="open">Open</string>
+    <string name="title">Title :</string>
+    <string name="content">Content :</string>
+    <string name="new_note">New note</string>
+    <string name="title_and_content_required">Note\'s title and Note\'s content are required!</string>
+    <string name="nothing_to_delete">Nothing to delete !</string>
+</resources>
