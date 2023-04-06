@@ -22,7 +22,11 @@
         android:id="@+id/fragmentSetting"
         android:name="com.neko.hiepdph.calculatorvault.ui.main.home.setting.FragmentSetting"
         android:label="@string/setting"
-        tools:layout="@layout/fragment_setting" />
+        tools:layout="@layout/fragment_setting" >
+        <action
+            android:id="@+id/action_fragmentSetting_to_fragmentSafe"
+            app:destination="@id/fragmentSafe" />
+    </fragment>
     <fragment
         android:id="@+id/fragmentLanguage"
         android:name="com.neko.hiepdph.calculatorvault.ui.main.home.language.FragmentLanguage"
@@ -96,4 +100,40 @@
         android:id="@+id/fragmentAddNote"
         android:name="com.neko.hiepdph.calculatorvault.ui.main.home.note.FragmentAddNote"
         tools:layout="@layout/fragment_add_note" />
+    <fragment
+        android:id="@+id/fragmentSafe"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.setting.safe.FragmentSafe"
+        android:label="@string/safe" >
+        <action
+            android:id="@+id/action_fragmentSafe_to_fragmentLock"
+            app:destination="@id/fragmentLock" />
+        <action
+            android:id="@+id/action_fragmentSafe_to_dialogChangeScreenOffAction"
+            app:destination="@id/dialogChangeScreenOffAction" />
+        <action
+            android:id="@+id/action_fragmentSafe_to_fragmentSetupLock"
+            app:destination="@id/fragmentSetupLock" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentLock"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.setting.safe.lock.FragmentLock"
+        android:label="@string/lock"
+        tools:layout="@layout/fragment_lock" >
+        <action
+            android:id="@+id/action_fragmentLock_to_dialogChangeLockType"
+            app:destination="@id/dialogChangeLockType" />
+    </fragment>
+    <dialog
+        android:id="@+id/dialogChangeLockType"
+        android:name="com.neko.hiepdph.calculatorvault.dialog.DialogChangeLockType"
+        android:label="DialogChangeLockType" />
+    <dialog
+        android:id="@+id/dialogChangeScreenOffAction"
+        android:name="com.neko.hiepdph.calculatorvault.dialog.DialogChangeScreenOffAction"
+        android:label="DialogChangeScreenOffAction" />
+    <fragment
+        android:id="@+id/fragmentSetupLock"
+        android:name="com.neko.hiepdph.calculatorvault.ui.setuplock.FragmentSetupLock"
+        android:label="@string/security_question"
+        tools:layout="@layout/fragment_setup_lock" />
 </navigation>

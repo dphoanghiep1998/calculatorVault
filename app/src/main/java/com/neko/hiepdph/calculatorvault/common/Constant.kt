@@ -1,8 +1,17 @@
 package com.neko.hiepdph.calculatorvault.common
 
 
-
 object Constant {
+    const val KEY_SECRET_PIN ="KEY_SECRET_PIN"
+    const val KEY_TACTILE_FEEDBACK = "KEY_TACTILE_FEEDBACK"
+    const val KEY_VISIBLE_PATTERN = "KEY_VISIBLE_PATTERN"
+    const val KEY_SCREEN_OFF_ACTION = "KEY_SCREEN_OFF_ACTION"
+    const val KEY_LOCK_WHEN_LEAVING_APP = "KEY_LOCK_WHEN_LEAVING_APP"
+    const val KEY_FINGER_PRINT_DISPLAY = "KEY_FINGER_PRINT_DISPLAY"
+    const val KEY_FINGER_PRINT_UNLOCK = "KEY_FINGER_PRINT_UNLOCK"
+    const val KEY_LOCK_PRESS_TYPE = "KEY_LOCK_PRESS_TYPE"
+    const val KEY_LOCK_TYPE = "KEY_LOCK_TYPE"
+    const val KEY_IS_SHOULD_SHOW_HIDDEN = "KEY_IS_SHOULD_SHOW_HIDDEN"
     const val LOCALE = "LOCALE_SUGAR_V2"
     const val KEY_SET_LANG = "KEY_SET_LANG_SUGAR_V2"
     const val KEY_FAQ_CLICKED = "KEY_FAQ_CLICKED_V2"
@@ -53,14 +62,14 @@ object Constant {
     const val TOMORROW_BIT = -2
     const val OPEN_ALARMS_TAB_INTENT_ID = 9996
 
-    const val KEY_SECURITY_QUESTION ="KEY_SECURITY_QUESTION"
-    const val KEY_SECURITY_ANSWER ="KEY_SECURITY_ANSWER"
+    const val KEY_SECURITY_QUESTION = "KEY_SECURITY_QUESTION"
+    const val KEY_SECURITY_ANSWER = "KEY_SECURITY_ANSWER"
 
 
     const val SECRET_KEY = 9996
     const val DEFAULT_SECRET_PASSWORD = "1234"
     const val DEFAULT_SECRET_PASSWORD_SUFFIX = "%"
-    const val KEY_THEME_COLOR ="KEY_THEME_COLOR"
+    const val KEY_THEME_COLOR = "KEY_THEME_COLOR"
 
     const val FILES_FOLDER_NAME = "FILE_CALCULATOR_VAULT_${SECRET_KEY}"
     const val PICTURE_FOLDER_NAME = "PICTURE_CALCULATOR_VAULT_${SECRET_KEY}"
@@ -106,10 +115,22 @@ object Constant {
     const val TYPE_ZIP = ".zip"
     const val TYPE_OTHER = "TYPE_OTHER"
 
-    val photoExtensions: Array<String> get() = arrayOf(".jpg", ".png", ".jpeg", ".bmp", ".webp", ".heic", ".heif", ".apng", ".avif")
-    val videoExtensions: Array<String> get() = arrayOf(".mp4", ".mkv", ".webm", ".avi", ".3gp", ".mov", ".m4v", ".3gpp")
-    val audioExtensions: Array<String> get() = arrayOf(".mp3", ".wav", ".wma", ".ogg", ".m4a", ".opus", ".flac", ".aac")
-    val rawExtensions: Array<String> get() = arrayOf(".dng", ".orf", ".nef", ".arw", ".rw2", ".cr2", ".cr3")
+    val photoExtensions: Array<String>
+        get() = arrayOf(
+            ".jpg", ".png", ".jpeg", ".bmp", ".webp", ".heic", ".heif", ".apng", ".avif"
+        )
+    val videoExtensions: Array<String>
+        get() = arrayOf(
+            ".mp4", ".mkv", ".webm", ".avi", ".3gp", ".mov", ".m4v", ".3gpp"
+        )
+    val audioExtensions: Array<String>
+        get() = arrayOf(
+            ".mp3", ".wav", ".wma", ".ogg", ".m4a", ".opus", ".flac", ".aac"
+        )
+    val rawExtensions: Array<String>
+        get() = arrayOf(
+            ".dng", ".orf", ".nef", ".arw", ".rw2", ".cr2", ".cr3"
+        )
 
 
 }

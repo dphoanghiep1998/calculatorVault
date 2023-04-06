@@ -16,6 +16,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 //import com.applovin.sdk.AppLovinSdk
 //import com.neko.hiepdph.calculatorvault.activities.MainActivity
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
+import com.neko.hiepdph.calculatorvault.config.MainConfig
 //import com.neko.hiepdph.calculatorvault.common.utils.AudienceNetworkInitializeHelper
 //import com.facebook.appevents.AppEventsLogger
 //import com.gianghv.libads.AppOpenAdManager
@@ -43,6 +44,7 @@ class CustomApplication : Application(), Application.ActivityLifecycleCallbacks,
     override fun onCreate() {
         super.onCreate()
         AppSharePreference.getInstance(applicationContext)
+
 //        settingLanguageLocale =
 //            AppSharePreference.INSTANCE.getSavedLanguage(Locale.getDefault().language)
 //        registerActivityLifecycleCallbacks(this)

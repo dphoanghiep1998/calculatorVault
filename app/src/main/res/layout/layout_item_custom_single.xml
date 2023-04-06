@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:foreground="@drawable/fg_ripple_effect"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -19,21 +20,46 @@
         android:fontFamily="@font/app_font_400"
         android:textColor="@color/neutral_06"
         android:textSize="@dimen/_14sdp"
-        android:layout_marginVertical="@dimen/_8sdp"
-        android:paddingHorizontal="@dimen/_6sdp"
+        android:layout_marginVertical="@dimen/_12sdp"
+        android:paddingStart="@dimen/_6sdp"
+        android:paddingEnd="@dimen/_12sdp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/imv_next"
+        app:layout_constraintEnd_toStartOf="@id/container_tool"
         app:layout_constraintStart_toEndOf="@id/imv_icon"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/imv_next"
-        android:layout_width="@dimen/_24sdp"
-        android:layout_height="@dimen/_24sdp"
-        android:src="@drawable/ic_next_setting"
+    <LinearLayout
+        android:gravity="center"
+        android:id="@+id/container_tool"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tv_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/app_font_400"
+            android:layout_marginEnd="@dimen/_4sdp"
+            android:textColor="@color/neutral_05"
+            android:textSize="@dimen/_10sdp" />
+
+        <ImageView
+            android:id="@+id/imv_next"
+            android:layout_width="@dimen/_20sdp"
+            android:layout_height="@dimen/_20sdp"
+            android:src="@drawable/ic_next_setting" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_change"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/_24sdp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
 
     <View
         android:layout_width="match_parent"

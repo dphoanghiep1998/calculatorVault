@@ -47,12 +47,12 @@ class AppSharePreference(private val context: Context?) {
         return null
     }
 
-    fun setThemeColor(values: Int){
-        saveInt(Constant.KEY_THEME_COLOR,values)
+    fun setThemeColor(values: Int) {
+        saveInt(Constant.KEY_THEME_COLOR, values)
     }
 
-    fun getThemeColor(defaultValues: Int):Int{
-        return getInt(Constant.KEY_THEME_COLOR,defaultValues)
+    fun getThemeColor(defaultValues: Int): Int {
+        return getInt(Constant.KEY_THEME_COLOR, defaultValues)
     }
 
     fun setSecurityQuestion(values: String) {
@@ -175,6 +175,55 @@ class AppSharePreference(private val context: Context?) {
         }
     }
 
+    fun getFingerPrintLockDisplay(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_FINGER_PRINT_DISPLAY, defaultValues)
+    }
+
+    fun saveFingerPrintLockDisplay(values: Boolean) {
+        saveBoolean(Constant.KEY_FINGER_PRINT_DISPLAY, values)
+    }
+
+    fun getIsShouldShowHidden(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_IS_SHOULD_SHOW_HIDDEN, defaultValues)
+    }
+
+    fun setShouldShowHidden(values: Boolean) {
+        saveBoolean(Constant.KEY_IS_SHOULD_SHOW_HIDDEN, values)
+    }
+
+    fun getLockType(defaultValues: Int): Int {
+        return getInt(Constant.KEY_LOCK_TYPE, defaultValues)
+    }
+
+    fun saveLockType(values: Int) {
+        saveInt(Constant.KEY_LOCK_TYPE, values)
+    }
+
+    fun getLockPressType(defaultValues: Int): Int {
+        return getInt(Constant.KEY_LOCK_PRESS_TYPE, defaultValues)
+    }
+
+    fun saveLockPressType(values: Int) {
+        saveInt(Constant.KEY_LOCK_PRESS_TYPE, values)
+    }
+
+    fun getFingerPrintUnlock(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_FINGER_PRINT_UNLOCK, defaultValues)
+    }
+
+    fun saveFingerPrintUnlock(values: Boolean) {
+        saveBoolean(Constant.KEY_FINGER_PRINT_UNLOCK, values)
+    }
+
+    fun getLockWhenLeavingApp(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_LOCK_WHEN_LEAVING_APP, defaultValues)
+    }
+
+    fun saveLockWhenLeavingApp(values: Boolean) {
+        saveBoolean(Constant.KEY_LOCK_WHEN_LEAVING_APP, values)
+    }
+
+
     private fun saveInt(key: String, values: Int) = sharedPreferences().edit {
         putInt(key, values)
     }
@@ -248,10 +297,47 @@ class AppSharePreference(private val context: Context?) {
             onSharedPreferenceChangeListener
         )
 
+    fun unregisterListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {
+        sharedPreferences().unregisterOnSharedPreferenceChangeListener(listener)
+    }
+
+
     private fun defaultSharedPreferences(context: Context): SharedPreferences =
         PreferenceManager.getDefaultSharedPreferences(context)
 
     fun sharedPreferences(): SharedPreferences = defaultSharedPreferences(context!!)
+    fun getScreenOffAction(defaultValues: Int): Int {
+        return getInt(Constant.KEY_SCREEN_OFF_ACTION, defaultValues)
+    }
+
+    fun saveScreenOffAction(values: Int) {
+        saveInt(Constant.KEY_SCREEN_OFF_ACTION, values)
+    }
+
+    fun getVisiblePattern(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_VISIBLE_PATTERN, defaultValues)
+    }
+
+    fun saveVisiblePattern(values: Boolean) {
+        saveBoolean(Constant.KEY_VISIBLE_PATTERN, values)
+    }
+
+    fun getTactileFeedback(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_TACTILE_FEEDBACK, defaultValues)
+    }
+
+    fun saveTactileFeedback(values: Boolean) {
+        saveBoolean(Constant.KEY_TACTILE_FEEDBACK, values)
+    }
+
+    fun getSecretPin(defaultValues: String): String {
+        return getString(Constant.KEY_SECRET_PIN, defaultValues)
+    }
+
+
+    fun saveSecretPin(values: String) {
+        saveString(Constant.KEY_SECRET_PIN, values)
+    }
 
 
 }

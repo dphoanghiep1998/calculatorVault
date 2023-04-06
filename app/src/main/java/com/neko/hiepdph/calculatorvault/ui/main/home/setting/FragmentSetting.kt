@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.view.*
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.databinding.FragmentSettingBinding
 
 
@@ -63,6 +65,13 @@ class FragmentSetting : Fragment() {
         groupView.forEachIndexed { index, item ->
             item.imvItem.setBackgroundResource(groupData[index].first)
             item.tvTitle.text = groupData[index].second
+        }
+        initButton()
+    }
+
+    private fun initButton() {
+        binding.itemSafe.root.clickWithDebounce {
+            findNavController().navigate(R.id.fragmentSafe)
         }
     }
 

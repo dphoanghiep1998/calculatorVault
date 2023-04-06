@@ -5,7 +5,6 @@ import android.content.Context
 import android.database.Cursor
 import android.graphics.BitmapFactory
 import android.graphics.Point
-import android.graphics.drawable.Drawable
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Handler
@@ -13,13 +12,16 @@ import android.os.Looper
 import android.provider.BaseColumns
 import android.provider.MediaStore
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import com.neko.hiepdph.calculatorvault.R
-import java.io.File
+import com.neko.hiepdph.calculatorvault.config.MainConfig
 
 
-
-fun Context.getDataColumn(uri: Uri, selection: String? = null, selectionArgs: Array<String>? = null): String? {
+val Context.config: MainConfig get() = MainConfig.newInstance(applicationContext)
+fun Context.getDataColumn(
+    uri: Uri,
+    selection: String? = null,
+    selectionArgs: Array<String>? = null
+): String? {
     try {
         val projection = arrayOf(MediaStore.Files.FileColumns.DATA)
         val cursor = contentResolver.query(uri, projection, selection, selectionArgs, null)
@@ -64,6 +66,7 @@ fun Context.queryCursor(
 fun Context.toast(id: Int, length: Int = Toast.LENGTH_SHORT) {
     toast(getString(id), length)
 }
+
 val isOnMainThread = Looper.myLooper() == Looper.getMainLooper()
 
 fun Context.toast(msg: String, length: Int = Toast.LENGTH_SHORT) {
@@ -78,7 +81,6 @@ fun Context.toast(msg: String, length: Int = Toast.LENGTH_SHORT) {
     } catch (e: Exception) {
     }
 }
-
 
 
 private fun doToast(context: Context, message: String, length: Int) {
@@ -98,6 +100,7 @@ fun Context.showErrorToast(msg: String, length: Int = Toast.LENGTH_LONG) {
 fun Context.showErrorToast(exception: Exception, length: Int = Toast.LENGTH_LONG) {
     showErrorToast(exception.toString(), length)
 }
+
 fun Context.getFileUri(path: String) = when {
     path.isImageSlow() -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
     path.isVideoSlow() -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
@@ -111,14 +114,17 @@ fun Context.getDuration(path: String): Int? {
     )
 
     val uri = getFileUri(path)
-    val selection = if (path.startsWith("content://")) "${BaseColumns._ID} = ?" else "${MediaStore.MediaColumns.DATA} = ?"
-    val selectionArgs = if (path.startsWith("content://")) arrayOf(path.substringAfterLast("/")) else arrayOf(path)
+    val selection =
+        if (path.startsWith("content://")) "${BaseColumns._ID} = ?" else "${MediaStore.MediaColumns.DATA} = ?"
+    val selectionArgs =
+        if (path.startsWith("content://")) arrayOf(path.substringAfterLast("/")) else arrayOf(path)
 
     try {
         val cursor = contentResolver.query(uri, projection, selection, selectionArgs, null)
         cursor?.use {
             if (cursor.moveToFirst()) {
-                return Math.round(cursor.getIntValue(MediaStore.MediaColumns.DURATION) / 1000.toDouble()).toInt()
+                return Math.round(cursor.getIntValue(MediaStore.MediaColumns.DURATION) / 1000.toDouble())
+                    .toInt()
             }
         }
     } catch (ignored: Exception) {
@@ -127,7 +133,10 @@ fun Context.getDuration(path: String): Int? {
     return try {
         val retriever = MediaMetadataRetriever()
         retriever.setDataSource(path)
-        Math.round(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)!!.toInt() / 1000f)
+        Math.round(
+            retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)!!
+                .toInt() / 1000f
+        )
     } catch (ignored: Exception) {
         null
     }
@@ -139,8 +148,10 @@ fun Context.getArtist(path: String): String? {
     )
 
     val uri = getFileUri(path)
-    val selection = if (path.startsWith("content://")) "${BaseColumns._ID} = ?" else "${MediaStore.MediaColumns.DATA} = ?"
-    val selectionArgs = if (path.startsWith("content://")) arrayOf(path.substringAfterLast("/")) else arrayOf(path)
+    val selection =
+        if (path.startsWith("content://")) "${BaseColumns._ID} = ?" else "${MediaStore.MediaColumns.DATA} = ?"
+    val selectionArgs =
+        if (path.startsWith("content://")) arrayOf(path.substringAfterLast("/")) else arrayOf(path)
 
     try {
         val cursor = contentResolver.query(uri, projection, selection, selectionArgs, null)
@@ -167,8 +178,10 @@ fun Context.getAlbum(path: String): String? {
     )
 
     val uri = getFileUri(path)
-    val selection = if (path.startsWith("content://")) "${BaseColumns._ID} = ?" else "${MediaStore.MediaColumns.DATA} = ?"
-    val selectionArgs = if (path.startsWith("content://")) arrayOf(path.substringAfterLast("/")) else arrayOf(path)
+    val selection =
+        if (path.startsWith("content://")) "${BaseColumns._ID} = ?" else "${MediaStore.MediaColumns.DATA} = ?"
+    val selectionArgs =
+        if (path.startsWith("content://")) arrayOf(path.substringAfterLast("/")) else arrayOf(path)
 
     try {
         val cursor = contentResolver.query(uri, projection, selection, selectionArgs, null)
@@ -195,8 +208,10 @@ fun Context.getTitle(path: String): String? {
     )
 
     val uri = getFileUri(path)
-    val selection = if (path.startsWith("content://")) "${BaseColumns._ID} = ?" else "${MediaStore.MediaColumns.DATA} = ?"
-    val selectionArgs = if (path.startsWith("content://")) arrayOf(path.substringAfterLast("/")) else arrayOf(path)
+    val selection =
+        if (path.startsWith("content://")) "${BaseColumns._ID} = ?" else "${MediaStore.MediaColumns.DATA} = ?"
+    val selectionArgs =
+        if (path.startsWith("content://")) arrayOf(path.substringAfterLast("/")) else arrayOf(path)
 
     try {
         val cursor = contentResolver.query(uri, projection, selection, selectionArgs, null)
@@ -247,8 +262,10 @@ fun Context.getVideoResolution(path: String): Point? {
 
         retriever.setDataSource(path)
 
-        val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)!!.toInt()
-        val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)!!.toInt()
+        val width =
+            retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)!!.toInt()
+        val height =
+            retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)!!.toInt()
         Point(width, height)
     } catch (ignored: Exception) {
         null
@@ -259,8 +276,11 @@ fun Context.getVideoResolution(path: String): Point? {
             val fd = contentResolver.openFileDescriptor(Uri.parse(path), "r")?.fileDescriptor
             val retriever = MediaMetadataRetriever()
             retriever.setDataSource(fd)
-            val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)!!.toInt()
-            val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)!!.toInt()
+            val width =
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)!!.toInt()
+            val height =
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)!!
+                    .toInt()
             point = Point(width, height)
         } catch (ignored: Exception) {
         }
