@@ -1,6 +1,7 @@
 package com.neko.hiepdph.calculatorvault.config
 
 import android.content.Context
+import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 
@@ -56,7 +57,7 @@ class MainConfig(val context: Context) {
             .saveTactileFeedback(tactileFeedback)
 
     var secretPin: String
-        get() = AppSharePreference.getInstance(context).getSecretPin(String.EMPTY)
+        get() = AppSharePreference.getInstance(context).getSecretPin("1111")
         set(secretPin) = AppSharePreference.getInstance(context).saveSecretPin(secretPin)
 
     var securityQuestion: String

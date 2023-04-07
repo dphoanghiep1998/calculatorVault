@@ -23,7 +23,15 @@
         <attr name="expand" format="boolean" />
     </declare-styleable>
 
-    <declare-styleable name="CalculatorMain"></declare-styleable>
+    <declare-styleable name="ButtonPin">
+        <attr name="srcPin" format="reference" />
+        <attr name="buttonTextPin" format="string" />
+
+    </declare-styleable>
+
+    <declare-styleable name="CalculatorMain" />
+
+    <declare-styleable name="PinMain" />
 
     <declare-styleable name="CustomSeekBar">
         //seekBar

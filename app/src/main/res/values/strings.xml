@@ -152,6 +152,8 @@
     <string name="tactile_feedback">Tactile Feedback</string>
     <string name="visible_pattern">Visible Pattern</string>
     <string name="change_unlock">Change Unlock</string>
+    <string name="change_unlock_pin">Change Unlock PIN</string>
+    <string name="change_unlock_pattern">Change Unlock Pattern</string>
     <string name="PIN">PIN</string>
     <string name="none">None</string>
     <string name="pin">PIN</string>
@@ -159,4 +161,11 @@
     <string name="lock_again">Lock Again</string>
     <string name="go_to_homescreen">Go to Home Screen</string>
     <string name="security_question">Security Question</string>
+    <string name="enter_original_password">Enter original password</string>
+    <string name="setup_a_new_password">Set up a new password</string>
+    <string name="confirm_your_password">Confirm your password</string>
+    <string name="password_must_be_4_characters">Password must be 4 characters</string>
+    <string name="current_password_is_not_correct">Current password is not correct</string>
+    <string name="password_does_not_match">Password does not match</string>
+    <string name="change_pin_success">Change PIN sucessfully !</string>
 </resources>

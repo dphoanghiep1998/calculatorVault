@@ -18,28 +18,11 @@ import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterPersistent
 import com.neko.hiepdph.calculatorvault.viewmodel.PersistentViewModel
 
-enum class PersistentType {
-    VIDEOS, AUDIOS, DOCUMENTS, PICTURES;
-
-    companion object {
-        @JvmStatic
-        fun fromString(value: String): PersistentType {
-            return when (value) {
-                "VIDEOS" -> VIDEOS
-                "AUDIOS" -> AUDIOS
-                "DOCUMENTS" -> DOCUMENTS
-                "PICTURES" -> PICTURES
-                else -> throw IllegalArgumentException("Invalid enum value: $value")
-            }
-        }
-    }
-}
-
 class FragmentPersistent : Fragment() {
     private var _binding: FragmentPersistentBinding? = null
     private val binding get() = _binding!!
     private val args: FragmentPersistentArgs by navArgs()
-    private val viewModel: PersistentViewModel by viewModels()
+    private val viewModel  by viewModels<PersistentViewModel>()
     private var adapterPersistent: AdapterPersistent? = null
 
 
@@ -47,7 +30,8 @@ class FragmentPersistent : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentPersistentBinding.inflate(inflater, container, false)
-        (requireActivity() as ActivityVault).supportActionBar?.title = args.title
+        (requireActivity() as ActivityVault).getToolbar().title =args.title
+
         return binding.root
     }
 

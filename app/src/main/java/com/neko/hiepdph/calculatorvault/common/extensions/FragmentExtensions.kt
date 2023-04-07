@@ -1,13 +1,12 @@
 package com.neko.hiepdph.calculatorvault.common.extensions
 
+//import com.gianghv.libads.*
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -17,12 +16,14 @@ import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
-//import com.gianghv.libads.*
 import com.google.android.material.snackbar.Snackbar
 import com.neko.hiepdph.calculatorvault.R
-import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionM
+import kotlinx.coroutines.launch
 
 enum class NativeType {
     HISTORY, INFORMATION, SETTINGS, LANGUAGE, RECORD, DETAIL_INFORMATION, UNIT, TARGET
@@ -38,25 +39,43 @@ enum class SnackBarType {
 
 
 fun Fragment.navigateToPage(id: Int, actionId: Int, bundle: Bundle? = null) {
-    if (findNavController().currentDestination?.id == id && isAdded) {
-        findNavController().navigate(
-            actionId, bundle
-        )
-        return
+    viewLifecycleOwner.lifecycleScope.launch {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            Log.d("TAG", "navigateToPage: " + id)
+            if (findNavController().currentDestination?.id == id && isAdded) {
+                findNavController().navigate(
+                    actionId, bundle
+                )
+            }
+        }
+
     }
 }
 
 fun Fragment.navigateToPage(id: Int, navDirections: NavDirections) {
-    if (findNavController().currentDestination?.id == id && isAdded) {
-        findNavController().navigate(navDirections)
-        return
+    viewLifecycleOwner.lifecycleScope.launch {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            if (findNavController().currentDestination?.id == id && isAdded) {
+                findNavController().navigate(navDirections)
+            }
+        }
     }
+
+}
+
+fun Fragment.popBackStack() {
+    lifecycleScope.launch {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            findNavController().popBackStack()
+        }
+    }
+
+
 }
 
 fun Fragment.getColor(res: Int): Int {
     return ContextCompat.getColor(requireContext(), res)
 }
-
 
 
 @SuppressLint("ResourceAsColor")

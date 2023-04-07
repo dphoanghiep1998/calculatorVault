@@ -12,7 +12,7 @@
 
     <color name="primary">#29BBCF</color>
     <color name="primary_12">#1F29BBCF</color>
-    <color name="secondary_01">#29BBCF1F</color>
+    <color name="secondary_01">#1F29BBCF</color>
     <color name="secondary_02">#356182</color>
 
     <color name="gradient_01">#26D0CE</color>

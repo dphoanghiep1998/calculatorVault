@@ -49,7 +49,7 @@ class FragmentAddFile : Fragment() {
     }
 
     private fun getDataFromArgs() {
-        (requireActivity() as ActivityVault).supportActionBar?.title = args.title
+        (requireActivity() as ActivityVault).getToolbar().title = args.title
         getDataGroupFile(args.type)
     }
 

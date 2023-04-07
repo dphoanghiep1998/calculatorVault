@@ -1,11 +1,11 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item
 
+//import com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item.adapter.AdapterListItem
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
@@ -18,8 +18,6 @@ import com.neko.hiepdph.calculatorvault.common.utils.IMoveFile
 import com.neko.hiepdph.calculatorvault.databinding.FragmentListItemBinding
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item.adapter.AdapterListItem
-//import com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item.adapter.AdapterListItem
-import com.neko.hiepdph.calculatorvault.viewmodel.HomeViewModel
 import com.neko.hiepdph.calculatorvault.viewmodel.ListItemViewModel
 
 class FragmentListItem : Fragment() {
@@ -44,7 +42,8 @@ class FragmentListItem : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initView()
         observeData()
-        (requireActivity() as ActivityVault).supportActionBar?.title = args.groupItem.name
+        (requireActivity() as ActivityVault).getToolbar().title = args.groupItem.name
+
     }
 
     private fun initView() {
@@ -55,21 +54,19 @@ class FragmentListItem : Fragment() {
 
     private fun initButton() {
         binding.btnMoveToVault.clickWithDebounce {
-            viewModel.copyMoveFile(
-                listPathSelected,
-                args.vaultPath,
-                object : IMoveFile {
-                    override fun onSuccess() {
-                        Log.d("TAG", "success: ")
-                    }
+            viewModel.copyMoveFile(listPathSelected, args.vaultPath, object : IMoveFile {
+                override fun onSuccess() {
+                    Log.d("TAG", "success: ")
+                }
 
-                    override fun onFailed() {
-                        Log.d("TAG", "failed: ")
-                    }
-                    override fun onDoneWithWarning() {
-                    }
+                override fun onFailed() {
+                    Log.d("TAG", "failed: ")
+                }
 
-                })
+                override fun onDoneWithWarning() {
+                }
+
+            })
         }
     }
 
@@ -81,28 +78,34 @@ class FragmentListItem : Fragment() {
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                when (menuItem.itemId) {
+                return when (menuItem.itemId) {
                     R.id.check_box_toolbar -> {
                         menuItem.isChecked = !menuItem.isChecked
+                        true
+
                     }
+                    else -> false
                 }
-                return true
             }
 
         })
     }
 
     private fun observeData() {
-        if(args.groupItem.type != Constant.TYPE_FILE){
-            viewModel.getItemListFromFolder(requireContext(),args.groupItem.folderPath,args.groupItem.type)
-        }else{
-            viewModel.getItemListFromFolder(requireContext(),args.groupItem.folderPath,args.groupItem.type,args.fileType)
+        if (args.groupItem.type != Constant.TYPE_FILE) {
+            viewModel.getItemListFromFolder(
+                requireContext(), args.groupItem.folderPath, args.groupItem.type
+            )
+        } else {
+            viewModel.getItemListFromFolder(
+                requireContext(), args.groupItem.folderPath, args.groupItem.type, args.fileType
+            )
         }
         viewModel.listItemList.observe(viewLifecycleOwner) {
             it?.let {
 
-                    adapterListItem?.setData(it, args.groupItem.type)
-                    sizeList = it.size
+                adapterListItem?.setData(it, args.groupItem.type)
+                sizeList = it.size
 
             }
         }

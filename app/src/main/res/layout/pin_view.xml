@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <com.neko.hiepdph.calculatorvault.common.customview.ButtonPin
+        android:id="@+id/btn_1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="@dimen/_2sdp"
+        app:buttonTextPin="1"
+        app:layout_constraintBottom_toTopOf="@id/btn_4"
+        app:layout_constraintDimensionRatio="W,1:1"
+        app:layout_constraintEnd_toStartOf="@id/btn_2"
+        app:layout_constraintHeight_max="@dimen/_60sdp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintWidth_max="@dimen/_60sdp" />
+
+    <com.neko.hiepdph.calculatorvault.common.customview.ButtonPin
+        android:id="@+id/btn_2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="@dimen/_2sdp"
+        app:buttonTextPin="2"
+        app:layout_constraintBottom_toBottomOf="@id/btn_1"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/btn_3"
+        app:layout_constraintStart_toEndOf="@id/btn_1"
+        app:layout_constraintTop_toTopOf="@id/btn_1"
+        app:layout_constraintWidth_max="@dimen/_60sdp" />
+
+    <com.neko.hiepdph.calculatorvault.common.customview.ButtonPin
+        android:id="@+id/btn_3"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="@dimen/_2sdp"
+        app:buttonTextPin="3"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btn_2"
+        app:layout_constraintTop_toTopOf="@id/btn_1"
+        app:layout_constraintWidth_max="@dimen/_60sdp" />
+
+    <com.neko.hiepdph.calculatorvault.common.customview.ButtonPin
+        android:id="@+id/btn_4"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginEnd="@dimen/_2sdp"
+        app:buttonTextPin="4"
+        app:layout_constraintBottom_toTopOf="@id/btn_7"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/btn_5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_1"
+
+        app:layout_constraintWidth_max="@dimen/_60sdp" />
+
+    <com.neko.hiepdph.calculatorvault.common.customview.ButtonPin
+        android:id="@+id/btn_5"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="@dimen/_2sdp"
+        app:buttonTextPin="5"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/btn_6"
+        app:layout_constraintStart_toEndOf="@id/btn_4"
+        app:layout_constraintTop_toTopOf="@id/btn_4"
+        app:layout_constraintWidth_max="@dimen/_60sdp" />
+
+    <com.neko.hiepdph.calculatorvault.common.customview.ButtonPin
+        android:id="@+id/btn_6"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="@dimen/_2sdp"
+        app:buttonTextPin="6"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btn_5"
+        app:layout_constraintTop_toTopOf="@id/btn_4"
+        app:layout_constraintWidth_max="@dimen/_60sdp" />
+
+    <com.neko.hiepdph.calculatorvault.common.customview.ButtonPin
+        android:id="@+id/btn_7"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginEnd="@dimen/_2sdp"
+        app:buttonTextPin="7"
+        app:layout_constraintBottom_toTopOf="@id/btn_delete"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/btn_8"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_4"
+        app:layout_constraintWidth_max="@dimen/_60sdp" />
+
+    <com.neko.hiepdph.calculatorvault.common.customview.ButtonPin
+        android:id="@+id/btn_8"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="@dimen/_2sdp"
+        app:buttonTextPin="8"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/btn_9"
+        app:layout_constraintStart_toEndOf="@id/btn_7"
+        app:layout_constraintTop_toTopOf="@id/btn_7"
+        app:layout_constraintWidth_max="@dimen/_60sdp" />
+
+    <com.neko.hiepdph.calculatorvault.common.customview.ButtonPin
+        android:id="@+id/btn_9"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="@dimen/_2sdp"
+        app:buttonTextPin="9"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btn_8"
+        app:layout_constraintTop_toTopOf="@id/btn_7"
+        app:layout_constraintWidth_max="@dimen/_60sdp" />
+
+    <com.neko.hiepdph.calculatorvault.common.customview.ButtonPin
+        android:id="@+id/btn_delete"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginEnd="@dimen/_2sdp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/btn_0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_7"
+        app:layout_constraintWidth_max="@dimen/_60sdp"
+        app:srcPin="@drawable/ic_backspace_pin" />
+
+    <com.neko.hiepdph.calculatorvault.common.customview.ButtonPin
+        android:id="@+id/btn_0"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="@dimen/_2sdp"
+        app:buttonTextPin="0"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/btn_check"
+        app:layout_constraintStart_toEndOf="@id/btn_delete"
+        app:layout_constraintTop_toTopOf="@id/btn_delete"
+        app:layout_constraintWidth_max="@dimen/_60sdp" />
+
+    <com.neko.hiepdph.calculatorvault.common.customview.ButtonPin
+        android:id="@+id/btn_check"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="@dimen/_2sdp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btn_0"
+        app:layout_constraintTop_toTopOf="@id/btn_delete"
+        app:layout_constraintWidth_max="@dimen/_60sdp"
+        app:srcPin="@drawable/ic_check_pin" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

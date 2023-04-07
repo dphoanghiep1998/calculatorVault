@@ -59,7 +59,7 @@ class DialogChangeScreenOffAction : DialogFragment() {
 
     private fun initData() {
         currentScreenOffAction = requireContext().config.lockType
-        when (requireContext().config.lockType) {
+        when (requireContext().config.screenOffAction) {
             ScreenOffAction.NOACTION -> binding.checkboxNoAction.isChecked = true
             ScreenOffAction.LOCKAGAIN -> binding.checkboxLockAgain.isChecked = true
             ScreenOffAction.GOTOHOMESCREEN -> binding.checkboxGoToHomescreen.isChecked = true

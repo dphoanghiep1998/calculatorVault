@@ -1,9 +1,7 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.setting.safe.lock
 
-import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,11 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
-import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
-import com.neko.hiepdph.calculatorvault.common.extensions.config
-import com.neko.hiepdph.calculatorvault.common.extensions.hide
-import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
+import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.config.LockType
 import com.neko.hiepdph.calculatorvault.databinding.FragmentLockBinding
 
@@ -24,9 +20,9 @@ class FragmentLock : Fragment() {
     private var _binding: FragmentLockBinding? = null
     private val binding get() = _binding!!
 
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentLockBinding.inflate(inflater, container, false)
         AppSharePreference.INSTANCE.registerOnSharedPreferenceChangeListener(listener)
@@ -40,6 +36,7 @@ class FragmentLock : Fragment() {
 
     private fun initView() {
         setupView()
+        setupChangeView(requireContext().config.lockType)
         initButton()
     }
 
@@ -48,10 +45,25 @@ class FragmentLock : Fragment() {
             findNavController().navigate(R.id.dialogChangeLockType)
         }
         binding.containerVisiblePattern.switchChange.setOnClickListener {
-            requireContext().config.visiblePattern = binding.containerVisiblePattern.switchChange.isChecked
+            requireContext().config.visiblePattern =
+                binding.containerVisiblePattern.switchChange.isChecked
         }
         binding.containerTactileFeedback.switchChange.setOnClickListener {
-            requireContext().config.tactileFeedback = binding.containerTactileFeedback.switchChange.isChecked
+            requireContext().config.tactileFeedback =
+                binding.containerTactileFeedback.switchChange.isChecked
+        }
+        binding.containerChangeUnlock.root.clickWithDebounce {
+            when (requireContext().config.lockType) {
+                LockType.PATTERN -> {
+
+                }
+                LockType.PIN -> {
+                    navigateToPage(R.id.fragmentLock, R.id.action_fragmentLock_to_fragmentChangePin)
+                }
+                LockType.NONE -> {
+
+                }
+            }
         }
     }
 
@@ -79,7 +91,7 @@ class FragmentLock : Fragment() {
         }
         binding.containerChangeUnlock.apply {
             imvIcon.hide()
-            tvContent.text = getString(R.string.change_unlock)
+            tvContent.text = getTitleChangeUnlock(requireContext().config.lockType)
             tvStatus.hide()
         }
     }
@@ -93,6 +105,35 @@ class FragmentLock : Fragment() {
         }
     }
 
+    private fun getTitleChangeUnlock(value: Int): String {
+        return when (value) {
+            LockType.PATTERN -> getString(R.string.change_unlock_pattern)
+            LockType.PIN -> getString(R.string.change_unlock_pin)
+            else -> String.EMPTY
+        }
+    }
+
+    private fun setupChangeView(value: Int) {
+        when (value) {
+            LockType.PATTERN -> {
+                binding.containerTactileFeedback.root.show()
+                binding.containerVisiblePattern.root.show()
+                binding.containerChangeUnlock.root.show()
+            }
+            LockType.PIN -> {
+                binding.containerTactileFeedback.root.hide()
+                binding.containerVisiblePattern.root.hide()
+                binding.containerChangeUnlock.root.show()
+            }
+
+            else -> {
+                binding.containerTactileFeedback.root.hide()
+                binding.containerVisiblePattern.root.hide()
+                binding.containerChangeUnlock.root.hide()
+            }
+        }
+    }
+
     override fun onDestroy() {
         AppSharePreference.INSTANCE.unregisterListener(listener)
         super.onDestroy()
@@ -102,6 +143,9 @@ class FragmentLock : Fragment() {
     private val listener = OnSharedPreferenceChangeListener { sharedPreferences, key ->
         if (key == Constant.KEY_LOCK_TYPE) {
             binding.containerLockType.tvStatus.text = getPattern(requireContext().config.lockType)
+            binding.containerChangeUnlock.tvContent.text =
+                getTitleChangeUnlock(requireContext().config.lockType)
+            setupChangeView(requireContext().config.lockType)
         }
     }
 
