@@ -339,6 +339,17 @@ class AppSharePreference(private val context: Context?) {
         saveString(Constant.KEY_SECRET_PIN, values)
     }
 
+    fun getPatternLock(defaultValues: ArrayList<String>): List<Int> {
+        val stringList = getStringList(Constant.KEY_PATTERN_LOCK, defaultValues)
+        return stringList.map {
+            it.toInt()
+        }
+    }
+
+    fun setPatternLock(patternLock: List<Int>) {
+        saveStringList(Constant.KEY_PATTERN_LOCK, patternLock.map { it.toString() })
+    }
+
 
 }
 

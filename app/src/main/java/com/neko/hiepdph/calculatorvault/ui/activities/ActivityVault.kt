@@ -18,6 +18,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.config
+import com.neko.hiepdph.calculatorvault.config.LockType
 import com.neko.hiepdph.calculatorvault.config.ScreenOffAction
 import com.neko.hiepdph.calculatorvault.databinding.ActivityCaculatorBinding
 import com.neko.hiepdph.calculatorvault.databinding.ActivityVaultBinding
@@ -63,10 +64,24 @@ class ActivityVault : AppCompatActivity() {
                            finish()
                        }
                        ScreenOffAction.LOCKAGAIN->{
-
+                        when(config.lockType){
+                            LockType.PIN -> {
+                                val intent = Intent(this@ActivityVault,ActivityPinLock::class.java)
+                                startActivity(intent)
+                                finish()
+                            }
+                            LockType.PATTERN -> {
+                                val intent = Intent(this@ActivityVault,ActivityPatternLock::class.java)
+                                startActivity(intent)
+                                finish()
+                            }
+                            else -> {
+                                //do nothing
+                            }
+                        }
                        }
                        ScreenOffAction.NOACTION->{
-
+                            //do nothing
                        }
                    }
                }

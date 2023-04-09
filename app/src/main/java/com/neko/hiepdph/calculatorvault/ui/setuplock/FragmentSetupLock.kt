@@ -5,11 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
+import com.neko.hiepdph.calculatorvault.common.extensions.popBackStack
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.databinding.FragmentSetupLockBinding
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 class FragmentSetupLock : Fragment() {
@@ -20,13 +24,14 @@ class FragmentSetupLock : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSetupLockBinding.inflate(inflater, container, false)
-        initView()
 
         return binding.root
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initView()
     }
 
     private fun initView() {
@@ -53,12 +58,15 @@ class FragmentSetupLock : Fragment() {
             getString(R.string.lock_ask_3),
             getString(R.string.lock_ask_4),
         )
-        binding.question.setSimpleItems(arrayQuestion)
+        lifecycleScope.launchWhenResumed {
+            binding.question.setSimpleItems(arrayQuestion)
+        }
 
 
         binding.btnConfim.clickWithDebounce {
             requireContext().config.securityQuestion = binding.question.text.toString()
             requireContext().config.securityAnswer = binding.edtAnswer.text.toString()
+            popBackStack()
         }
     }
 

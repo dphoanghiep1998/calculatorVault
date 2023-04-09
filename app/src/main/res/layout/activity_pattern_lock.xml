@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.main.home.setting.safe.lock.changepattern.FragmentChangePattern">
+
+
+
+    <TextView
+        app:layout_constraintVertical_chainStyle="packed"
+        android:id="@+id/tv_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:fontFamily="@font/app_font_500"
+        android:gravity="center"
+        android:textSize="@dimen/_16sdp"
+        app:layout_constraintBottom_toTopOf="@id/lock_9_view"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.takwolf.android.lock9.Lock9View
+        android:id="@+id/lock_9_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/tv_status"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:lock9_autoLink="true"
+        app:lock9_enableVibrate="false"
+        app:lock9_lineColor="@color/neutral_06"
+        app:lock9_lineWidth="@dimen/_4sdp"
+        app:lock9_nodeOnSrc="@drawable/ic_dot_pattern"
+        app:lock9_nodeOnAnim="@anim/pattern_touch"
+        app:lock9_padding="@dimen/_80sdp"
+        app:lock9_spacing="@dimen/_50sdp"
+        app:lock9_nodeAreaExpand="@dimen/_10sdp"
+        app:lock9_nodeSrc="@drawable/ic_dot_pattern"
+
+        tools:layout_editor_absoluteX="0dp" />
+</androidx.constraintlayout.widget.ConstraintLayout>

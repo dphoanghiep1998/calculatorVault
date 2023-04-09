@@ -55,7 +55,7 @@ class FragmentLock : Fragment() {
         binding.containerChangeUnlock.root.clickWithDebounce {
             when (requireContext().config.lockType) {
                 LockType.PATTERN -> {
-
+                    navigateToPage(R.id.fragmentLock,R.id.action_fragmentLock_to_fragmentChangePattern)
                 }
                 LockType.PIN -> {
                     navigateToPage(R.id.fragmentLock, R.id.action_fragmentLock_to_fragmentChangePin)

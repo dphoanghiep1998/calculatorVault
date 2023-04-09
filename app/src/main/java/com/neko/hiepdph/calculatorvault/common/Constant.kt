@@ -2,7 +2,8 @@ package com.neko.hiepdph.calculatorvault.common
 
 
 object Constant {
-    const val KEY_SECRET_PIN ="KEY_SECRET_PIN"
+    const val KEY_PATTERN_LOCK = "KEY_PATTERN_LOCK"
+    const val KEY_SECRET_PIN = "KEY_SECRET_PIN"
     const val KEY_TACTILE_FEEDBACK = "KEY_TACTILE_FEEDBACK"
     const val KEY_VISIBLE_PATTERN = "KEY_VISIBLE_PATTERN"
     const val KEY_SCREEN_OFF_ACTION = "KEY_SCREEN_OFF_ACTION"

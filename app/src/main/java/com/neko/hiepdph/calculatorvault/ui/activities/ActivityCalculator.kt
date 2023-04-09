@@ -9,10 +9,12 @@ import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.customview.CalculatorFunction
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.utils.DIVIDE_SYMBOL
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.common.utils.PI_SYMBOL
 import com.neko.hiepdph.calculatorvault.common.utils.SQRT_SYMBOL
+import com.neko.hiepdph.calculatorvault.config.LockType
 import com.neko.hiepdph.calculatorvault.databinding.ActivityCaculatorBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogChangeTheme
 import org.mariuszgromada.math.mxparser.Expression
@@ -36,6 +38,7 @@ class ActivityCalculator : AppCompatActivity() {
         initButton()
         observePassword()
     }
+
     private fun initInputText() {
         binding.tvInput.movementMethod = ScrollingMovementMethod()
     }
@@ -54,6 +57,23 @@ class ActivityCalculator : AppCompatActivity() {
         binding.imvChangeTheme.clickWithDebounce {
             val dialogChangeTheme = DialogChangeTheme()
             dialogChangeTheme.show(supportFragmentManager, dialogChangeTheme.tag)
+        }
+        binding.tvCalculator.setOnLongClickListener {
+            when (config.lockType) {
+                LockType.PATTERN -> {
+                    startActivity(Intent(this@ActivityCalculator, ActivityPatternLock::class.java))
+                    finish()
+                }
+                LockType.PIN -> {
+                    startActivity(Intent(this@ActivityCalculator, ActivityPinLock::class.java))
+                    finish()
+                }
+                else -> {
+                    startActivity(Intent(this@ActivityCalculator, ActivityVault::class.java))
+                    finish()
+                }
+            }
+            return@setOnLongClickListener true
         }
     }
 

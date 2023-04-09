@@ -70,5 +70,9 @@ class MainConfig(val context: Context) {
         set(securityAnswer) = AppSharePreference.getInstance(context)
             .setSecurityAnswer(securityAnswer)
 
+    var patternLock:List<Int>
+        get() = AppSharePreference.getInstance(context).getPatternLock(arrayListOf())
+        set(patternLock) = AppSharePreference.getInstance(context).setPatternLock(patternLock)
+
 
 }

@@ -125,6 +125,9 @@
         <action
             android:id="@+id/action_fragmentLock_to_fragmentChangePin"
             app:destination="@id/fragmentChangePin" />
+        <action
+            android:id="@+id/action_fragmentLock_to_fragmentChangePattern"
+            app:destination="@id/fragmentChangePattern" />
     </fragment>
     <dialog
         android:id="@+id/dialogChangeLockType"
@@ -146,4 +149,9 @@
         tools:layout="@layout/fragment_change_pin" >
 
     </fragment>
+    <fragment
+        android:id="@+id/fragmentChangePattern"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.setting.safe.lock.changepattern.FragmentChangePattern"
+        android:label="@string/change_unlock_pattern"
+        tools:layout="@layout/fragment_change_pattern" />
 </navigation>

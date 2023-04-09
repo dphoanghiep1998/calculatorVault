@@ -167,5 +167,11 @@
     <string name="password_must_be_4_characters">Password must be 4 characters</string>
     <string name="current_password_is_not_correct">Current password is not correct</string>
     <string name="password_does_not_match">Password does not match</string>
-    <string name="change_pin_success">Change PIN sucessfully !</string>
+    <string name="change_pin_success">Change PIN successfully !</string>
+    <string name="draw_a_new_key_pattern">Draw a new key pattern</string>
+    <string name="draw_current_key">Draw currently key pattern</string>
+    <string name="draw_pattern_again_to_confirm">Draw pattern again to confirm</string>
+    <string name="pattern_atleast_4_node">Pattern has atleast 4 node!</string>
+    <string name="pattern_not_match">Pattern doesn\'t match!</string>
+    <string name="pattern_lock_set_success">Pattern lock is set successfully</string>
 </resources>
