@@ -143,7 +143,7 @@
     <string name="lock_when_leaving_app">Lock when leaving app</string>
     <string name="temporary_file_deletion_time">Temporary File Deletion Time</string>
     <string name="unlock_app_with_registered_fingerprint">Unlock app with registered fingerprint</string>
-    <string name="unlock_interface_displays_fingerprint_pattern">Unlock app with registered fingerprint</string>
+    <string name="unlock_interface_displays_fingerprint_pattern">Unlock interface displays fingerprint pattern</string>
     <string name="content_2_screen_off_action">The status of Sgallery  after screen is locked</string>
     <string name="content_2_lock_when_leaving_app">Re-lock when you press the Back button or the HOME button to leave the app</string>
     <string name="content_2_temporary_file_deletion_time">"Delete the decrypted temporary file,  after the app is locked  "</string>
@@ -169,9 +169,16 @@
     <string name="password_does_not_match">Password does not match</string>
     <string name="change_pin_success">Change PIN successfully !</string>
     <string name="draw_a_new_key_pattern">Draw a new key pattern</string>
-    <string name="draw_current_key">Draw currently key pattern</string>
+    <string name="draw_current_key">Draw your currently pattern</string>
     <string name="draw_pattern_again_to_confirm">Draw pattern again to confirm</string>
     <string name="pattern_atleast_4_node">Pattern has atleast 4 node!</string>
     <string name="pattern_not_match">Pattern doesn\'t match!</string>
     <string name="pattern_lock_set_success">Pattern lock is set successfully</string>
+    <string name="biometric_for_app">Biometric login for vault!</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot password</string>
+    <string name="release_your_finger_when_done">Release your finger when done</string>
+    <string name="confirm_your_question">Confirm password question</string>
+    <string name="enter_security_answer">Enter security answer</string>
+    <string name="security_answer_invalid">Security answer is not valid!</string>
 </resources>

@@ -69,12 +69,14 @@ class FragmentChangePattern : Fragment() {
     }
 
     private fun setupLockView() {
+        binding.lock9View.setEnableVibrate(requireContext().config.tactileFeedback)
+        binding.lock9View.setHighlighted(requireContext().config.visiblePattern)
         binding.lock9View.setGestureCallback(object :GestureCallback{
             override fun onNodeConnected(numbers: IntArray) {
-                Log.d("TAG", "onNodeConnected: "+numbers.contentToString())
             }
 
             override fun onGestureFinished(numbers: IntArray) {
+                Log.d("TAG", "onGestureFinished: "+numbers.contentToString())
                 checkPattern(numbers)
             }
         })

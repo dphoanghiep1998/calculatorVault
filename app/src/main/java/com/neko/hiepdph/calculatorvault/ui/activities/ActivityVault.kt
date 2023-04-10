@@ -16,9 +16,11 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
+import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.config.LockType
+import com.neko.hiepdph.calculatorvault.config.LockWhenLeavingApp
 import com.neko.hiepdph.calculatorvault.config.ScreenOffAction
 import com.neko.hiepdph.calculatorvault.databinding.ActivityCaculatorBinding
 import com.neko.hiepdph.calculatorvault.databinding.ActivityVaultBinding
@@ -30,6 +32,25 @@ class ActivityVault : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var drawerLayout: DrawerLayout
     private var screenOffBroadcastReceiver: BroadcastReceiver? = null
+
+    override fun onResume() {
+        super.onResume()
+        val application = application as CustomApplication
+        Log.d("TAG", "onResume: "+ application.isLockShowed)
+        if(config.lockWhenLeavingApp == LockWhenLeavingApp.ENABLE && !application.isLockShowed){
+            when (config.lockType) {
+                LockType.PATTERN -> {
+                    startActivity(Intent(this@ActivityVault, ActivityPatternLock::class.java))
+                    application.isLockShowed = true
+                }
+                LockType.PIN -> {
+                    startActivity(Intent(this@ActivityVault, ActivityPinLock::class.java))
+                    application.isLockShowed = true
+                }
+            }
+        }
+
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

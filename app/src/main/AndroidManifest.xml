@@ -14,7 +14,6 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:manageSpaceActivity=".ui.activities.ActivityVault"
         android:supportsRtl="true"
         android:theme="@style/Theme.CalculatorVault"
         tools:targetApi="31">

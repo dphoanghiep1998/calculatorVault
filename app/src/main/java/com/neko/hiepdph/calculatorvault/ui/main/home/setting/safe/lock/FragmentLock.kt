@@ -1,11 +1,21 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.setting.safe.lock
 
+import android.content.Intent
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
+
+
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
@@ -35,10 +45,15 @@ class FragmentLock : Fragment() {
     }
 
     private fun initView() {
-        setupView()
+        lifecycleScope.launchWhenResumed {
+            setupView()
+        }
         setupChangeView(requireContext().config.lockType)
         initButton()
     }
+
+
+
 
     private fun initButton() {
         binding.containerLockType.root.clickWithDebounce {
@@ -79,6 +94,7 @@ class FragmentLock : Fragment() {
             tvContent.text = getString(R.string.tactile_feedback)
             switchChange.show()
             imvNext.hide()
+            switchChange.invalidate()
             switchChange.isChecked = requireContext().config.tactileFeedback
         }
         binding.containerVisiblePattern.apply {
@@ -136,6 +152,7 @@ class FragmentLock : Fragment() {
 
     override fun onDestroy() {
         AppSharePreference.INSTANCE.unregisterListener(listener)
+        _binding = null
         super.onDestroy()
     }
 

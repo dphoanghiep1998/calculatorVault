@@ -7,13 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.DialogFragment
 import com.neko.hiepdph.calculatorvault.R
-import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
-import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
-import com.neko.hiepdph.calculatorvault.databinding.DialogAddFolderBinding
+import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.databinding.DialogPasswordBinding
 
 
@@ -22,8 +21,6 @@ interface SetupPassWordCallBack {
 }
 
 class DialogPassword(
-    private val title:String,
-    private val content:String,
     private val callBack: SetupPassWordCallBack
 ) : DialogFragment() {
     private lateinit var binding: DialogPasswordBinding
@@ -64,13 +61,26 @@ class DialogPassword(
     }
 
     private fun initButton() {
-        binding.tvTitle.text = title
-        binding.tvContent.text = content
+        binding.tvTitle.text = getString(R.string.confirm_your_question)
+        binding.tvSecurityQuestion.text = requireContext().config.securityQuestion
+
         binding.btnConfirm.clickWithDebounce {
-           callBack.onPositiveClicked()
+            if (binding.tvContent.text.toString() == requireContext().config.securityAnswer) {
+                callBack.onPositiveClicked()
+                dismiss()
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.security_answer_invalid),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
         binding.root.clickWithDebounce {
+            dismiss()
         }
+
+        binding.containerMain.setOnClickListener {  }
     }
 
     private val callback = object : BackPressDialogCallBack {

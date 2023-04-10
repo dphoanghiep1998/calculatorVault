@@ -107,7 +107,6 @@ class ActivityPinLock : AppCompatActivity() {
             return
         }
         if (config.secretPin == currentPassword) {
-            startActivity(Intent(this@ActivityPinLock, ActivityVault::class.java))
             finish()
         }
     }
@@ -128,5 +127,8 @@ class ActivityPinLock : AppCompatActivity() {
                 item.setBackgroundResource(R.drawable.bg_pin_inactive)
             }
         }
+    }
+    override fun onBackPressed() {
+        finishAffinity()
     }
 }

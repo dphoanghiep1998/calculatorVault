@@ -11,6 +11,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.DialogFragment
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.databinding.DialogConfirmBinding
 
 
@@ -41,6 +42,13 @@ enum class DialogConfirmType(
         R.drawable.ic_unlock,
         R.string.never_show,
         R.string.go_it
+    ),
+    FORGOT_PASSWORD(
+        R.string.forgot_password,
+        R.string.confirm_your_question,
+        R.drawable.ic_unlock,
+        R.string.cancel,
+        R.string.custom_ok
     )
 
 }
@@ -52,7 +60,7 @@ interface ConfirmDialogCallBack {
 class DialogConfirm(
     private val callBack: ConfirmDialogCallBack,
     private val dialogType: DialogConfirmType,
-    val name: String
+    val name: String?
 ) : DialogFragment() {
     private lateinit var binding: DialogConfirmBinding
 
@@ -88,7 +96,11 @@ class DialogConfirm(
     }
 
     private fun initView() {
-        binding.imvTitle.setImageResource(dialogType.imageRes)
+        if(dialogType.imageRes != 0){
+            binding.imvTitle.setImageResource(dialogType.imageRes)
+        }else{
+            binding.imvTitle.hide()
+        }
         binding.tvTitle.text = requireContext().getText(dialogType.title)
         binding.tvInstruction.text = requireContext().getString(dialogType.content, name)
         binding.btnCancel.text = requireContext().getText(dialogType.negativeText)
@@ -98,8 +110,8 @@ class DialogConfirm(
 
     private fun initButton() {
         binding.btnConfirm.clickWithDebounce {
-            callBack.onPositiveClicked()
             dismiss()
+            callBack.onPositiveClicked()
         }
         binding.btnCancel.clickWithDebounce {
             dismiss()

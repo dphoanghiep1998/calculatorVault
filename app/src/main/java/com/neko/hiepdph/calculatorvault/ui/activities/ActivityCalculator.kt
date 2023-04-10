@@ -26,10 +26,11 @@ class ActivityCalculator : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityCaculatorBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         initView()
 
     }
+
+
 
     private fun initView() {
         initInputText()
@@ -59,20 +60,8 @@ class ActivityCalculator : AppCompatActivity() {
             dialogChangeTheme.show(supportFragmentManager, dialogChangeTheme.tag)
         }
         binding.tvCalculator.setOnLongClickListener {
-            when (config.lockType) {
-                LockType.PATTERN -> {
-                    startActivity(Intent(this@ActivityCalculator, ActivityPatternLock::class.java))
-                    finish()
-                }
-                LockType.PIN -> {
-                    startActivity(Intent(this@ActivityCalculator, ActivityPinLock::class.java))
-                    finish()
-                }
-                else -> {
-                    startActivity(Intent(this@ActivityCalculator, ActivityVault::class.java))
-                    finish()
-                }
-            }
+            startActivity(Intent(this@ActivityCalculator, ActivityVault::class.java))
+            finish()
             return@setOnLongClickListener true
         }
     }

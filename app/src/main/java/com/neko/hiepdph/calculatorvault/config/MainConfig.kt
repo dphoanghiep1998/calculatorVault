@@ -31,7 +31,7 @@ class MainConfig(val context: Context) {
 
     var fingerPrintLockDisplay: Boolean
         get() = AppSharePreference.getInstance(context)
-            .getFingerPrintLockDisplay(FingerPrintUnlock.DISABLE)
+            .getFingerPrintLockDisplay(FingerPrintLockDisplay.DISABLE)
         set(fingerPrintLockDisplay) = AppSharePreference.getInstance(context)
             .saveFingerPrintLockDisplay(fingerPrintLockDisplay)
 

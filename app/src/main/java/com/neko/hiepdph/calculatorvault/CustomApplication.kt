@@ -1,22 +1,11 @@
 package com.neko.hiepdph.calculatorvault
 
-import android.app.Activity
-import android.app.Application
-import android.content.res.Configuration
-import android.os.Build
-import android.os.Bundle
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.ProcessLifecycleOwner
 //import com.adjust.sdk.Adjust
 //import com.adjust.sdk.AdjustConfig
 //import com.adjust.sdk.LogLevel
 //import com.applovin.sdk.AppLovinMediationProvider
 //import com.applovin.sdk.AppLovinSdk
 //import com.neko.hiepdph.calculatorvault.activities.MainActivity
-import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
-import com.neko.hiepdph.calculatorvault.config.MainConfig
 //import com.neko.hiepdph.calculatorvault.common.utils.AudienceNetworkInitializeHelper
 //import com.facebook.appevents.AppEventsLogger
 //import com.gianghv.libads.AppOpenAdManager
@@ -26,13 +15,24 @@ import com.neko.hiepdph.calculatorvault.config.MainConfig
 //import com.google.android.gms.ads.MobileAds
 //import com.google.android.gms.ads.RequestConfiguration
 //import com.google.android.gms.ads.nativead.NativeAd
+import android.app.Activity
+import android.app.Application
+import android.content.res.Configuration
+import android.os.Bundle
+import android.util.Log
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.ProcessLifecycleOwner
+import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import dagger.hilt.android.HiltAndroidApp
 import java.util.*
+import kotlin.math.log
 
 @HiltAndroidApp
 class CustomApplication : Application(), Application.ActivityLifecycleCallbacks, LifecycleObserver {
-//
-//    private var currentActivity: Activity? = null
+    var isLockShowed = false
+    private var currentActivity: Activity? = null
 //    private var appOpenAdsManager: AppOpenAdManager? = null
 //    var shouldDestroyApp = false
 //    var showAdsClickBottomNav = false
@@ -47,8 +47,8 @@ class CustomApplication : Application(), Application.ActivityLifecycleCallbacks,
 
 //        settingLanguageLocale =
 //            AppSharePreference.INSTANCE.getSavedLanguage(Locale.getDefault().language)
-//        registerActivityLifecycleCallbacks(this)
-//        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+        registerActivityLifecycleCallbacks(this)
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 //        MobileAds.initialize(this) { MobileAds.setAppMuted(true) }
 //        val requestConfiguration =
 //            RequestConfiguration.Builder().setTestDeviceIds(Constants.testDevices()).build()
@@ -96,6 +96,19 @@ class CustomApplication : Application(), Application.ActivityLifecycleCallbacks,
 //                }
 //            }
 //        }
+
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    private fun onChangePause() {
+        Log.d("TAG", "onChangePause: ")
+        isLockShowed = false
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    private fun onChangeStop() {
+        Log.d("TAG", "onChangeStop: ")
+        isLockShowed = false
     }
 
     override fun onActivityCreated(p0: Activity, p1: Bundle?) {
