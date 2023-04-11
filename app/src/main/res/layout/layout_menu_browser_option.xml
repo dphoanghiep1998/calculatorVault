@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_item_calculator_normal"
+    android:clickable="true"
+    android:paddingVertical="@dimen/_12sdp">
+
+    <TextView
+        android:id="@+id/tv_rename"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/app_font_400"
+        android:foreground="@drawable/fg_ripple_effect"
+        android:paddingHorizontal="@dimen/_24sdp"
+        android:drawablePadding="@dimen/_8sdp"
+        android:paddingVertical="@dimen/_8sdp"
+        android:text="@string/rename"
+        android:textColor="@color/neutral_06"
+        android:textSize="@dimen/_14sdp"
+        app:drawableStartCompat="@drawable/ic_edit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_delete"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_6sdp"
+        android:drawablePadding="@dimen/_8sdp"
+        android:fontFamily="@font/app_font_400"
+        android:paddingHorizontal="@dimen/_24sdp"
+        android:foreground="@drawable/fg_ripple_effect"
+        android:paddingVertical="@dimen/_8sdp"
+        android:text="@string/delete"
+        android:textSize="@dimen/_14sdp"
+        app:drawableStartCompat="@drawable/ic_delete"
+        app:layout_constraintEnd_toEndOf="@id/tv_rename"
+        app:layout_constraintStart_toStartOf="@id/tv_rename"
+        app:layout_constraintTop_toBottomOf="@id/tv_rename" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
