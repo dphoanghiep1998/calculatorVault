@@ -74,5 +74,9 @@ class MainConfig(val context: Context) {
         get() = AppSharePreference.getInstance(context).getPatternLock(arrayListOf())
         set(patternLock) = AppSharePreference.getInstance(context).setPatternLock(patternLock)
 
+    var isShowLock:Boolean
+        get() = AppSharePreference.getInstance(context).getShowLock(false)
+        set(isShowLock) = AppSharePreference.getInstance(context).setShowLock(isShowLock)
+
 
 }

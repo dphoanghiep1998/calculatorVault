@@ -4,9 +4,12 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.CheckBox
 import androidx.core.view.MenuProvider
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,12 +17,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.toastLocation
 import com.neko.hiepdph.calculatorvault.common.utils.IMoveFile
 import com.neko.hiepdph.calculatorvault.databinding.FragmentListItemBinding
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item.adapter.AdapterListItem
 import com.neko.hiepdph.calculatorvault.viewmodel.ListItemViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class FragmentListItem : Fragment() {
     private var _binding: FragmentListItemBinding? = null
     private val binding get() = _binding!!
@@ -35,6 +44,7 @@ class FragmentListItem : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentListItemBinding.inflate(inflater, container, false)
+        toastLocation()
         return binding.root
     }
 
@@ -56,7 +66,13 @@ class FragmentListItem : Fragment() {
         binding.btnMoveToVault.clickWithDebounce {
             viewModel.copyMoveFile(listPathSelected, args.vaultPath, object : IMoveFile {
                 override fun onSuccess() {
-                    Log.d("TAG", "success: ")
+                    CoroutineScope(Dispatchers.Main).launch{
+                       observeData()
+                        adapterListItem?.unSelectAll()
+                        listPathSelected.clear()
+                        checkListPath()
+                        checkCheckBoxAll()
+                    }
                 }
 
                 override fun onFailed() {
@@ -75,20 +91,37 @@ class FragmentListItem : Fragment() {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
                 menuInflater.inflate(R.menu.toolbar_menu_pick, menu)
+                menu[0].actionView?.findViewById<View>(R.id.checkbox)?.setOnClickListener {
+                    checkAllItem(menu[0].actionView?.findViewById<CheckBox>(R.id.checkbox)?.isChecked == true)
+                }
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
-                    R.id.check_box_toolbar -> {
-                        menuItem.isChecked = !menuItem.isChecked
-                        true
-
-                    }
                     else -> false
                 }
             }
 
         })
+    }
+
+    private fun checkAllItem(status: Boolean) {
+        if (status) {
+            adapterListItem?.selectAll()
+
+            binding.btnMoveToVault.apply {
+                setBackgroundResource(R.drawable.bg_primary_corner_10)
+                isEnabled = true
+            }
+        } else {
+            adapterListItem?.unSelectAll()
+
+
+            binding.btnMoveToVault.apply {
+                setBackgroundResource(R.drawable.bg_neu04_corner_10)
+                isEnabled = false
+            }
+        }
     }
 
     private fun observeData() {
@@ -103,7 +136,6 @@ class FragmentListItem : Fragment() {
         }
         viewModel.listItemList.observe(viewLifecycleOwner) {
             it?.let {
-
                 adapterListItem?.setData(it, args.groupItem.type)
                 sizeList = it.size
 
@@ -136,9 +168,11 @@ class FragmentListItem : Fragment() {
     }
 
     private fun checkCheckBoxAll() {
-        if (listPathSelected.size == sizeList && sizeList > 0) {
-
-        }
+        val checkbox =
+            (requireActivity() as ActivityVault).getToolbar().menu[0].actionView?.findViewById<CheckBox>(
+                R.id.checkbox
+            )
+        checkbox?.isChecked = listPathSelected.size == sizeList && sizeList > 0
     }
 
     private fun checkListPath() {

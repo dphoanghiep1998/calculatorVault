@@ -36,6 +36,7 @@
         app:layout_constraintBottom_toBottomOf="@id/imv_thumb"
         app:layout_constraintStart_toStartOf="@id/imv_thumb" />
     <CheckBox
+        android:visibility="gone"
         android:id="@+id/check_box"
         android:layout_width="@dimen/_20sdp"
         android:layout_height="@dimen/_20sdp"

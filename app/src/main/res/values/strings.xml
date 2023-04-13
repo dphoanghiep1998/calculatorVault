@@ -181,4 +181,16 @@
     <string name="confirm_your_question">Confirm password question</string>
     <string name="enter_security_answer">Enter security answer</string>
     <string name="security_answer_invalid">Security answer is not valid!</string>
+    <string name="verify_successfully">Verify successfully</string>
+    <string name="your_password_is">Your password is %s</string>
+    <string name="search_query">Search</string>
+    <string name="google" translatable="false">Google</string>
+    <string name="qwant">Qwant</string>
+    <string name="search_encrypt">Searchencrypt</string>
+    <string name="ducduckgo">DuckDuckGo</string>
+    <string name="this_bookmark">this bookmark</string>
+    <string name="cancel_upper">CANCEL</string>
+    <string name="camera">Camera</string>
+    <string name="slide_show">Slideshow</string>
+    <string name="share">Share</string>
 </resources>

@@ -30,6 +30,18 @@ class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
         notifyDataSetChanged()
     }
 
+    fun selectAll(){
+        listItem.forEach {
+            listPath.add(it.mPath)
+        }
+        notifyItemRangeChanged(0,listItem.size)
+    }
+
+    fun unSelectAll(){
+        listPath.clear()
+        notifyItemRangeChanged(0,listItem.size)
+    }
+
     inner class ItemPictureViewHolder(val binding: LayoutItemPictureBinding) :
         RecyclerView.ViewHolder(binding.root)
 
@@ -99,7 +111,17 @@ class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
                         .error(R.drawable.ic_delete).into(binding.imvThumb)
+                    binding.checkBox.isChecked = item.mPath in listPath
                     binding.root.setOnClickListener {
+                        binding.checkBox.isChecked = !binding.checkBox.isChecked
+                        if (binding.checkBox.isChecked) {
+                            listPath.add(item.path)
+                        } else {
+                            listPath.remove(item.path)
+                        }
+                        onClickItem.invoke(listPath)
+                    }
+                    binding.checkBox.setOnClickListener {
                         binding.checkBox.isChecked = !binding.checkBox.isChecked
                         if (binding.checkBox.isChecked) {
                             listPath.add(item.path)
@@ -118,7 +140,18 @@ class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
                     Glide.with(itemView.context).load(item.path).apply(requestOptions)
                         .error(R.drawable.ic_delete).into(binding.imvThumb)
                     binding.tvDuration.text = item.getDuration(itemView.context).toString()
+                    binding.checkBox.isChecked = item.mPath in listPath
+
                     binding.root.setOnClickListener {
+                        binding.checkBox.isChecked = !binding.checkBox.isChecked
+                        if (binding.checkBox.isChecked) {
+                            listPath.add(item.path)
+                        } else {
+                            listPath.remove(item.path)
+                        }
+                        onClickItem.invoke(listPath)
+                    }
+                    binding.checkBox.setOnClickListener {
                         binding.checkBox.isChecked = !binding.checkBox.isChecked
                         if (binding.checkBox.isChecked) {
                             listPath.add(item.path)
@@ -138,8 +171,19 @@ class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
                         .apply(requestOptions).error(R.drawable.ic_delete).into(binding.imvThumb)
 
                     binding.tvNameAudio.text = item.name
+                    binding.checkbox.isChecked = item.mPath in listPath
                     binding.tvDurationAuthor.text = item.getDuration(itemView.context).toString()
                     binding.root.setOnClickListener {
+                        binding.checkbox.isChecked = !binding.checkbox.isChecked
+                        if (binding.checkbox.isChecked) {
+                            listPath.add(item.path)
+                        } else {
+                            listPath.remove(item.path)
+                        }
+                        onClickItem.invoke(listPath)
+                    }
+
+                    binding.checkbox.setOnClickListener {
                         binding.checkbox.isChecked = !binding.checkbox.isChecked
                         if (binding.checkbox.isChecked) {
                             listPath.add(item.path)
@@ -157,10 +201,20 @@ class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
 
                     Glide.with(itemView.context).load(getImageForItemFile(item))
                         .error(R.drawable.ic_delete).into(binding.imvThumb)
+                    binding.checkbox.isChecked = item.mPath in listPath
 
                     binding.tvNameDocument.text = item.name
                     binding.tvSize.text = item.mSize.toString()
                     binding.root.setOnClickListener {
+                        binding.checkbox.isChecked = !binding.checkbox.isChecked
+                        if (binding.checkbox.isChecked) {
+                            listPath.add(item.path)
+                        } else {
+                            listPath.remove(item.path)
+                        }
+                        onClickItem.invoke(listPath)
+                    }
+                    binding.checkbox.setOnClickListener {
                         binding.checkbox.isChecked = !binding.checkbox.isChecked
                         if (binding.checkbox.isChecked) {
                             listPath.add(item.path)

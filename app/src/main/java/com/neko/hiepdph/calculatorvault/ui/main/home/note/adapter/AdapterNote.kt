@@ -1,5 +1,6 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.note.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -18,9 +19,10 @@ class AdapterNote(
 
     private val onUnSelect: () -> Unit,
 
-) : RecyclerView.Adapter<AdapterNote.NoteViewHolder>() {
+    ) : RecyclerView.Adapter<AdapterNote.NoteViewHolder>() {
 
     private var listOfNote: MutableList<NoteModel> = mutableListOf()
+    private var dataOfNote: MutableList<NoteModel> = mutableListOf()
     private var listOfId = mutableSetOf<Int>()
 
 
@@ -29,6 +31,8 @@ class AdapterNote(
         noteDiffCallback.dispatchUpdatesTo(this)
         listOfNote.clear()
         listOfNote.addAll(listNote)
+        dataOfNote.clear()
+        dataOfNote.addAll(listNote)
     }
 
     fun selectAll() {
@@ -79,8 +83,8 @@ class AdapterNote(
                 binding.checkBox.hide()
             }
             binding.root.setOnLongClickListener {
-                onLongClickItem()
                 editMode = true
+                onLongClickItem()
                 notifyItemRangeChanged(0, listOfNote.size)
                 return@setOnLongClickListener true
             }
@@ -114,6 +118,24 @@ class AdapterNote(
         editMode = false
         listOfId.clear()
         notifyItemRangeChanged(0, listOfNote.size)
+    }
+
+    fun filterNote(query: String) {
+        if (query.isEmpty()) {
+            val noteDiffCallback = DiffUtil.calculateDiff(NoteDiffCallback(listOfNote, dataOfNote))
+            noteDiffCallback.dispatchUpdatesTo(this)
+            listOfNote.clear()
+            listOfNote.addAll(dataOfNote)
+        } else {
+            val filterList = listOfNote.filter {
+                it.title.contains(query) || it.content.contains(query)
+            }
+            val noteDiffCallback = DiffUtil.calculateDiff(NoteDiffCallback(listOfNote, filterList))
+            noteDiffCallback.dispatchUpdatesTo(this)
+            listOfNote.clear()
+            listOfNote.addAll(filterList)
+        }
+
     }
 }
 

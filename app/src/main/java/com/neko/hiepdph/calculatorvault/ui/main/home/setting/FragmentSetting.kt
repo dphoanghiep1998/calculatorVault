@@ -1,15 +1,22 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.setting
 
+import android.content.Intent
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
+import android.graphics.drawable.Icon
 import android.os.Bundle
-import android.view.*
-import androidx.core.view.MenuProvider
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.navigateToPage
 import com.neko.hiepdph.calculatorvault.databinding.FragmentSettingBinding
+import com.neko.hiepdph.calculatorvault.ui.activities.ActivityCamera
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class FragmentSetting : Fragment() {
 
     private var _binding: FragmentSettingBinding? = null
@@ -71,7 +78,26 @@ class FragmentSetting : Fragment() {
 
     private fun initButton() {
         binding.itemSafe.root.clickWithDebounce {
-            findNavController().navigate(R.id.fragmentSafe)
+            navigateToPage(R.id.fragmentSetting, R.id.fragmentSafe)
+        }
+        binding.itemPrivateCamera.root.clickWithDebounce {
+            createShortcutsCamera()
+        }
+    }
+
+    private fun createShortcutsCamera() {
+        val shortcutManager = requireActivity().getSystemService(ShortcutManager::class.java)
+        val intent = Intent(requireContext(), ActivityCamera::class.java)
+        intent.action = Intent.ACTION_VIEW
+        if (shortcutManager.isRequestPinShortcutSupported) {
+            val shortcut = ShortcutInfo.Builder(requireContext(), getString(R.string.camera))
+                .setShortLabel(getString(R.string.camera)).setIcon(
+                    Icon.createWithResource(
+                        requireContext(), R.drawable.ic_setting_private_camera
+                    )
+                ).setIntent(intent).build()
+
+            shortcutManager.requestPinShortcut(shortcut, null)
         }
     }
 

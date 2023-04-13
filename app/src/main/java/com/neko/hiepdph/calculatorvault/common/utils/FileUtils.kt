@@ -159,7 +159,6 @@ object FileUtils {
                 val destinationFile = File(directory, newName)
                 sourceFile.copyTo(destinationFile)
             }
-            callback.onSuccess()
 
             if (!isCopy) {
                 filePath.forEach {
@@ -167,6 +166,8 @@ object FileUtils {
                     sourceFile.delete()
                 }
             }
+            callback.onSuccess()
+
         } catch (e: Exception) {
             callback.onFailed()
             e.printStackTrace()

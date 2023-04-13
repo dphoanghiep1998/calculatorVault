@@ -2,9 +2,7 @@ package com.neko.hiepdph.calculatorvault.data.database.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.neko.hiepdph.calculatorvault.data.database.entity.HistoryEntity
 import com.neko.hiepdph.calculatorvault.data.database.entity.NoteEntity
-import com.neko.hiepdph.calculatorvault.data.database.model.HistoryModel
 import com.neko.hiepdph.calculatorvault.data.model.NoteModel
 
 @Dao

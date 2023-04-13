@@ -11,9 +11,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
@@ -39,7 +41,7 @@ class FragmentVault : Fragment() {
     private val binding get() = _binding!!
     private lateinit var popupWindow: PopupWindow
     private lateinit var adapter: AdapterFolder
-    private val viewModel by viewModels<VaultViewModel>()
+    private val viewModel by activityViewModels<VaultViewModel>()
 
     companion object {
         var sortType: Sort = Sort.NAME
@@ -47,18 +49,15 @@ class FragmentVault : Fragment() {
     }
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        retainInstance = true
-    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentVaultBinding.inflate(inflater, container, false)
-        changeBackPressCallBack {
-            requireActivity().finishAffinity()
-        }
+//        changeBackPressCallBack {
+//            requireActivity().finishAffinity()
+//        }
         initToolBar()
         return binding.root
     }
@@ -98,6 +97,7 @@ class FragmentVault : Fragment() {
 
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
                 menuInflater.inflate(R.menu.toolbar_menu_vault, menu)
             }
 
@@ -202,7 +202,6 @@ class FragmentVault : Fragment() {
         } else {
             val gridLayoutManager = GridLayoutManager(requireContext(), 2)
             binding.rcvFolder.layoutManager = gridLayoutManager
-
         }
 
     }

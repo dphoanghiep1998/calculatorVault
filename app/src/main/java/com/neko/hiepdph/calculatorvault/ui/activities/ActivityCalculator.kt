@@ -1,27 +1,34 @@
 package com.neko.hiepdph.calculatorvault.ui.activities
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.Settings
 import android.text.method.ScrollingMovementMethod
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.widget.doOnTextChanged
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.customview.CalculatorFunction
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
-import com.neko.hiepdph.calculatorvault.common.extensions.config
-import com.neko.hiepdph.calculatorvault.common.utils.DIVIDE_SYMBOL
-import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
-import com.neko.hiepdph.calculatorvault.common.utils.PI_SYMBOL
-import com.neko.hiepdph.calculatorvault.common.utils.SQRT_SYMBOL
-import com.neko.hiepdph.calculatorvault.config.LockType
+import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
+import com.neko.hiepdph.calculatorvault.common.utils.*
 import com.neko.hiepdph.calculatorvault.databinding.ActivityCaculatorBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogChangeTheme
+import com.neko.hiepdph.calculatorvault.viewmodel.AppViewModel
 import org.mariuszgromada.math.mxparser.Expression
 import java.text.DecimalFormat
 
 class ActivityCalculator : AppCompatActivity() {
     private lateinit var binding: ActivityCaculatorBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCaculatorBinding.inflate(layoutInflater)
@@ -29,8 +36,6 @@ class ActivityCalculator : AppCompatActivity() {
         initView()
 
     }
-
-
 
     private fun initView() {
         initInputText()

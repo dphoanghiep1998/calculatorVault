@@ -1,11 +1,16 @@
 package com.takwolf.android.lock9;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.FloatEvaluator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.graphics.Path;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Vibrator;
@@ -20,6 +25,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +54,8 @@ public class Lock9View extends ViewGroup {
 
     private boolean isVisiblePattern = true;
 
+    private boolean isShowPattern = false;
+
     /**
      * 自动连接中间节点
      */
@@ -65,12 +73,7 @@ public class Lock9View extends ViewGroup {
      */
     private Paint paint;
 
-    List<Integer> pattern = new ArrayList<Integer>() {{
-        add(1);
-        add(2);
-        add(3);
-        add(4);
-    }};
+    List<Integer> pattern = new ArrayList();
 
     /**
      * 结果回调监听器接口
@@ -137,6 +140,9 @@ public class Lock9View extends ViewGroup {
         vibrateTime = a.getInt(R.styleable.Lock9View_lock9_vibrateTime, 20);
 
         a.recycle();
+        animator = ValueAnimator.ofFloat(0f, 1000f);
+        animator.setDuration(1000);
+        animator.setInterpolator(new LinearInterpolator());
 
         // 初始化振动器
 //        if (enableVibrate && !isInEditMode()) {
@@ -196,22 +202,85 @@ public class Lock9View extends ViewGroup {
         }
     }
 
-    public void drawGivenPattern(List<Integer> numbers, Canvas canvas) {
+    private ValueAnimator animator = new ValueAnimator();
+    private int currentIndex = 0;
 
-        for (int n = 0; n < numbers.size(); n++) {
-            nodeList.add((NodeView) getChildAt(n));
+    public void setDrawGivenPattern(List<Integer> list) {
+        pattern = list;
+        pathList = new ArrayList();
+        nodeList.clear();
+        for (int n = 0; n < pattern.size(); n++) {
+            NodeView nodeView = (NodeView) getChildAt(pattern.get(n) - 1);
+            nodeList.add(nodeView);
         }
-        for (int n = 0; n < numbers.size() -1; n++) {
-            NodeView firstNode = nodeList.get(n);
-            NodeView secondNode = nodeList.get(n+1);
-            canvas.drawLine(firstNode.getCenterX(), firstNode.getCenterY(), secondNode.getCenterX(), secondNode.getCenterY(), paint);
+        isShowPattern = true;
+        animator.setEvaluator(new FloatEvaluator());
+        animator.setInterpolator(new LinearInterpolator());
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(@NonNull ValueAnimator valueAnimator) {
+                try {
+                    float fraction = animator.getAnimatedFraction();
+                    NodeView firstNode = nodeList.get(currentIndex);
+                    NodeView secondNode = nodeList.get(currentIndex + 1);
+                    float x = firstNode.getCenterX() + (secondNode.getCenterX() - firstNode.getCenterX()) * fraction;
+                    float y = firstNode.getCenterY() + (secondNode.getCenterY() - firstNode.getCenterY()) * fraction;
+                    Path path = new Path();
+                    path.moveTo(firstNode.getCenterX(), firstNode.getCenterY());
+                    path.lineTo(x, y);
+                    pathList.add(path);
+                    invalidate();
+                }catch (Exception e){
+                    e.printStackTrace();
+                    animator.cancel();
+                }
+
+            }
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if(isShowPattern){
+                    currentIndex++;
+                    if (currentIndex < pattern.size() - 1) {
+                        animator.start();
+                    }
+                    if(currentIndex >= pattern.size() - 1){
+                        currentIndex = 0;
+                        pathList = new ArrayList();
+                        animator.start();
+                    }
+                }
+
+            }
+        });
+        animator.start();
+    }
+
+    private List<Path> pathList = new ArrayList<>();
+
+    public void drawGivenPattern(Canvas canvas) {
+        if (animator.isRunning()) {
+
+            long elapsedTime = animator.getCurrentPlayTime();
+            Log.d("TAG", "drawGivenPattern: " + elapsedTime);
+            if (elapsedTime >= 0) {
+
+                for (Path p : pathList) {
+                    canvas.drawPath(p, paint);
+                }
+            }
+        } else {
+            currentIndex++;
+            if (currentIndex < pattern.size() - 1) {
+                animator.start();
+            } else {
+                animator.cancel();
+            }
         }
 
         // 如果已经有点亮的点，则在点亮点和手指位置之间绘制连线
-//        if (nodeList.size() > 0) {
-//            NodeView lastNode = nodeList.get(nodeList.size() - 1);
-//            canvas.drawLine(lastNode.getCenterX(), lastNode.getCenterY(), x, y, paint);
-//        }
+
     }
 
     /**
@@ -260,6 +329,15 @@ public class Lock9View extends ViewGroup {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
+                if(isShowPattern){
+                    isShowPattern = false;
+                    currentIndex = 0;
+                    if(animator.isRunning()){
+                        animator.cancel();
+                    }
+                    pathList = new ArrayList();
+                    invalidate();
+                }
                 x = event.getX(); // 这里要实时记录手指的坐标
                 y = event.getY();
                 NodeView currentNode = getNodeAt(x, y);
@@ -341,20 +419,26 @@ public class Lock9View extends ViewGroup {
     @Override
     protected void onDraw(Canvas canvas) {
         // 先绘制已有的连线
-        if (isVisiblePattern) {
-            for (int n = 1; n < nodeList.size(); n++) {
-                NodeView firstNode = nodeList.get(n - 1);
-                NodeView secondNode = nodeList.get(n);
-                canvas.drawLine(firstNode.getCenterX(), firstNode.getCenterY(), secondNode.getCenterX(), secondNode.getCenterY(), paint);
+
+        if (isShowPattern) {
+            for (Path path : pathList) {
+                canvas.drawPath(path, paint);
             }
-            // 如果已经有点亮的点，则在点亮点和手指位置之间绘制连线
-            if (nodeList.size() > 0) {
-                NodeView lastNode = nodeList.get(nodeList.size() - 1);
-                canvas.drawLine(lastNode.getCenterX(), lastNode.getCenterY(), x, y, paint);
+        } else {
+            if (isVisiblePattern) {
+                for (int n = 1; n < nodeList.size(); n++) {
+                    NodeView firstNode = nodeList.get(n - 1);
+                    NodeView secondNode = nodeList.get(n);
+                    canvas.drawLine(firstNode.getCenterX(), firstNode.getCenterY(), secondNode.getCenterX(), secondNode.getCenterY(), paint);
+                }
+                // 如果已经有点亮的点，则在点亮点和手指位置之间绘制连线
+                if (nodeList.size() > 0) {
+                    NodeView lastNode = nodeList.get(nodeList.size() - 1);
+                    canvas.drawLine(lastNode.getCenterX(), lastNode.getCenterY(), x, y, paint);
+                }
             }
         }
 
-        drawGivenPattern(pattern, canvas);
 
     }
 

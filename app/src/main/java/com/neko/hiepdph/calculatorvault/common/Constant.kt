@@ -2,6 +2,8 @@ package com.neko.hiepdph.calculatorvault.common
 
 
 object Constant {
+    const val KEY_URL ="KEY_URL"
+    const val KEY_SHOW_LOCK ="KEY_SHOW_LOCK"
     const val KEY_PATTERN_LOCK = "KEY_PATTERN_LOCK"
     const val KEY_SECRET_PIN = "KEY_SECRET_PIN"
     const val KEY_TACTILE_FEEDBACK = "KEY_TACTILE_FEEDBACK"
@@ -76,8 +78,10 @@ object Constant {
     const val PICTURE_FOLDER_NAME = "PICTURE_CALCULATOR_VAULT_${SECRET_KEY}"
     const val AUDIOS_FOLDER_NAME = "AUDIOS_CALCULATOR_VAULT_${SECRET_KEY}"
     const val VIDEOS_FOLDER_NAME = "VIDEOS_CALCULATOR_VAULT_${SECRET_KEY}"
+    const val RECYCLER_BIN_FOLDER_NAME ="BIN_CALCULATOR_VAULT_${SECRET_KEY}"
 
     const val TYPE_PICTURE = "TYPE_PICTURE"
+    const val TYPE_RECYCLER_BIN = "TYPE_RECYCLER_BIN"
     const val TYPE_AUDIOS = "TYPE_AUDIOS"
     const val TYPE_VIDEOS = "TYPE_VIDEOS"
     const val TYPE_FILE = "TYPE_FILE"
@@ -132,6 +136,14 @@ object Constant {
         get() = arrayOf(
             ".dng", ".orf", ".nef", ".arw", ".rw2", ".cr2", ".cr3"
         )
+    const val GOOGLE = "https://www.google.com/"
+    const val DUCKDUCKGO = "https://duckduckgo.com/"
+    const val SEARCH_ENCRYPT = "https://www.searchencrypt.com/home"
+    const val QWANT = "https://www.qwant.com/"
+
+    const val PREFIX_URL_ICON = "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url="
+    const val SUFFIX_URL_ICON = "&size=256"
+
 
 
 }

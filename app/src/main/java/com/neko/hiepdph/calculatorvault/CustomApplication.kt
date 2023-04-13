@@ -24,14 +24,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
+import com.neko.hiepdph.calculatorvault.common.utils.isScreenOn
+import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import dagger.hilt.android.HiltAndroidApp
 import java.util.*
 import kotlin.math.log
 
 @HiltAndroidApp
 class CustomApplication : Application(), Application.ActivityLifecycleCallbacks, LifecycleObserver {
-    var isLockShowed = false
     private var currentActivity: Activity? = null
 //    private var appOpenAdsManager: AppOpenAdManager? = null
 //    var shouldDestroyApp = false
@@ -101,14 +103,10 @@ class CustomApplication : Application(), Application.ActivityLifecycleCallbacks,
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     private fun onChangePause() {
-        Log.d("TAG", "onChangePause: ")
-        isLockShowed = false
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     private fun onChangeStop() {
-        Log.d("TAG", "onChangeStop: ")
-        isLockShowed = false
     }
 
     override fun onActivityCreated(p0: Activity, p1: Bundle?) {
@@ -122,13 +120,20 @@ class CustomApplication : Application(), Application.ActivityLifecycleCallbacks,
     override fun onActivityResumed(p0: Activity) {
 //        currentActivity = p0
 //        Adjust.onResume()
+
     }
 
     override fun onActivityPaused(p0: Activity) {
 //        Adjust.onPause()
+        if(p0 is ActivityVault && isScreenOn()){
+            applicationContext.config.isShowLock = false
+        }
     }
 
     override fun onActivityStopped(p0: Activity) {
+        if(p0 is ActivityVault && isScreenOn()){
+            applicationContext.config.isShowLock = false
+        }
     }
 
     override fun onActivitySaveInstanceState(p0: Activity, p1: Bundle) {

@@ -1,7 +1,6 @@
 package com.neko.hiepdph.calculatorvault.ui.activities
 
-import android.animation.Animator
-import android.animation.Animator.AnimatorListener
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.animation.Animation
@@ -15,7 +14,6 @@ import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
-import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.config.FingerPrintLockDisplay
 import com.neko.hiepdph.calculatorvault.config.FingerPrintUnlock
 import com.neko.hiepdph.calculatorvault.databinding.ActivityPatternLockBinding
@@ -31,6 +29,7 @@ class ActivityPatternLock : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityPatternLockBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        Log.d("TAG", "onCreate: "+config.isShowLock)
         initView()
     }
 
@@ -47,6 +46,7 @@ class ActivityPatternLock : AppCompatActivity() {
             val biometric = biometricConfig {
                 ownerFragmentActivity = this@ActivityPatternLock
                 authenticateSuccess = {
+                    config.isShowLock = true
                     Log.d("TAG", "authenticateSuccess: ")
                 }
                 authenticateFailed = {
@@ -61,18 +61,19 @@ class ActivityPatternLock : AppCompatActivity() {
         }
 
         binding.tvForgotPassword.clickWithDebounce {
-            val confirmDialog = DialogConfirm(callBack = object :ConfirmDialogCallBack{
+            val confirmDialog = DialogConfirm(callBack = object : ConfirmDialogCallBack {
                 override fun onPositiveClicked() {
                     showDialogConfirmSecurityQuestion()
                 }
-            },DialogConfirmType.FORGOT_PASSWORD,null)
-            confirmDialog.show(supportFragmentManager,confirmDialog.tag)
+            }, DialogConfirmType.FORGOT_PASSWORD, null)
+            confirmDialog.show(supportFragmentManager, confirmDialog.tag)
         }
 
-        if(config.fingerPrintUnlock == FingerPrintUnlock.ENABLE){
+        if (config.fingerPrintUnlock == FingerPrintUnlock.ENABLE) {
             val biometric = biometricConfig {
                 ownerFragmentActivity = this@ActivityPatternLock
                 authenticateSuccess = {
+                    config.isShowLock = true
                     Log.d("TAG", "authenticateSuccess: ")
                 }
                 authenticateFailed = {
@@ -100,15 +101,16 @@ class ActivityPatternLock : AppCompatActivity() {
         }
     }
 
-    private fun showDialogConfirmSecurityQuestion(){
-        val dialogPassword = DialogPassword(callBack = object : SetupPassWordCallBack{
+    private fun showDialogConfirmSecurityQuestion() {
+        val dialogPassword = DialogPassword(callBack = object : SetupPassWordCallBack {
             override fun onPositiveClicked() {
-
+                Log.d("TAG", "onPositiveClicked: " + config.patternLock)
+                binding.lock9View.setDrawGivenPattern(config.patternLock)
             }
 
         })
 
-        dialogPassword.show(supportFragmentManager,dialogPassword.tag)
+        dialogPassword.show(supportFragmentManager, dialogPassword.tag)
     }
 
     private fun checkPattern(numbers: IntArray) {
@@ -117,7 +119,7 @@ class ActivityPatternLock : AppCompatActivity() {
             anim.duration = 100 // set animation duration to 500 milliseconds
             anim.repeatMode = Animation.REVERSE // repeat animation in reverse mode
             anim.repeatCount = 2 // repeat animation 2 times
-            anim.setAnimationListener(object:AnimationListener{
+            anim.setAnimationListener(object : AnimationListener {
                 override fun onAnimationStart(p0: Animation?) {
                 }
 
@@ -143,12 +145,12 @@ class ActivityPatternLock : AppCompatActivity() {
                 startAnimation(anim)
             }
         } else {
+            config.isShowLock = true
+            startActivity(
+                Intent(this@ActivityPatternLock, ActivityVault::class.java)
+            )
             finish()
         }
     }
 
-
-    override fun onBackPressed() {
-        finishAffinity()
-    }
 }

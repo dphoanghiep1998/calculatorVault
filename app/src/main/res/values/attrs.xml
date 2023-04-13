@@ -33,6 +33,9 @@
 
     <declare-styleable name="PinMain" />
 
+    <declare-styleable name="ChromeProgressBar" />
+
+
     <declare-styleable name="CustomSeekBar">
         //seekBar
         <attr name="sb_max" format="float" />

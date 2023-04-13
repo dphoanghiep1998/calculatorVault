@@ -1,6 +1,7 @@
 package com.neko.hiepdph.calculatorvault.viewmodel
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,37 +17,44 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ListItemViewModel @Inject constructor() :ViewModel() {
+class ListItemViewModel @Inject constructor() : ViewModel() {
 
     private val _listItemList = SelfCleaningLiveData<MutableList<ListItem>>()
     val listItemList: LiveData<MutableList<ListItem>> get() = _listItemList
     fun setListItemData(list: List<ListItem>) {
+        Log.d("TAG", "setListItemData: " + list.size)
         _listItemList.postValue(list.toMutableList())
     }
 
-    fun getItemListFromFolder(context: Context,folderPath:String,type:String,fileType:String?=null){
+    fun getItemListFromFolder(
+        context: Context, folderPath: String, type: String, fileType: String? = null
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
-            when(type){
+            when (type) {
                 Constant.TYPE_PICTURE -> {
-                    setListItemData(MediaStoreUtils.getChildImageFromPath(context,folderPath))
+                    setListItemData(MediaStoreUtils.getChildImageFromPath(context, folderPath))
                 }
                 Constant.TYPE_AUDIOS -> {
-                    setListItemData(MediaStoreUtils.getChildAudioFromPath(context,folderPath))
+                    setListItemData(MediaStoreUtils.getChildAudioFromPath(context, folderPath))
                 }
                 Constant.TYPE_VIDEOS -> {
-                    setListItemData(MediaStoreUtils.getChildVideoFromPath(context,folderPath))
+                    setListItemData(MediaStoreUtils.getChildVideoFromPath(context, folderPath))
                 }
                 Constant.TYPE_FILE -> {
-                    setListItemData(MediaStoreUtils.getChildFileFromPath(context,folderPath,fileType!!))
+                    setListItemData(
+                        MediaStoreUtils.getChildFileFromPath(
+                            context, folderPath, fileType!!
+                        )
+                    )
                 }
             }
 
         }
     }
 
-    fun copyMoveFile(listPath:List<String>,destinationPath:String,callback:IMoveFile){
+    fun copyMoveFile(listPath: List<String>, destinationPath: String, callback: IMoveFile) {
         viewModelScope.launch(Dispatchers.IO) {
-            FileUtils.copyMoveTo(listPath,destinationPath,false, callback)
+            FileUtils.copyMoveTo(listPath, destinationPath, false, callback)
         }
     }
 }

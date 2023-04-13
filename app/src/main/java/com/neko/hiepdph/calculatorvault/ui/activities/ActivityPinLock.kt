@@ -1,19 +1,20 @@
 package com.neko.hiepdph.calculatorvault.ui.activities
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.biometric.BiometricConfig
 import com.neko.hiepdph.calculatorvault.common.customview.PinFunction
-import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
+import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
-import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
+import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.databinding.ActivityPinLockBinding
+import com.neko.hiepdph.calculatorvault.dialog.*
 
 class ActivityPinLock : AppCompatActivity() {
     private lateinit var binding: ActivityPinLockBinding
@@ -83,6 +84,46 @@ class ActivityPinLock : AppCompatActivity() {
                 handlePressBackspace()
             }
         })
+
+        binding.fingerPrint.clickWithDebounce {
+            val biometric = BiometricConfig.biometricConfig {
+                ownerFragmentActivity = this@ActivityPinLock
+                authenticateSuccess = {
+                    Log.d("TAG", "authenticateSuccess: ")
+                }
+                authenticateFailed = {
+                    Log.d("TAG", "authenticateFailed: ")
+                }
+            }
+            biometric.showPrompt()
+        }
+
+        binding.tvPassword.clickWithDebounce {
+            binding.containerFingerPrint.hide()
+        }
+
+        binding.tvForgotPassword.clickWithDebounce {
+            val confirmDialog = DialogConfirm(callBack = object : ConfirmDialogCallBack {
+                override fun onPositiveClicked() {
+                    showDialogConfirmSecurityQuestion()
+                }
+            }, DialogConfirmType.FORGOT_PASSWORD, null)
+            confirmDialog.show(supportFragmentManager, confirmDialog.tag)
+        }
+    }
+
+    private fun showDialogConfirmSecurityQuestion() {
+        val dialogPassword = DialogPassword(callBack = object : SetupPassWordCallBack {
+            override fun onPositiveClicked() {
+                showDialogPassword()
+            }
+        })
+        dialogPassword.show(supportFragmentManager, dialogPassword.tag)
+    }
+
+    private fun showDialogPassword() {
+        val dialogShowPassword = DialogShowPassword()
+        dialogShowPassword.show(supportFragmentManager, dialogShowPassword.tag)
     }
 
     private fun checkPass() {
@@ -107,6 +148,10 @@ class ActivityPinLock : AppCompatActivity() {
             return
         }
         if (config.secretPin == currentPassword) {
+            config.isShowLock = true
+            startActivity(
+                Intent(this@ActivityPinLock, ActivityVault::class.java)
+            )
             finish()
         }
     }
@@ -127,8 +172,5 @@ class ActivityPinLock : AppCompatActivity() {
                 item.setBackgroundResource(R.drawable.bg_pin_inactive)
             }
         }
-    }
-    override fun onBackPressed() {
-        finishAffinity()
     }
 }

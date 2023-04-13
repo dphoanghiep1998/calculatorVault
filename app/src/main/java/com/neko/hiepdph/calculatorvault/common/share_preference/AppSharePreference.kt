@@ -350,6 +350,14 @@ class AppSharePreference(private val context: Context?) {
         saveStringList(Constant.KEY_PATTERN_LOCK, patternLock.map { it.toString() })
     }
 
+    fun getShowLock(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_SHOW_LOCK,defaultValues)
+    }
+
+    fun setShowLock(values: Boolean) {
+        saveBoolean(Constant.KEY_SHOW_LOCK,values)
+    }
+
 
 }
 

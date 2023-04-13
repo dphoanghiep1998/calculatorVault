@@ -5,7 +5,10 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.view.MenuItem.OnActionExpandListener
 import android.widget.CheckBox
+import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
 import androidx.core.view.get
@@ -13,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -90,6 +94,12 @@ class FragmentNote : Fragment() {
         adapterNote = AdapterNote(onClickItem = {}, onLongClickItem = {
             initToolBar()
             editView()
+//            (requireActivity() as ActivityVault).getToolbar().setNavigationIcon(R.drawable.ic_exit)
+//            (requireActivity() as ActivityVault).getToolbar().setNavigationOnClickListener {
+//                adapterNote?.changeToNormalView()
+//                initToolBar()
+//                (requireActivity() as ActivityVault).setupActionBar()
+//            }
         }, onEditItem = {
             listIdNoteSelected.clear()
             listIdNoteSelected.addAll(it)
@@ -115,6 +125,10 @@ class FragmentNote : Fragment() {
     }
 
 
+    private fun queryNote(query: String) {
+        adapterNote?.filterNote(query)
+    }
+
     private fun initToolBar() {
         normalMenuProvider = object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -124,7 +138,6 @@ class FragmentNote : Fragment() {
                     menu[1].actionView?.findViewById<View>(R.id.checkbox)?.setOnClickListener {
                         checkAllNote(menu[1].actionView?.findViewById<CheckBox>(R.id.checkbox)?.isChecked == true)
                     }
-
                 } else {
                     menuInflater.inflate(R.menu.toolbar_menu_note, menu)
                     if (AdapterNote.isSwitchView) {
@@ -134,6 +147,38 @@ class FragmentNote : Fragment() {
                         menu[0].icon =
                             ContextCompat.getDrawable(requireContext(), R.drawable.ic_grid_layout)
                     }
+
+                    val actionExpandListener = object : OnActionExpandListener {
+                        override fun onMenuItemActionExpand(p0: MenuItem): Boolean {
+                            return true;
+                        }
+
+                        override fun onMenuItemActionCollapse(p0: MenuItem): Boolean {
+                            return true;
+                        }
+
+                    }
+                    val searchItem = menu.findItem(R.id.search)
+                    searchItem.setOnActionExpandListener(actionExpandListener)
+                    val searchView = searchItem.actionView as SearchView
+                    searchView.queryHint = getString(R.string.search_query)
+                    searchView.setOnQueryTextListener(object : OnQueryTextListener {
+                        override fun onQueryTextSubmit(query: String?): Boolean {
+                            query?.let {
+                                queryNote(it)
+                            }
+                            return true
+                        }
+
+                        override fun onQueryTextChange(newText: String?): Boolean {
+                            newText?.let {
+                                queryNote(it)
+                            }
+                            return true
+                        }
+
+                    })
+
                 }
             }
 
@@ -153,10 +198,7 @@ class FragmentNote : Fragment() {
                             changeLayout(menuItem)
                             true
                         }
-                        R.id.search -> {
-                            changeToSearchView()
-                            true
-                        }
+
                         else -> false
                     }
                 }

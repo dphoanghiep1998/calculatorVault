@@ -6,14 +6,11 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.util.Log
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.PopupMenu
 import android.widget.PopupWindow
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
@@ -21,28 +18,50 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
-import com.neko.hiepdph.calculatorvault.common.enums.Order
-import com.neko.hiepdph.calculatorvault.common.enums.Sort
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.hide
+import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.utils.formatSize
 import com.neko.hiepdph.calculatorvault.data.model.*
 import com.neko.hiepdph.calculatorvault.databinding.*
-import com.neko.hiepdph.calculatorvault.dialog.DialogSort
-import com.neko.hiepdph.calculatorvault.dialog.SortDialogCallBack
-import com.neko.hiepdph.calculatorvault.ui.main.home.language.adapter.AdapterFolder
-import com.neko.hiepdph.calculatorvault.ui.main.home.vault.FragmentVault
 
 
-class AdapterPersistent(private val onClickItem: (ListItem) -> Unit) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class AdapterPersistent(
+    private val onClickItem: (ListItem) -> Unit,
+    private val onLongClickItem: () -> Unit,
+    private val onEditItem: (List<ListItem>) -> Unit,
+    private val onSelectAll: (List<ListItem>) -> Unit,
+    private val onUnSelect: () -> Unit,
+
+    ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var listItem = mutableListOf<ListItem>()
     private var mType: String = Constant.TYPE_PICTURE
+    private var listOfItemSelected = mutableSetOf<ListItem>()
 
     fun setData(listDataItem: List<ListItem>, type: String) {
         mType = type
         listItem = listDataItem.toMutableList()
         Log.d("TAG", "setData: " + listItem.size)
         notifyDataSetChanged()
+    }
+
+    fun selectAll() {
+        listItem.forEach {
+            listOfItemSelected.add(it)
+        }
+        onSelectAll.invoke(listOfItemSelected.toMutableList())
+        notifyItemRangeChanged(0, listItem.size)
+    }
+
+    fun unSelectAll() {
+        listOfItemSelected.clear()
+        onUnSelect()
+        notifyItemRangeChanged(0, listItem.size)
+    }
+
+
+    companion object {
+        var editMode = false
     }
 
     inner class ItemPictureViewHolder(val binding: LayoutItemPersistentPictureBinding) :
@@ -96,6 +115,13 @@ class AdapterPersistent(private val onClickItem: (ListItem) -> Unit) :
         }
     }
 
+    fun changeToNormalView() {
+        editMode = false
+        listOfItemSelected.clear()
+        notifyItemRangeChanged(0, listItem.size)
+    }
+
+
     override fun getItemViewType(position: Int): Int = when (mType) {
         Constant.TYPE_PICTURE -> 0
         Constant.TYPE_VIDEOS -> 1
@@ -118,6 +144,42 @@ class AdapterPersistent(private val onClickItem: (ListItem) -> Unit) :
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
                         .error(R.drawable.ic_delete).into(binding.imvThumb)
+
+                    if (editMode) {
+                        binding.checkBox.show()
+                    } else {
+                        binding.checkBox.hide()
+                    }
+                    binding.checkBox.isChecked = item in listOfItemSelected
+
+                    binding.root.setOnLongClickListener {
+                        editMode = true
+                        onLongClickItem()
+                        notifyItemRangeChanged(0, listItem.size)
+                        return@setOnLongClickListener true
+                    }
+                    binding.root.setOnClickListener {
+                        if (!editMode) {
+                            onClickItem.invoke(item)
+                        } else {
+                            binding.checkBox.isChecked = !binding.checkBox.isChecked
+                            if (binding.checkBox.isChecked) {
+                                listOfItemSelected.add(item)
+                            } else {
+                                listOfItemSelected.remove(item)
+                            }
+                            onEditItem(listOfItemSelected.toMutableList())
+                        }
+                    }
+                    binding.checkBox.setOnClickListener {
+                        binding.checkBox.isChecked = !binding.checkBox.isChecked
+                        if (binding.checkBox.isChecked) {
+                            listOfItemSelected.add(item)
+                        } else {
+                            listOfItemSelected.remove(item)
+                        }
+                        onEditItem(listOfItemSelected.toMutableList())
+                    }
                 }
             }
             1 -> {
@@ -127,7 +189,44 @@ class AdapterPersistent(private val onClickItem: (ListItem) -> Unit) :
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
                         .error(R.drawable.ic_delete).into(binding.imvThumb)
+
+                    binding.checkBox.isChecked = item in listOfItemSelected
+
+                    if (editMode) {
+                        binding.checkBox.show()
+                    } else {
+                        binding.checkBox.hide()
+                    }
                     binding.tvDuration.text = item.getDuration(itemView.context).toString()
+
+                    binding.root.setOnLongClickListener {
+                        editMode = true
+                        onLongClickItem()
+                        notifyItemRangeChanged(0, listItem.size)
+                        return@setOnLongClickListener true
+                    }
+                    binding.root.setOnClickListener {
+                        if (!editMode) {
+                            onClickItem.invoke(item)
+                        } else {
+                            binding.checkBox.isChecked = !binding.checkBox.isChecked
+                            if (binding.checkBox.isChecked) {
+                                listOfItemSelected.add(item)
+                            } else {
+                                listOfItemSelected.remove(item)
+                            }
+                            onEditItem(listOfItemSelected.toMutableList())
+                        }
+                    }
+                    binding.checkBox.setOnClickListener {
+                        binding.checkBox.isChecked = !binding.checkBox.isChecked
+                        if (binding.checkBox.isChecked) {
+                            listOfItemSelected.add(item)
+                        } else {
+                            listOfItemSelected.remove(item)
+                        }
+                        onEditItem(listOfItemSelected.toMutableList())
+                    }
                 }
             }
             2 -> {
@@ -138,6 +237,13 @@ class AdapterPersistent(private val onClickItem: (ListItem) -> Unit) :
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).asBitmap().load(getThumbnail(item.mPath))
                         .apply(requestOptions).error(R.drawable.ic_delete).into(binding.imvThumb)
+                    binding.checkBox.isChecked = item in listOfItemSelected
+
+                    if (editMode) {
+                        binding.checkBox.show()
+                    } else {
+                        binding.checkBox.hide()
+                    }
                     binding.tvNameAudio.text = item.mName
                     binding.tvDurationAuthor.text =
                         item.getDuration(itemView.context).toString() + " - " + item.getArtist(
@@ -146,6 +252,36 @@ class AdapterPersistent(private val onClickItem: (ListItem) -> Unit) :
                     binding.option.clickWithDebounce {
                         showPopupWindow(itemView.context, binding.option)
                     }
+
+                    binding.root.setOnLongClickListener {
+                        editMode = true
+                        onLongClickItem()
+                        notifyItemRangeChanged(0, listItem.size)
+                        return@setOnLongClickListener true
+                    }
+                    binding.root.setOnClickListener {
+                        if (!editMode) {
+                            onClickItem.invoke(item)
+                        } else {
+                            binding.checkBox.isChecked = !binding.checkBox.isChecked
+                            if (binding.checkBox.isChecked) {
+                                listOfItemSelected.add(item)
+                            } else {
+                                listOfItemSelected.remove(item)
+                            }
+                            onEditItem(listOfItemSelected.toMutableList())
+                        }
+                    }
+
+                    binding.checkBox.setOnClickListener {
+                        binding.checkBox.isChecked = !binding.checkBox.isChecked
+                        if (binding.checkBox.isChecked) {
+                            listOfItemSelected.add(item)
+                        } else {
+                            listOfItemSelected.remove(item)
+                        }
+                        onEditItem(listOfItemSelected.toMutableList())
+                    }
                 }
             }
             3 -> {
@@ -153,10 +289,46 @@ class AdapterPersistent(private val onClickItem: (ListItem) -> Unit) :
                     val item = listItem[adapterPosition]
                     Glide.with(itemView.context).load(getImageForItemFile(item))
                         .error(R.drawable.ic_delete).into(binding.imvThumb)
+                    binding.checkBox.isChecked = item in listOfItemSelected
+
+                    if (editMode) {
+                        binding.checkBox.show()
+                    } else {
+                        binding.checkBox.hide()
+                    }
                     binding.tvNameDocument.text = item.mName
                     binding.tvSize.text = item.mSize.formatSize()
                     binding.option.clickWithDebounce {
                         showPopupWindowFile(itemView.context, binding.option)
+                    }
+
+                    binding.root.setOnLongClickListener {
+                        editMode = true
+                        onLongClickItem()
+                        notifyItemRangeChanged(0, listItem.size)
+                        return@setOnLongClickListener true
+                    }
+                    binding.root.setOnClickListener {
+                        if (!editMode) {
+                            onClickItem.invoke(item)
+                        } else {
+                            binding.checkBox.isChecked = !binding.checkBox.isChecked
+                            if (binding.checkBox.isChecked) {
+                                listOfItemSelected.add(item)
+                            } else {
+                                listOfItemSelected.remove(item)
+                            }
+                            onEditItem(listOfItemSelected.toMutableList())
+                        }
+                    }
+                    binding.checkBox.setOnClickListener {
+                        binding.checkBox.isChecked = !binding.checkBox.isChecked
+                        if (binding.checkBox.isChecked) {
+                            listOfItemSelected.add(item)
+                        } else {
+                            listOfItemSelected.remove(item)
+                        }
+                        onEditItem(listOfItemSelected.toMutableList())
                     }
                 }
             }
@@ -165,11 +337,49 @@ class AdapterPersistent(private val onClickItem: (ListItem) -> Unit) :
                     val item = listItem[adapterPosition]
                     Glide.with(itemView.context).load(getImageForItemFile(item))
                         .error(R.drawable.ic_delete).into(binding.imvThumb)
+                    binding.checkBox.isChecked = item in listOfItemSelected
+
+                    if (editMode) {
+                        binding.checkBox.show()
+                    } else {
+                        binding.checkBox.hide()
+                    }
+                    binding.root.setOnLongClickListener {
+                        editMode = true
+                        onLongClickItem()
+                        notifyItemRangeChanged(0, listItem.size)
+                        return@setOnLongClickListener true
+                    }
+                    binding.root.setOnClickListener {
+                        if (!editMode) {
+                            onClickItem.invoke(item)
+                        } else {
+                            binding.checkBox.isChecked = !binding.checkBox.isChecked
+                            if (binding.checkBox.isChecked) {
+                                listOfItemSelected.add(item)
+                            } else {
+                                listOfItemSelected.remove(item)
+                            }
+                            onEditItem(listOfItemSelected.toMutableList())
+                        }
+                    }
+                    binding.checkBox.setOnClickListener {
+                        binding.checkBox.isChecked = !binding.checkBox.isChecked
+                        if (binding.checkBox.isChecked) {
+                            listOfItemSelected.add(item)
+                        } else {
+                            listOfItemSelected.remove(item)
+                        }
+                        onEditItem(listOfItemSelected.toMutableList())
+                    }
                 }
+
+
             }
         }
     }
 }
+
 
 private fun getImageForItemFile(item: ListItem): Int {
     return when (item.type) {

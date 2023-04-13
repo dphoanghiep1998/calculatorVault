@@ -19,6 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
     <CheckBox
+        android:visibility="gone"
         android:id="@+id/check_box"
         android:layout_width="@dimen/_20sdp"
         android:layout_height="@dimen/_20sdp"

@@ -5,7 +5,7 @@ import android.content.Context
 import androidx.room.Room
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.data.database.AppDatabase
-import com.neko.hiepdph.calculatorvault.data.database.dao.HistoryDao
+import com.neko.hiepdph.calculatorvault.data.database.dao.BookmarkDao
 import com.neko.hiepdph.calculatorvault.data.database.dao.NoteDao
 import dagger.Module
 import dagger.Provides
@@ -25,8 +25,8 @@ class DatabaseModule {
     }
 
     @Provides
-    fun provideHistoryDao(appDatabase: AppDatabase): HistoryDao {
-        return appDatabase.historyDao
+    fun provideBookmarkDao(appDatabase: AppDatabase): BookmarkDao {
+        return appDatabase.bookmarkDao
     }
     @Provides
     fun provideNoteDao(appDatabase: AppDatabase): NoteDao {

@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/layout"
-        android:icon="@drawable/ic_grid_layout"
-        android:orderInCategory="100"
-        android:title=""
-        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/search"
         android:icon="@drawable/ic_toolbar_search"
-        android:orderInCategory="200"
         android:title=""
         app:actionViewClass="androidx.appcompat.widget.SearchView"
-        app:showAsAction="ifRoom|collapseActionView" />
+        app:showAsAction="ifRoom|collapseActionView"
+        />
+    <item
+        android:id="@+id/option"
+        android:icon="@drawable/ic_option"
+        android:title=""
+        app:showAsAction="ifRoom" />
+
+
 
 
     <!--    <item android:id="@+id/item_checkbox"-->

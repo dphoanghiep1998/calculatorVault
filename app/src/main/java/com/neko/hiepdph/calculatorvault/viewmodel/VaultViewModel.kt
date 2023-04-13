@@ -27,16 +27,17 @@ class VaultViewModel @Inject constructor() : ViewModel() {
     fun setDataToListFolderVault(data: MutableList<VaultFileDirItem>) {
         _listFolderInVault.postValue(data)
     }
-    fun selfListFolderInVaultPostValue(){
+
+    fun selfListFolderInVaultPostValue() {
         _listFolderInVault.postValue(_listFolderInVault.value)
     }
+
 
     fun getListFolderInVault(context: Context, parentDir: File) {
         viewModelScope.launch(Dispatchers.IO) {
             val listVaultFolder = mutableListOf<VaultFileDirItem>()
 
             val listFile = FileUtils.getFoldersInDirectory(parentDir.path)
-
             var type: String
             for (file in listFile) {
                 val name = when (file.name) {
@@ -56,6 +57,8 @@ class VaultViewModel @Inject constructor() : ViewModel() {
                         type = Constant.TYPE_FILE
                         context.getString(R.string.files)
                     }
+                    Constant.RECYCLER_BIN_FOLDER_NAME -> continue
+
                     else -> {
                         type = Constant.TYPE_ADD_MORE
                         file.name
@@ -65,7 +68,13 @@ class VaultViewModel @Inject constructor() : ViewModel() {
 
                 listVaultFolder.add(
                     VaultFileDirItem(
-                        file.absolutePath, name, type, true, count, file.length(), file.lastModified()
+                        file.absolutePath,
+                        name,
+                        type,
+                        true,
+                        count,
+                        file.length(),
+                        file.lastModified()
                     )
                 )
             }

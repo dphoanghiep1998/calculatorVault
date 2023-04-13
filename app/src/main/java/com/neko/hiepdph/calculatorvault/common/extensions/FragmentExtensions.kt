@@ -73,6 +73,10 @@ fun Fragment.popBackStack() {
 
 }
 
+fun Fragment.toastLocation(){
+    Log.d("TAG", "I am in : ${this::class.java}")
+}
+
 fun Fragment.getColor(res: Int): Int {
     return ContextCompat.getColor(requireContext(), res)
 }
