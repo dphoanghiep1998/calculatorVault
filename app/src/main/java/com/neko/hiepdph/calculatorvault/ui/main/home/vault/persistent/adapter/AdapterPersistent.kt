@@ -28,7 +28,7 @@ import com.neko.hiepdph.calculatorvault.databinding.*
 
 class AdapterPersistent(
     private val onClickItem: (ListItem) -> Unit,
-    private val onLongClickItem: () -> Unit,
+    private val onLongClickItem: (List<ListItem>) -> Unit,
     private val onEditItem: (List<ListItem>) -> Unit,
     private val onSelectAll: (List<ListItem>) -> Unit,
     private val onUnSelect: () -> Unit,
@@ -50,13 +50,13 @@ class AdapterPersistent(
             listOfItemSelected.add(it)
         }
         onSelectAll.invoke(listOfItemSelected.toMutableList())
-        notifyItemRangeChanged(0, listItem.size)
+        notifyDataSetChanged()
     }
 
     fun unSelectAll() {
         listOfItemSelected.clear()
         onUnSelect()
-        notifyItemRangeChanged(0, listItem.size)
+        notifyDataSetChanged()
     }
 
 
@@ -118,7 +118,7 @@ class AdapterPersistent(
     fun changeToNormalView() {
         editMode = false
         listOfItemSelected.clear()
-        notifyItemRangeChanged(0, listItem.size)
+       notifyDataSetChanged()
     }
 
 
@@ -153,9 +153,14 @@ class AdapterPersistent(
                     binding.checkBox.isChecked = item in listOfItemSelected
 
                     binding.root.setOnLongClickListener {
+                        if(editMode){
+                            return@setOnLongClickListener false
+                        }
                         editMode = true
-                        onLongClickItem()
-                        notifyItemRangeChanged(0, listItem.size)
+                        listOfItemSelected.add(item)
+                        onLongClickItem(listItem)
+
+                        notifyDataSetChanged()
                         return@setOnLongClickListener true
                     }
                     binding.root.setOnClickListener {
@@ -201,7 +206,8 @@ class AdapterPersistent(
 
                     binding.root.setOnLongClickListener {
                         editMode = true
-                        onLongClickItem()
+                        listOfItemSelected.add(item)
+                        onLongClickItem(listItem)
                         notifyItemRangeChanged(0, listItem.size)
                         return@setOnLongClickListener true
                     }
@@ -255,8 +261,10 @@ class AdapterPersistent(
 
                     binding.root.setOnLongClickListener {
                         editMode = true
-                        onLongClickItem()
-                        notifyItemRangeChanged(0, listItem.size)
+                        listOfItemSelected.add(item)
+                        onLongClickItem(listItem)
+                        notifyDataSetChanged()
+
                         return@setOnLongClickListener true
                     }
                     binding.root.setOnClickListener {
@@ -304,8 +312,10 @@ class AdapterPersistent(
 
                     binding.root.setOnLongClickListener {
                         editMode = true
-                        onLongClickItem()
-                        notifyItemRangeChanged(0, listItem.size)
+                        listOfItemSelected.add(item)
+                        onLongClickItem(listItem)
+                        notifyDataSetChanged()
+
                         return@setOnLongClickListener true
                     }
                     binding.root.setOnClickListener {
@@ -346,8 +356,9 @@ class AdapterPersistent(
                     }
                     binding.root.setOnLongClickListener {
                         editMode = true
-                        onLongClickItem()
-                        notifyItemRangeChanged(0, listItem.size)
+                        listOfItemSelected.add(item)
+                        onLongClickItem(listItem)
+                        notifyDataSetChanged()
                         return@setOnLongClickListener true
                     }
                     binding.root.setOnClickListener {

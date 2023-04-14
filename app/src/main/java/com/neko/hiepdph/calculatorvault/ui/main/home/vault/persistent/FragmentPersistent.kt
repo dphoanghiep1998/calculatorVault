@@ -1,15 +1,16 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.CheckBox
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,7 +20,10 @@ import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentPersistentBinding
+import com.neko.hiepdph.calculatorvault.dialog.ConfirmDialogCallBack
 import com.neko.hiepdph.calculatorvault.dialog.DialogAddFile
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterPersistent
 import com.neko.hiepdph.calculatorvault.viewmodel.PersistentViewModel
@@ -27,8 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class FragmentPersistent : Fragment() {
-    private var _binding: FragmentPersistentBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: FragmentPersistentBinding
     private val args: FragmentPersistentArgs by navArgs()
     private val viewModel by viewModels<PersistentViewModel>()
     private var adapterPersistent: AdapterPersistent? = null
@@ -36,14 +39,10 @@ class FragmentPersistent : Fragment() {
     private var sizeList = 0
 
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        Log.d("TAG", "onAttach: "+context)
-    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentPersistentBinding.inflate(inflater, container, false)
+        binding = FragmentPersistentBinding.inflate(inflater, container, false)
         (requireActivity() as ActivityVault).getToolbar().title = args.title
         toastLocation()
         return binding.root
@@ -53,9 +52,8 @@ class FragmentPersistent : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initView()
         initToolBar()
+
     }
-
-
 
 
     private fun initView() {
@@ -94,7 +92,8 @@ class FragmentPersistent : Fragment() {
                         android.R.id.home -> {
                             adapterPersistent?.changeToNormalView()
                             binding.containerController.hide()
-                            normalHome()
+                            (requireActivity() as ActivityVault).setupActionBar()
+                            initToolBar()
                             true
                         }
                         else -> false
@@ -102,10 +101,9 @@ class FragmentPersistent : Fragment() {
                 } else {
                     false
                 }
-
             }
 
-        })
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
     private fun checkItem() {
@@ -191,18 +189,66 @@ class FragmentPersistent : Fragment() {
         }
 
         binding.tvUnlock.clickWithDebounce {
-
+            showDialogUnlock()
         }
         binding.tvSlideshow.clickWithDebounce {
-
+            slideShow()
         }
         binding.tvShare.clickWithDebounce {
-
+            share()
         }
         binding.tvDelete.clickWithDebounce {
-
+            showDialogDelete()
         }
 
+    }
+
+    private fun showDialogDelete() {
+        if(listItemSelected.isEmpty()){
+            Toast.makeText(requireContext(),getString(R.string.select_no_more_than_one),Toast.LENGTH_SHORT).show()
+            return
+        }
+        val name = when (args.type) {
+            Constant.TYPE_PICTURE -> getString(R.string.pictures)
+            Constant.TYPE_VIDEOS -> getString(R.string.videos)
+            Constant.TYPE_FILE -> getString(R.string.files)
+            Constant.TYPE_AUDIOS -> getString(R.string.audios)
+            else -> getString(R.string.files)
+        }
+        val confirmDialog = DialogConfirm(callBack = object : ConfirmDialogCallBack {
+            override fun onPositiveClicked() {
+
+            }
+
+        }, DialogConfirmType.DELETE, name)
+
+        confirmDialog.show(childFragmentManager, confirmDialog.tag)
+    }
+
+    private fun share() {
+
+    }
+
+    private fun slideShow() {
+
+    }
+
+    private fun showDialogUnlock() {
+        val name = when (args.type) {
+            Constant.TYPE_PICTURE -> getString(R.string.pictures)
+            Constant.TYPE_VIDEOS -> getString(R.string.videos)
+            Constant.TYPE_FILE -> getString(R.string.files)
+            Constant.TYPE_AUDIOS -> getString(R.string.audios)
+            else -> getString(R.string.files)
+        }
+        val confirmDialog = DialogConfirm(callBack = object : ConfirmDialogCallBack {
+            override fun onPositiveClicked() {
+
+            }
+
+        }, DialogConfirmType.UNLOCK, name)
+
+        confirmDialog.show(childFragmentManager, confirmDialog.tag)
     }
 
 
@@ -212,23 +258,16 @@ class FragmentPersistent : Fragment() {
         exitIcon?.let {
             actionBar?.setHomeAsUpIndicator(it)
         }
+
     }
 
-    private fun normalHome() {
-        val actionBar = (activity as? ActivityVault)?.supportActionBar
-        actionBar?.setHomeAsUpIndicator(0)
-        initToolBar()
-
-//        val exitIcon = ContextCompat.getDrawable(requireContext(),R.drawable.ic_back)
-//        exitIcon?.let {
-//            actionBar?.setHomeAsUpIndicator(it)
-//        }
-    }
 
     private fun initRecyclerView() {
         adapterPersistent = AdapterPersistent(onClickItem = {
 
         }, onLongClickItem = {
+            listItemSelected.clear()
+            listItemSelected.addAll(it)
             initToolBar()
             editHome()
             showController()

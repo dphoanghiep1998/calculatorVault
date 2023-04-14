@@ -119,6 +119,9 @@ class DialogConfirm(
         binding.root.clickWithDebounce {
             dismiss()
         }
+        binding.containerMain.clickWithDebounce {
+
+        }
     }
 
     private val callback = object : BackPressDialogCallBack {

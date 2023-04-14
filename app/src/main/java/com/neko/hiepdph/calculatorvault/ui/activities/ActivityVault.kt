@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -148,8 +149,8 @@ class ActivityVault : AppCompatActivity() {
         }
 
 
-    private fun setupActionBar() {
-        val navController: NavController = findNavController(R.id.nav_host_fragment)
+     fun setupActionBar() {
+        val navController: NavController = (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController
         appBarConfiguration = AppBarConfiguration.Builder(
             R.id.fragmentVault,
             R.id.fragmentBrowser,
@@ -220,7 +221,7 @@ class ActivityVault : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return findNavController(R.id.nav_host_fragment).navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+        return (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
     override fun onDestroy() {

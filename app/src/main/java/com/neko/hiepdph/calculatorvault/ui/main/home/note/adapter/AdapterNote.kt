@@ -40,13 +40,13 @@ class AdapterNote(
             listOfId.add(it.id)
         }
         onSelectAll.invoke(listOfId.toMutableList())
-        notifyItemRangeChanged(0, listOfNote.size)
+        notifyDataSetChanged()
     }
 
     fun unSelectAll() {
         listOfId.clear()
         onUnSelect()
-        notifyItemRangeChanged(0, listOfNote.size)
+        notifyDataSetChanged()
     }
 
     companion object {
