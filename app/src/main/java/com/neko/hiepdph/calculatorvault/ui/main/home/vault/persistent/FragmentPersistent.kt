@@ -1,5 +1,6 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -24,6 +25,7 @@ import com.neko.hiepdph.calculatorvault.dialog.ConfirmDialogCallBack
 import com.neko.hiepdph.calculatorvault.dialog.DialogAddFile
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
+import com.neko.hiepdph.calculatorvault.ui.activities.ActivityImageDetail
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterPersistent
 import com.neko.hiepdph.calculatorvault.viewmodel.PersistentViewModel
@@ -264,7 +266,7 @@ class FragmentPersistent : Fragment() {
 
     private fun initRecyclerView() {
         adapterPersistent = AdapterPersistent(onClickItem = {
-
+            startActivity(Intent(requireContext(),ActivityImageDetail::class.java))
         }, onLongClickItem = {
             listItemSelected.clear()
             listItemSelected.addAll(it)

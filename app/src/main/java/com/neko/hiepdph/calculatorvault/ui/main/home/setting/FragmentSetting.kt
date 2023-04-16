@@ -11,8 +11,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.navigateToPage
 import com.neko.hiepdph.calculatorvault.databinding.FragmentSettingBinding
+import com.neko.hiepdph.calculatorvault.databinding.LayoutItemCustomSingleBinding
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityCamera
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -70,8 +72,11 @@ class FragmentSetting : Fragment() {
         )
 
         groupView.forEachIndexed { index, item ->
-            item.imvItem.setBackgroundResource(groupData[index].first)
-            item.tvTitle.text = groupData[index].second
+            item.imvIcon.setBackgroundResource(groupData[index].first)
+            item.tvContent.text = groupData[index].second
+            if(item == binding.itemAdvanced || item == binding.itemDeviceMigration || item == binding.itemLanguage || item == binding.itemFaq){
+                item.line.hide()
+            }
         }
         initButton()
     }

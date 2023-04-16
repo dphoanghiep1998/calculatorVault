@@ -15,32 +15,37 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <include
+            android:layout_marginHorizontal="@dimen/_12sdp"
             android:id="@+id/item_general"
-            layout="@layout/layout_item_setting"
+            layout="@layout/layout_item_custom_single"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <include
+            android:layout_marginHorizontal="@dimen/_12sdp"
             android:id="@+id/item_safe"
-            layout="@layout/layout_item_setting"
+            layout="@layout/layout_item_custom_single"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <include
+            android:layout_marginHorizontal="@dimen/_12sdp"
             android:id="@+id/item_disguise_icon"
-            layout="@layout/layout_item_setting"
+            layout="@layout/layout_item_custom_single"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <include
+            android:layout_marginHorizontal="@dimen/_12sdp"
             android:id="@+id/item_private_camera"
-            layout="@layout/layout_item_setting"
+            layout="@layout/layout_item_custom_single"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <include
+            android:layout_marginHorizontal="@dimen/_12sdp"
             android:id="@+id/item_advanced"
-            layout="@layout/layout_item_setting"
+            layout="@layout/layout_item_custom_single"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </LinearLayout>
@@ -55,20 +60,23 @@
         app:layout_constraintTop_toBottomOf="@id/container_1">
 
         <include
+            android:layout_marginHorizontal="@dimen/_12sdp"
             android:id="@+id/item_retrieve_lost_files"
-            layout="@layout/layout_item_setting"
+            layout="@layout/layout_item_custom_single"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <include
+            android:layout_marginHorizontal="@dimen/_12sdp"
             android:id="@+id/item_backup"
-            layout="@layout/layout_item_setting"
+            layout="@layout/layout_item_custom_single"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <include
+            android:layout_marginHorizontal="@dimen/_12sdp"
             android:id="@+id/item_device_migration"
-            layout="@layout/layout_item_setting"
+            layout="@layout/layout_item_custom_single"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -83,8 +91,9 @@
         app:layout_constraintTop_toBottomOf="@id/container_2">
 
         <include
+            android:layout_marginHorizontal="@dimen/_12sdp"
             android:id="@+id/item_language"
-            layout="@layout/layout_item_setting"
+            layout="@layout/layout_item_custom_single"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -101,20 +110,23 @@
         app:layout_constraintTop_toBottomOf="@id/container_3">
 
         <include
+            android:layout_marginHorizontal="@dimen/_12sdp"
             android:id="@+id/item_clear_cache"
-            layout="@layout/layout_item_setting"
+            layout="@layout/layout_item_custom_single"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <include
+            android:layout_marginHorizontal="@dimen/_12sdp"
             android:id="@+id/item_preventing_lost_file_help"
-            layout="@layout/layout_item_setting"
+            layout="@layout/layout_item_custom_single"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <include
+            android:layout_marginHorizontal="@dimen/_12sdp"
             android:id="@+id/item_faq"
-            layout="@layout/layout_item_setting"
+            layout="@layout/layout_item_custom_single"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
