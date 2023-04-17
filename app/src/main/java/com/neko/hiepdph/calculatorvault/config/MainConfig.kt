@@ -1,7 +1,6 @@
 package com.neko.hiepdph.calculatorvault.config
 
 import android.content.Context
-import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 
@@ -70,13 +69,49 @@ class MainConfig(val context: Context) {
         set(securityAnswer) = AppSharePreference.getInstance(context)
             .setSecurityAnswer(securityAnswer)
 
-    var patternLock:List<Int>
+    var patternLock: List<Int>
         get() = AppSharePreference.getInstance(context).getPatternLock(arrayListOf())
         set(patternLock) = AppSharePreference.getInstance(context).setPatternLock(patternLock)
 
-    var isShowLock:Boolean
+    var isShowLock: Boolean
         get() = AppSharePreference.getInstance(context).getShowLock(false)
         set(isShowLock) = AppSharePreference.getInstance(context).setShowLock(isShowLock)
+
+    var slideShowInterval: Int
+        get() = AppSharePreference.getInstance(context).getSlideShowInterval(3)
+        set(slideShowInterval) = AppSharePreference.getInstance(context)
+            .setSlideShowInterval(slideShowInterval)
+
+    var slideShowTransition: Int
+        get() = AppSharePreference.getInstance(context)
+            .getSlideShowTransition(SlideShowTransition.NATURAL)
+        set(slideShowTransition) = AppSharePreference.getInstance(context)
+            .setSlideShowTransition(slideShowTransition)
+
+    var moveToRecyclerBin: Boolean
+        get() = AppSharePreference.getInstance(context).getMoveToRecyclerBin(RecyclerBin.ENABLE)
+        set(moveToRecyclerBin) = AppSharePreference.getInstance(context)
+            .setMoveToRecyclerBin(moveToRecyclerBin)
+
+    var slideRandomPlay: Boolean
+        get() = AppSharePreference.getInstance(context).getSlideRandomPlay(SlideRandomPlay.ENABLE)
+        set(slideRandomPlay) = AppSharePreference.getInstance(context)
+            .setSlideRandomPlay(slideRandomPlay)
+
+    var shakeClose: Boolean
+        get() = AppSharePreference.getInstance(context).getShakeClose(ShakeClose.ENABLE)
+        set(shakeClose) = AppSharePreference.getInstance(context)
+            .setClose(shakeClose)
+
+    var playVideoMode :Boolean
+        get() = AppSharePreference.getInstance(context).getPlayVideoMode(PlayVideoMode.ENABLE)
+        set(playVideoMode) = AppSharePreference.getInstance(context)
+            .setPlayVideoMode(playVideoMode)
+
+    var encryptionMode:Int
+        get() = AppSharePreference.getInstance(context).getEncryptionMode(EncryptionMode.ALWAYS_ASK)
+        set(encryptionMode) = AppSharePreference.getInstance(context)
+            .setEncryptionMode(encryptionMode)
 
 
 }

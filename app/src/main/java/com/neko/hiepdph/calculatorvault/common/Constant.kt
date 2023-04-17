@@ -2,8 +2,16 @@ package com.neko.hiepdph.calculatorvault.common
 
 
 object Constant {
-    const val KEY_URL ="KEY_URL"
-    const val KEY_SHOW_LOCK ="KEY_SHOW_LOCK"
+    const val KEY_IMAGE_INTENT = "KEY_IMAGE_INTENT"
+    const val KEY_ENCRYPTION_MODE ="KEY_ENCRYPTION_MODE"
+    const val KEY_PLAY_VIDEO_MODE ="KEY_PLAY_VIDEO_MODE"
+    const val KEY_SHAKE_CLOSE = "KEY_SHAKE_CLOSE"
+    const val KEY_SLIDE_RANDOM_PLAY = "KEY_SLIDE_RANDOM_PLAY"
+    const val KEY_MOVE_TO_RECYCLER_BIN = "KEY_MOVE_TO_RECYCLER_BIN"
+    const val KEY_SLIDE_SHOW_TRANSITION = "KEY_SLIDE_SHOW_TRANSITION"
+    const val KEY_SLIDE_SHOW_INTERVAL = "KEY_SLIDE_SHOW_INTERVAL"
+    const val KEY_URL = "KEY_URL"
+    const val KEY_SHOW_LOCK = "KEY_SHOW_LOCK"
     const val KEY_PATTERN_LOCK = "KEY_PATTERN_LOCK"
     const val KEY_SECRET_PIN = "KEY_SECRET_PIN"
     const val KEY_TACTILE_FEEDBACK = "KEY_TACTILE_FEEDBACK"
@@ -78,7 +86,7 @@ object Constant {
     const val PICTURE_FOLDER_NAME = "PICTURE_CALCULATOR_VAULT_${SECRET_KEY}"
     const val AUDIOS_FOLDER_NAME = "AUDIOS_CALCULATOR_VAULT_${SECRET_KEY}"
     const val VIDEOS_FOLDER_NAME = "VIDEOS_CALCULATOR_VAULT_${SECRET_KEY}"
-    const val RECYCLER_BIN_FOLDER_NAME ="BIN_CALCULATOR_VAULT_${SECRET_KEY}"
+    const val RECYCLER_BIN_FOLDER_NAME = "BIN_CALCULATOR_VAULT_${SECRET_KEY}"
 
     const val TYPE_PICTURE = "TYPE_PICTURE"
     const val TYPE_RECYCLER_BIN = "TYPE_RECYCLER_BIN"
@@ -141,9 +149,9 @@ object Constant {
     const val SEARCH_ENCRYPT = "https://www.searchencrypt.com/home"
     const val QWANT = "https://www.qwant.com/"
 
-    const val PREFIX_URL_ICON = "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url="
+    const val PREFIX_URL_ICON =
+        "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url="
     const val SUFFIX_URL_ICON = "&size=256"
-
 
 
 }

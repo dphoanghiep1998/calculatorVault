@@ -40,7 +40,7 @@
         android:paddingEnd="@dimen/_12sdp"
         android:paddingVertical="@dimen/_2sdp"
         android:textColor="@color/neutral_05"
-        android:textSize="@dimen/_14sdp"
+        android:textSize="@dimen/_10sdp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/container_tool"
         app:layout_constraintStart_toEndOf="@id/imv_icon"

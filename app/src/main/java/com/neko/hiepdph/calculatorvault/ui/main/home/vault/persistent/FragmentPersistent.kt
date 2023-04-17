@@ -25,6 +25,7 @@ import com.neko.hiepdph.calculatorvault.dialog.ConfirmDialogCallBack
 import com.neko.hiepdph.calculatorvault.dialog.DialogAddFile
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
+import com.neko.hiepdph.calculatorvault.sharedata.ShareData
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityImageDetail
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterPersistent
@@ -266,7 +267,7 @@ class FragmentPersistent : Fragment() {
 
     private fun initRecyclerView() {
         adapterPersistent = AdapterPersistent(onClickItem = {
-            startActivity(Intent(requireContext(),ActivityImageDetail::class.java))
+           handleClickItem(it)
         }, onLongClickItem = {
             listItemSelected.clear()
             listItemSelected.addAll(it)
@@ -300,6 +301,23 @@ class FragmentPersistent : Fragment() {
         }
         binding.rcvItemGroup.layoutManager = gridLayoutManager
 
+    }
+
+    private fun handleClickItem(item: ListItem) {
+        when(args.type){
+            Constant.TYPE_PICTURE -> {
+                var list = mutableListOf<ListItem>()
+                list.add(item)
+                ShareData.getInstance().setListItemImage(list)
+                val intent = Intent(requireContext(),ActivityImageDetail::class.java)
+                startActivity(intent)
+            }
+            Constant.TYPE_AUDIOS -> {}
+            Constant.TYPE_VIDEOS -> {}
+            else ->{
+
+            }
+        }
     }
 
     private fun showController() {

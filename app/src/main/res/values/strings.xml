@@ -194,4 +194,27 @@
     <string name="slide_show">Slideshow</string>
     <string name="share">Share</string>
     <string name="select_no_more_than_one">Select no more than one!</string>
+    <string name="recycle_bin_content_2">After a file is deleted, it moves to the Recycle Bin automatically</string>
+    <string name="sec">%s sec</string>
+    <string name="natural">Natural</string>
+    <string name="bottom">Bottom</string>
+    <string name="fade">Fade</string>
+    <string name="left">Left</string>
+    <string name="right">Right</string>
+    <string name="top">Top</string>
+    <string name="rotate">Rotate</string>
+    <string name="zoom">Zoom</string>
+    <string name="shake_close_content_2">Shake the phone go to home screen</string>
+    <string name="play_video_mode_content_2">Use the app’s built-in video player to open the video and play it</string>
+    <string name="encryption_mode_content_2">Encryption: Encrypts all bits of a file and is suitable for small, high-security files\n\nHidden: Handles only file names and is suitable for large, low-security files\n\n(We do not recommend that you put too many files in one folder. For more than 1000 files, we recommend that you put them in a different folder)\n\n
+    </string>
+    <string name="slide_show_interval">Slideshow Interval</string>
+    <string name="slide_show_transition">Slideshow Transition</string>
+    <string name="slide_show_random_play">Slideshow Random Play</string>
+    <string name="shake_close">Shake Close</string>
+    <string name="play_video_mode">Play Video Mode</string>
+    <string name="select_an_encryption_mode">Select an Encryption Mode</string>
+    <string name="hidden">Hidden</string>
+    <string name="encryption">Encryption</string>
+    <string name="always_ask">Always ask</string>
 </resources>

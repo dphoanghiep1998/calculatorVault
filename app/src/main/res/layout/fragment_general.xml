@@ -2,65 +2,78 @@
 <layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".ui.main.home.setting.safe.FragmentSafe">
+        android:layout_height="match_parent">
 
-        <include
-            android:id="@+id/container_recycle_bin"
-            layout="@layout/layout_item_custom_double"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/_12sdp"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:fitsSystemWindows="true"
+            android:paddingBottom="@dimen/_12sdp">
 
-        <include
-            android:id="@+id/container_slideshow_interval"
-            layout="@layout/layout_item_custom_single"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/_12sdp"
-            app:layout_constraintTop_toBottomOf="@id/container_lock" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <include
-            android:id="@+id/container_slideshow_transition"
-            layout="@layout/layout_item_custom_double"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/_12sdp"
-            app:layout_constraintTop_toBottomOf="@id/container_password_recovery_question" />
+                <include
+                    android:id="@+id/container_recycle_bin"
+                    layout="@layout/layout_item_custom_double"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_12sdp"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-        <include
-            android:id="@+id/container_slideshow_random_play"
-            layout="@layout/layout_item_custom_double"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/_12sdp"
-            app:layout_constraintTop_toBottomOf="@id/container_fingerprint_unlock" />
+                <include
+                    android:id="@+id/container_slideshow_interval"
+                    layout="@layout/layout_item_custom_single"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_12sdp"
+                    app:layout_constraintTop_toBottomOf="@id/container_recycle_bin" />
 
-        <include
-            android:id="@+id/container_shake_close"
-            layout="@layout/layout_item_custom_double"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/_12sdp"
-            app:layout_constraintTop_toBottomOf="@id/container_fingerprint_lock_display" />
+                <include
+                    android:id="@+id/container_slideshow_transition"
+                    layout="@layout/layout_item_custom_single"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_12sdp"
+                    app:layout_constraintTop_toBottomOf="@id/container_slideshow_interval" />
 
-        <include
-            android:id="@+id/container_play_video_mode"
-            layout="@layout/layout_item_custom_double"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/_12sdp"
-            app:layout_constraintTop_toBottomOf="@id/container_screen_off_action" />
+                <include
+                    android:id="@+id/container_slideshow_random_play"
+                    layout="@layout/layout_item_custom_single"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_12sdp"
+                    app:layout_constraintTop_toBottomOf="@id/container_slideshow_transition" />
 
-        <include
-            android:id="@+id/container_select_an_encryption_mode"
-            layout="@layout/layout_item_custom_double"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/_12sdp"
-            app:layout_constraintTop_toBottomOf="@id/container_lock_when_leaving" />
+                <include
+                    android:id="@+id/container_shake_close"
+                    layout="@layout/layout_item_custom_double"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_12sdp"
+                    app:layout_constraintTop_toBottomOf="@id/container_slideshow_random_play" />
+
+                <include
+                    android:id="@+id/container_play_video_mode"
+                    layout="@layout/layout_item_custom_double"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_12sdp"
+                    app:layout_constraintTop_toBottomOf="@id/container_shake_close" />
+
+                <include
+                    android:id="@+id/container_select_an_encryption_mode"
+                    layout="@layout/layout_item_custom_double"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_12sdp"
+                    app:layout_constraintTop_toBottomOf="@id/container_play_video_mode" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </ScrollView>
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

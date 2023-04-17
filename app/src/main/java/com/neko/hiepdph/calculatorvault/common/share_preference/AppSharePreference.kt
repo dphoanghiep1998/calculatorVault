@@ -351,11 +351,67 @@ class AppSharePreference(private val context: Context?) {
     }
 
     fun getShowLock(defaultValues: Boolean): Boolean {
-        return getBoolean(Constant.KEY_SHOW_LOCK,defaultValues)
+        return getBoolean(Constant.KEY_SHOW_LOCK, defaultValues)
     }
 
     fun setShowLock(values: Boolean) {
-        saveBoolean(Constant.KEY_SHOW_LOCK,values)
+        saveBoolean(Constant.KEY_SHOW_LOCK, values)
+    }
+
+    fun getSlideShowInterval(defaultValues: Int): Int {
+        return getInt(Constant.KEY_SLIDE_SHOW_INTERVAL, defaultValues)
+    }
+
+    fun setSlideShowInterval(value: Int) {
+        saveInt(Constant.KEY_SLIDE_SHOW_INTERVAL, value)
+    }
+
+    fun getSlideShowTransition(defaultValues: Int): Int {
+        return getInt(Constant.KEY_SLIDE_SHOW_TRANSITION, defaultValues)
+    }
+
+    fun setSlideShowTransition(values: Int) {
+        saveInt(Constant.KEY_SLIDE_SHOW_TRANSITION, values)
+    }
+
+    fun getMoveToRecyclerBin(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_MOVE_TO_RECYCLER_BIN, defaultValues)
+    }
+
+    fun setMoveToRecyclerBin(values: Boolean) {
+        saveBoolean(Constant.KEY_MOVE_TO_RECYCLER_BIN, values)
+    }
+
+    fun getSlideRandomPlay(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_SLIDE_RANDOM_PLAY, defaultValues)
+    }
+
+    fun setSlideRandomPlay(values: Boolean) {
+        saveBoolean(Constant.KEY_SLIDE_RANDOM_PLAY, values)
+    }
+
+    fun getShakeClose(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_SHAKE_CLOSE, defaultValues)
+    }
+
+    fun setClose(values: Boolean) {
+        saveBoolean(Constant.KEY_SHAKE_CLOSE, values)
+    }
+
+    fun getPlayVideoMode(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_PLAY_VIDEO_MODE, defaultValues)
+    }
+
+    fun setPlayVideoMode(values: Boolean) {
+        saveBoolean(Constant.KEY_PLAY_VIDEO_MODE, values)
+    }
+
+    fun getEncryptionMode(defaultValues: Int): Int {
+        return getInt(Constant.KEY_ENCRYPTION_MODE, defaultValues)
+    }
+
+    fun setEncryptionMode(values: Int) {
+        saveInt(Constant.KEY_ENCRYPTION_MODE, values)
     }
 
 

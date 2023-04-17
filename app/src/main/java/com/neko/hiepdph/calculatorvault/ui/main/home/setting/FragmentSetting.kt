@@ -88,6 +88,9 @@ class FragmentSetting : Fragment() {
         binding.itemPrivateCamera.root.clickWithDebounce {
             createShortcutsCamera()
         }
+        binding.itemGeneral.root.clickWithDebounce {
+            navigateToPage(R.id.fragmentSetting,R.id.fragmentGeneral)
+        }
     }
 
     private fun createShortcutsCamera() {

@@ -26,6 +26,9 @@
         <action
             android:id="@+id/action_fragmentSetting_to_fragmentSafe"
             app:destination="@id/fragmentSafe" />
+        <action
+            android:id="@+id/action_fragmentSetting_to_fragmentGeneral"
+            app:destination="@id/fragmentGeneral" />
     </fragment>
     <fragment
         android:id="@+id/fragmentLanguage"
@@ -154,4 +157,8 @@
         android:name="com.neko.hiepdph.calculatorvault.ui.main.home.setting.safe.lock.changepattern.FragmentChangePattern"
         android:label="@string/change_unlock_pattern"
         tools:layout="@layout/fragment_change_pattern" />
+    <fragment
+        android:id="@+id/fragmentGeneral"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.setting.general.FragmentGeneral"
+        android:label="@string/general" />
 </navigation>
