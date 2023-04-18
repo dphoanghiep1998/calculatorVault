@@ -1,27 +1,26 @@
 package com.neko.hiepdph.calculatorvault.ui.activities
 
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
-import android.view.ViewGroup
-import android.view.Window
-import android.widget.FrameLayout
-import androidx.activity.viewModels
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
-import com.bumptech.glide.Glide
-import com.jsibbold.zoomage.ZoomageView
+import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.common.adapter.ImagePagerAdapter
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
+import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityImageDetailBinding
-import com.neko.hiepdph.calculatorvault.dialog.DialogCallBack
+import com.neko.hiepdph.calculatorvault.dialog.DialogDetail
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
-import com.neko.hiepdph.calculatorvault.viewmodel.PersistentViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class ActivityImageDetail : AppCompatActivity() {
     private lateinit var binding: ActivityImageDetailBinding
+    private var viewPagerAdapter: ImagePagerAdapter? = null
+    private var currentItem: ListItem? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityImageDetailBinding.inflate(layoutInflater)
@@ -33,32 +32,76 @@ class ActivityImageDetail : AppCompatActivity() {
         binding.toolbar.setNavigationOnClickListener {
             finish()
         }
-        getData()
         initView()
+        getData()
     }
-    private fun getData(){
-        ShareData.getInstance().listItemImage.observe(this){
-            Log.d("TAG", "getData: "+ it.size)
-            it.forEach {item ->
-                val imageView = ZoomageView(this)
-                val root = FrameLayout(this)
-                root.layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                imageView.window.setLayout(
-                    (requireContext().resources.displayMetrics.widthPixels),
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                imageView
-                Glide.with(this).load(item.mPath).error(R.drawable.ic_global).into(imageView)
-                binding.flipView.addView(imageView)
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.toolbar_menu_image_detail, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.info -> {
+                openImageInformationDialog()
+                true
             }
+            else -> false
+        }
+    }
+
+    private fun openImageInformationDialog() {
+        val dialogDetail = DialogDetail.dialogDetailConfig {
+            name = currentItem?.mName
+            size = currentItem?.mSize
+            path = currentItem?.mPath
+        }
+        dialogDetail.show(supportFragmentManager, dialogDetail.tag)
+    }
+
+    private fun getData() {
+        ShareData.getInstance().listItemImage.observe(this) {
+            viewPagerAdapter?.setData(it)
+            if (it.isNotEmpty()) {
+                currentItem = it[0]
+            }
+            if (it.size > 1) {
+                supportActionBar?.title = "1/${it.size}"
+            } else {
+                supportActionBar?.title = String.EMPTY
+            }
+            binding.imageViewPager.addOnPageChangeListener(object : OnPageChangeListener {
+                override fun onPageScrolled(
+                    position: Int, positionOffset: Float, positionOffsetPixels: Int
+                ) {
+                }
+
+                override fun onPageSelected(position: Int) {
+                    currentItem = it[position]
+                    supportActionBar?.title = "${position + 1}/${it.size}"
+                }
+
+                override fun onPageScrollStateChanged(state: Int) {
+
+                }
+            })
         }
     }
 
 
     private fun initView() {
+//        binding.actionBar.invisible()
+//        binding.containerController.invisible()
+
+        initViewPager()
         initButton()
+    }
+
+    private fun initViewPager() {
+        viewPagerAdapter = ImagePagerAdapter(this)
+        binding.imageViewPager.adapter = viewPagerAdapter
+
     }
 
     private fun initButton() {
@@ -77,5 +120,16 @@ class ActivityImageDetail : AppCompatActivity() {
         binding.tvSlideshow.clickWithDebounce {
 
         }
+
+        binding.tvRotate.clickWithDebounce {
+            viewPagerAdapter?.rotate(binding.imageViewPager.currentItem)
+        }
+
+
+    }
+
+    private fun showController() {
+        binding.containerController.show()
+        binding.actionBar.show()
     }
 }

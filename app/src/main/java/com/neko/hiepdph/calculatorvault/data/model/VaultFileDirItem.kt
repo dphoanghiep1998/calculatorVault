@@ -9,4 +9,4 @@ class VaultFileDirItem(
     var mSize: Long = 0L,
     var mModified: Long = 0L,
 
-    ) : FileDirItem(mPath, mName, mIsDirectory, mChildren, mSize, mModified) {}
+    ) : FileDirItem(mPath,mPath, mName, mIsDirectory, mChildren, mSize, mModified) {}

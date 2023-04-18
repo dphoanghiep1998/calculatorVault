@@ -8,6 +8,7 @@ import java.io.File
 
 open class FileDirItem(
     val path: String,
+    val ownerPath: String,
     val name: String = "",
     var isDirectory: Boolean = false,
     var children: Int = 0,

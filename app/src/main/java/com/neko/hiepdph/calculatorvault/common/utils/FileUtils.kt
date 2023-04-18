@@ -112,7 +112,7 @@ object FileUtils {
                 }
                 listOfFolder.add(
                     ListItem(
-                        0, file.path, file.name, false, 0, file.length(), file.lastModified(), type
+                        0, file.path,file.path, file.name, false, 0, file.length(), file.lastModified(), type
                     )
                 )
             }

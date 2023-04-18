@@ -23,8 +23,8 @@
             app:titleTextAppearance="@style/TextViewStyleToolbar" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <ViewFlipper
-        android:id="@+id/flipView"
+    <com.neko.hiepdph.calculatorvault.common.customview.HackyViewPager
+        android:id="@+id/imageViewPager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/container_controller"
@@ -36,7 +36,6 @@
         android:layout_height="wrap_content"
         android:background="@drawable/bg_border_top_only_neu03"
         android:paddingVertical="@dimen/_6sdp"
-        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView
@@ -64,8 +63,21 @@
             android:textSize="@dimen/_12sdp"
             app:drawableTopCompat="@drawable/ic_slideshow"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/tv_share"
+            app:layout_constraintEnd_toStartOf="@id/tv_rotate"
             app:layout_constraintStart_toEndOf="@id/tv_unlock"
+            app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/tv_rotate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/app_font_400"
+            android:text="@string/rotate"
+            android:textColor="@color/neutral_06"
+            android:textSize="@dimen/_12sdp"
+            app:drawableTopCompat="@drawable/ic_rotate"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/tv_share"
+            app:layout_constraintStart_toEndOf="@id/tv_slideshow"
             app:layout_constraintTop_toTopOf="parent" />
 
 
@@ -80,7 +92,7 @@
             app:drawableTopCompat="@drawable/ic_share"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/tv_delete"
-            app:layout_constraintStart_toEndOf="@id/tv_slideshow"
+            app:layout_constraintStart_toEndOf="@id/tv_rotate"
             app:layout_constraintTop_toTopOf="parent" />
 
 

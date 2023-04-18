@@ -8,11 +8,13 @@ import kotlinx.parcelize.Parcelize
 class ListItem(
     val id: Long,
     val mPath: String,
+    val mOwnerPath: String,
     val mName: String = "",
     var mIsDirectory: Boolean = false,
     var mChildren: Int = 0,
     var mSize: Long = 0L,
     var mModified: Long = 0L,
-    var type: String ?= "",
+    var type: String? = "",
 
-    ) : FileDirItem(mPath, mName, mIsDirectory, mChildren, mSize, mModified), Parcelable {}
+    ) : FileDirItem(mPath,mOwnerPath, mName, mIsDirectory, mChildren , mSize, mModified),
+    Parcelable {}

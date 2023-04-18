@@ -7,9 +7,6 @@ import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
 import android.provider.MediaStore
-import android.util.Log
-import androidx.core.content.FileProvider
-import androidx.core.net.toUri
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.Constant.archiveMimeTypes
 import com.neko.hiepdph.calculatorvault.common.Constant.extraAudioMimeTypes
@@ -17,7 +14,8 @@ import com.neko.hiepdph.calculatorvault.common.Constant.extraDocumentMimeTypes
 import com.neko.hiepdph.calculatorvault.common.extensions.getLongValue
 import com.neko.hiepdph.calculatorvault.common.extensions.getStringValue
 import com.neko.hiepdph.calculatorvault.common.extensions.queryCursor
-import com.neko.hiepdph.calculatorvault.data.model.*
+import com.neko.hiepdph.calculatorvault.data.model.GroupItem
+import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import java.io.File
 import java.util.*
 
@@ -239,7 +237,7 @@ object MediaStoreUtils {
                 if (childPath.isNotBlank() && childPath != path) {
                     listImageChild.add(
                         ListItem(
-                            id, childPath, name, false, 0, size, modified
+                            id, childPath, childPath, name, false, 0, size, modified
                         )
                     )
                 }
@@ -276,7 +274,9 @@ object MediaStoreUtils {
                 if (childPath.isNotBlank()) {
                     val duration = getDuration(context, childPath)
                     listVideoChild.add(
-                        ListItem(id, childPath, name, false, 0, size, modified)
+                        ListItem(
+                            id, childPath, childPath, name, false, 0, size, modified
+                        )
                     )
                 }
             }
@@ -315,7 +315,9 @@ object MediaStoreUtils {
                 if (childPath.isNotBlank()) {
                     val thumb = getThumbnail(childPath)
                     listAudioChild.add(
-                        ListItem(id, childPath, name, false, 0, size, modified)
+                        ListItem(
+                            id, childPath, childPath, name, false, 0, size, modified
+                        )
                     )
                 }
             }
@@ -360,6 +362,7 @@ object MediaStoreUtils {
                                         ListItem(
                                             id,
                                             childPath,
+                                            childPath,
                                             name,
                                             false,
                                             0,
@@ -380,6 +383,7 @@ object MediaStoreUtils {
                                         ListItem(
                                             id,
                                             childPath,
+                                            childPath,
                                             name,
                                             false,
                                             0,
@@ -399,6 +403,7 @@ object MediaStoreUtils {
                                         ListItem(
                                             id,
                                             childPath,
+                                            childPath,
                                             name,
                                             false,
                                             0,
@@ -414,6 +419,7 @@ object MediaStoreUtils {
                                     listFileChild.add(
                                         ListItem(
                                             id,
+                                            childPath,
                                             childPath,
                                             name,
                                             false,
@@ -431,6 +437,7 @@ object MediaStoreUtils {
                                         ListItem(
                                             id,
                                             childPath,
+                                            childPath,
                                             name,
                                             false,
                                             0,
@@ -447,6 +454,7 @@ object MediaStoreUtils {
                                         ListItem(
                                             id,
                                             childPath,
+                                            childPath,
                                             name,
                                             false,
                                             0,
@@ -462,6 +470,7 @@ object MediaStoreUtils {
                                     listFileChild.add(
                                         ListItem(
                                             id,
+                                            childPath,
                                             childPath,
                                             name,
                                             false,

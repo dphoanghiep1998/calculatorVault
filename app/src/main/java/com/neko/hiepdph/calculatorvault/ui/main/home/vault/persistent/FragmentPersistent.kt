@@ -233,7 +233,9 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun slideShow() {
-
+        ShareData.getInstance().setListItemImage(listItemSelected)
+        val intent = Intent(requireContext(),ActivityImageDetail::class.java)
+        startActivity(intent)
     }
 
     private fun showDialogUnlock() {
@@ -306,7 +308,7 @@ class FragmentPersistent : Fragment() {
     private fun handleClickItem(item: ListItem) {
         when(args.type){
             Constant.TYPE_PICTURE -> {
-                var list = mutableListOf<ListItem>()
+                val list = mutableListOf<ListItem>()
                 list.add(item)
                 ShareData.getInstance().setListItemImage(list)
                 val intent = Intent(requireContext(),ActivityImageDetail::class.java)

@@ -217,4 +217,11 @@
     <string name="hidden">Hidden</string>
     <string name="encryption">Encryption</string>
     <string name="always_ask">Always ask</string>
+    <string name="detail">Detail</string>
+    <string name="name_detail">Name:</string>
+    <string name="size_detail">Size:</string>
+    <string name="resolution_detail">Resolution:</string>
+    <string name="time_detail">Time:</string>
+    <string name="time_lock_detail">Time lock</string>
+    <string name="path_detail">Path:</string>
 </resources>

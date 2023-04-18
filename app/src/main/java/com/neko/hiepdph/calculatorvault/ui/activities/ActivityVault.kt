@@ -26,11 +26,13 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.biometric.BiometricConfig
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import com.neko.hiepdph.calculatorvault.common.utils.ICreateFile
 import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionS
+import com.neko.hiepdph.calculatorvault.config.FingerPrintUnlock
 import com.neko.hiepdph.calculatorvault.config.LockType
 import com.neko.hiepdph.calculatorvault.config.LockWhenLeavingApp
 import com.neko.hiepdph.calculatorvault.config.ScreenOffAction
@@ -62,7 +64,10 @@ class ActivityVault : AppCompatActivity() {
             }
         }
 
+
     }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
