@@ -1,22 +1,28 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.CheckBox
+import androidx.core.view.MenuProvider
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
+import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.navigateToPage
+import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.extensions.toastLocation
 import com.neko.hiepdph.calculatorvault.databinding.FragmentAddFileBinding
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.adapter.AdapterGroupItem
+import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterOtherFolder
+import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterPersistent
 import com.neko.hiepdph.calculatorvault.viewmodel.AddFileViewModel
 import com.neko.hiepdph.calculatorvault.viewmodel.HomeViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,6 +49,7 @@ class FragmentAddFile : Fragment() {
         initView()
         getDataFromArgs()
         observeListGroupData()
+        initToolBar()
     }
 
     override fun onResume() {
@@ -54,6 +61,20 @@ class FragmentAddFile : Fragment() {
         (requireActivity() as ActivityVault).getToolbar().title = args.title
         getDataGroupFile(args.type)
     }
+
+    private fun initToolBar() {
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return false
+            }
+
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
+
 
 
     private fun initView() {
@@ -84,6 +105,12 @@ class FragmentAddFile : Fragment() {
             viewModel.listItemListGroupFile.observe(viewLifecycleOwner) {
                 it?.let {
                     adapter.setData(it, args.type)
+                    binding.loading.hide()
+                    if (it.isNotEmpty()) {
+                        binding.tvEmpty.hide()
+                    } else {
+                        binding.tvEmpty.show()
+                    }
                 }
             }
 

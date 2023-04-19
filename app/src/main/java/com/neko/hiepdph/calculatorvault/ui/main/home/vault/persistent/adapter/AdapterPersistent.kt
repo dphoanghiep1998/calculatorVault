@@ -143,7 +143,7 @@ class AdapterPersistent(
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
-                        .error(R.drawable.ic_delete).into(binding.imvThumb)
+                        .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
 
                     if (editMode) {
                         binding.checkBox.show()
@@ -193,7 +193,7 @@ class AdapterPersistent(
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
-                        .error(R.drawable.ic_delete).into(binding.imvThumb)
+                        .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
 
                     binding.checkBox.isChecked = item in listOfItemSelected
 
@@ -205,6 +205,9 @@ class AdapterPersistent(
                     binding.tvDuration.text = item.getDuration(itemView.context).toString()
 
                     binding.root.setOnLongClickListener {
+                        if(editMode){
+                            return@setOnLongClickListener false
+                        }
                         editMode = true
                         listOfItemSelected.add(item)
                         onLongClickItem(listItem)
@@ -242,7 +245,7 @@ class AdapterPersistent(
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).asBitmap().load(getThumbnail(item.mPath))
-                        .apply(requestOptions).error(R.drawable.ic_delete).into(binding.imvThumb)
+                        .apply(requestOptions).error(R.drawable.ic_file_unknow).into(binding.imvThumb)
                     binding.checkBox.isChecked = item in listOfItemSelected
 
                     if (editMode) {
@@ -260,6 +263,9 @@ class AdapterPersistent(
                     }
 
                     binding.root.setOnLongClickListener {
+                        if(editMode){
+                            return@setOnLongClickListener false
+                        }
                         editMode = true
                         listOfItemSelected.add(item)
                         onLongClickItem(listItem)
@@ -296,13 +302,16 @@ class AdapterPersistent(
                 with(holder as ItemFileViewHolder) {
                     val item = listItem[adapterPosition]
                     Glide.with(itemView.context).load(getImageForItemFile(item))
-                        .error(R.drawable.ic_delete).into(binding.imvThumb)
+                        .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
                     binding.checkBox.isChecked = item in listOfItemSelected
+                    binding.tvNameDocument.isSelected = true
 
                     if (editMode) {
                         binding.checkBox.show()
+                        binding.option.hide()
                     } else {
                         binding.checkBox.hide()
+                        binding.option.show()
                     }
                     binding.tvNameDocument.text = item.mName
                     binding.tvSize.text = item.mSize.formatSize()
@@ -311,6 +320,9 @@ class AdapterPersistent(
                     }
 
                     binding.root.setOnLongClickListener {
+                        if(editMode){
+                            return@setOnLongClickListener false
+                        }
                         editMode = true
                         listOfItemSelected.add(item)
                         onLongClickItem(listItem)
@@ -346,7 +358,7 @@ class AdapterPersistent(
                 with(holder as ItemOtherFileViewHolder) {
                     val item = listItem[adapterPosition]
                     Glide.with(itemView.context).load(getImageForItemFile(item))
-                        .error(R.drawable.ic_delete).into(binding.imvThumb)
+                        .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
                     binding.checkBox.isChecked = item in listOfItemSelected
 
                     if (editMode) {
@@ -355,6 +367,9 @@ class AdapterPersistent(
                         binding.checkBox.hide()
                     }
                     binding.root.setOnLongClickListener {
+                        if(editMode){
+                            return@setOnLongClickListener false
+                        }
                         editMode = true
                         listOfItemSelected.add(item)
                         onLongClickItem(listItem)

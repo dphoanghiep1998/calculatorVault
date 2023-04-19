@@ -14,6 +14,31 @@
         android:layout_marginHorizontal="@dimen/_2sdp"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:visibility="gone"
+        android:drawablePadding="@dimen/_12sdp"
+        android:gravity="center"
+        android:id="@+id/tv_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:drawableTopCompat="@drawable/ic_empty_picture" />
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/loading"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:indeterminate="true"
+        android:indeterminateBehavior="repeat"
+        app:indicatorColor="@color/gradient_01"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -59,13 +84,14 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:visibility="gone"
-        android:background="@drawable/bg_border_top_only_neu03"
         android:id="@+id/container_controller"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_border_top_only_neu03"
         android:paddingVertical="@dimen/_6sdp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent">
+
         <TextView
             android:id="@+id/tv_unlock"
             android:layout_width="wrap_content"

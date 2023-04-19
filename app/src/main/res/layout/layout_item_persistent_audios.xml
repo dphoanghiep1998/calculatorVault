@@ -8,8 +8,8 @@
     <com.neko.hiepdph.calculatorvault.common.customview.RoundedImageView
         android:id="@+id/imv_thumb"
         android:layout_width="@dimen/_30sdp"
-        android:layout_marginVertical="@dimen/_12sdp"
         android:layout_height="@dimen/_30sdp"
+        android:layout_marginVertical="@dimen/_12sdp"
         app:cornerRadiusBotLeft="@dimen/_15sdp"
         app:cornerRadiusBotRight="@dimen/_15sdp"
         app:cornerRadiusTopLeft="@dimen/_15sdp"
@@ -23,15 +23,15 @@
         android:id="@+id/tv_name_audio"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textColor="@color/neutral_06"
-        android:textSize="@dimen/_14sdp"
-       android:singleLine="true"
         android:ellipsize="marquee"
-        android:scrollHorizontally="true"
         android:marqueeRepeatLimit="marquee_forever"
         android:paddingHorizontal="@dimen/_6sdp"
-        app:layout_constraintEnd_toStartOf="@id/option"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:textColor="@color/neutral_06"
+        android:textSize="@dimen/_14sdp"
         app:layout_constraintBottom_toTopOf="@id/tv_duration_author"
+        app:layout_constraintEnd_toStartOf="@id/option"
         app:layout_constraintStart_toEndOf="@id/imv_thumb"
         app:layout_constraintTop_toTopOf="@id/imv_thumb"
         app:layout_constraintVertical_chainStyle="spread_inside" />
@@ -39,43 +39,47 @@
     <TextView
         android:id="@+id/tv_duration_author"
         android:layout_width="0dp"
-        app:layout_constraintEnd_toStartOf="@id/option"
         android:layout_height="wrap_content"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:paddingHorizontal="@dimen/_6sdp"
         android:textColor="@color/neutral_05"
         android:textSize="@dimen/_10sdp"
-        android:maxLines="1"
-        android:ellipsize="marquee"
-        android:paddingHorizontal="@dimen/_6sdp"
         app:layout_constraintBottom_toBottomOf="@id/imv_thumb"
+        app:layout_constraintEnd_toStartOf="@id/option"
         app:layout_constraintStart_toStartOf="@id/tv_name_audio"
         app:layout_constraintTop_toBottomOf="@id/tv_name_audio" />
+
     <CheckBox
-        android:visibility="gone"
         android:id="@+id/check_box"
         android:layout_width="@dimen/_20sdp"
         android:layout_height="@dimen/_20sdp"
+        android:layout_margin="@dimen/_2sdp"
+        android:background="@drawable/bg_checkbox_pick_selector"
         android:button="@null"
         android:minWidth="0dp"
         android:minHeight="0dp"
-        android:layout_margin="@dimen/_2sdp"
-        android:background="@drawable/bg_checkbox_pick_selector"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:foreground="@drawable/fg_ripple_effect"
         android:id="@+id/option"
         android:layout_width="@dimen/_26sdp"
         android:layout_height="@dimen/_26sdp"
+        android:foreground="@drawable/fg_ripple_effect"
         android:padding="@dimen/_6sdp"
         android:src="@drawable/ic_option"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     <View
-        app:layout_constraintBottom_toBottomOf="parent"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/neutral_03"/>
+        android:background="@color/neutral_03"
+        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

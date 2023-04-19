@@ -1,10 +1,13 @@
 package com.neko.hiepdph.calculatorvault.ui.activities
 
 import android.os.Bundle
+import android.os.Handler
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.viewpager.widget.ViewPager.OnPageChangeListener
+import androidx.core.view.size
+import androidx.viewpager.widget.ViewPager
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.adapter.ImagePagerAdapter
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
@@ -21,6 +24,7 @@ class ActivityImageDetail : AppCompatActivity() {
     private lateinit var binding: ActivityImageDetailBinding
     private var viewPagerAdapter: ImagePagerAdapter? = null
     private var currentItem: ListItem? = null
+    private var currentPage = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityImageDetailBinding.inflate(layoutInflater)
@@ -62,7 +66,7 @@ class ActivityImageDetail : AppCompatActivity() {
 
     private fun getData() {
         ShareData.getInstance().listItemImage.observe(this) {
-            viewPagerAdapter?.setData(it)
+            viewPagerAdapter?.setData(it, binding.imageViewPager)
             if (it.isNotEmpty()) {
                 currentItem = it[0]
             }
@@ -71,19 +75,29 @@ class ActivityImageDetail : AppCompatActivity() {
             } else {
                 supportActionBar?.title = String.EMPTY
             }
-            binding.imageViewPager.addOnPageChangeListener(object : OnPageChangeListener {
+
+            binding.imageViewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
                 override fun onPageScrolled(
                     position: Int, positionOffset: Float, positionOffsetPixels: Int
                 ) {
+
                 }
 
                 override fun onPageSelected(position: Int) {
                     currentItem = it[position]
                     supportActionBar?.title = "${position + 1}/${it.size}"
+                    Log.d("TAG", "onPageSelected: " + binding.imageViewPager.getChildAt(position))
+                    Log.d("TAG", "onPageSelected: " + binding.imageViewPager.size)
+                    if (binding.imageViewPager.currentItem == position) {
+                        binding.imageViewPager.getChildAt(position)?.animate()?.alpha(1f)
+                            ?.setDuration(500)?.start()
+                    } else {
+                        binding.imageViewPager.getChildAt(position)?.animate()?.alpha(0f)
+                            ?.setDuration(500)?.start()
+                    }
                 }
 
                 override fun onPageScrollStateChanged(state: Int) {
-
                 }
             })
         }
@@ -118,7 +132,7 @@ class ActivityImageDetail : AppCompatActivity() {
         }
 
         binding.tvSlideshow.clickWithDebounce {
-
+            autoScroll()
         }
 
         binding.tvRotate.clickWithDebounce {
@@ -126,6 +140,18 @@ class ActivityImageDetail : AppCompatActivity() {
         }
 
 
+    }
+
+    private fun autoScroll() {
+        Log.d("TAG", "autoScroll: " + viewPagerAdapter?.count)
+        Handler().postDelayed({
+            currentPage++
+            if (currentPage == viewPagerAdapter?.count - 1) {
+                currentPage = 0
+            }
+            binding.imageViewPager.setCurrentItem(currentPage, true)
+            autoScroll()
+        }, 1000)
     }
 
     private fun showController() {

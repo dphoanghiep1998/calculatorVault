@@ -2,6 +2,7 @@ package com.neko.hiepdph.calculatorvault.common
 
 
 object Constant {
+    const val INTERNAL_STORAGE_PATH ="internal_storage_path"
     const val KEY_IMAGE_INTENT = "KEY_IMAGE_INTENT"
     const val KEY_ENCRYPTION_MODE ="KEY_ENCRYPTION_MODE"
     const val KEY_PLAY_VIDEO_MODE ="KEY_PLAY_VIDEO_MODE"

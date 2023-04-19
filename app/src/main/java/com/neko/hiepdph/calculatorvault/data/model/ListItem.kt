@@ -15,6 +15,6 @@ class ListItem(
     var mSize: Long = 0L,
     var mModified: Long = 0L,
     var type: String? = "",
+    var realType: String? = ""
 
-    ) : FileDirItem(mPath,mOwnerPath, mName, mIsDirectory, mChildren , mSize, mModified),
-    Parcelable {}
+) : FileDirItem(mPath, mOwnerPath, mName, mIsDirectory, mChildren, mSize, mModified), Parcelable {}

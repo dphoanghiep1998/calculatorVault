@@ -96,6 +96,9 @@ dependencies {
     implementation 'androidx.biometric:biometric:1.1.0'
     //photoview
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+    implementation("com.google.guava:guava:31.1-android")
+
+
 }
 
 

@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.hide
+import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.extensions.toastLocation
 import com.neko.hiepdph.calculatorvault.common.utils.IMoveFile
 import com.neko.hiepdph.calculatorvault.databinding.FragmentListItemBinding
@@ -52,8 +54,26 @@ class FragmentListItem : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initView()
         observeData()
-        (requireActivity() as ActivityVault).getToolbar().title = args.groupItem.name
+        setupTitle()
 
+    }
+
+    private fun setupTitle(){
+        if(args.groupItem.type != Constant.TYPE_FILE ){
+            (requireActivity() as ActivityVault).getToolbar().title = args.groupItem.name
+        }
+        else{
+            when(args.fileType){
+                Constant.TYPE_EXCEL -> (requireActivity() as ActivityVault).getToolbar().title = getString(R.string.excel)
+                Constant.TYPE_ZIP -> (requireActivity() as ActivityVault).getToolbar().title = getString(R.string.zip)
+                Constant.TYPE_TEXT -> (requireActivity() as ActivityVault).getToolbar().title = getString(R.string.text)
+                Constant.TYPE_PPT -> (requireActivity() as ActivityVault).getToolbar().title = getString(R.string.ppt)
+                Constant.TYPE_WORD -> (requireActivity() as ActivityVault).getToolbar().title = getString(R.string.word)
+                Constant.TYPE_CSV -> (requireActivity() as ActivityVault).getToolbar().title = getString(R.string.csv)
+                Constant.TYPE_PDF -> (requireActivity() as ActivityVault).getToolbar().title = getString(R.string.pdf)
+                else -> (requireActivity() as ActivityVault).getToolbar().title = getString(R.string.other_file)
+            }
+        }
     }
 
     private fun initView() {
@@ -138,6 +158,12 @@ class FragmentListItem : Fragment() {
             it?.let {
                 adapterListItem?.setData(it, args.groupItem.type)
                 sizeList = it.size
+                binding.loading.hide()
+                if (it.isNotEmpty()) {
+                    binding.tvEmpty.hide()
+                } else {
+                    binding.tvEmpty.show()
+                }
 
             }
         }

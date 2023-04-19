@@ -52,6 +52,8 @@
     <string name="back">Back</string>
     <string name="vault">Vault</string>
     <string name="pictures">Pictures</string>
+    <string name="picture_lower">picture</string>
+    <string name="picture">Picture</string>
     <string name="videos">Videos</string>
     <string name="audios">Audios</string>
     <string name="documents">Documents</string>
@@ -75,6 +77,7 @@
     <string name="invalid_expression">Invalid expression</string>
     <string name="browser">Browser</string>
     <string name="note">Note</string>
+    <string name="note_lower">Note</string>
     <string name="recycle_bin">Recycle Bin</string>
     <string name="setting">Setting</string>
     <string name="language">Language</string>
@@ -224,4 +227,14 @@
     <string name="time_detail">Time:</string>
     <string name="time_lock_detail">Time lock</string>
     <string name="path_detail">Path:</string>
+    <string name="empty_text">No %s!\nPress + to add %s.</string>
+    <string name="audio">Audio</string>
+    <string name="audio_lower">audio</string>
+    <string name="video">Video</string>
+    <string name="video_lower">video</string>
+    <string name="file">File</string>
+    <string name="file_lower">file</string>
+    <string name="other_file">Other File</string>
+    <string name="rename_folder">Rename folder</string>
+    <string name="enter_new_name">Enter new name</string>
 </resources>

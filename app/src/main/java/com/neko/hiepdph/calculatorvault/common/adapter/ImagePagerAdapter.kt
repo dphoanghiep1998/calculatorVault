@@ -5,19 +5,25 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.viewpager.widget.PagerAdapter
+import androidx.viewpager.widget.ViewPager
 import com.bumptech.glide.Glide
-import com.github.chrisbanes.photoview.PhotoView
 import com.neko.hiepdph.calculatorvault.common.customview.CustomPhotoView
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 
+
+
 class ImagePagerAdapter(val context: Context) : PagerAdapter() {
     private var listImage: List<ListItem> = mutableListOf()
-    private var listPhotoView :MutableList<CustomPhotoView> = mutableListOf()
+    private var listPhotoView: MutableList<CustomPhotoView> = mutableListOf()
+    private var mViewPager :ViewPager?=null
 
-    fun setData(mListImage: List<ListItem>) {
+
+    fun setData(mListImage: List<ListItem>,viewPager: ViewPager) {
         listImage = mListImage
+        mViewPager = viewPager
         notifyDataSetChanged()
     }
+
 
 
     override fun getCount(): Int {
@@ -42,9 +48,12 @@ class ImagePagerAdapter(val context: Context) : PagerAdapter() {
         container.removeView(`object` as View)
     }
 
+
     fun rotate(position: Int) {
-        Log.d("TAG", "rotate: "+position)
+        Log.d("TAG", "rotate: " + position)
         listPhotoView[position].toggleRotate()
         notifyDataSetChanged()
     }
+
+
 }

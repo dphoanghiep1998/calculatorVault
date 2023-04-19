@@ -58,6 +58,14 @@ class PersistentViewModel @Inject constructor() : ViewModel() {
         }
     }
 
+    fun getAllFileChildFromFolder(path: String){
+        viewModelScope.launch(Dispatchers.IO) {
+            val listFileChild =
+                FileUtils.getFileInDirectory(path).toMutableList()
+            setListItemPersistentData(listFileChild)
+        }
+    }
+
 
 
 }

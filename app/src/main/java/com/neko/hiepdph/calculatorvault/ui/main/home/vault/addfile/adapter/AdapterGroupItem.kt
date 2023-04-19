@@ -115,7 +115,7 @@ class AdapterGroupItem(
                 with(holder as GroupItemPictureViewHolder) {
                     val model = listGroupItem[adapterPosition]
                     Glide.with(itemView.context).load(model.dataList[0]).centerCrop()
-                        .error(ContextCompat.getDrawable(itemView.context, R.drawable.ic_delete))
+                        .error(ContextCompat.getDrawable(itemView.context, R.drawable.ic_file_unknow))
                         .into(binding.imvThumb)
                     binding.tvNameQuantity.text = "${model.name} (${model.itemCount})"
 
@@ -128,7 +128,7 @@ class AdapterGroupItem(
                 with(holder as GroupItemVideoViewHolder) {
                     val model = listGroupItem[adapterPosition]
                     Glide.with(itemView.context).load(model.dataList[0]).centerCrop()
-                        .error(ContextCompat.getDrawable(itemView.context, R.drawable.ic_delete))
+                        .error(ContextCompat.getDrawable(itemView.context, R.drawable.ic_file_unknow))
                         .into(binding.imvThumb)
                     binding.tvNameQuantity.text = "${model.name} (${model.itemCount})"
                     binding.root.clickWithDebounce {
@@ -140,7 +140,7 @@ class AdapterGroupItem(
                 with(holder as GroupItemAudioViewHolder) {
                     val model = listGroupItem[adapterPosition]
                     Glide.with(itemView.context).asBitmap().load(model.dataThumb[0]).centerCrop()
-                        .error(ContextCompat.getDrawable(itemView.context, R.drawable.ic_delete))
+                        .error(ContextCompat.getDrawable(itemView.context, R.drawable.ic_file_unknow))
                         .into(binding.imvThumb)
                     binding.tvNameQuantity.text = "${model.name} (${model.itemCount})"
                     binding.root.clickWithDebounce {
@@ -150,7 +150,7 @@ class AdapterGroupItem(
             }
             3 -> {
                 with(holder as GroupItemFileViewHolder) {
-
+                    Log.d("TAG", "lmao: "+fileDataFolder[adapterPosition])
                     when (fileDataFolder[adapterPosition]) {
                         Constant.TYPE_PDF -> {
                             binding.imvThumb.setImageResource(R.drawable.ic_pdf_album)

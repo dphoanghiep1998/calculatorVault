@@ -237,10 +237,10 @@ class AppSharePreference(private val context: Context?) {
         }
     }
 
-    private fun saveString(key: String, values: String): Unit =
+     fun saveString(key: String, values: String): Unit =
         sharedPreferences().edit { putString(key, values) }
 
-    private fun getString(key: String, defaultValues: String): String {
+     fun getString(key: String, defaultValues: String): String {
         return try {
             sharedPreferences().getString(key, defaultValues)!!
         } catch (e: Exception) {

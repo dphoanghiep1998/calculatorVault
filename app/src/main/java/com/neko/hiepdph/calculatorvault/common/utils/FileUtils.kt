@@ -91,28 +91,50 @@ object FileUtils {
             val files = directory.listFiles()
             for (file in files) {
                 var type = ""
-                if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF)) {
-                    type = Constant.TYPE_PDF
-                } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_CSV)) {
-                    type = Constant.TYPE_CSV
-                } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPT)) {
-                    type = Constant.TYPE_PPT
-                } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPT)) {
-                    type = Constant.TYPE_PPTX
-                } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_TEXT)) {
-                    type = Constant.TYPE_TEXT
-                } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORD)) {
-                    type = Constant.TYPE_WORD
-                } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_EXCEL)) {
-                    type = Constant.TYPE_EXCEL
-                } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORDX)) {
-                    type = Constant.TYPE_WORD
-                } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_ZIP)) {
-                    type = Constant.TYPE_ZIP
+                var realType: String? = null
+                when {
+                    getMimeType(file.path).contains("image") -> type = Constant.TYPE_PICTURE
+                    getMimeType(file.path).contains("video") -> type = Constant.TYPE_VIDEOS
+                    getMimeType(file.path).contains("audio") || Constant.extraAudioMimeTypes.contains(
+                        getMimeType(file.path)
+                    ) -> type = Constant.TYPE_AUDIOS
+                    else -> {
+                        type = Constant.TYPE_FILE
+
+                        if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF)) {
+                            realType = Constant.TYPE_PDF
+                        } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_CSV)) {
+                            realType = Constant.TYPE_CSV
+                        } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPT)) {
+                            realType = Constant.TYPE_PPT
+                        } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPT)) {
+                            realType = Constant.TYPE_PPTX
+                        } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_TEXT)) {
+                            realType = Constant.TYPE_TEXT
+                        } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORD)) {
+                            realType = Constant.TYPE_WORD
+                        } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_EXCEL)) {
+                            realType = Constant.TYPE_EXCEL
+                        } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORDX)) {
+                            realType = Constant.TYPE_WORD
+                        } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_ZIP)) {
+                            realType = Constant.TYPE_ZIP
+                        }
+                    }
                 }
+
                 listOfFolder.add(
                     ListItem(
-                        0, file.path,file.path, file.name, false, 0, file.length(), file.lastModified(), type
+                        0,
+                        file.path,
+                        file.path,
+                        file.name,
+                        false,
+                        0,
+                        file.length(),
+                        file.lastModified(),
+                        type,
+                        realType
                     )
                 )
             }
@@ -143,6 +165,8 @@ object FileUtils {
         filePath: List<String>, destinationPath: String, isCopy: Boolean, callback: IMoveFile
     ) {
         try {
+
+
             val directory = File(destinationPath)
             if (!directory.exists()) {
                 directory.mkdirs()
@@ -182,4 +206,6 @@ object FileUtils {
         }
         return type
     }
+
+
 }

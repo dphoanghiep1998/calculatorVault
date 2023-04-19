@@ -1,17 +1,16 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
-import com.neko.hiepdph.calculatorvault.data.model.*
+import com.neko.hiepdph.calculatorvault.common.utils.formatSize
+import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.LayoutItemAudiosBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutItemFileBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutItemPictureBinding
@@ -30,16 +29,16 @@ class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
         notifyDataSetChanged()
     }
 
-    fun selectAll(){
+    fun selectAll() {
         listItem.forEach {
             listPath.add(it.mPath)
         }
-        notifyItemRangeChanged(0,listItem.size)
+        notifyItemRangeChanged(0, listItem.size)
     }
 
-    fun unSelectAll(){
+    fun unSelectAll() {
         listPath.clear()
-        notifyItemRangeChanged(0,listItem.size)
+        notifyItemRangeChanged(0, listItem.size)
     }
 
     inner class ItemPictureViewHolder(val binding: LayoutItemPictureBinding) :
@@ -110,7 +109,7 @@ class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
-                        .error(R.drawable.ic_delete).into(binding.imvThumb)
+                        .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
                     binding.checkBox.isChecked = item.mPath in listPath
                     binding.root.setOnClickListener {
                         binding.checkBox.isChecked = !binding.checkBox.isChecked
@@ -138,7 +137,7 @@ class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).load(item.path).apply(requestOptions)
-                        .error(R.drawable.ic_delete).into(binding.imvThumb)
+                        .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
                     binding.tvDuration.text = item.getDuration(itemView.context).toString()
                     binding.checkBox.isChecked = item.mPath in listPath
 
@@ -168,7 +167,9 @@ class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).asBitmap().load(item.getThumb())
-                        .apply(requestOptions).error(R.drawable.ic_delete).into(binding.imvThumb)
+                        .apply(requestOptions).error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+
+                    binding.tvNameAudio.isSelected = true
 
                     binding.tvNameAudio.text = item.name
                     binding.checkbox.isChecked = item.mPath in listPath
@@ -197,14 +198,14 @@ class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
             3 -> {
                 with(holder as ItemFileViewHolder) {
                     val item = listItem[adapterPosition]
-                    Log.d("TAG", "onBindViewHolder: "+ item )
 
+                    binding.tvNameDocument.isSelected = true
                     Glide.with(itemView.context).load(getImageForItemFile(item))
-                        .error(R.drawable.ic_delete).into(binding.imvThumb)
+                        .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
                     binding.checkbox.isChecked = item.mPath in listPath
 
                     binding.tvNameDocument.text = item.name
-                    binding.tvSize.text = item.mSize.toString()
+                    binding.tvSize.text = item.mSize.formatSize()
                     binding.root.setOnClickListener {
                         binding.checkbox.isChecked = !binding.checkbox.isChecked
                         if (binding.checkbox.isChecked) {
@@ -229,7 +230,7 @@ class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
     }
 
     private fun getImageForItemFile(item: ListItem): Int {
-        return when (item.type) {
+        return when (item.realType) {
             Constant.TYPE_WORDX -> R.drawable.ic_docx
             Constant.TYPE_WORD -> R.drawable.ic_doc
             Constant.TYPE_CSV -> R.drawable.ic_csv

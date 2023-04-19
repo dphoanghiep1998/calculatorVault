@@ -8,6 +8,7 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.provider.MediaStore
 import com.neko.hiepdph.calculatorvault.common.Constant
+import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_AUDIOS
 import com.neko.hiepdph.calculatorvault.common.Constant.archiveMimeTypes
 import com.neko.hiepdph.calculatorvault.common.Constant.extraAudioMimeTypes
 import com.neko.hiepdph.calculatorvault.common.Constant.extraDocumentMimeTypes
@@ -237,7 +238,15 @@ object MediaStoreUtils {
                 if (childPath.isNotBlank() && childPath != path) {
                     listImageChild.add(
                         ListItem(
-                            id, childPath, childPath, name, false, 0, size, modified
+                            id,
+                            childPath,
+                            childPath,
+                            name,
+                            false,
+                            0,
+                            size,
+                            modified,
+                            Constant.TYPE_PICTURE
                         )
                     )
                 }
@@ -275,7 +284,15 @@ object MediaStoreUtils {
                     val duration = getDuration(context, childPath)
                     listVideoChild.add(
                         ListItem(
-                            id, childPath, childPath, name, false, 0, size, modified
+                            id,
+                            childPath,
+                            childPath,
+                            name,
+                            false,
+                            0,
+                            size,
+                            modified,
+                            Constant.TYPE_VIDEOS
                         )
                     )
                 }
@@ -316,7 +333,7 @@ object MediaStoreUtils {
                     val thumb = getThumbnail(childPath)
                     listAudioChild.add(
                         ListItem(
-                            id, childPath, childPath, name, false, 0, size, modified
+                            id, childPath, childPath, name, false, 0, size, modified, TYPE_AUDIOS
                         )
                     )
                 }
@@ -368,6 +385,7 @@ object MediaStoreUtils {
                                             0,
                                             size,
                                             modified,
+                                            Constant.TYPE_FILE,
                                             Constant.TYPE_PDF
                                         )
                                     )
@@ -389,6 +407,7 @@ object MediaStoreUtils {
                                             0,
                                             size,
                                             modified,
+                                            Constant.TYPE_FILE,
                                             Constant.TYPE_PPT
                                         )
                                     )
@@ -409,6 +428,7 @@ object MediaStoreUtils {
                                             0,
                                             size,
                                             modified,
+                                            Constant.TYPE_FILE,
                                             Constant.TYPE_WORD
                                         )
                                     )
@@ -426,6 +446,7 @@ object MediaStoreUtils {
                                             0,
                                             size,
                                             modified,
+                                            Constant.TYPE_FILE,
                                             Constant.TYPE_EXCEL
                                         )
                                     )
@@ -443,6 +464,7 @@ object MediaStoreUtils {
                                             0,
                                             size,
                                             modified,
+                                            Constant.TYPE_FILE,
                                             Constant.TYPE_CSV
                                         )
                                     )
@@ -460,6 +482,7 @@ object MediaStoreUtils {
                                             0,
                                             size,
                                             modified,
+                                            Constant.TYPE_FILE,
                                             Constant.TYPE_TEXT
                                         )
                                     )
@@ -477,20 +500,31 @@ object MediaStoreUtils {
                                             0,
                                             size,
                                             modified,
+                                            Constant.TYPE_FILE,
                                             Constant.TYPE_ZIP
                                         )
                                     )
                                 }
                             }
-//                        Constant.TYPE_OTHER -> {
-//                            if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF)) {
-//                                listFileChild.add(
-//                                    FileItem(
-//                                        path, name, size, modified, id, Constant.TYPE_PDF
-//                                    )
-//                                )
-//                            }
-//                        }
+                            else -> {
+                                if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF)) {
+                                    listFileChild.add(
+                                        ListItem(
+                                            id,
+                                            childPath,
+                                            childPath,
+                                            name,
+                                            false,
+                                            0,
+                                            size,
+                                            modified,
+                                            Constant.TYPE_FILE,
+                                            Constant.TYPE_OTHER
+                                        )
+                                    )
+
+                                }
+                            }
                         }
 
                     }

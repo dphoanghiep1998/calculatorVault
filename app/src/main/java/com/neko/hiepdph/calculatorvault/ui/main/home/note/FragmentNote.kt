@@ -21,10 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.neko.hiepdph.calculatorvault.R
-import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
-import com.neko.hiepdph.calculatorvault.common.extensions.changeBackPressCallBack
-import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
-import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
+import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.databinding.FragmentNoteBinding
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.main.home.note.adapter.AdapterNote
@@ -76,10 +73,17 @@ class FragmentNote : Fragment() {
         viewModel.getAllNote().observe(viewLifecycleOwner) {
             adapterNote?.setData(it)
             sizeNote = it.size
+            binding.loading.hide()
+            if (it.isNotEmpty()) {
+                binding.tvEmpty.hide()
+            } else {
+                binding.tvEmpty.show()
+            }
         }
     }
 
     private fun initView() {
+        binding.tvEmpty.text = String.format(getString(R.string.empty_text),getString(R.string.note),getString(R.string.note_lower))
         initRecyclerView()
         initButton()
     }

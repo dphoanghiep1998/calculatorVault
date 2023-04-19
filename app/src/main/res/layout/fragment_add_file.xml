@@ -10,14 +10,37 @@
         android:id="@+id/rcv_group_item"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:paddingTop="@dimen/_6sdp"
         android:layout_marginHorizontal="@dimen/_6sdp"
         android:clipToPadding="false"
+        android:paddingTop="@dimen/_6sdp"
         android:paddingBottom="@dimen/_12sdp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0"
         tools:layout_editor_absoluteX="16dp" />
 
+    <TextView
+        android:id="@+id/tv_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawablePadding="@dimen/_12sdp"
+        android:gravity="center"
+        android:visibility="gone"
+        app:drawableTopCompat="@drawable/ic_empty_picture"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:indeterminateBehavior="repeat"
+        app:indicatorColor="@color/gradient_01"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

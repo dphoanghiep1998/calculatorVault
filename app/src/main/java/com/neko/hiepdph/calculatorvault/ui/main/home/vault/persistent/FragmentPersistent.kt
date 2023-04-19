@@ -2,7 +2,6 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.CheckBox
 import android.widget.Toast
@@ -28,6 +27,7 @@ import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityImageDetail
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
+import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterOtherFolder
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterPersistent
 import com.neko.hiepdph.calculatorvault.viewmodel.PersistentViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -38,6 +38,7 @@ class FragmentPersistent : Fragment() {
     private val args: FragmentPersistentArgs by navArgs()
     private val viewModel by viewModels<PersistentViewModel>()
     private var adapterPersistent: AdapterPersistent? = null
+    private var adapterOtherFolder: AdapterOtherFolder? = null
     private var listItemSelected = mutableListOf<ListItem>()
     private var sizeList = 0
 
@@ -68,15 +69,17 @@ class FragmentPersistent : Fragment() {
     private fun checkAllItem(status: Boolean) {
         if (status) {
             adapterPersistent?.selectAll()
+            adapterOtherFolder?.selectAll()
         } else {
             adapterPersistent?.unSelectAll()
+            adapterOtherFolder?.unSelectAll()
         }
     }
 
     private fun initToolBar() {
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                if (AdapterPersistent.editMode) {
+                if (AdapterPersistent.editMode || AdapterOtherFolder.editMode) {
                     menu.clear()
                     menuInflater.inflate(R.menu.toolbar_menu_persistent, menu)
                     menu[0].actionView?.findViewById<View>(R.id.checkbox)?.setOnClickListener {
@@ -90,10 +93,11 @@ class FragmentPersistent : Fragment() {
 
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return if (AdapterPersistent.editMode) {
+                return if (AdapterPersistent.editMode || AdapterOtherFolder.editMode) {
                     when (menuItem.itemId) {
                         android.R.id.home -> {
                             adapterPersistent?.changeToNormalView()
+                            adapterOtherFolder?.changeToNormalView()
                             binding.containerController.hide()
                             (requireActivity() as ActivityVault).setupActionBar()
                             initToolBar()
@@ -121,27 +125,79 @@ class FragmentPersistent : Fragment() {
 
     private fun getDataFile() {
         when (args.type) {
-            Constant.TYPE_PICTURE -> viewModel.getImageChildFromFolder(
-                args.vaultPath
-            )
-            Constant.TYPE_AUDIOS -> viewModel.getAudioChildFromFolder(
-                args.vaultPath
-            )
-            Constant.TYPE_VIDEOS -> viewModel.getVideoChildFromFolder(
-                args.vaultPath
-            )
-            Constant.TYPE_FILE -> viewModel.getFileChildFromFolder(args.vaultPath)
-            else -> viewModel.getFileChildFromFolder(args.vaultPath)
+            Constant.TYPE_PICTURE -> {
+                viewModel.getImageChildFromFolder(
+                    args.vaultPath
+                )
+                binding.tvEmpty.text = String.format(
+                    getString(R.string.empty_text),
+                    getString(R.string.picture),
+                    getString(R.string.picture_lower)
+                )
+                binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_empty_picture,0,0)
+            }
+            Constant.TYPE_AUDIOS -> {
+                viewModel.getAudioChildFromFolder(
+                    args.vaultPath
+                )
+                binding.tvEmpty.text = String.format(
+                    getString(R.string.empty_text),
+                    getString(R.string.audio),
+                    getString(R.string.audio_lower)
+                )
+                binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_empty_audio,0,0)
+
+            }
+            Constant.TYPE_VIDEOS -> {
+                viewModel.getVideoChildFromFolder(
+                    args.vaultPath
+                )
+                binding.tvEmpty.text = String.format(
+                    getString(R.string.empty_text),
+                    getString(R.string.video),
+                    getString(R.string.video_lower)
+                )
+                binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_empty_video,0,0)
+
+            }
+            Constant.TYPE_FILE -> {
+                viewModel.getFileChildFromFolder(args.vaultPath)
+                binding.tvEmpty.text = String.format(
+                    getString(R.string.empty_text),
+                    getString(R.string.file),
+                    getString(R.string.file_lower)
+                )
+                binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_empty_file,0,0)
+
+            }
+            else -> {
+                viewModel.getFileChildFromFolder(args.vaultPath)
+                binding.tvEmpty.text = String.format(
+                    getString(R.string.empty_text),
+                    getString(R.string.file),
+                    getString(R.string.file_lower)
+                )
+                binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_empty_file,0,0)
+            }
         }
     }
 
     private fun initData() {
         getDataFile()
-
         viewModel.listItemListPersistent.observe(viewLifecycleOwner) {
             it?.let {
-                adapterPersistent?.setData(it, args.type)
+                if (args.type != Constant.TYPE_ADD_MORE) {
+                    adapterPersistent?.setData(it, args.type)
+                } else {
+                    adapterOtherFolder?.setData(it)
+                }
                 sizeList = it.size
+                binding.loading.hide()
+                if (it.isNotEmpty()) {
+                    binding.tvEmpty.hide()
+                } else {
+                    binding.tvEmpty.show()
+                }
             }
         }
     }
@@ -207,8 +263,10 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun showDialogDelete() {
-        if(listItemSelected.isEmpty()){
-            Toast.makeText(requireContext(),getString(R.string.select_no_more_than_one),Toast.LENGTH_SHORT).show()
+        if (listItemSelected.isEmpty()) {
+            Toast.makeText(
+                requireContext(), getString(R.string.select_no_more_than_one), Toast.LENGTH_SHORT
+            ).show()
             return
         }
         val name = when (args.type) {
@@ -234,7 +292,7 @@ class FragmentPersistent : Fragment() {
 
     private fun slideShow() {
         ShareData.getInstance().setListItemImage(listItemSelected)
-        val intent = Intent(requireContext(),ActivityImageDetail::class.java)
+        val intent = Intent(requireContext(), ActivityImageDetail::class.java)
         startActivity(intent)
     }
 
@@ -268,55 +326,80 @@ class FragmentPersistent : Fragment() {
 
 
     private fun initRecyclerView() {
-        adapterPersistent = AdapterPersistent(onClickItem = {
-           handleClickItem(it)
-        }, onLongClickItem = {
-            listItemSelected.clear()
-            listItemSelected.addAll(it)
-            initToolBar()
-            editHome()
-            showController()
+        if (args.type != Constant.TYPE_ADD_MORE) {
 
-        }, onSelectAll = {
-            listItemSelected.clear()
-            listItemSelected.addAll(it)
-        }, onUnSelect = {
+            adapterPersistent = AdapterPersistent(onClickItem = {
+                handleClickItem(it)
+            }, onLongClickItem = {
+                listItemSelected.clear()
+                listItemSelected.addAll(it)
+                initToolBar()
+                editHome()
+                showController()
+
+            }, onSelectAll = {
+                listItemSelected.clear()
+                listItemSelected.addAll(it)
+            }, onUnSelect = {
 //            unCheckItem()
-        }, onEditItem = {
-            listItemSelected.clear()
-            listItemSelected.addAll(it)
-            checkItem()
-        })
-        binding.rcvItemGroup.adapter = adapterPersistent
-        val gridLayoutManager = when (args.type) {
-            Constant.TYPE_PICTURE, Constant.TYPE_VIDEOS -> GridLayoutManager(
-                requireContext(), 4, RecyclerView.VERTICAL, false
-            )
+            }, onEditItem = {
+                listItemSelected.clear()
+                listItemSelected.addAll(it)
+                checkItem()
+            })
+            binding.rcvItemGroup.adapter = adapterPersistent
+            val gridLayoutManager = when (args.type) {
+                Constant.TYPE_PICTURE, Constant.TYPE_VIDEOS -> GridLayoutManager(
+                    requireContext(), 4, RecyclerView.VERTICAL, false
+                )
 
-            Constant.TYPE_AUDIOS, Constant.TYPE_FILE -> LinearLayoutManager(
-                requireContext(), RecyclerView.VERTICAL, false
-            )
-            else -> LinearLayoutManager(
-                requireContext(), RecyclerView.VERTICAL, false
-            )
+                Constant.TYPE_AUDIOS, Constant.TYPE_FILE -> LinearLayoutManager(
+                    requireContext(), RecyclerView.VERTICAL, false
+                )
+                else -> LinearLayoutManager(
+                    requireContext(), RecyclerView.VERTICAL, false
+                )
 
+            }
+            binding.rcvItemGroup.layoutManager = gridLayoutManager
+        } else {
+            adapterOtherFolder = AdapterOtherFolder(onClickItem = {
+                handleClickItem(it)
+            }, onLongClickItem = {
+                listItemSelected.clear()
+                listItemSelected.addAll(it)
+                initToolBar()
+                editHome()
+                showController()
+
+            }, onSelectAll = {
+                listItemSelected.clear()
+                listItemSelected.addAll(it)
+            }, onUnSelect = {
+//            unCheckItem()
+            }, onEditItem = {
+                listItemSelected.clear()
+                listItemSelected.addAll(it)
+                checkItem()
+            })
+            binding.rcvItemGroup.adapter = adapterOtherFolder
+            val layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
+            binding.rcvItemGroup.layoutManager = layoutManager
         }
-        binding.rcvItemGroup.layoutManager = gridLayoutManager
-
     }
 
     private fun handleClickItem(item: ListItem) {
-        when(args.type){
+        when (args.type) {
             Constant.TYPE_PICTURE -> {
                 val list = mutableListOf<ListItem>()
                 list.add(item)
                 ShareData.getInstance().setListItemImage(list)
-                val intent = Intent(requireContext(),ActivityImageDetail::class.java)
+                val intent = Intent(requireContext(), ActivityImageDetail::class.java)
                 startActivity(intent)
             }
             Constant.TYPE_AUDIOS -> {}
             Constant.TYPE_VIDEOS -> {}
-            else ->{
+            else -> {
 
             }
         }

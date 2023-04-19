@@ -1,6 +1,8 @@
 package com.neko.hiepdph.calculatorvault.config
 
 import android.content.Context
+import com.neko.hiepdph.calculatorvault.common.Constant
+import com.neko.hiepdph.calculatorvault.common.Constant.INTERNAL_STORAGE_PATH
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 
@@ -112,6 +114,12 @@ class MainConfig(val context: Context) {
         get() = AppSharePreference.getInstance(context).getEncryptionMode(EncryptionMode.ALWAYS_ASK)
         set(encryptionMode) = AppSharePreference.getInstance(context)
             .setEncryptionMode(encryptionMode)
+//
+//    var internalStoragePath: String
+//        get() = AppSharePreference.getInstance(context).getString(INTERNAL_STORAGE_PATH, getDefaultInternalPath())
+//        set(internalStoragePath) = AppSharePreference.getInstance(context).saveString(INTERNAL_STORAGE_PATH, internalStoragePath)
+//
+//    private fun getDefaultInternalPath() = if (prefs.contains(INTERNAL_STORAGE_PATH)) "" else context.getInternalStoragePath()
 
 
 }
