@@ -1,6 +1,7 @@
 package com.neko.hiepdph.calculatorvault.viewmodel
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,6 +11,7 @@ import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
 import com.neko.hiepdph.calculatorvault.common.utils.ICreateFile
 import com.neko.hiepdph.calculatorvault.common.utils.IDeleteFile
+import com.neko.hiepdph.calculatorvault.common.utils.IRenameFile
 import com.neko.hiepdph.calculatorvault.data.model.VaultFileDirItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +38,7 @@ class VaultViewModel @Inject constructor() : ViewModel() {
     fun getListFolderInVault(context: Context, parentDir: File) {
         viewModelScope.launch(Dispatchers.IO) {
             val listVaultFolder = mutableListOf<VaultFileDirItem>()
-
+            Log.d("TAG", "getListFolderInVault: "+parentDir.path)
             val listFile = FileUtils.getFoldersInDirectory(parentDir.path)
             var type: String
             for (file in listFile) {
@@ -91,6 +93,12 @@ class VaultViewModel @Inject constructor() : ViewModel() {
     fun createFolder(file: File, name: String, callback: ICreateFile) {
         viewModelScope.launch(Dispatchers.IO) {
             FileUtils.createSecretFile(file, name, callback)
+        }
+    }
+
+    fun renameFolder(file: File,name:String,callback: IRenameFile){
+        viewModelScope.launch (Dispatchers.IO){
+            FileUtils.renameFile(file,name,callback)
         }
     }
 }

@@ -21,7 +21,7 @@ interface RenameDialogCallBack {
 }
 
 class DialogRenameFolder(
-    private val callBack: AddNewFolderDialogCallBack
+    private val callBack: RenameDialogCallBack
 ) : DialogFragment() {
     private lateinit var binding: DialogAddFolderBinding
 

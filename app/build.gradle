@@ -97,7 +97,9 @@ dependencies {
     //photoview
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
     implementation("com.google.guava:guava:31.1-android")
+    implementation 'commons-io:commons-io:2.11.0'
 
+    implementation 'in.dd4you.animatoo:anim:1.0.0'
 
 }
 

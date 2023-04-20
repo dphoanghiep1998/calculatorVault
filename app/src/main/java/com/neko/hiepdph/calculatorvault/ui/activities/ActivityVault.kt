@@ -18,7 +18,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -26,20 +25,18 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.neko.hiepdph.calculatorvault.R
-import com.neko.hiepdph.calculatorvault.biometric.BiometricConfig
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import com.neko.hiepdph.calculatorvault.common.utils.ICreateFile
 import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionS
-import com.neko.hiepdph.calculatorvault.config.FingerPrintUnlock
 import com.neko.hiepdph.calculatorvault.config.LockType
 import com.neko.hiepdph.calculatorvault.config.LockWhenLeavingApp
 import com.neko.hiepdph.calculatorvault.config.ScreenOffAction
 import com.neko.hiepdph.calculatorvault.databinding.ActivityVaultBinding
-import com.neko.hiepdph.calculatorvault.viewmodel.AppViewModel
 import com.neko.hiepdph.calculatorvault.viewmodel.VaultViewModel
 import dagger.hilt.android.AndroidEntryPoint
+
 
 @AndroidEntryPoint
 class ActivityVault : AppCompatActivity() {
@@ -68,10 +65,13 @@ class ActivityVault : AppCompatActivity() {
     }
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityVaultBinding.inflate(layoutInflater)
+        Log.d("TAG", "onCreate: " + config.externalStoragePath + "/${Constant.PRIVACY_FOLDER_NAME}")
+        Log.d("TAG", "onCreate: " + config.externalStoragePath)
+        Log.d("TAG", "onCreate: " + this.getExternalFilesDir(null)?.path + "")
+
         setContentView(binding.root)
         initScreenOffAction()
         setupNavigationDrawer()
@@ -93,21 +93,20 @@ class ActivityVault : AppCompatActivity() {
 
                 }
             }
-            viewModel.createFolder(filesDir, Constant.PICTURE_FOLDER_NAME, callback)
-            viewModel.createFolder(filesDir, Constant.VIDEOS_FOLDER_NAME, callback)
-            viewModel.createFolder(filesDir, Constant.AUDIOS_FOLDER_NAME, callback)
-            viewModel.createFolder(filesDir, Constant.FILES_FOLDER_NAME, callback)
+            viewModel.createFolder(config.privacyFolder, Constant.PICTURE_FOLDER_NAME, callback)
+            viewModel.createFolder(config.privacyFolder, Constant.VIDEOS_FOLDER_NAME, callback)
+            viewModel.createFolder(config.privacyFolder, Constant.AUDIOS_FOLDER_NAME, callback)
+            viewModel.createFolder(config.privacyFolder, Constant.FILES_FOLDER_NAME, callback)
             viewModel.createFolder(filesDir, Constant.RECYCLER_BIN_FOLDER_NAME, callback)
             AppSharePreference.INSTANCE.saveInitFirstDone(true)
-            viewModel.getListFolderInVault(this,filesDir)
-
+            viewModel.getListFolderInVault(this,config.privacyFolder)
         }
     }
 
     private fun requestAllFileManage() {
+
         if (buildMinVersionS()) {
             val hasManageExternalStoragePermission = Environment.isExternalStorageManager()
-
             if (hasManageExternalStoragePermission) {
                 createSecretFolderFirstTime()
             } else {
@@ -154,8 +153,9 @@ class ActivityVault : AppCompatActivity() {
         }
 
 
-     fun setupActionBar() {
-        val navController: NavController = (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController
+    fun setupActionBar() {
+        val navController: NavController =
+            (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController
         appBarConfiguration = AppBarConfiguration.Builder(
             R.id.fragmentVault,
             R.id.fragmentBrowser,
@@ -226,7 +226,9 @@ class ActivityVault : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+        return (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController.navigateUp(
+            appBarConfiguration
+        ) || super.onSupportNavigateUp()
     }
 
     override fun onDestroy() {

@@ -237,4 +237,6 @@
     <string name="other_file">Other File</string>
     <string name="rename_folder">Rename folder</string>
     <string name="enter_new_name">Enter new name</string>
+    <string name="error_rename">Can not rename this folder.</string>
+    <string name="require_character">Folder name contains invalid characters.</string>
 </resources>

@@ -11,19 +11,26 @@ import com.neko.hiepdph.calculatorvault.common.customview.CustomPhotoView
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 
 
+interface TapViewListener {
+    fun onTap()
+}
 
 class ImagePagerAdapter(val context: Context) : PagerAdapter() {
     private var listImage: List<ListItem> = mutableListOf()
     private var listPhotoView: MutableList<CustomPhotoView> = mutableListOf()
-    private var mViewPager :ViewPager?=null
+    private var mListener: TapViewListener? = null
 
 
-    fun setData(mListImage: List<ListItem>,viewPager: ViewPager) {
-        listImage = mListImage
-        mViewPager = viewPager
-        notifyDataSetChanged()
+    fun setListener(listener: TapViewListener){
+        this.mListener = listener
     }
 
+
+    fun setData(mListImage: List<ListItem>) {
+        listImage = mListImage
+        listPhotoView.clear()
+        notifyDataSetChanged()
+    }
 
 
     override fun getCount(): Int {
@@ -32,10 +39,13 @@ class ImagePagerAdapter(val context: Context) : PagerAdapter() {
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val photoView = CustomPhotoView(container.context)
-        Glide.with(context).load(listImage[position].path).centerCrop().into(photoView)
+        Glide.with(context).load(listImage[position].path).centerInside().into(photoView)
         container.addView(
             photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
         )
+        photoView.setOnViewTapListener { view, x, y ->
+            mListener?.onTap()
+        }
         listPhotoView.add(photoView)
         return photoView
     }
@@ -48,9 +58,12 @@ class ImagePagerAdapter(val context: Context) : PagerAdapter() {
         container.removeView(`object` as View)
     }
 
+    override fun getItemPosition(`object`: Any): Int {
+        return POSITION_NONE
+    }
+
 
     fun rotate(position: Int) {
-        Log.d("TAG", "rotate: " + position)
         listPhotoView[position].toggleRotate()
         notifyDataSetChanged()
     }

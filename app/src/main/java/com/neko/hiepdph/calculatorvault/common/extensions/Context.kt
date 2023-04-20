@@ -2,6 +2,7 @@ package com.neko.hiepdph.calculatorvault.common.extensions
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.database.Cursor
 import android.graphics.BitmapFactory
 import android.graphics.Point
@@ -12,20 +13,37 @@ import android.os.Looper
 import android.provider.BaseColumns
 import android.provider.MediaStore
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.config.MainConfig
-
 import java.io.File
 
 
 val Context.config: MainConfig get() = MainConfig.newInstance(applicationContext)
 
+fun Context.shareFile(listPath: List<String>) {
+    try {
+        val uris = ArrayList<Uri>()
+        listPath.forEach {
+            uris.add(
+                FileProvider.getUriForFile(this, "$packageName.provider", File(it))
+            )
+        }
 
+
+        val shareIntent = Intent(Intent.ACTION_SEND_MULTIPLE)
+        shareIntent.type = "*/*"
+        shareIntent.putParcelableArrayListExtra(
+            Intent.EXTRA_STREAM, uris
+        )
+        startActivity(Intent.createChooser(shareIntent, "Share"))
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
 
 fun Context.getDataColumn(
-    uri: Uri,
-    selection: String? = null,
-    selectionArgs: Array<String>? = null
+    uri: Uri, selection: String? = null, selectionArgs: Array<String>? = null
 ): String? {
     try {
         val projection = arrayOf(MediaStore.Files.FileColumns.DATA)

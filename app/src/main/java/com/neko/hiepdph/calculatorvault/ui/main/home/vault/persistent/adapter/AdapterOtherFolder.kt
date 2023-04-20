@@ -174,7 +174,7 @@ class AdapterOtherFolder(
                 }
                 editMode = true
                 listOfItemSelected.add(item)
-                onLongClickItem(listItem)
+                onLongClickItem(listOfItemSelected.toMutableList())
                 notifyDataSetChanged()
 
                 return@setOnLongClickListener true

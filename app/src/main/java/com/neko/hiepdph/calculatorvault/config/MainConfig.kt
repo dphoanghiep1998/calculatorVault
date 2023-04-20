@@ -1,15 +1,19 @@
 package com.neko.hiepdph.calculatorvault.config
 
 import android.content.Context
+import android.os.Environment
+import android.util.Log
 import com.neko.hiepdph.calculatorvault.common.Constant
-import com.neko.hiepdph.calculatorvault.common.Constant.INTERNAL_STORAGE_PATH
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
+import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionQ
+import java.io.File
 
 class MainConfig(val context: Context) {
     companion object {
         fun newInstance(context: Context) = MainConfig(context)
     }
+    var privacyFolder = File(externalStoragePath+"/${Constant.PRIVACY_FOLDER_NAME}")
 
     var isShouldShowHidden: Boolean
         get() = AppSharePreference.getInstance(context).getIsShouldShowHidden(false)
@@ -102,24 +106,30 @@ class MainConfig(val context: Context) {
 
     var shakeClose: Boolean
         get() = AppSharePreference.getInstance(context).getShakeClose(ShakeClose.ENABLE)
-        set(shakeClose) = AppSharePreference.getInstance(context)
-            .setClose(shakeClose)
+        set(shakeClose) = AppSharePreference.getInstance(context).setClose(shakeClose)
 
-    var playVideoMode :Boolean
+    var playVideoMode: Boolean
         get() = AppSharePreference.getInstance(context).getPlayVideoMode(PlayVideoMode.ENABLE)
-        set(playVideoMode) = AppSharePreference.getInstance(context)
-            .setPlayVideoMode(playVideoMode)
+        set(playVideoMode) = AppSharePreference.getInstance(context).setPlayVideoMode(playVideoMode)
 
-    var encryptionMode:Int
+    var encryptionMode: Int
         get() = AppSharePreference.getInstance(context).getEncryptionMode(EncryptionMode.ALWAYS_ASK)
         set(encryptionMode) = AppSharePreference.getInstance(context)
             .setEncryptionMode(encryptionMode)
-//
-//    var internalStoragePath: String
-//        get() = AppSharePreference.getInstance(context).getString(INTERNAL_STORAGE_PATH, getDefaultInternalPath())
-//        set(internalStoragePath) = AppSharePreference.getInstance(context).saveString(INTERNAL_STORAGE_PATH, internalStoragePath)
-//
-//    private fun getDefaultInternalPath() = if (prefs.contains(INTERNAL_STORAGE_PATH)) "" else context.getInternalStoragePath()
+
+
+    var externalStoragePath: String
+        get() = AppSharePreference.getInstance(context)
+            .getExternalStoragePath(getDefaultInternalPath())
+        set(externalStoragePath) = AppSharePreference.getInstance(context)
+            .setExternalStoragePath(externalStoragePath)
+
+    private fun getDefaultInternalPath(): String {
+        val externalDir = context.getExternalFilesDir(null)
+
+        return if (buildMinVersionQ()) externalDir?.parentFile?.parentFile?.parentFile?.parentFile?.path.toString()
+        else Environment.getExternalStorageDirectory().path
+    }
 
 
 }

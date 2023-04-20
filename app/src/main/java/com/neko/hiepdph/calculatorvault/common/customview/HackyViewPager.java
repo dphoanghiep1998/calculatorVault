@@ -3,6 +3,8 @@ package com.neko.hiepdph.calculatorvault.common.customview;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.animation.Interpolator;
+import android.widget.Scroller;
 
 import androidx.viewpager.widget.ViewPager;
 
@@ -25,4 +27,6 @@ public class HackyViewPager extends ViewPager {
 			return false;
 		}
     }
+
+
 }

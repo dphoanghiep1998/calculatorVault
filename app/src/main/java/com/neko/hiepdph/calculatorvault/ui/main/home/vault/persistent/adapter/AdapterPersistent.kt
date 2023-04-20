@@ -41,7 +41,6 @@ class AdapterPersistent(
     fun setData(listDataItem: List<ListItem>, type: String) {
         mType = type
         listItem = listDataItem.toMutableList()
-        Log.d("TAG", "setData: " + listItem.size)
         notifyDataSetChanged()
     }
 
@@ -158,7 +157,7 @@ class AdapterPersistent(
                         }
                         editMode = true
                         listOfItemSelected.add(item)
-                        onLongClickItem(listItem)
+                        onLongClickItem(listOfItemSelected.toMutableList())
 
                         notifyDataSetChanged()
                         return@setOnLongClickListener true
@@ -210,8 +209,9 @@ class AdapterPersistent(
                         }
                         editMode = true
                         listOfItemSelected.add(item)
-                        onLongClickItem(listItem)
-                        notifyItemRangeChanged(0, listItem.size)
+                        onLongClickItem(listOfItemSelected.toMutableList())
+
+                        notifyDataSetChanged()
                         return@setOnLongClickListener true
                     }
                     binding.root.setOnClickListener {
@@ -268,7 +268,8 @@ class AdapterPersistent(
                         }
                         editMode = true
                         listOfItemSelected.add(item)
-                        onLongClickItem(listItem)
+                        onLongClickItem(listOfItemSelected.toMutableList())
+
                         notifyDataSetChanged()
 
                         return@setOnLongClickListener true
@@ -325,7 +326,8 @@ class AdapterPersistent(
                         }
                         editMode = true
                         listOfItemSelected.add(item)
-                        onLongClickItem(listItem)
+                        onLongClickItem(listOfItemSelected.toMutableList())
+
                         notifyDataSetChanged()
 
                         return@setOnLongClickListener true
@@ -372,7 +374,9 @@ class AdapterPersistent(
                         }
                         editMode = true
                         listOfItemSelected.add(item)
-                        onLongClickItem(listItem)
+                        onLongClickItem(listOfItemSelected.toMutableList())
+
+                        onLongClickItem(listOfItemSelected.toMutableList())
                         notifyDataSetChanged()
                         return@setOnLongClickListener true
                     }

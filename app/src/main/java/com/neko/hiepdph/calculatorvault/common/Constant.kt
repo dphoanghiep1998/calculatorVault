@@ -2,7 +2,8 @@ package com.neko.hiepdph.calculatorvault.common
 
 
 object Constant {
-    const val INTERNAL_STORAGE_PATH ="internal_storage_path"
+    const val INTERNAL_STORAGE_PATH ="INTERNAL_STORAGE_PATH"
+    const val EXTERNAL_STORAGE_PATH ="internal_storage_path"
     const val KEY_IMAGE_INTENT = "KEY_IMAGE_INTENT"
     const val KEY_ENCRYPTION_MODE ="KEY_ENCRYPTION_MODE"
     const val KEY_PLAY_VIDEO_MODE ="KEY_PLAY_VIDEO_MODE"
@@ -33,10 +34,12 @@ object Constant {
     const val APP_DB = "CALCULATOR_V1"
     const val KEY_PASS_SPLASH = "KEY_PASS_SPLASH_V2"
 
+
     const val KEY_USER_RATE = "KEY_USER_RATE_SUGAR_V2"
     const val KEY_INDEX_NOTIFY = "KEY_INDEX_NOTIFY_V2"
     const val KEY_NUM_NOTI = "KEY_NUM_NOTI_SUGAR_V2"
     const val KEY_TIME_RATE = "KEY_TIME_RATE_SUGAR_V2"
+
 
     const val NOTI_EVERYDAY = "NOTI_EVERYDAY_MORNING_SUGAR_V2"
     const val NOTI_EVERYDAY_EVENING = "NOTI_EVERYDAY_EVENING_SUGAR_V2"
@@ -58,36 +61,21 @@ object Constant {
 //        "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
 
 
-    const val HOUR_MINUTES = 60
-    const val DAY_MINUTES = 24 * HOUR_MINUTES
-    const val WEEK_MINUTES = DAY_MINUTES * 7
-    const val MONTH_MINUTES = DAY_MINUTES * 30
-    const val YEAR_MINUTES = DAY_MINUTES * 365
-
-    const val MINUTE_SECONDS = 60
-    const val HOUR_SECONDS = HOUR_MINUTES * 60
-    const val DAY_SECONDS = DAY_MINUTES * 60
-    const val WEEK_SECONDS = WEEK_MINUTES * 60
-    const val MONTH_SECONDS = MONTH_MINUTES * 60
-    const val YEAR_SECONDS = YEAR_MINUTES * 60
-    const val TODAY_BIT = -1
-    const val TOMORROW_BIT = -2
-    const val OPEN_ALARMS_TAB_INTENT_ID = 9996
 
     const val KEY_SECURITY_QUESTION = "KEY_SECURITY_QUESTION"
     const val KEY_SECURITY_ANSWER = "KEY_SECURITY_ANSWER"
 
 
-    const val SECRET_KEY = 9996
+    const val SECRET_KEY = "9CVC6123A23"
     const val DEFAULT_SECRET_PASSWORD = "1234"
     const val DEFAULT_SECRET_PASSWORD_SUFFIX = "%"
     const val KEY_THEME_COLOR = "KEY_THEME_COLOR"
 
-    const val FILES_FOLDER_NAME = "FILE_CALCULATOR_VAULT_${SECRET_KEY}"
-    const val PICTURE_FOLDER_NAME = "PICTURE_CALCULATOR_VAULT_${SECRET_KEY}"
-    const val AUDIOS_FOLDER_NAME = "AUDIOS_CALCULATOR_VAULT_${SECRET_KEY}"
-    const val VIDEOS_FOLDER_NAME = "VIDEOS_CALCULATOR_VAULT_${SECRET_KEY}"
-    const val RECYCLER_BIN_FOLDER_NAME = "BIN_CALCULATOR_VAULT_${SECRET_KEY}"
+    const val FILES_FOLDER_NAME = "Files"
+    const val PICTURE_FOLDER_NAME = "Pictures"
+    const val AUDIOS_FOLDER_NAME = "Audios"
+    const val VIDEOS_FOLDER_NAME = "Videos"
+    const val RECYCLER_BIN_FOLDER_NAME = "Bin"
 
     const val TYPE_PICTURE = "TYPE_PICTURE"
     const val TYPE_RECYCLER_BIN = "TYPE_RECYCLER_BIN"
@@ -153,6 +141,8 @@ object Constant {
     const val PREFIX_URL_ICON =
         "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url="
     const val SUFFIX_URL_ICON = "&size=256"
+
+    const val PRIVACY_FOLDER_NAME = ".privacy_neko_$SECRET_KEY"
 
 
 }

@@ -2,6 +2,8 @@ package com.neko.hiepdph.calculatorvault.common.utils
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import com.neko.hiepdph.calculatorvault.common.Constant
@@ -10,6 +12,12 @@ import java.io.File
 import java.util.*
 
 interface IDeleteFile {
+    fun onSuccess()
+    fun onFailed()
+
+}
+
+interface IRenameFile {
     fun onSuccess()
     fun onFailed()
 
@@ -54,6 +62,9 @@ object FileUtils {
 
     fun createSecretFile(parentDir: File, name: String, callback: ICreateFile) {
         try {
+            if(!parentDir.exists()){
+                parentDir.mkdir()
+            }
             val folder = File(parentDir, name)
             if (!folder.exists()) {
                 folder.mkdir()
@@ -69,13 +80,19 @@ object FileUtils {
     }
 
     fun getFoldersInDirectory(dir: String): List<File> {
+        Log.d("TAG", "getFoldersInDirectory: "+dir)
+
         val listOfFolder = mutableListOf<File>()
         return try {
             val directory = File(dir)
+
             val files = directory.listFiles { file -> file.isDirectory }
-            for (file in files) {
-                listOfFolder.add(file)
+            files?.let {
+                for (file in files) {
+                    listOfFolder.add(file)
+                }
             }
+            Log.d("TAG", "getFoldersInDirectory: "+listOfFolder.size)
             listOfFolder
         } catch (e: Exception) {
             e.printStackTrace()
@@ -206,6 +223,22 @@ object FileUtils {
         }
         return type
     }
+
+    fun renameFile(oldFile: File, name: String, callback: IRenameFile) {
+        try {
+            val newFile = File(oldFile.parentFile?.path + "/$name")
+            if (oldFile.isDirectory) {
+                org.apache.commons.io.FileUtils.moveDirectory(oldFile, newFile)
+            } else {
+                org.apache.commons.io.FileUtils.moveFile(oldFile, newFile)
+            }
+            callback.onSuccess()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            callback.onFailed()
+        }
+    }
+
 
 
 }

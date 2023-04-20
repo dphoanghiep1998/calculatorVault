@@ -12,10 +12,8 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
@@ -24,6 +22,7 @@ import com.neko.hiepdph.calculatorvault.common.enums.Sort
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.utils.ICreateFile
 import com.neko.hiepdph.calculatorvault.common.utils.IDeleteFile
+import com.neko.hiepdph.calculatorvault.common.utils.IRenameFile
 import com.neko.hiepdph.calculatorvault.data.model.VaultFileDirItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentVaultBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutMenuOptionBinding
@@ -34,6 +33,8 @@ import com.neko.hiepdph.calculatorvault.viewmodel.VaultViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
+import java.util.regex.Pattern
 
 @AndroidEntryPoint
 class FragmentVault : Fragment() {
@@ -47,8 +48,6 @@ class FragmentVault : Fragment() {
         var sortType: Sort = Sort.NAME
         var order: Order = Order.ASC
     }
-
-
 
 
     override fun onCreateView(
@@ -67,7 +66,11 @@ class FragmentVault : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initView()
         observeListFile()
-        viewModel.getListFolderInVault(requireContext(), requireActivity().filesDir)
+        Log.d("TAG", "onSuccess: ")
+
+        viewModel.getListFolderInVault(
+            requireContext(), requireContext().config.privacyFolder
+        )
 
     }
 
@@ -169,7 +172,7 @@ class FragmentVault : Fragment() {
                     val callback = object : IDeleteFile {
                         override fun onSuccess() {
                             viewModel.getListFolderInVault(
-                                requireContext(), requireActivity().filesDir
+                                requireContext(), requireContext().config.privacyFolder
                             )
                             lifecycleScope.launch(Dispatchers.Main) {
                                 showSnackBar(
@@ -193,7 +196,7 @@ class FragmentVault : Fragment() {
             dialogConfirm.show(parentFragmentManager, dialogConfirm.tag)
 
         }, onRenamePress = {
-
+            openRenameDialog(it.mPath)
         })
         binding.rcvFolder.adapter = adapter
         if (!AdapterFolder.isSwitchView) {
@@ -204,6 +207,36 @@ class FragmentVault : Fragment() {
             binding.rcvFolder.layoutManager = gridLayoutManager
         }
 
+    }
+
+    private fun openRenameDialog(path: String) {
+        val dialogRenameFolder = DialogRenameFolder(object : RenameDialogCallBack {
+            override fun onPositiveClicked(name: String) {
+                val pattern = Pattern.compile("[a-zA-Z0-9_-]+")
+                val matcher = pattern.matcher(name)
+                if (!matcher.matches()) {
+                    showSnackBar(getString(R.string.require_character), SnackBarType.FAILED)
+                    return
+                } else {
+                    viewModel.renameFolder(File(path), name, object : IRenameFile {
+                        override fun onSuccess() {
+                            viewModel.getListFolderInVault(
+                                requireContext(), requireContext().config.privacyFolder
+                            )
+                            showSnackBar(getString(R.string.error_rename), SnackBarType.SUCCESS)
+                        }
+
+                        override fun onFailed() {
+                            showSnackBar(getString(R.string.error_rename), SnackBarType.FAILED)
+                        }
+
+                    })
+                }
+
+            }
+
+        })
+        dialogRenameFolder.show(childFragmentManager, dialogRenameFolder.tag)
     }
 
 
@@ -228,7 +261,9 @@ class FragmentVault : Fragment() {
                                 getString(R.string.create_success), SnackBarType.SUCCESS
                             )
                         }
-                        viewModel.getListFolderInVault(requireContext(), requireActivity().filesDir)
+                        viewModel.getListFolderInVault(
+                            requireContext(), requireContext().config.privacyFolder
+                        )
                     }
 
                     override fun onFailed() {
@@ -240,7 +275,7 @@ class FragmentVault : Fragment() {
                     }
 
                 }
-                viewModel.createFolder(requireActivity().filesDir, name, callback)
+                viewModel.createFolder(requireContext().config.privacyFolder, name, callback)
             }
 
         })

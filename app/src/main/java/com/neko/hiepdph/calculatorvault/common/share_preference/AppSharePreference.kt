@@ -414,6 +414,14 @@ class AppSharePreference(private val context: Context?) {
         saveInt(Constant.KEY_ENCRYPTION_MODE, values)
     }
 
+    fun getExternalStoragePath(defaultExternalPath: String): String {
+        return getString(Constant.EXTERNAL_STORAGE_PATH,defaultExternalPath)
+    }
+
+    fun setExternalStoragePath( values: String) {
+        saveString(Constant.EXTERNAL_STORAGE_PATH,values)
+    }
+
 
 }
 

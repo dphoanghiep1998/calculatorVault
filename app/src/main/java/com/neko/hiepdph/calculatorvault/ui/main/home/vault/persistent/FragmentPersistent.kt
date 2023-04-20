@@ -2,6 +2,7 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.CheckBox
 import android.widget.Toast
@@ -55,14 +56,25 @@ class FragmentPersistent : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initView()
-        initToolBar()
+    }
 
+    override fun onResume() {
+        super.onResume()
+        initData()
+        resetAllViewAndData()
+
+    }
+
+    private fun resetAllViewAndData() {
+        listItemSelected.clear()
+        adapterPersistent?.changeToNormalView()
+        adapterOtherFolder?.changeToNormalView()
+        initToolBar()
     }
 
 
     private fun initView() {
         initRecyclerView()
-        initData()
         initButton()
     }
 
@@ -331,6 +343,7 @@ class FragmentPersistent : Fragment() {
             adapterPersistent = AdapterPersistent(onClickItem = {
                 handleClickItem(it)
             }, onLongClickItem = {
+                Log.d("TAG", "initRecyclerView: "+it.size)
                 listItemSelected.clear()
                 listItemSelected.addAll(it)
                 initToolBar()
