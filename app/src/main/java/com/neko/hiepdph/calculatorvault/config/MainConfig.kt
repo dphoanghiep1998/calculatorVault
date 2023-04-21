@@ -2,18 +2,24 @@ package com.neko.hiepdph.calculatorvault.config
 
 import android.content.Context
 import android.os.Environment
-import android.util.Log
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionQ
+import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import java.io.File
 
 class MainConfig(val context: Context) {
     companion object {
         fun newInstance(context: Context) = MainConfig(context)
     }
-    var privacyFolder = File(externalStoragePath+"/${Constant.PRIVACY_FOLDER_NAME}")
+
+    var privacyFolder = File(externalStoragePath + "/${Constant.PRIVACY_FOLDER_NAME}")
+    var recyclerBinFolder = File(context.filesDir.path + "/${Constant.RECYCLER_BIN_FOLDER_NAME}")
+    var picturePrivacyFolder = File(privacyFolder, Constant.PICTURE_FOLDER_NAME)
+    var filePrivacyFolder = File(privacyFolder, Constant.VIDEOS_FOLDER_NAME)
+    var audioPrivacyFolder = File(privacyFolder, Constant.AUDIOS_FOLDER_NAME)
+    var videoPrivacyFolder = File(privacyFolder, Constant.FILES_FOLDER_NAME)
 
     var isShouldShowHidden: Boolean
         get() = AppSharePreference.getInstance(context).getIsShouldShowHidden(false)
@@ -123,6 +129,13 @@ class MainConfig(val context: Context) {
             .getExternalStoragePath(getDefaultInternalPath())
         set(externalStoragePath) = AppSharePreference.getInstance(context)
             .setExternalStoragePath(externalStoragePath)
+
+    var listItemVault: List<ListItem>?
+        get() = AppSharePreference.getInstance(context)
+            .getObjectFromSharePreference<List<ListItem>>(Constant.KEY_LIST_ITEM_VAULT)
+        set(listItemVault) = AppSharePreference.getInstance(context)
+            .saveObjectToSharePreference(Constant.KEY_LIST_ITEM_VAULT, listItemVault)
+
 
     private fun getDefaultInternalPath(): String {
         val externalDir = context.getExternalFilesDir(null)

@@ -9,18 +9,15 @@ import androidx.core.view.MenuProvider
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
-import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
-import com.neko.hiepdph.calculatorvault.common.extensions.hide
-import com.neko.hiepdph.calculatorvault.common.extensions.show
-import com.neko.hiepdph.calculatorvault.common.extensions.toastLocation
+import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.utils.IMoveFile
+import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentListItemBinding
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item.adapter.AdapterListItem
@@ -39,7 +36,7 @@ class FragmentListItem : Fragment() {
     private val viewModel by viewModels<ListItemViewModel>()
     private var adapterListItem: AdapterListItem? = null
     private val args: FragmentListItemArgs by navArgs()
-    private var listPathSelected = mutableListOf<String>()
+    private var listItemSelected = mutableListOf<ListItem>()
     private var sizeList = 0
 
     override fun onCreateView(
@@ -58,20 +55,27 @@ class FragmentListItem : Fragment() {
 
     }
 
-    private fun setupTitle(){
-        if(args.groupItem.type != Constant.TYPE_FILE ){
+    private fun setupTitle() {
+        if (args.groupItem.type != Constant.TYPE_FILE) {
             (requireActivity() as ActivityVault).getToolbar().title = args.groupItem.name
-        }
-        else{
-            when(args.fileType){
-                Constant.TYPE_EXCEL -> (requireActivity() as ActivityVault).getToolbar().title = getString(R.string.excel)
-                Constant.TYPE_ZIP -> (requireActivity() as ActivityVault).getToolbar().title = getString(R.string.zip)
-                Constant.TYPE_TEXT -> (requireActivity() as ActivityVault).getToolbar().title = getString(R.string.text)
-                Constant.TYPE_PPT -> (requireActivity() as ActivityVault).getToolbar().title = getString(R.string.ppt)
-                Constant.TYPE_WORD -> (requireActivity() as ActivityVault).getToolbar().title = getString(R.string.word)
-                Constant.TYPE_CSV -> (requireActivity() as ActivityVault).getToolbar().title = getString(R.string.csv)
-                Constant.TYPE_PDF -> (requireActivity() as ActivityVault).getToolbar().title = getString(R.string.pdf)
-                else -> (requireActivity() as ActivityVault).getToolbar().title = getString(R.string.other_file)
+        } else {
+            when (args.fileType) {
+                Constant.TYPE_EXCEL -> (requireActivity() as ActivityVault).getToolbar().title =
+                    getString(R.string.excel)
+                Constant.TYPE_ZIP -> (requireActivity() as ActivityVault).getToolbar().title =
+                    getString(R.string.zip)
+                Constant.TYPE_TEXT -> (requireActivity() as ActivityVault).getToolbar().title =
+                    getString(R.string.text)
+                Constant.TYPE_PPT -> (requireActivity() as ActivityVault).getToolbar().title =
+                    getString(R.string.ppt)
+                Constant.TYPE_WORD -> (requireActivity() as ActivityVault).getToolbar().title =
+                    getString(R.string.word)
+                Constant.TYPE_CSV -> (requireActivity() as ActivityVault).getToolbar().title =
+                    getString(R.string.csv)
+                Constant.TYPE_PDF -> (requireActivity() as ActivityVault).getToolbar().title =
+                    getString(R.string.pdf)
+                else -> (requireActivity() as ActivityVault).getToolbar().title =
+                    getString(R.string.other_file)
             }
         }
     }
@@ -84,25 +88,35 @@ class FragmentListItem : Fragment() {
 
     private fun initButton() {
         binding.btnMoveToVault.clickWithDebounce {
-            viewModel.copyMoveFile(listPathSelected, args.vaultPath, object : IMoveFile {
-                override fun onSuccess() {
-                    CoroutineScope(Dispatchers.Main).launch{
-                       observeData()
-                        adapterListItem?.unSelectAll()
-                        listPathSelected.clear()
-                        checkListPath()
-                        checkCheckBoxAll()
+            viewModel.copyMoveFile(listItemSelected.map { it.mPath },
+                args.vaultPath,
+                object : IMoveFile {
+                    override fun onSuccess() {
+                        val newList = listItemSelected.toMutableList()
+                        newList.forEach {
+                            it.path = args.vaultPath+"/${it.mName}"
+                        }
+                        val listItemVault = requireContext().config.listItemVault?.toMutableList()
+                            ?: mutableListOf()
+                        listItemVault.addAll(newList)
+                        requireContext().config.listItemVault = listItemVault
+                        CoroutineScope(Dispatchers.Main).launch {
+                            observeData()
+                            adapterListItem?.unSelectAll()
+                            listItemSelected.clear()
+                            checkListPath()
+                            checkCheckBoxAll()
+                        }
                     }
-                }
 
-                override fun onFailed() {
-                    Log.d("TAG", "failed: ")
-                }
+                    override fun onFailed() {
+                        Log.d("TAG", "failed: ")
+                    }
 
-                override fun onDoneWithWarning() {
-                }
+                    override fun onDoneWithWarning() {
+                    }
 
-            })
+                })
         }
     }
 
@@ -171,8 +185,8 @@ class FragmentListItem : Fragment() {
 
     private fun initRecycleView() {
         adapterListItem = AdapterListItem(onClickItem = {
-            listPathSelected.clear()
-            listPathSelected.addAll(it)
+            listItemSelected.clear()
+            listItemSelected.addAll(it)
             checkListPath()
             checkCheckBoxAll()
         })
@@ -198,11 +212,11 @@ class FragmentListItem : Fragment() {
             (requireActivity() as ActivityVault).getToolbar().menu[0].actionView?.findViewById<CheckBox>(
                 R.id.checkbox
             )
-        checkbox?.isChecked = listPathSelected.size == sizeList && sizeList > 0
+        checkbox?.isChecked = listItemSelected.size == sizeList && sizeList > 0
     }
 
     private fun checkListPath() {
-        if (listPathSelected.isEmpty()) {
+        if (listItemSelected.isEmpty()) {
             binding.btnMoveToVault.apply {
                 setBackgroundResource(R.drawable.bg_neu04_corner_10)
                 isEnabled = false

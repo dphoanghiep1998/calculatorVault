@@ -15,7 +15,20 @@
         android:textColor="@color/neutral_05"
         android:textSize="@dimen/_12sdp"
         app:layout_constraintStart_toStartOf="parent"
-
+        android:id="@+id/tv_instruction"
         app:layout_constraintTop_toTopOf="parent" />
+    <View
+        android:layout_marginTop="@dimen/_12sdp"
+        app:layout_constraintTop_toBottomOf="@id/tv_instruction"
+        android:id="@+id/line"
+        android:layout_width="match_parent"
+        android:layout_height="0.5px"
+        android:background="@color/neutral_03"/>
+    <androidx.recyclerview.widget.RecyclerView
+        app:layout_constraintTop_toBottomOf="@id/line"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/rcv_items"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

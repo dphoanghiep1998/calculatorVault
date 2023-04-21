@@ -1,7 +1,6 @@
 package com.neko.hiepdph.calculatorvault.ui.activities
 
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.animation.AccelerateInterpolator
@@ -17,9 +16,9 @@ import com.neko.hiepdph.calculatorvault.common.transformer.*
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
 import com.neko.hiepdph.calculatorvault.common.utils.IDeleteFile
+import com.neko.hiepdph.calculatorvault.common.utils.IMoveFile
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityImageDetailBinding
-import com.neko.hiepdph.calculatorvault.dialog.ConfirmDialogCallBack
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.dialog.DialogDetail
@@ -37,7 +36,7 @@ import java.lang.reflect.Field
 class ActivityImageDetail : AppCompatActivity() {
     private lateinit var binding: ActivityImageDetailBinding
     private var viewPagerAdapter: ImagePagerAdapter? = null
-    private var listItem :MutableList<ListItem> = mutableListOf()
+    private var listItem: MutableList<ListItem> = mutableListOf()
     private var currentItem: ListItem? = null
     private var currentPage = 0
     private var jobSlide: Job? = null
@@ -83,13 +82,19 @@ class ActivityImageDetail : AppCompatActivity() {
     private fun getData() {
         ShareData.getInstance().listItemImage.observe(this) {
             listItem = it
-            Log.d("TAG", "getData: "+it.size)
-            viewPagerAdapter?.setData(it)
+            viewPagerAdapter = ImagePagerAdapter(this,it)
+            viewPagerAdapter?.setListener(object : TapViewListener {
+                override fun onTap() {
+                    jobSlide?.cancel()
+                    showController()
+                }
+            })
+            binding.imageViewPager.adapter = viewPagerAdapter
             if (it.isNotEmpty()) {
                 currentItem = it[0]
             }
             if (it.size > 1) {
-                supportActionBar?.title = "${binding.imageViewPager.currentItem+1}/${it.size}"
+                supportActionBar?.title = "${binding.imageViewPager.currentItem + 1}/${it.size}"
             } else {
                 supportActionBar?.title = String.EMPTY
             }
@@ -114,42 +119,28 @@ class ActivityImageDetail : AppCompatActivity() {
 
 
     private fun initView() {
-        initViewPager()
         initButton()
     }
 
-    private fun initViewPager() {
-        viewPagerAdapter = ImagePagerAdapter(this)
 
-        viewPagerAdapter?.setListener(object : TapViewListener {
-            override fun onTap() {
-                jobSlide?.cancel()
-                showController()
-            }
-        })
-        binding.imageViewPager.adapter = viewPagerAdapter
-
-
-
-
-    }
 
     private fun initButton() {
 
         binding.tvUnlock.clickWithDebounce {
-
+            unlock()
         }
 
         binding.tvDelete.clickWithDebounce {
-            val confirmDialog = DialogConfirm(callBack = object : ConfirmDialogCallBack {
-                override fun onPositiveClicked() {
-                    FileUtils.deleteFolderInDirectory(currentItem?.path.toString(),object :IDeleteFile{
+            val confirmDialog = DialogConfirm(onPositiveClicked = {
+                FileUtils.deleteFolderInDirectory(
+                    currentItem?.path.toString(),
+                    object : IDeleteFile {
                         override fun onSuccess() {
                             listItem.remove(currentItem)
-                            if(listItem.isEmpty()){
+                            if (listItem.isEmpty()) {
                                 ShareData.getInstance().setListItemImage(mutableListOf())
                                 finish()
-                            }else{
+                            } else {
                                 ShareData.getInstance().setListItemImage(listItem)
                             }
                         }
@@ -159,8 +150,6 @@ class ActivityImageDetail : AppCompatActivity() {
                         }
 
                     })
-                }
-
             }, DialogConfirmType.DELETE, getString(R.string.pictures))
 
             confirmDialog.show(supportFragmentManager, confirmDialog.tag)
@@ -200,7 +189,7 @@ class ActivityImageDetail : AppCompatActivity() {
 
         when (config.slideShowTransition) {
             0 -> {}
-            1 -> binding.imageViewPager.setPageTransformer(false,null)
+            1 -> binding.imageViewPager.setPageTransformer(false, null)
             2 -> {}
             3 -> binding.imageViewPager.setPageTransformer(false, FadeTransformer())
             4 -> binding.imageViewPager.setPageTransformer(false, VpAnimatoo.ZoomIn())
@@ -217,11 +206,6 @@ class ActivityImageDetail : AppCompatActivity() {
                 if (currentPage == viewPagerAdapter!!.count) {
                     currentPage = 0
                 }
-//                if (config.slideShowTransition == 1) {
-//                    binding.imageViewPager.setCurrentItem(currentPage, false)
-//                } else {
-//                    binding.imageViewPager.setCurrentItem(currentPage, true)
-//                }
 
                 binding.imageViewPager.setCurrentItem(currentPage, true)
 
@@ -240,8 +224,52 @@ class ActivityImageDetail : AppCompatActivity() {
         jobSlide?.cancel()
     }
 
-    private fun unlock(){
+    private fun unlock() {
+        showDialogUnlock()
+    }
 
+    private fun showDialogUnlock() {
+        val name = getString(R.string.pictures)
+
+        val confirmDialog = DialogConfirm(onPositiveClicked = {
+            unLockPicture()
+        }, DialogConfirmType.UNLOCK, name)
+
+        confirmDialog.show(supportFragmentManager, confirmDialog.tag)
+    }
+
+    private fun unLockPicture() {
+        lifecycleScope.launch {
+            val listPath = mutableListOf<String>()
+            listPath.add(currentItem?.path.toString())
+
+            val item = config.listItemVault?.firstOrNull {
+                it.path == currentItem?.path
+            }
+            FileUtils.copyMoveTo(listPath,
+                item?.originalPath.toString(),
+                false,
+                object : IMoveFile {
+                    override fun onSuccess() {
+                        listItem.remove(currentItem)
+                        if (listItem.isEmpty()) {
+                            ShareData.getInstance().setListItemImage(mutableListOf())
+                            finish()
+                        } else {
+                            ShareData.getInstance().setListItemImage(listItem)
+                        }
+                    }
+
+                    override fun onFailed() {
+
+                    }
+
+                    override fun onDoneWithWarning() {
+
+                    }
+
+                })
+        }
     }
 
 

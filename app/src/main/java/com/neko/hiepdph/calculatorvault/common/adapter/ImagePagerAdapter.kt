@@ -1,11 +1,9 @@
 package com.neko.hiepdph.calculatorvault.common.adapter
 
 import android.content.Context
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.viewpager.widget.PagerAdapter
-import androidx.viewpager.widget.ViewPager
 import com.bumptech.glide.Glide
 import com.neko.hiepdph.calculatorvault.common.customview.CustomPhotoView
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
@@ -15,21 +13,14 @@ interface TapViewListener {
     fun onTap()
 }
 
-class ImagePagerAdapter(val context: Context) : PagerAdapter() {
-    private var listImage: List<ListItem> = mutableListOf()
+class ImagePagerAdapter(val context: Context,private val listImage: MutableList<ListItem>) : PagerAdapter() {
     private var listPhotoView: MutableList<CustomPhotoView> = mutableListOf()
     private var mListener: TapViewListener? = null
 
 
-    fun setListener(listener: TapViewListener){
+
+    fun setListener(listener: TapViewListener) {
         this.mListener = listener
-    }
-
-
-    fun setData(mListImage: List<ListItem>) {
-        listImage = mListImage
-        listPhotoView.clear()
-        notifyDataSetChanged()
     }
 
 
@@ -58,9 +49,9 @@ class ImagePagerAdapter(val context: Context) : PagerAdapter() {
         container.removeView(`object` as View)
     }
 
-    override fun getItemPosition(`object`: Any): Int {
-        return POSITION_NONE
-    }
+//    override fun getItemPosition(`object`: Any): Int {
+//        return POSITION_NONE
+//    }
 
 
     fun rotate(position: Int) {

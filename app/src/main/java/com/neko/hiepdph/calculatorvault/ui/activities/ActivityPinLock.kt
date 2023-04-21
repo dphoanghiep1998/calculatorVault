@@ -103,10 +103,8 @@ class ActivityPinLock : AppCompatActivity() {
         }
 
         binding.tvForgotPassword.clickWithDebounce {
-            val confirmDialog = DialogConfirm(callBack = object : ConfirmDialogCallBack {
-                override fun onPositiveClicked() {
-                    showDialogConfirmSecurityQuestion()
-                }
+            val confirmDialog = DialogConfirm(onPositiveClicked = {
+                showDialogConfirmSecurityQuestion()
             }, DialogConfirmType.FORGOT_PASSWORD, null)
             confirmDialog.show(supportFragmentManager, confirmDialog.tag)
         }

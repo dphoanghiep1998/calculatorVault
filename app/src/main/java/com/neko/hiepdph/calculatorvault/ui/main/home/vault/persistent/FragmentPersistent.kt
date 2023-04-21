@@ -2,7 +2,6 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.CheckBox
 import android.widget.Toast
@@ -12,6 +11,7 @@ import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,9 +19,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
+import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
+import com.neko.hiepdph.calculatorvault.common.utils.IDeleteFile
+import com.neko.hiepdph.calculatorvault.common.utils.IMoveFile
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentPersistentBinding
-import com.neko.hiepdph.calculatorvault.dialog.ConfirmDialogCallBack
 import com.neko.hiepdph.calculatorvault.dialog.DialogAddFile
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
@@ -32,6 +34,7 @@ import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.Ad
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterPersistent
 import com.neko.hiepdph.calculatorvault.viewmodel.PersistentViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class FragmentPersistent : Fragment() {
@@ -62,6 +65,7 @@ class FragmentPersistent : Fragment() {
         super.onResume()
         initData()
         resetAllViewAndData()
+        (requireActivity() as ActivityVault).setupActionBar()
 
     }
 
@@ -76,6 +80,8 @@ class FragmentPersistent : Fragment() {
     private fun initView() {
         initRecyclerView()
         initButton()
+        initData()
+        resetAllViewAndData()
     }
 
     private fun checkAllItem(status: Boolean) {
@@ -91,12 +97,14 @@ class FragmentPersistent : Fragment() {
     private fun initToolBar() {
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
                 if (AdapterPersistent.editMode || AdapterOtherFolder.editMode) {
                     menu.clear()
                     menuInflater.inflate(R.menu.toolbar_menu_persistent, menu)
                     menu[0].actionView?.findViewById<View>(R.id.checkbox)?.setOnClickListener {
                         checkAllItem(menu[0].actionView?.findViewById<CheckBox>(R.id.checkbox)?.isChecked == true)
                     }
+                    checkItem()
                 } else {
                     menu.clear()
                 }
@@ -146,7 +154,9 @@ class FragmentPersistent : Fragment() {
                     getString(R.string.picture),
                     getString(R.string.picture_lower)
                 )
-                binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_empty_picture,0,0)
+                binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(
+                    0, R.drawable.ic_empty_picture, 0, 0
+                )
             }
             Constant.TYPE_AUDIOS -> {
                 viewModel.getAudioChildFromFolder(
@@ -157,7 +167,9 @@ class FragmentPersistent : Fragment() {
                     getString(R.string.audio),
                     getString(R.string.audio_lower)
                 )
-                binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_empty_audio,0,0)
+                binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(
+                    0, R.drawable.ic_empty_audio, 0, 0
+                )
 
             }
             Constant.TYPE_VIDEOS -> {
@@ -169,7 +181,9 @@ class FragmentPersistent : Fragment() {
                     getString(R.string.video),
                     getString(R.string.video_lower)
                 )
-                binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_empty_video,0,0)
+                binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(
+                    0, R.drawable.ic_empty_video, 0, 0
+                )
 
             }
             Constant.TYPE_FILE -> {
@@ -179,7 +193,9 @@ class FragmentPersistent : Fragment() {
                     getString(R.string.file),
                     getString(R.string.file_lower)
                 )
-                binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_empty_file,0,0)
+                binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(
+                    0, R.drawable.ic_empty_file, 0, 0
+                )
 
             }
             else -> {
@@ -189,7 +205,9 @@ class FragmentPersistent : Fragment() {
                     getString(R.string.file),
                     getString(R.string.file_lower)
                 )
-                binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_empty_file,0,0)
+                binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(
+                    0, R.drawable.ic_empty_file, 0, 0
+                )
             }
         }
     }
@@ -208,6 +226,10 @@ class FragmentPersistent : Fragment() {
                 if (it.isNotEmpty()) {
                     binding.tvEmpty.hide()
                 } else {
+                    adapterPersistent?.changeToNormalView()
+                    adapterOtherFolder?.changeToNormalView()
+                    initToolBar()
+                    (requireActivity() as ActivityVault).setupActionBar()
                     binding.tvEmpty.show()
                 }
             }
@@ -288,9 +310,40 @@ class FragmentPersistent : Fragment() {
             Constant.TYPE_AUDIOS -> getString(R.string.audios)
             else -> getString(R.string.files)
         }
-        val confirmDialog = DialogConfirm(callBack = object : ConfirmDialogCallBack {
-            override fun onPositiveClicked() {
+        val confirmDialog = DialogConfirm(onPositiveClicked = {
 
+            if (requireContext().config.moveToRecyclerBin) {
+                FileUtils.copyMoveTo(listItemSelected.map { it.mPath },
+                    requireContext().config.recyclerBinFolder.path,
+                    false,
+                    object : IMoveFile {
+                        override fun onSuccess() {
+                            getDataFile()
+                            showSnackBar(
+                                getString(R.string.move_to_recycler_bin), SnackBarType.SUCCESS
+                            )
+                        }
+
+                        override fun onFailed() {
+                        }
+
+                        override fun onDoneWithWarning() {
+                        }
+
+                    })
+            } else {
+                viewModel.deleteMultipleFolder(listItemSelected.map { it.mPath },
+                    object : IDeleteFile {
+                        override fun onSuccess() {
+                            getDataFile()
+                            showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
+                        }
+
+                        override fun onFailed() {
+                            showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
+                        }
+
+                    })
             }
 
         }, DialogConfirmType.DELETE, name)
@@ -299,13 +352,18 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun share() {
-
+        requireContext().shareFile(listItemSelected.map { it.mPath })
     }
 
     private fun slideShow() {
-        ShareData.getInstance().setListItemImage(listItemSelected)
-        val intent = Intent(requireContext(), ActivityImageDetail::class.java)
-        startActivity(intent)
+        if (listItemSelected.size <= 1) {
+            toast(getString(R.string.require_size_more_than_1))
+        } else {
+            ShareData.getInstance().setListItemImage(listItemSelected)
+            val intent = Intent(requireContext(), ActivityImageDetail::class.java)
+            startActivity(intent)
+        }
+
     }
 
     private fun showDialogUnlock() {
@@ -316,15 +374,46 @@ class FragmentPersistent : Fragment() {
             Constant.TYPE_AUDIOS -> getString(R.string.audios)
             else -> getString(R.string.files)
         }
-        val confirmDialog = DialogConfirm(callBack = object : ConfirmDialogCallBack {
-            override fun onPositiveClicked() {
-
-            }
+        val confirmDialog = DialogConfirm(onPositiveClicked = {
 
         }, DialogConfirmType.UNLOCK, name)
 
         confirmDialog.show(childFragmentManager, confirmDialog.tag)
     }
+    private fun unLockPicture() {
+        lifecycleScope.launch {
+            val listPath = mutableListOf<String>()
+            listPath.add(currentItem?.path.toString())
+
+            val item = config.listItemVault?.firstOrNull {
+                it.path == currentItem?.path
+            }
+            FileUtils.copyMoveTo(listPath,
+                item?.originalPath.toString(),
+                false,
+                object : IMoveFile {
+                    override fun onSuccess() {
+                        listItem.remove(currentItem)
+                        if (listItem.isEmpty()) {
+                            ShareData.getInstance().setListItemImage(mutableListOf())
+                            finish()
+                        } else {
+                            ShareData.getInstance().setListItemImage(listItem)
+                        }
+                    }
+
+                    override fun onFailed() {
+
+                    }
+
+                    override fun onDoneWithWarning() {
+
+                    }
+
+                })
+        }
+    }
+
 
 
     private fun editHome() {
@@ -343,7 +432,6 @@ class FragmentPersistent : Fragment() {
             adapterPersistent = AdapterPersistent(onClickItem = {
                 handleClickItem(it)
             }, onLongClickItem = {
-                Log.d("TAG", "initRecyclerView: "+it.size)
                 listItemSelected.clear()
                 listItemSelected.addAll(it)
                 initToolBar()
@@ -383,6 +471,7 @@ class FragmentPersistent : Fragment() {
                 listItemSelected.addAll(it)
                 initToolBar()
                 editHome()
+                checkItem()
                 showController()
 
             }, onSelectAll = {
@@ -425,6 +514,7 @@ class FragmentPersistent : Fragment() {
 
     override fun onDestroy() {
         AdapterPersistent.editMode = false
+        AdapterOtherFolder.editMode = false
         super.onDestroy()
 //        _binding = null
     }

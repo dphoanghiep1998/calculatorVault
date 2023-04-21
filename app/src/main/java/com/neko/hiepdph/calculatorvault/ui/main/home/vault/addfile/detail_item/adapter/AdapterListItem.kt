@@ -17,11 +17,11 @@ import com.neko.hiepdph.calculatorvault.databinding.LayoutItemPictureBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutItemVideosBinding
 
 
-class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
+class AdapterListItem(private val onClickItem: (MutableSet<ListItem>) -> Unit) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var listItem = mutableListOf<ListItem>()
     private var mType: String = Constant.TYPE_PICTURE
-    private var listPath = mutableSetOf<String>()
+    private var listItemSelected = mutableSetOf<ListItem>()
 
     fun setData(listDataItem: List<ListItem>, type: String) {
         mType = type
@@ -30,15 +30,14 @@ class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
     }
 
     fun selectAll() {
-        listItem.forEach {
-            listPath.add(it.mPath)
-        }
-        notifyItemRangeChanged(0, listItem.size)
+        listItemSelected.clear()
+        listItemSelected.addAll(listItem)
+        notifyDataSetChanged()
     }
 
     fun unSelectAll() {
-        listPath.clear()
-        notifyItemRangeChanged(0, listItem.size)
+        listItemSelected.clear()
+        notifyDataSetChanged()
     }
 
     inner class ItemPictureViewHolder(val binding: LayoutItemPictureBinding) :
@@ -110,24 +109,24 @@ class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
                         .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
-                    binding.checkBox.isChecked = item.mPath in listPath
+                    binding.checkBox.isChecked = item in listItemSelected
                     binding.root.setOnClickListener {
                         binding.checkBox.isChecked = !binding.checkBox.isChecked
                         if (binding.checkBox.isChecked) {
-                            listPath.add(item.path)
+                            listItemSelected.add(item)
                         } else {
-                            listPath.remove(item.path)
+                            listItemSelected.remove(item)
                         }
-                        onClickItem.invoke(listPath)
+                        onClickItem.invoke(listItemSelected)
                     }
                     binding.checkBox.setOnClickListener {
                         binding.checkBox.isChecked = !binding.checkBox.isChecked
                         if (binding.checkBox.isChecked) {
-                            listPath.add(item.path)
+                            listItemSelected.add(item)
                         } else {
-                            listPath.remove(item.path)
+                            listItemSelected.remove(item)
                         }
-                        onClickItem.invoke(listPath)
+                        onClickItem.invoke(listItemSelected)
                     }
                 }
             }
@@ -139,25 +138,25 @@ class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
                     Glide.with(itemView.context).load(item.path).apply(requestOptions)
                         .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
                     binding.tvDuration.text = item.getDuration(itemView.context).toString()
-                    binding.checkBox.isChecked = item.mPath in listPath
+                    binding.checkBox.isChecked = item in listItemSelected
 
                     binding.root.setOnClickListener {
                         binding.checkBox.isChecked = !binding.checkBox.isChecked
                         if (binding.checkBox.isChecked) {
-                            listPath.add(item.path)
+                            listItemSelected.add(item)
                         } else {
-                            listPath.remove(item.path)
+                            listItemSelected.remove(item)
                         }
-                        onClickItem.invoke(listPath)
+                        onClickItem.invoke(listItemSelected)
                     }
                     binding.checkBox.setOnClickListener {
                         binding.checkBox.isChecked = !binding.checkBox.isChecked
                         if (binding.checkBox.isChecked) {
-                            listPath.add(item.path)
+                            listItemSelected.add(item)
                         } else {
-                            listPath.remove(item.path)
+                            listItemSelected.remove(item)
                         }
-                        onClickItem.invoke(listPath)
+                        onClickItem.invoke(listItemSelected)
                     }
                 }
             }
@@ -172,26 +171,26 @@ class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
                     binding.tvNameAudio.isSelected = true
 
                     binding.tvNameAudio.text = item.name
-                    binding.checkbox.isChecked = item.mPath in listPath
+                    binding.checkbox.isChecked = item in listItemSelected
                     binding.tvDurationAuthor.text = item.getDuration(itemView.context).toString()
                     binding.root.setOnClickListener {
                         binding.checkbox.isChecked = !binding.checkbox.isChecked
                         if (binding.checkbox.isChecked) {
-                            listPath.add(item.path)
+                            listItemSelected.add(item)
                         } else {
-                            listPath.remove(item.path)
+                            listItemSelected.remove(item)
                         }
-                        onClickItem.invoke(listPath)
+                        onClickItem.invoke(listItemSelected)
                     }
 
                     binding.checkbox.setOnClickListener {
                         binding.checkbox.isChecked = !binding.checkbox.isChecked
                         if (binding.checkbox.isChecked) {
-                            listPath.add(item.path)
+                            listItemSelected.add(item)
                         } else {
-                            listPath.remove(item.path)
+                            listItemSelected.remove(item)
                         }
-                        onClickItem.invoke(listPath)
+                        onClickItem.invoke(listItemSelected)
                     }
                 }
             }
@@ -202,27 +201,27 @@ class AdapterListItem(private val onClickItem: (MutableSet<String>) -> Unit) :
                     binding.tvNameDocument.isSelected = true
                     Glide.with(itemView.context).load(getImageForItemFile(item))
                         .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
-                    binding.checkbox.isChecked = item.mPath in listPath
+                    binding.checkbox.isChecked = item in listItemSelected
 
                     binding.tvNameDocument.text = item.name
                     binding.tvSize.text = item.mSize.formatSize()
                     binding.root.setOnClickListener {
                         binding.checkbox.isChecked = !binding.checkbox.isChecked
                         if (binding.checkbox.isChecked) {
-                            listPath.add(item.path)
+                            listItemSelected.add(item)
                         } else {
-                            listPath.remove(item.path)
+                            listItemSelected.remove(item)
                         }
-                        onClickItem.invoke(listPath)
+                        onClickItem.invoke(listItemSelected)
                     }
                     binding.checkbox.setOnClickListener {
                         binding.checkbox.isChecked = !binding.checkbox.isChecked
                         if (binding.checkbox.isChecked) {
-                            listPath.add(item.path)
+                            listItemSelected.add(item)
                         } else {
-                            listPath.remove(item.path)
+                            listItemSelected.remove(item)
                         }
-                        onClickItem.invoke(listPath)
+                        onClickItem.invoke(listItemSelected)
                     }
                 }
             }

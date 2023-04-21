@@ -53,12 +53,11 @@ enum class DialogConfirmType(
 
 }
 
-interface ConfirmDialogCallBack {
-    fun onPositiveClicked()
-}
+
 
 class DialogConfirm(
-    private val callBack: ConfirmDialogCallBack,
+    private val onPositiveClicked: () -> Unit,
+
     private val dialogType: DialogConfirmType,
     val name: String?
 ) : DialogFragment() {
@@ -111,7 +110,7 @@ class DialogConfirm(
     private fun initButton() {
         binding.btnConfirm.clickWithDebounce {
             dismiss()
-            callBack.onPositiveClicked()
+            onPositiveClicked()
         }
         binding.btnCancel.clickWithDebounce {
             dismiss()

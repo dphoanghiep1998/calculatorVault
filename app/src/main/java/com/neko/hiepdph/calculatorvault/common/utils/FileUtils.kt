@@ -2,7 +2,6 @@ package com.neko.hiepdph.calculatorvault.common.utils
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
@@ -62,7 +61,7 @@ object FileUtils {
 
     fun createSecretFile(parentDir: File, name: String, callback: ICreateFile) {
         try {
-            if(!parentDir.exists()){
+            if (!parentDir.exists()) {
                 parentDir.mkdir()
             }
             val folder = File(parentDir, name)
@@ -80,7 +79,7 @@ object FileUtils {
     }
 
     fun getFoldersInDirectory(dir: String): List<File> {
-        Log.d("TAG", "getFoldersInDirectory: "+dir)
+        Log.d("TAG", "getFoldersInDirectory: " + dir)
 
         val listOfFolder = mutableListOf<File>()
         return try {
@@ -92,7 +91,7 @@ object FileUtils {
                     listOfFolder.add(file)
                 }
             }
-            Log.d("TAG", "getFoldersInDirectory: "+listOfFolder.size)
+            Log.d("TAG", "getFoldersInDirectory: " + listOfFolder.size)
             listOfFolder
         } catch (e: Exception) {
             e.printStackTrace()
@@ -102,6 +101,7 @@ object FileUtils {
     }
 
     fun getFileInDirectory(dir: String): List<ListItem> {
+        Log.d("TAG", "getFileInDirectory: " + dir)
         val listOfFolder = mutableListOf<ListItem>()
         return try {
             val directory = File(dir)
@@ -178,6 +178,27 @@ object FileUtils {
         }
     }
 
+    fun deleteMultipleFolderInDirectory(pathFolder: List<String>, callback: IDeleteFile) {
+        try {
+            var count = 0
+            pathFolder.forEach {
+                val folder = File(it)
+                val delete = folder.deleteRecursively()
+                if (delete) {
+                    count++
+                }
+            }
+            if (count == pathFolder.size) {
+                callback.onSuccess()
+            }
+
+
+        } catch (e: Exception) {
+            callback.onFailed()
+            e.printStackTrace()
+        }
+    }
+
     fun copyMoveTo(
         filePath: List<String>, destinationPath: String, isCopy: Boolean, callback: IMoveFile
     ) {
@@ -238,7 +259,6 @@ object FileUtils {
             callback.onFailed()
         }
     }
-
 
 
 }

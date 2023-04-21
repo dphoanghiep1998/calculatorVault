@@ -212,6 +212,50 @@ object MediaStoreUtils {
             null
         }
     }
+    fun getAllImage(context: Context):List<ListItem>{
+        try {
+            val listImageChild = mutableListOf<ListItem>()
+            val uri = MediaStore.Images.Media.getContentUri("external")
+            val projection = arrayOf(
+                MediaStore.Images.Media.DATA,
+                MediaStore.Images.Media.DISPLAY_NAME,
+                MediaStore.Images.Media.SIZE,
+                MediaStore.Images.Media.DATE_MODIFIED,
+                MediaStore.Images.Media._ID
+            )
+            val sortOrder = "${MediaStore.Images.Media.DATE_MODIFIED} DESC"
+
+
+            context.queryCursor(uri, projection,sortOrder=sortOrder) { cursor ->
+
+                val id = cursor.getLongValue(MediaStore.Images.Media._ID)
+                val childPath = cursor.getStringValue(MediaStore.Images.Media.DATA)
+                val size = cursor.getLongValue(MediaStore.Images.Media.SIZE)
+                val modified = cursor.getLongValue(MediaStore.Images.Media.SIZE)
+                val name = cursor.getStringValue(MediaStore.Images.Media.DISPLAY_NAME)
+
+                if (childPath.isNotBlank()) {
+                    listImageChild.add(
+                        ListItem(
+                            id,
+                            childPath,
+                            childPath,
+                            name,
+                            false,
+                            0,
+                            size,
+                            modified,
+                            Constant.TYPE_PICTURE
+                        )
+                    )
+                }
+            }
+            return listImageChild
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return mutableListOf()
+        }
+    }
 
     fun getChildImageFromPath(context: Context, path: String): List<ListItem> {
         try {

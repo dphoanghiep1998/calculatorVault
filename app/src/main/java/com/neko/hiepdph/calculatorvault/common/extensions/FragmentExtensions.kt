@@ -13,6 +13,7 @@ import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -75,6 +76,9 @@ fun Fragment.popBackStack() {
 
 fun Fragment.toastLocation(){
     Log.d("TAG", "I am in : ${this::class.java}")
+}
+fun Fragment.toast(mess:String){
+  Toast.makeText(requireContext(),mess,Toast.LENGTH_SHORT).show()
 }
 
 fun Fragment.getColor(res: Int): Int {

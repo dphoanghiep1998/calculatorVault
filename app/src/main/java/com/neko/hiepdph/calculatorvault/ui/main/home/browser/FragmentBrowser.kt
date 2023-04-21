@@ -20,7 +20,6 @@ import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.data.database.model.BookmarkModel
 import com.neko.hiepdph.calculatorvault.databinding.FragmentBrowserBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutMenuBrowserOptionBinding
-import com.neko.hiepdph.calculatorvault.dialog.ConfirmDialogCallBack
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityBrowser
@@ -186,11 +185,8 @@ class FragmentBrowser : Fragment() {
     }
 
     private fun showDialogConfirmDelete(id: Int) {
-        val confirmDialog = DialogConfirm(callBack = object : ConfirmDialogCallBack {
-            override fun onPositiveClicked() {
+        val confirmDialog = DialogConfirm(onPositiveClicked= {
                 viewModel.deleteBookmark(id)
-            }
-
         }, DialogConfirmType.DELETE, getString(R.string.this_bookmark))
 
         confirmDialog.show(childFragmentManager, confirmDialog.tag)

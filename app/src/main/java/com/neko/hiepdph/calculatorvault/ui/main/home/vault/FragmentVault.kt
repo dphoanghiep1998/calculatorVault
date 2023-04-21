@@ -68,16 +68,20 @@ class FragmentVault : Fragment() {
         observeListFile()
         Log.d("TAG", "onSuccess: ")
 
+
+    }
+
+    override fun onResume() {
+        super.onResume()
         viewModel.getListFolderInVault(
             requireContext(), requireContext().config.privacyFolder
         )
-
     }
 
     private fun observeListFile() {
         viewModel.listFolderInVault.observe(viewLifecycleOwner) {
-            adapter.setData(sortList(it))
-            binding.swipeLayout.isRefreshing = false
+            adapter?.setData(sortList(it))
+            binding?.swipeLayout?.isRefreshing = false
         }
     }
 
@@ -167,30 +171,27 @@ class FragmentVault : Fragment() {
                 }
             }
         }, onDeletePress = {
-            val dialogConfirm = DialogConfirm(object : ConfirmDialogCallBack {
-                override fun onPositiveClicked() {
-                    val callback = object : IDeleteFile {
-                        override fun onSuccess() {
-                            viewModel.getListFolderInVault(
-                                requireContext(), requireContext().config.privacyFolder
-                            )
-                            lifecycleScope.launch(Dispatchers.Main) {
-                                showSnackBar(
-                                    getString(R.string.delete_success), SnackBarType.SUCCESS
-                                )
-                            }
-
-                        }
-
-                        override fun onFailed() {
+            val dialogConfirm = DialogConfirm(onPositiveClicked = {
+                val callback = object : IDeleteFile {
+                    override fun onSuccess() {
+                        viewModel.getListFolderInVault(
+                            requireContext(), requireContext().config.privacyFolder
+                        )
+                        lifecycleScope.launch(Dispatchers.Main) {
                             showSnackBar(
-                                getString(R.string.delete_failed), SnackBarType.FAILED
+                                getString(R.string.delete_success), SnackBarType.SUCCESS
                             )
                         }
 
                     }
-                    viewModel.deleteFolder(it.path, callback)
+                    override fun onFailed() {
+                        showSnackBar(
+                            getString(R.string.delete_failed), SnackBarType.FAILED
+                        )
+                    }
+
                 }
+                viewModel.deleteFolder(it.path, callback)
             }, DialogConfirmType.DELETE, it.name)
 
             dialogConfirm.show(parentFragmentManager, dialogConfirm.tag)

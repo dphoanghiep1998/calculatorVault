@@ -22,7 +22,16 @@ class PersistentViewModel @Inject constructor() : ViewModel() {
         _listItemListPersistent.postValue(list)
     }
 
-
+    fun deleteFolder(path: String, callback: IDeleteFile) {
+        viewModelScope.launch(Dispatchers.IO) {
+            FileUtils.deleteFolderInDirectory(path, callback)
+        }
+    }
+    fun deleteMultipleFolder(path: List<String>, callback: IDeleteFile) {
+        viewModelScope.launch(Dispatchers.IO) {
+            FileUtils.deleteMultipleFolderInDirectory(path, callback)
+        }
+    }
 
 
     fun getImageChildFromFolder(path: String) {

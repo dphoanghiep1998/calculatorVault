@@ -7,8 +7,8 @@ import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionN
 import java.io.File
 
 open class FileDirItem(
-    val path: String,
-    val ownerPath: String,
+    var path: String,
+    val originalPath: String,
     val name: String = "",
     var isDirectory: Boolean = false,
     var children: Int = 0,
@@ -18,7 +18,7 @@ open class FileDirItem(
 ) {
 
     override fun toString() =
-        "FileDirItem(path=$path, name=$name, isDirectory=$isDirectory, children=$children, size=$size, modified=$modified, mediaStoreId=$mediaStoreId)"
+        "FileDirItem(path=$path,originalPath=$originalPath, name=$name, isDirectory=$isDirectory, children=$children, size=$size, modified=$modified, mediaStoreId=$mediaStoreId)"
 
     fun getExtension() = if (isDirectory) name else path.substringAfterLast(".", "")
 

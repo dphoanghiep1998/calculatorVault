@@ -1,12 +1,8 @@
 package com.neko.hiepdph.calculatorvault.viewmodel
 
-import android.content.Context
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neko.hiepdph.calculatorvault.R
-import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.utils.*
 import com.neko.hiepdph.calculatorvault.data.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel

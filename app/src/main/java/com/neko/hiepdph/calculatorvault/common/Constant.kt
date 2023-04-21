@@ -2,6 +2,8 @@ package com.neko.hiepdph.calculatorvault.common
 
 
 object Constant {
+    const val KEY_LIST_ITEM_VAULT ="KEY_LIST_ITEM_VAULT"
+
     const val INTERNAL_STORAGE_PATH ="INTERNAL_STORAGE_PATH"
     const val EXTERNAL_STORAGE_PATH ="internal_storage_path"
     const val KEY_IMAGE_INTENT = "KEY_IMAGE_INTENT"
