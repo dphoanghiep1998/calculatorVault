@@ -239,6 +239,7 @@
     <string name="enter_new_name">Enter new name</string>
     <string name="error_rename">Can not rename this folder.</string>
     <string name="require_character">Folder name contains invalid characters.</string>
-    <string name="require_size_more_than_1">Please select at least 2 items to use this features.</string>
+    <string name="require_size_more_than_2">Please select at least 2 items to use this features.</string>
+    <string name="require_size_more_than_1">Please select at least 1 items to use this features.</string>
     <string name="move_to_recycler_bin">File is moved to Recycler Bin</string>
 </resources>

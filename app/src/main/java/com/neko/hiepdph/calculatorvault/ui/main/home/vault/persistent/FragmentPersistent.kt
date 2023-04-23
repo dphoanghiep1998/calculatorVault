@@ -19,9 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
-import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
-import com.neko.hiepdph.calculatorvault.common.utils.IDeleteFile
-import com.neko.hiepdph.calculatorvault.common.utils.IMoveFile
+import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentPersistentBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogAddFile
@@ -35,6 +33,7 @@ import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.Ad
 import com.neko.hiepdph.calculatorvault.viewmodel.PersistentViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.io.File
 
 @AndroidEntryPoint
 class FragmentPersistent : Fragment() {
@@ -282,7 +281,11 @@ class FragmentPersistent : Fragment() {
         }
 
         binding.tvUnlock.clickWithDebounce {
-            showDialogUnlock()
+            if (listItemSelected.isNotEmpty()) {
+                showDialogUnlock()
+            } else {
+                toast(getString(R.string.require_size_more_than_1))
+            }
         }
         binding.tvSlideshow.clickWithDebounce {
             slideShow()
@@ -313,39 +316,30 @@ class FragmentPersistent : Fragment() {
         val confirmDialog = DialogConfirm(onPositiveClicked = {
 
             if (requireContext().config.moveToRecyclerBin) {
-                FileUtils.copyMoveTo(listItemSelected.map { it.mPath },
-                    requireContext().config.recyclerBinFolder.path,
-                    false,
-                    object : IMoveFile {
-                        override fun onSuccess() {
-                            getDataFile()
-                            showSnackBar(
-                                getString(R.string.move_to_recycler_bin), SnackBarType.SUCCESS
-                            )
-                        }
+                CopyFiles.copy(requireContext(),
+                    listItemSelected.map { File(it.mPath) }.toMutableList(),
+                    requireContext().config.recyclerBinFolder,
+                    0L,
+                    progress = { _: Int, _: Float, _: File? -> },
+                    true,
+                    onSuccess = {
+                        getDataFile()
+                        showSnackBar(
+                            getString(R.string.move_to_recycler_bin), SnackBarType.SUCCESS
+                        )
+                    },
 
-                        override fun onFailed() {
-                        }
-
-                        override fun onDoneWithWarning() {
-                        }
-
-                    })
+                    onError = {})
             } else {
                 viewModel.deleteMultipleFolder(listItemSelected.map { it.mPath },
-                    object : IDeleteFile {
-                        override fun onSuccess() {
-                            getDataFile()
-                            showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
-                        }
-
-                        override fun onFailed() {
-                            showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
-                        }
-
+                    onSuccess = {
+                        getDataFile()
+                        showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
+                    },
+                    onError = {
+                        showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
                     })
             }
-
         }, DialogConfirmType.DELETE, name)
 
         confirmDialog.show(childFragmentManager, confirmDialog.tag)
@@ -380,40 +374,10 @@ class FragmentPersistent : Fragment() {
 
         confirmDialog.show(childFragmentManager, confirmDialog.tag)
     }
+
     private fun unLockPicture() {
-        lifecycleScope.launch {
-            val listPath = mutableListOf<String>()
-            listPath.add(currentItem?.path.toString())
 
-            val item = config.listItemVault?.firstOrNull {
-                it.path == currentItem?.path
-            }
-            FileUtils.copyMoveTo(listPath,
-                item?.originalPath.toString(),
-                false,
-                object : IMoveFile {
-                    override fun onSuccess() {
-                        listItem.remove(currentItem)
-                        if (listItem.isEmpty()) {
-                            ShareData.getInstance().setListItemImage(mutableListOf())
-                            finish()
-                        } else {
-                            ShareData.getInstance().setListItemImage(listItem)
-                        }
-                    }
-
-                    override fun onFailed() {
-
-                    }
-
-                    override fun onDoneWithWarning() {
-
-                    }
-
-                })
-        }
     }
-
 
 
     private fun editHome() {
@@ -471,7 +435,6 @@ class FragmentPersistent : Fragment() {
                 listItemSelected.addAll(it)
                 initToolBar()
                 editHome()
-                checkItem()
                 showController()
 
             }, onSelectAll = {

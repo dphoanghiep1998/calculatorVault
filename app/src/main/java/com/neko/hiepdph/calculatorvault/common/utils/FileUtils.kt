@@ -10,29 +10,7 @@ import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import java.io.File
 import java.util.*
 
-interface IDeleteFile {
-    fun onSuccess()
-    fun onFailed()
 
-}
-
-interface IRenameFile {
-    fun onSuccess()
-    fun onFailed()
-
-}
-
-interface ICreateFile {
-    fun onSuccess()
-    fun onFailed()
-}
-
-interface IMoveFile {
-    fun onSuccess()
-    fun onFailed()
-
-    fun onDoneWithWarning()
-}
 
 object FileUtils {
     fun generateFile(context: Context, fileName: String): File? {
@@ -59,28 +37,8 @@ object FileUtils {
         return intent
     }
 
-    fun createSecretFile(parentDir: File, name: String, callback: ICreateFile) {
-        try {
-            if (!parentDir.exists()) {
-                parentDir.mkdir()
-            }
-            val folder = File(parentDir, name)
-            if (!folder.exists()) {
-                folder.mkdir()
-                callback.onSuccess()
-            } else {
-                callback.onFailed()
-            }
-        } catch (e: Exception) {
-            callback.onFailed()
-            e.printStackTrace()
-        }
-
-    }
 
     fun getFoldersInDirectory(dir: String): List<File> {
-        Log.d("TAG", "getFoldersInDirectory: " + dir)
-
         val listOfFolder = mutableListOf<File>()
         return try {
             val directory = File(dir)
@@ -91,7 +49,6 @@ object FileUtils {
                     listOfFolder.add(file)
                 }
             }
-            Log.d("TAG", "getFoldersInDirectory: " + listOfFolder.size)
             listOfFolder
         } catch (e: Exception) {
             e.printStackTrace()
@@ -101,59 +58,60 @@ object FileUtils {
     }
 
     fun getFileInDirectory(dir: String): List<ListItem> {
-        Log.d("TAG", "getFileInDirectory: " + dir)
         val listOfFolder = mutableListOf<ListItem>()
         return try {
             val directory = File(dir)
             val files = directory.listFiles()
-            for (file in files) {
-                var type = ""
-                var realType: String? = null
-                when {
-                    getMimeType(file.path).contains("image") -> type = Constant.TYPE_PICTURE
-                    getMimeType(file.path).contains("video") -> type = Constant.TYPE_VIDEOS
-                    getMimeType(file.path).contains("audio") || Constant.extraAudioMimeTypes.contains(
-                        getMimeType(file.path)
-                    ) -> type = Constant.TYPE_AUDIOS
-                    else -> {
-                        type = Constant.TYPE_FILE
+            files?.let {
+                for (file in it) {
+                    var type: String
+                    var realType: String? = null
+                    when {
+                        getMimeType(file.path).contains("image") -> type = Constant.TYPE_PICTURE
+                        getMimeType(file.path).contains("video") -> type = Constant.TYPE_VIDEOS
+                        getMimeType(file.path).contains("audio") || Constant.extraAudioMimeTypes.contains(
+                            getMimeType(file.path)
+                        ) -> type = Constant.TYPE_AUDIOS
+                        else -> {
+                            type = Constant.TYPE_FILE
 
-                        if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF)) {
-                            realType = Constant.TYPE_PDF
-                        } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_CSV)) {
-                            realType = Constant.TYPE_CSV
-                        } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPT)) {
-                            realType = Constant.TYPE_PPT
-                        } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPT)) {
-                            realType = Constant.TYPE_PPTX
-                        } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_TEXT)) {
-                            realType = Constant.TYPE_TEXT
-                        } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORD)) {
-                            realType = Constant.TYPE_WORD
-                        } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_EXCEL)) {
-                            realType = Constant.TYPE_EXCEL
-                        } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORDX)) {
-                            realType = Constant.TYPE_WORD
-                        } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_ZIP)) {
-                            realType = Constant.TYPE_ZIP
+                            if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF)) {
+                                realType = Constant.TYPE_PDF
+                            } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_CSV)) {
+                                realType = Constant.TYPE_CSV
+                            } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPT)) {
+                                realType = Constant.TYPE_PPT
+                            } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPT)) {
+                                realType = Constant.TYPE_PPTX
+                            } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_TEXT)) {
+                                realType = Constant.TYPE_TEXT
+                            } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORD)) {
+                                realType = Constant.TYPE_WORD
+                            } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_EXCEL)) {
+                                realType = Constant.TYPE_EXCEL
+                            } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORDX)) {
+                                realType = Constant.TYPE_WORD
+                            } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_ZIP)) {
+                                realType = Constant.TYPE_ZIP
+                            }
                         }
                     }
-                }
 
-                listOfFolder.add(
-                    ListItem(
-                        0,
-                        file.path,
-                        file.path,
-                        file.name,
-                        false,
-                        0,
-                        file.length(),
-                        file.lastModified(),
-                        type,
-                        realType
+                    listOfFolder.add(
+                        ListItem(
+                            0,
+                            file.path,
+                            file.path,
+                            file.name,
+                            false,
+                            0,
+                            file.length(),
+                            file.lastModified(),
+                            type,
+                            realType
+                        )
                     )
-                )
+                }
             }
             listOfFolder
         } catch (e: Exception) {
@@ -163,22 +121,22 @@ object FileUtils {
 
     }
 
-    fun deleteFolderInDirectory(pathFolder: String, callback: IDeleteFile) {
+    fun deleteFolderInDirectory(pathFolder: String, onSuccess: () -> Unit,onError: (message: String) -> Unit) {
         try {
             val folder = File(pathFolder)
             val delete = folder.deleteRecursively()
             if (delete) {
-                callback.onSuccess()
+              onSuccess()
             } else {
-                callback.onFailed()
+                onError("Can not delete file/folder")
             }
         } catch (e: Exception) {
-            callback.onFailed()
-            e.printStackTrace()
+            onError(e.message.toString())
+
         }
     }
 
-    fun deleteMultipleFolderInDirectory(pathFolder: List<String>, callback: IDeleteFile) {
+    fun deleteMultipleFolderInDirectory(pathFolder: List<String>,onSuccess: () -> Unit,onError: (message: String) -> Unit) {
         try {
             var count = 0
             pathFolder.forEach {
@@ -189,63 +147,25 @@ object FileUtils {
                 }
             }
             if (count == pathFolder.size) {
-                callback.onSuccess()
+                onSuccess()
             }
 
 
         } catch (e: Exception) {
-            callback.onFailed()
-            e.printStackTrace()
-        }
-    }
-
-    fun copyMoveTo(
-        filePath: List<String>, destinationPath: String, isCopy: Boolean, callback: IMoveFile
-    ) {
-        try {
-
-
-            val directory = File(destinationPath)
-            if (!directory.exists()) {
-                directory.mkdirs()
-            }
-            filePath.forEach {
-                val sourceFile = File(it)
-                var newName = sourceFile.name
-                var counter = 1
-
-                while (File(directory, newName).exists()) {
-                    newName = "${sourceFile.nameWithoutExtension}($counter).${sourceFile.extension}"
-                    counter++
-                }
-                val destinationFile = File(directory, newName)
-                sourceFile.copyTo(destinationFile)
-            }
-
-            if (!isCopy) {
-                filePath.forEach {
-                    val sourceFile = File(it)
-                    sourceFile.delete()
-                }
-            }
-            callback.onSuccess()
-
-        } catch (e: Exception) {
-            callback.onFailed()
-            e.printStackTrace()
+            onError(e.message.toString())
         }
     }
 
     private fun getMimeType(url: String): String {
         var type = ""
-        var extension = MimeTypeMap.getFileExtensionFromUrl(url)
+        val extension = MimeTypeMap.getFileExtensionFromUrl(url)
         if (extension != null) {
             type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension).toString()
         }
         return type
     }
 
-    fun renameFile(oldFile: File, name: String, callback: IRenameFile) {
+    fun renameFile(oldFile: File, name: String, onSuccess: () -> Unit, onError: (message:String) -> Unit) {
         try {
             val newFile = File(oldFile.parentFile?.path + "/$name")
             if (oldFile.isDirectory) {
@@ -253,10 +173,9 @@ object FileUtils {
             } else {
                 org.apache.commons.io.FileUtils.moveFile(oldFile, newFile)
             }
-            callback.onSuccess()
+            onSuccess()
         } catch (e: Exception) {
-            e.printStackTrace()
-            callback.onFailed()
+            onError(e.message.toString())
         }
     }
 

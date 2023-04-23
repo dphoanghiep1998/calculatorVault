@@ -6,14 +6,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neko.hiepdph.calculatorvault.common.Constant
-import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
-import com.neko.hiepdph.calculatorvault.common.utils.IMoveFile
-import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
-import com.neko.hiepdph.calculatorvault.common.utils.SelfCleaningLiveData
+import com.neko.hiepdph.calculatorvault.common.utils.*
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -52,9 +50,16 @@ class ListItemViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun copyMoveFile(listPath: List<String>, destinationPath: String, callback: IMoveFile) {
+    fun copyMoveFile(
+        context: Context,
+        listFile: MutableList<File>,
+        destination: File,
+        progress:(state:Int,value:Float,currentFile:File?)->Unit,
+        onSuccess: () -> Unit,
+        onError: (t: Throwable) -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
-            FileUtils.copyMoveTo(listPath, destinationPath, false, callback)
+            CopyFiles.copy(context,listFile, destination,0L, progress,true, onSuccess,onError)
         }
     }
 }

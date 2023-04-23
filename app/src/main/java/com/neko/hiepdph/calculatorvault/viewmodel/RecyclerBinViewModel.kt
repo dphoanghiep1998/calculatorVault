@@ -22,14 +22,14 @@ class RecyclerBinViewModel @Inject constructor() : ViewModel() {
         _listItemListRecyclerBin.postValue(list)
     }
 
-    fun deleteFolder(path: String, callback: IDeleteFile) {
+    fun deleteFolder(path: String,onSuccess:()->Unit,onError:(e:String)->Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            FileUtils.deleteFolderInDirectory(path, callback)
+            FileUtils.deleteFolderInDirectory(path, onSuccess,onError)
         }
     }
-    fun deleteMultipleFolder(path: List<String>, callback: IDeleteFile) {
+    fun deleteMultipleFolder(path: List<String>, onSuccess:()->Unit,onError:(e:String)->Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            FileUtils.deleteMultipleFolderInDirectory(path, callback)
+            FileUtils.deleteMultipleFolderInDirectory(path, onSuccess,onError)
         }
     }
 

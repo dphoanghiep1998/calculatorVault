@@ -412,7 +412,7 @@ class AdapterPersistent(
 
 
 private fun getImageForItemFile(item: ListItem): Int {
-    return when (item.type) {
+    return when (item.realType) {
         Constant.TYPE_WORDX -> R.drawable.ic_docx
         Constant.TYPE_WORD -> R.drawable.ic_doc
         Constant.TYPE_CSV -> R.drawable.ic_csv

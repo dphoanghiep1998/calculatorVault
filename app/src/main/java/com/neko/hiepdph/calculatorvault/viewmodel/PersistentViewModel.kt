@@ -22,38 +22,38 @@ class PersistentViewModel @Inject constructor() : ViewModel() {
         _listItemListPersistent.postValue(list)
     }
 
-    fun deleteFolder(path: String, callback: IDeleteFile) {
+    fun deleteFolder(path: String, onSuccess: () -> Unit, onError: (e: String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            FileUtils.deleteFolderInDirectory(path, callback)
+            FileUtils.deleteFolderInDirectory(path, onSuccess, onError)
         }
     }
-    fun deleteMultipleFolder(path: List<String>, callback: IDeleteFile) {
+
+    fun deleteMultipleFolder(
+        path: List<String>, onSuccess: () -> Unit, onError: (e: String) -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
-            FileUtils.deleteMultipleFolderInDirectory(path, callback)
+            FileUtils.deleteMultipleFolderInDirectory(path, onSuccess, onError)
         }
     }
 
 
     fun getImageChildFromFolder(path: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val listImageChild =
-                FileUtils.getFileInDirectory(path).toMutableList()
+            val listImageChild = FileUtils.getFileInDirectory(path).toMutableList()
             setListItemPersistentData(listImageChild)
         }
     }
 
     fun getAudioChildFromFolder(path: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val listAudioChild =
-                FileUtils.getFileInDirectory(path).toMutableList()
+            val listAudioChild = FileUtils.getFileInDirectory(path).toMutableList()
             setListItemPersistentData(listAudioChild)
         }
     }
 
     fun getVideoChildFromFolder(path: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val listVideoChild =
-                FileUtils.getFileInDirectory(path).toMutableList()
+            val listVideoChild = FileUtils.getFileInDirectory(path).toMutableList()
             setListItemPersistentData(listVideoChild)
 
         }
@@ -61,20 +61,17 @@ class PersistentViewModel @Inject constructor() : ViewModel() {
 
     fun getFileChildFromFolder(path: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val listFileChild =
-                FileUtils.getFileInDirectory(path).toMutableList()
+            val listFileChild = FileUtils.getFileInDirectory(path).toMutableList()
             setListItemPersistentData(listFileChild)
         }
     }
 
-    fun getAllFileChildFromFolder(path: String){
+    fun getAllFileChildFromFolder(path: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val listFileChild =
-                FileUtils.getFileInDirectory(path).toMutableList()
+            val listFileChild = FileUtils.getFileInDirectory(path).toMutableList()
             setListItemPersistentData(listFileChild)
         }
     }
-
 
 
 }

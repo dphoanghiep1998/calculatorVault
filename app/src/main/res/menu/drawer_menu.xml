@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <group android:checkableBehavior="single">
         <item
             android:id="@id/fragmentVault"
@@ -18,7 +19,8 @@
             android:icon="@drawable/ic_delete"
             android:title="@string/recycle_bin" />
 
-
+    </group>
+    <group>
         <item
             android:id="@id/fragmentSetting"
             android:icon="@drawable/ic_setting"
@@ -31,6 +33,7 @@
         <item
             android:id="@+id/item_theme"
             android:icon="@drawable/ic_dark_theme"
+            app:actionLayout="@layout/layout_switch_menu"
             android:title="@string/dark_theme" />
         <item
             android:id="@+id/item_rate_app"

@@ -8,10 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
-import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
-import com.neko.hiepdph.calculatorvault.common.utils.ICreateFile
-import com.neko.hiepdph.calculatorvault.common.utils.IDeleteFile
-import com.neko.hiepdph.calculatorvault.common.utils.IRenameFile
+import com.neko.hiepdph.calculatorvault.common.utils.*
 import com.neko.hiepdph.calculatorvault.data.model.VaultFileDirItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -84,21 +81,21 @@ class VaultViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun deleteFolder(path: String, callback: IDeleteFile) {
+    fun deleteFolder(path: String,onSuccess: () -> Unit,onError: (e: String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            FileUtils.deleteFolderInDirectory(path, callback)
+            FileUtils.deleteFolderInDirectory(path, onSuccess,onError)
         }
     }
 
-    fun createFolder(file: File, name: String, callback: ICreateFile) {
+    fun createFolder(file: File, name: String, onSuccess: () -> Unit = {},onError: (e: String) -> Unit ={}) {
         viewModelScope.launch(Dispatchers.IO) {
-            FileUtils.createSecretFile(file, name, callback)
+            CreateFile.createFileDirectory(file, name, onSuccess,onError)
         }
     }
 
-    fun renameFolder(file: File,name:String,callback: IRenameFile){
+    fun renameFolder(file: File,name:String,onSuccess:()->Unit,onError:(e:String)->Unit){
         viewModelScope.launch (Dispatchers.IO){
-            FileUtils.renameFile(file,name,callback)
+            FileUtils.renameFile(file,name,onSuccess, onError)
         }
     }
 }

@@ -21,16 +21,16 @@
     <TextView
         android:id="@+id/tv_name_quantity"
         android:layout_width="0dp"
-        android:layout_height="@dimen/_30sdp"
+        android:layout_height="wrap_content"
         android:background="@drawable/bg_blur_corner_bottom"
         android:ellipsize="end"
         android:gravity="center_vertical"
         android:maxLines="1"
+        android:paddingVertical="@dimen/_8sdp"
         android:paddingHorizontal="@dimen/_6sdp"
         android:textColor="@color/neutral_01"
         android:textSize="@dimen/_10sdp"
         app:layout_constraintBottom_toBottomOf="@id/imv_thumb"
         app:layout_constraintEnd_toEndOf="@id/imv_thumb"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@id/imv_thumb" />
 </androidx.constraintlayout.widget.ConstraintLayout>

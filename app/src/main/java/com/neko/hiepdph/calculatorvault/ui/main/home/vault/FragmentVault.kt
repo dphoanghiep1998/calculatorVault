@@ -20,9 +20,7 @@ import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.enums.Order
 import com.neko.hiepdph.calculatorvault.common.enums.Sort
 import com.neko.hiepdph.calculatorvault.common.extensions.*
-import com.neko.hiepdph.calculatorvault.common.utils.ICreateFile
-import com.neko.hiepdph.calculatorvault.common.utils.IDeleteFile
-import com.neko.hiepdph.calculatorvault.common.utils.IRenameFile
+
 import com.neko.hiepdph.calculatorvault.data.model.VaultFileDirItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentVaultBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutMenuOptionBinding
@@ -41,7 +39,7 @@ class FragmentVault : Fragment() {
     private var _binding: FragmentVaultBinding? = null
     private val binding get() = _binding!!
     private lateinit var popupWindow: PopupWindow
-    private lateinit var adapter: AdapterFolder
+    private  var adapter: AdapterFolder ?= null
     private val viewModel by activityViewModels<VaultViewModel>()
 
     companion object {
@@ -66,11 +64,7 @@ class FragmentVault : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initView()
         observeListFile()
-        Log.d("TAG", "onSuccess: ")
-
-
     }
-
     override fun onResume() {
         super.onResume()
         viewModel.getListFolderInVault(
@@ -172,26 +166,20 @@ class FragmentVault : Fragment() {
             }
         }, onDeletePress = {
             val dialogConfirm = DialogConfirm(onPositiveClicked = {
-                val callback = object : IDeleteFile {
-                    override fun onSuccess() {
-                        viewModel.getListFolderInVault(
-                            requireContext(), requireContext().config.privacyFolder
-                        )
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            showSnackBar(
-                                getString(R.string.delete_success), SnackBarType.SUCCESS
-                            )
-                        }
-
-                    }
-                    override fun onFailed() {
+                viewModel.deleteFolder(it.path, onSuccess = {
+                    viewModel.getListFolderInVault(
+                        requireContext(), requireContext().config.privacyFolder
+                    )
+                    lifecycleScope.launch(Dispatchers.Main) {
                         showSnackBar(
-                            getString(R.string.delete_failed), SnackBarType.FAILED
+                            getString(R.string.delete_success), SnackBarType.SUCCESS
                         )
                     }
-
-                }
-                viewModel.deleteFolder(it.path, callback)
+                }, onError = {
+                    showSnackBar(
+                        getString(R.string.delete_failed), SnackBarType.FAILED
+                    )
+                })
             }, DialogConfirmType.DELETE, it.name)
 
             dialogConfirm.show(parentFragmentManager, dialogConfirm.tag)
@@ -213,25 +201,28 @@ class FragmentVault : Fragment() {
     private fun openRenameDialog(path: String) {
         val dialogRenameFolder = DialogRenameFolder(object : RenameDialogCallBack {
             override fun onPositiveClicked(name: String) {
-                val pattern = Pattern.compile("[a-zA-Z0-9_-]+")
+                val pattern = Pattern.compile("[a-zA-Z\\d_-]+")
                 val matcher = pattern.matcher(name)
                 if (!matcher.matches()) {
                     showSnackBar(getString(R.string.require_character), SnackBarType.FAILED)
                     return
                 } else {
-                    viewModel.renameFolder(File(path), name, object : IRenameFile {
-                        override fun onSuccess() {
+                    viewModel.renameFolder(
+                        File(path),
+                        name,
+                        onSuccess = {
                             viewModel.getListFolderInVault(
                                 requireContext(), requireContext().config.privacyFolder
                             )
                             showSnackBar(getString(R.string.error_rename), SnackBarType.SUCCESS)
+                        },
+                        onError = {
+                            showSnackBar(
+                                getString(R.string.error_rename),
+                                SnackBarType.FAILED
+                            )
                         }
-
-                        override fun onFailed() {
-                            showSnackBar(getString(R.string.error_rename), SnackBarType.FAILED)
-                        }
-
-                    })
+                    )
                 }
 
             }
@@ -251,32 +242,24 @@ class FragmentVault : Fragment() {
     }
 
     private fun showAddFolderDialog() {
-        Log.d("TAG", "showAddFolderDialog: ")
         val dialogAddNewFolder = DialogAddNewFolder(object : AddNewFolderDialogCallBack {
             override fun onPositiveClicked(name: String) {
-                val callback = object : ICreateFile {
-                    override fun onSuccess() {
-
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            showSnackBar(
-                                getString(R.string.create_success), SnackBarType.SUCCESS
-                            )
-                        }
-                        viewModel.getListFolderInVault(
-                            requireContext(), requireContext().config.privacyFolder
+                viewModel.createFolder(requireContext().config.privacyFolder, name, onSuccess = {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        showSnackBar(
+                            getString(R.string.create_success), SnackBarType.SUCCESS
                         )
                     }
-
-                    override fun onFailed() {
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            showSnackBar(
-                                getString(R.string.create_failed), SnackBarType.FAILED
-                            )
-                        }
+                    viewModel.getListFolderInVault(
+                        requireContext(), requireContext().config.privacyFolder
+                    )
+                }, onError = {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        showSnackBar(
+                            getString(R.string.create_failed), SnackBarType.FAILED
+                        )
                     }
-
-                }
-                viewModel.createFolder(requireContext().config.privacyFolder, name, callback)
+                })
             }
 
         })

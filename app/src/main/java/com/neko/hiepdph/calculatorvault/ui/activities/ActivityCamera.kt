@@ -8,13 +8,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.neko.hiepdph.calculatorvault.common.extensions.config
-import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
-import com.neko.hiepdph.calculatorvault.common.utils.IMoveFile
+import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityCameraBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.io.File
 
 @AndroidEntryPoint
 class ActivityCamera : AppCompatActivity() {
@@ -66,25 +66,23 @@ class ActivityCamera : AppCompatActivity() {
                         listItemVault.addAll(newList)
                         config.listItemVault = listItemVault
 
-                        FileUtils.copyMoveTo(listItemDiff.map { item -> item.mPath },
-                            config.picturePrivacyFolder.path,
+                        CopyFiles.copy(
+                            this@ActivityCamera,
+                            listItemDiff.map { item -> File(item.path) }.toMutableList(),
+                            config.picturePrivacyFolder,
+                            0L,
+                            progress = { state: Int, value: Float, currentFile: File? ->
+
+                            },
                             false,
-                            object : IMoveFile {
-                                override fun onSuccess() {
-                                    Log.d("TAG", "onSuccess: ")
-                                    finish()
-                                }
+                            onError = {
+                                finish()
+                            },
+                            onSuccess = {
+                                finish()
+                            }
+                        )
 
-                                override fun onFailed() {
-                                    Log.d("TAG", "onFailed: ")
-                                    finish()
-                                }
-
-                                override fun onDoneWithWarning() {
-                                    finish()
-                                }
-
-                            })
                     } else {
                         finish()
                     }

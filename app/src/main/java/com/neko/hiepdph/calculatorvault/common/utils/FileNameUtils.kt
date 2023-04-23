@@ -112,7 +112,6 @@ object FileNameUtils {
         if (!folder.exists() || !folder.isDirectory) {
             return false
         }
-
         // Find a non-existing file in this directory.
         var i = 0
         var file: File
@@ -125,14 +124,11 @@ object FileNameUtils {
         if (isWritable(file)) {
             return true
         }
-
         // Next check SAF writability.
         val document: DocumentFile = getDocumentFile(file, false, c) ?: return false
-
         // This should have created the file - otherwise something is wrong with access URL.
 //        val result = document.canWrite() && file.exists()
         val result = document.canWrite()
-
         // Ensure that the dummy file is not remaining.
         deleteFile(file, c)
         return result

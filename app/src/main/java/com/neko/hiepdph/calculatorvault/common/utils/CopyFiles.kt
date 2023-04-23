@@ -18,7 +18,6 @@ const val STATE_PROCESSING = 2
 private const val STATE_DONE = 3
 
 object CopyFiles {
-
     fun copy(
         context: Context,
         files: MutableList<File>?,
@@ -32,14 +31,11 @@ object CopyFiles {
         try {
             if (files?.isEmpty() == true) return
             var totalSize = 0L
-            if (tSize == 0L)
-                files?.forEach {
-                    totalSize += calFolderSize(it)
-                }
+            if (tSize == 0L) files?.forEach {
+                totalSize += calFolderSize(it)
+            }
             else totalSize = tSize
-
             var currentSize = 0f
-
             // move file
             files?.forEach { itemFile ->
                 val targetFile = if (itemFile.isDirectory) {
@@ -48,17 +44,13 @@ object CopyFiles {
                     File(createNewFile(context, targetFolder, itemFile.name))
                 }
 
-                copyDirectoryOneLocationToAnotherLocation(context,
-                    itemFile,
-                    targetFile,
+                copyDirectoryOneLocationToAnotherLocation(context, itemFile, targetFile,
                     // on progress
                     { len, file ->
                         run {
                             currentSize += len
                             progress(
-                                STATE_PROCESSING,
-                                (currentSize * 100 / tSize).toFloat(),
-                                file
+                                STATE_PROCESSING, (currentSize * 100 / tSize).toFloat(), file
                             )
                         }
                     },
@@ -104,17 +96,13 @@ object CopyFiles {
 //                } else {
             var targetFile = File(createNewFile(context, targetFolder, file.name))
 //                }
-            copyDirectoryOneLocationToAnotherLocation(context,
-                file,
-                targetFile,
+            copyDirectoryOneLocationToAnotherLocation(context, file, targetFile,
                 // on progress
                 { len, file ->
                     run {
                         currentSize += len
                         progress(
-                            STATE_PROCESSING,
-                            (currentSize * 100 / tSize).toFloat(),
-                            file
+                            STATE_PROCESSING, (currentSize * 100 / tSize).toFloat(), file
                         )
                     }
                 },
@@ -184,8 +172,7 @@ object CopyFiles {
                     } else {
                         newIndex = currentIndex + 1
                         newName = name.substring(
-                            0,
-                            lastIndexOpen
+                            0, lastIndexOpen
                         ) + "($newIndex)" + if (TextUtils.isEmpty(extension)) "" else ".$extension"
                     }
                 }

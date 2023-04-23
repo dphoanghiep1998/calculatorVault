@@ -28,7 +28,6 @@ import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
-import com.neko.hiepdph.calculatorvault.common.utils.ICreateFile
 import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionS
 import com.neko.hiepdph.calculatorvault.config.LockType
 import com.neko.hiepdph.calculatorvault.config.LockWhenLeavingApp
@@ -84,20 +83,12 @@ class ActivityVault : AppCompatActivity() {
 
     private fun createSecretFolderFirstTime() {
         if (!AppSharePreference.INSTANCE.getInitDone(false)) {
-            val callback = object : ICreateFile {
-                override fun onSuccess() {
 
-                }
-
-                override fun onFailed() {
-
-                }
-            }
-            viewModel.createFolder(config.privacyFolder, Constant.PICTURE_FOLDER_NAME, callback)
-            viewModel.createFolder(config.privacyFolder, Constant.VIDEOS_FOLDER_NAME, callback)
-            viewModel.createFolder(config.privacyFolder, Constant.AUDIOS_FOLDER_NAME, callback)
-            viewModel.createFolder(config.privacyFolder, Constant.FILES_FOLDER_NAME, callback)
-            viewModel.createFolder(filesDir, Constant.RECYCLER_BIN_FOLDER_NAME, callback)
+            viewModel.createFolder(config.privacyFolder, Constant.PICTURE_FOLDER_NAME)
+            viewModel.createFolder(config.privacyFolder, Constant.VIDEOS_FOLDER_NAME)
+            viewModel.createFolder(config.privacyFolder, Constant.AUDIOS_FOLDER_NAME)
+            viewModel.createFolder(config.privacyFolder, Constant.FILES_FOLDER_NAME)
+            viewModel.createFolder(filesDir, Constant.RECYCLER_BIN_FOLDER_NAME)
             AppSharePreference.INSTANCE.saveInitFirstDone(true)
             viewModel.getListFolderInVault(this,config.privacyFolder)
         }

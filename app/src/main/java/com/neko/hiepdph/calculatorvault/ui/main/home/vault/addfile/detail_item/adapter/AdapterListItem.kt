@@ -110,6 +110,7 @@ class AdapterListItem(private val onClickItem: (MutableSet<ListItem>) -> Unit) :
                     Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
                         .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
                     binding.checkBox.isChecked = item in listItemSelected
+
                     binding.root.setOnClickListener {
                         binding.checkBox.isChecked = !binding.checkBox.isChecked
                         if (binding.checkBox.isChecked) {

@@ -3,8 +3,8 @@ package com.neko.hiepdph.calculatorvault.viewmodel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neko.hiepdph.calculatorvault.common.utils.CreateFile
 import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
-import com.neko.hiepdph.calculatorvault.common.utils.ICreateFile
 import com.neko.hiepdph.calculatorvault.data.repositories.AppRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -19,9 +19,9 @@ class AppViewModel @Inject constructor(
     var userActionRate = false
     var shouldShowRate = MutableLiveData(false)
 
-    fun createFolder(parentDir: File, fileName: String,callback:ICreateFile) {
+    fun createFolder(parentDir: File, fileName: String,onSuccess:()->Unit,onError:(e:String)->Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            FileUtils.createSecretFile(parentDir, fileName,callback)
+            CreateFile.createFileDirectory(parentDir, fileName,onSuccess,onError)
         }
     }
 

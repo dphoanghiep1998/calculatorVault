@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
-import com.neko.hiepdph.calculatorvault.common.utils.IMoveFile
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentListItemBinding
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
@@ -26,6 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 
 @AndroidEntryPoint
 class FragmentListItem : Fragment() {
@@ -88,34 +88,31 @@ class FragmentListItem : Fragment() {
 
     private fun initButton() {
         binding.btnMoveToVault.clickWithDebounce {
-            viewModel.copyMoveFile(listItemSelected.map { it.mPath },
-                args.vaultPath,
-                object : IMoveFile {
-                    override fun onSuccess() {
-                        val newList = listItemSelected.toMutableList()
-                        newList.forEach {
-                            it.path = args.vaultPath+"/${it.mName}"
-                        }
-                        val listItemVault = requireContext().config.listItemVault?.toMutableList()
-                            ?: mutableListOf()
-                        listItemVault.addAll(newList)
-                        requireContext().config.listItemVault = listItemVault
-                        CoroutineScope(Dispatchers.Main).launch {
-                            observeData()
-                            adapterListItem?.unSelectAll()
-                            listItemSelected.clear()
-                            checkListPath()
-                            checkCheckBoxAll()
-                        }
-                    }
+            viewModel.copyMoveFile(requireContext(),
+                listItemSelected.map { File(it.mPath) }.toMutableList(),
+                File(args.vaultPath),
+                progress = { state: Int, value: Float, currentFile: File? ->
+                    Log.d("TAG", "progress: ")
 
-                    override fun onFailed() {
-                        Log.d("TAG", "failed: ")
+                },
+                onSuccess = {
+                    Log.d("TAG", "initButton: ")
+                    val newList = listItemSelected.toMutableList()
+                    newList.forEach {
+                        it.path = args.vaultPath + "/${it.mName}"
                     }
-
-                    override fun onDoneWithWarning() {
+                    val listItemVault = requireContext().config.listItemVault?.toMutableList()
+                        ?: mutableListOf()
+                    listItemVault.addAll(newList)
+                    requireContext().config.listItemVault = listItemVault
+                    CoroutineScope(Dispatchers.Main).launch {
+                        observeData()
+                        adapterListItem?.unSelectAll()
+                        listItemSelected.clear()
+                        checkListPath()
+                        checkCheckBoxAll()
                     }
-
+                }, onError = {
                 })
         }
     }
