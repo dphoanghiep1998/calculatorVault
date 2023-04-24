@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.text.TextUtils
+import android.util.Log
 import com.google.common.io.Files.getNameWithoutExtension
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.copyDirectoryOneLocationToAnotherLocation
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.createNewFile
@@ -44,6 +45,58 @@ object CopyFiles {
                     File(createNewFile(context, targetFolder, itemFile.name))
                 }
 
+                copyDirectoryOneLocationToAnotherLocation(context, itemFile, targetFile,
+                    // on progress
+                    { len, file ->
+                        run {
+                            currentSize += len
+                            progress(
+                                STATE_PROCESSING, (currentSize * 100 / tSize).toFloat(), file
+                            )
+                        }
+                    },
+                    // on finish
+                    { sourceFile, targetFile ->
+                        if (isMove) {
+                            deleteFile(sourceFile, context)
+                        }
+                        addMedia(context, targetFile)
+                        onSuccess()
+                    })
+            }
+
+        } catch (e: Exception) {
+            onError(e)
+        }
+    }
+
+    fun copy(
+        context: Context,
+        files: MutableList<File>?,
+        targetFolder: MutableList<File>,
+        tSize: Long,
+        progress: (state: Int, value: Float, currentFile: File?) -> Unit,
+        isMove: Boolean = false,
+        onSuccess: () -> Unit = {},
+        onError: (t: Throwable) -> Unit = {},
+    ) {
+        try {
+            if (files?.isEmpty() == true) return
+            var totalSize = 0L
+            if (tSize == 0L) files?.forEach {
+                totalSize += calFolderSize(it)
+            }
+            else totalSize = tSize
+            var currentSize = 0f
+            // move file
+            files?.forEachIndexed { index, itemFile ->
+                val targetFile = if (itemFile.isDirectory) {
+                    File(createNewFolder(context, targetFolder[index], itemFile.name))
+
+                } else {
+                    File(createNewFile(context, targetFolder[index], itemFile.name).toString())
+
+                }
                 copyDirectoryOneLocationToAnotherLocation(context, itemFile, targetFile,
                     // on progress
                     { len, file ->

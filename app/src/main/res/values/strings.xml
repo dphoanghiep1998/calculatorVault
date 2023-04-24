@@ -242,4 +242,14 @@
     <string name="require_size_more_than_2">Please select at least 2 items to use this features.</string>
     <string name="require_size_more_than_1">Please select at least 1 items to use this features.</string>
     <string name="move_to_recycler_bin">File is moved to Recycler Bin</string>
+    <string name="all_files">all files</string>
+    <string name="restore">Restore</string>
+    <string name="restore_instruction">Do you want to restore this file?</string>
+    <string name="restore_successfully">Restore successfully</string>
+    <string name="restore_failed">Restore failed !</string>
+    <string name="selected_file">selected files</string>
+    <string name="no_files">No files!</string>
+    <string name="rename_successfully">Rename successfully!</string>
+    <string name="empty_bin_instruction">Empty files from recycle Bin is permanent. Are you sure want to empty?</string>
+    <string name="no">No</string>
 </resources>

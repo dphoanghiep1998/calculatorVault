@@ -2,14 +2,12 @@ package com.neko.hiepdph.calculatorvault.common.utils
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import java.io.File
 import java.util.*
-
 
 
 object FileUtils {
@@ -64,12 +62,17 @@ object FileUtils {
             val files = directory.listFiles()
             files?.let {
                 for (file in it) {
+
                     var type: String
                     var realType: String? = null
                     when {
-                        getMimeType(file.path).contains("image") -> type = Constant.TYPE_PICTURE
+                        getMimeType(file.path).contains("image") || checkImageExtension(
+                            file.path
+                        ) -> type = Constant.TYPE_PICTURE
                         getMimeType(file.path).contains("video") -> type = Constant.TYPE_VIDEOS
-                        getMimeType(file.path).contains("audio") || Constant.extraAudioMimeTypes.contains(
+                        getMimeType(
+                            file.path
+                        ).contains("audio") || Constant.extraAudioMimeTypes.contains(
                             getMimeType(file.path)
                         ) -> type = Constant.TYPE_AUDIOS
                         else -> {
@@ -77,21 +80,37 @@ object FileUtils {
 
                             if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF)) {
                                 realType = Constant.TYPE_PDF
-                            } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_CSV)) {
+                            } else if (file.name.lowercase(Locale.ROOT)
+                                    .endsWith(Constant.TYPE_CSV)
+                            ) {
                                 realType = Constant.TYPE_CSV
-                            } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPT)) {
+                            } else if (file.name.lowercase(Locale.ROOT)
+                                    .endsWith(Constant.TYPE_PPT)
+                            ) {
                                 realType = Constant.TYPE_PPT
-                            } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPT)) {
+                            } else if (file.name.lowercase(Locale.ROOT)
+                                    .endsWith(Constant.TYPE_PPT)
+                            ) {
                                 realType = Constant.TYPE_PPTX
-                            } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_TEXT)) {
+                            } else if (file.name.lowercase(Locale.ROOT)
+                                    .endsWith(Constant.TYPE_TEXT)
+                            ) {
                                 realType = Constant.TYPE_TEXT
-                            } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORD)) {
+                            } else if (file.name.lowercase(Locale.ROOT)
+                                    .endsWith(Constant.TYPE_WORD)
+                            ) {
                                 realType = Constant.TYPE_WORD
-                            } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_EXCEL)) {
+                            } else if (file.name.lowercase(Locale.ROOT)
+                                    .endsWith(Constant.TYPE_EXCEL)
+                            ) {
                                 realType = Constant.TYPE_EXCEL
-                            } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORDX)) {
+                            } else if (file.name.lowercase(Locale.ROOT)
+                                    .endsWith(Constant.TYPE_WORDX)
+                            ) {
                                 realType = Constant.TYPE_WORD
-                            } else if (file.name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_ZIP)) {
+                            } else if (file.name.lowercase(Locale.ROOT)
+                                    .endsWith(Constant.TYPE_ZIP)
+                            ) {
                                 realType = Constant.TYPE_ZIP
                             }
                         }
@@ -121,12 +140,23 @@ object FileUtils {
 
     }
 
-    fun deleteFolderInDirectory(pathFolder: String, onSuccess: () -> Unit,onError: (message: String) -> Unit) {
+    private fun checkImageExtension(path: String): Boolean {
+        Constant.photoExtensions.forEach {
+            if (path.endsWith(it)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    fun deleteFolderInDirectory(
+        pathFolder: String, onSuccess: () -> Unit, onError: (message: String) -> Unit
+    ) {
         try {
             val folder = File(pathFolder)
             val delete = folder.deleteRecursively()
             if (delete) {
-              onSuccess()
+                onSuccess()
             } else {
                 onError("Can not delete file/folder")
             }
@@ -136,7 +166,35 @@ object FileUtils {
         }
     }
 
-    fun deleteMultipleFolderInDirectory(pathFolder: List<String>,onSuccess: () -> Unit,onError: (message: String) -> Unit) {
+    fun deleteAllChildInDirectory(
+        path: String, onSuccess: () -> Unit, onError: (message: String) -> Unit
+    ) {
+        try {
+            val folder = File(path)
+            folder.listFiles()?.let {
+                val size = it.size
+                var count = 0
+                for (file in it) {
+                    val delete = file.deleteRecursively()
+                    if (delete) {
+                        count++
+                    }
+                }
+                if(count == size - 1){
+                    onSuccess()
+                }else{
+                    onError("Can not delete file/folder")
+                }
+            }
+        } catch (e: Exception) {
+            onError(e.message.toString())
+
+        }
+    }
+
+    fun deleteMultipleFolderInDirectory(
+        pathFolder: List<String>, onSuccess: () -> Unit, onError: (message: String) -> Unit
+    ) {
         try {
             var count = 0
             pathFolder.forEach {
@@ -165,7 +223,9 @@ object FileUtils {
         return type
     }
 
-    fun renameFile(oldFile: File, name: String, onSuccess: () -> Unit, onError: (message:String) -> Unit) {
+    fun renameFile(
+        oldFile: File, name: String, onSuccess: () -> Unit, onError: (message: String) -> Unit
+    ) {
         try {
             val newFile = File(oldFile.parentFile?.path + "/$name")
             if (oldFile.isDirectory) {

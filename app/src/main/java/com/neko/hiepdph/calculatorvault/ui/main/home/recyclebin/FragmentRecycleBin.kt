@@ -2,6 +2,7 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.recyclebin
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.CheckBox
 import androidx.core.content.ContextCompat
@@ -14,17 +15,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
-import com.neko.hiepdph.calculatorvault.common.extensions.config
+import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentRecycleBinBinding
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityImageDetail
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.main.home.recyclebin.adapter.AdapterRecyclerBin
-import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterOtherFolder
-import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterPersistent
 import com.neko.hiepdph.calculatorvault.viewmodel.RecyclerBinViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
 
 @AndroidEntryPoint
 class FragmentRecycleBin : Fragment() {
@@ -33,7 +35,8 @@ class FragmentRecycleBin : Fragment() {
     private val viewModel by viewModels<RecyclerBinViewModel>()
 
     private var adapterRecycleBin: AdapterRecyclerBin? = null
-    private var listItemSelected:MutableList<ListItem> = mutableListOf()
+    private var listItemSelected: MutableList<ListItem> = mutableListOf()
+    private var sizeList = 0
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -56,14 +59,13 @@ class FragmentRecycleBin : Fragment() {
                     menu.clear()
                     menuInflater.inflate(R.menu.toolbar_menu_recycler_bin_edit_mode, menu)
                     menu[2].actionView?.findViewById<View>(R.id.checkbox)?.setOnClickListener {
-                        checkAllItem(menu[0].actionView?.findViewById<CheckBox>(R.id.checkbox)?.isChecked == true)
+                        checkAllItem(menu[2].actionView?.findViewById<CheckBox>(R.id.checkbox)?.isChecked == true)
                     }
                     checkItem()
                 } else {
                     menu.clear()
                     menuInflater.inflate(R.menu.toolbar_menu_recycler_bin, menu)
                 }
-
             }
 
 
@@ -77,11 +79,11 @@ class FragmentRecycleBin : Fragment() {
                             true
                         }
                         R.id.restore_item -> {
-
+                            restore()
                             true
                         }
                         R.id.delete_item -> {
-
+                            deletePermanent()
                             true
                         }
                         else -> false
@@ -89,11 +91,11 @@ class FragmentRecycleBin : Fragment() {
                 } else {
                     when (menuItem.itemId) {
                         R.id.edit_item -> {
-
+                            changeToEditView()
                             true
                         }
-                        R.id.delete_item -> {
-
+                        R.id.delete_all_item -> {
+                            deleteAll()
                             true
                         }
                         else -> false
@@ -104,16 +106,43 @@ class FragmentRecycleBin : Fragment() {
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
+    private fun changeToEditView() {
+        if(sizeList == 0){
+            toast(getString(R.string.require_size_more_than_1))
+            return
+        }
+        adapterRecycleBin?.changeToEditView()
+        initToolBar()
+        editHome()
+    }
+
     private fun getData() {
-        viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
+        viewModel.getAllFileChildFromFolder(
+            requireContext().config.recyclerBinFolder.path
+        )
         viewModel.listItemListRecyclerBin.observe(viewLifecycleOwner) {
             it?.let {
                 adapterRecycleBin?.setData(it)
+                sizeList = it.size
+
+                if (it.isEmpty()) {
+                    binding.tvEmpty.show()
+                } else {
+                    binding.tvEmpty.hide()
+                }
+                adapterRecycleBin?.changeToNormalView()
+                initToolBar()
+                (requireActivity() as ActivityVault).setupActionBar()
             }
         }
     }
 
     private fun checkItem() {
+        val checkbox =
+            (requireActivity() as ActivityVault).getToolbar().menu[2].actionView?.findViewById<CheckBox>(
+                R.id.checkbox
+            )
+        checkbox?.isChecked = listItemSelected.size == sizeList && sizeList > 0
 
     }
 
@@ -128,12 +157,12 @@ class FragmentRecycleBin : Fragment() {
     }
 
     private fun initView() {
+        binding.tvEmpty.text = getString(R.string.no_files)
         initRecyclerView()
     }
 
     private fun initRecyclerView() {
-        adapterRecycleBin = AdapterRecyclerBin(
-            onClickItem = {
+        adapterRecycleBin = AdapterRecyclerBin(onClickItem = {
             handleClickItem(it)
         }, onLongClickItem = {
             listItemSelected.clear()
@@ -182,6 +211,79 @@ class FragmentRecycleBin : Fragment() {
 
             }
         }
+    }
+
+    private fun restore() {
+        if (listItemSelected.isEmpty()) {
+            toast(getString(R.string.require_size_more_than_1))
+            return
+        }
+        val listToRestore = mutableListOf<File>()
+        listItemSelected.forEach {
+            val item = requireContext().config.listPathRecyclerBin?.find { item ->
+                it.path == item.recyclerBinPath
+            }
+            if (item != null) {
+                listToRestore.add(File(item.vaultPath))
+            }
+        }
+
+        val dialogConfirm = DialogConfirm(onPositiveClicked = {
+
+            viewModel.restoreFile(requireContext(),
+                listItemSelected.map { File(it.path) }.toMutableList(),
+                listToRestore,
+                0L,
+                progress = { _: Int, _: Float, _: File? -> },
+                true,
+                onSuccess = {
+                    showSnackBar(getString(R.string.restore_successfully), SnackBarType.SUCCESS)
+                },
+                onError = {
+                    Log.d("TAG", "restore: " + it)
+                    showSnackBar(getString(R.string.restore_failed), SnackBarType.FAILED)
+                })
+        }, DialogConfirmType.RESTORE, null)
+
+        dialogConfirm.show(childFragmentManager, dialogConfirm.tag)
+    }
+
+    private fun deletePermanent() {
+        if (listItemSelected.isEmpty()) {
+            toast(getString(R.string.require_size_more_than_1))
+            return
+        }
+        val dialogConfirm = DialogConfirm(onPositiveClicked = {
+            viewModel.deleteSelectedFile(listItemSelected.map { it.path }, onSuccess = {
+                showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
+                viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
+            }, onError = {
+                showSnackBar(getString(R.string.delete_failed), SnackBarType.FAILED)
+                viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
+            })
+        }, DialogConfirmType.DELETE, getString(R.string.selected_file))
+
+        dialogConfirm.show(childFragmentManager, dialogConfirm.tag)
+    }
+
+    private fun deleteAll() {
+        if (sizeList == 0) {
+            toast(getString(R.string.require_size_more_than_1))
+            return
+        }
+        val dialogConfirm = DialogConfirm(onPositiveClicked = {
+            viewModel.deleteAllRecyclerBin(requireContext().config.recyclerBinFolder.path,
+                onSuccess = {
+                    showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
+                    viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
+                },
+                onError = {
+                    showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
+                    viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
+                })
+        }, DialogConfirmType.EMPTY_BIN, null)
+
+        dialogConfirm.show(childFragmentManager, dialogConfirm.tag)
     }
 
     override fun onDestroy() {

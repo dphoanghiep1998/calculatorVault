@@ -11,7 +11,6 @@ import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +19,7 @@ import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
+import com.neko.hiepdph.calculatorvault.data.model.ItemMoved
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentPersistentBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogAddFile
@@ -32,7 +32,6 @@ import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.Ad
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterPersistent
 import com.neko.hiepdph.calculatorvault.viewmodel.PersistentViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import java.io.File
 
 @AndroidEntryPoint
@@ -145,9 +144,8 @@ class FragmentPersistent : Fragment() {
     private fun getDataFile() {
         when (args.type) {
             Constant.TYPE_PICTURE -> {
-                viewModel.getImageChildFromFolder(
-                    args.vaultPath
-                )
+                viewModel.getImageChildFromFolder(args.vaultPath)
+
                 binding.tvEmpty.text = String.format(
                     getString(R.string.empty_text),
                     getString(R.string.picture),
@@ -158,9 +156,8 @@ class FragmentPersistent : Fragment() {
                 )
             }
             Constant.TYPE_AUDIOS -> {
-                viewModel.getAudioChildFromFolder(
-                    args.vaultPath
-                )
+                viewModel.getAudioChildFromFolder(args.vaultPath)
+
                 binding.tvEmpty.text = String.format(
                     getString(R.string.empty_text),
                     getString(R.string.audio),
@@ -172,9 +169,7 @@ class FragmentPersistent : Fragment() {
 
             }
             Constant.TYPE_VIDEOS -> {
-                viewModel.getVideoChildFromFolder(
-                    args.vaultPath
-                )
+                viewModel.getVideoChildFromFolder(args.vaultPath)
                 binding.tvEmpty.text = String.format(
                     getString(R.string.empty_text),
                     getString(R.string.video),
@@ -229,6 +224,7 @@ class FragmentPersistent : Fragment() {
                     adapterOtherFolder?.changeToNormalView()
                     initToolBar()
                     (requireActivity() as ActivityVault).setupActionBar()
+                    binding.containerController.hide()
                     binding.tvEmpty.show()
                 }
             }
@@ -316,6 +312,17 @@ class FragmentPersistent : Fragment() {
         val confirmDialog = DialogConfirm(onPositiveClicked = {
 
             if (requireContext().config.moveToRecyclerBin) {
+                val listPathRecyclerBin =
+                    requireContext().config.listPathRecyclerBin?.toMutableList() ?: mutableListOf()
+
+                listPathRecyclerBin.addAll(listItemSelected.map {
+                    ItemMoved(
+                        args.vaultPath,
+                        requireContext().config.recyclerBinFolder.path + "/${it.name}"
+                    )
+                })
+                requireContext().config.listPathRecyclerBin = listPathRecyclerBin
+
                 CopyFiles.copy(requireContext(),
                     listItemSelected.map { File(it.mPath) }.toMutableList(),
                     requireContext().config.recyclerBinFolder,
@@ -331,14 +338,12 @@ class FragmentPersistent : Fragment() {
 
                     onError = {})
             } else {
-                viewModel.deleteMultipleFolder(listItemSelected.map { it.mPath },
-                    onSuccess = {
-                        getDataFile()
-                        showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
-                    },
-                    onError = {
-                        showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
-                    })
+                viewModel.deleteMultipleFolder(listItemSelected.map { it.mPath }, onSuccess = {
+                    getDataFile()
+                    showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
+                }, onError = {
+                    showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
+                })
             }
         }, DialogConfirmType.DELETE, name)
 

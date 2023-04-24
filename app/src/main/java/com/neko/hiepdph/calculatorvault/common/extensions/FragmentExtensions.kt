@@ -89,7 +89,7 @@ fun Fragment.getColor(res: Int): Int {
 @SuppressLint("ResourceAsColor")
 fun Fragment.showSnackBar(text: String, type: SnackBarType) {
     val snackBar: Snackbar =
-        Snackbar.make(requireActivity().window.decorView, text, Snackbar.LENGTH_SHORT)
+        Snackbar.make(requireView(), text, Snackbar.LENGTH_SHORT)
     snackBar.setAction("Action", null)
     when (type) {
         SnackBarType.FAILED -> snackBar.setBackgroundTint(requireContext().getColor(R.color.theme_01))
@@ -135,6 +135,8 @@ fun Fragment.setStatusColor(color: Int) {
     requireActivity().window.statusBarColor = ContextCompat.getColor(requireContext(), color)
 
 }
+
+
 
 fun hideSoftKeyboard(activity: Activity, view: View) {
     val inputMethodManager: InputMethodManager = activity.getSystemService(

@@ -121,7 +121,6 @@ class AdapterListItem(private val onClickItem: (MutableSet<ListItem>) -> Unit) :
                         onClickItem.invoke(listItemSelected)
                     }
                     binding.checkBox.setOnClickListener {
-                        binding.checkBox.isChecked = !binding.checkBox.isChecked
                         if (binding.checkBox.isChecked) {
                             listItemSelected.add(item)
                         } else {
@@ -151,7 +150,6 @@ class AdapterListItem(private val onClickItem: (MutableSet<ListItem>) -> Unit) :
                         onClickItem.invoke(listItemSelected)
                     }
                     binding.checkBox.setOnClickListener {
-                        binding.checkBox.isChecked = !binding.checkBox.isChecked
                         if (binding.checkBox.isChecked) {
                             listItemSelected.add(item)
                         } else {
@@ -185,7 +183,6 @@ class AdapterListItem(private val onClickItem: (MutableSet<ListItem>) -> Unit) :
                     }
 
                     binding.checkbox.setOnClickListener {
-                        binding.checkbox.isChecked = !binding.checkbox.isChecked
                         if (binding.checkbox.isChecked) {
                             listItemSelected.add(item)
                         } else {
@@ -216,7 +213,6 @@ class AdapterListItem(private val onClickItem: (MutableSet<ListItem>) -> Unit) :
                         onClickItem.invoke(listItemSelected)
                     }
                     binding.checkbox.setOnClickListener {
-                        binding.checkbox.isChecked = !binding.checkbox.isChecked
                         if (binding.checkbox.isChecked) {
                             listItemSelected.add(item)
                         } else {

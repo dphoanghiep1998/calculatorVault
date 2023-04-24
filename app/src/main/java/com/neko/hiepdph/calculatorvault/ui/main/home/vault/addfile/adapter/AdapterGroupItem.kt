@@ -6,6 +6,9 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
@@ -97,13 +100,13 @@ class AdapterGroupItem(
     }
 
     override fun getItemCount(): Int {
-        if (mType != Constant.TYPE_FILE) {
-            return listGroupItem.size
+        return if (mType != Constant.TYPE_FILE) {
+            listGroupItem.size
         } else {
             if (listGroupItem.isNotEmpty()) {
-                return listGroupItem[0].dataTypeList?.size ?: 0
+                listGroupItem[0].dataTypeList?.size ?: 0
             } else {
-                return 0
+                0
             }
         }
 
@@ -114,7 +117,10 @@ class AdapterGroupItem(
             0 -> {
                 with(holder as GroupItemPictureViewHolder) {
                     val model = listGroupItem[adapterPosition]
-                    Glide.with(itemView.context).load(model.dataList[0]).centerCrop()
+                    Log.d("TAG", "onBindViewHolder: "+ model.itemCount)
+
+                    val requestOptions = RequestOptions().transforms(CenterCrop(), RoundedCorners(16))
+                    Glide.with(itemView.context).load(model.dataList[0]).apply(requestOptions)
                         .error(ContextCompat.getDrawable(itemView.context, R.drawable.ic_file_unknow))
                         .into(binding.imvThumb)
                     binding.tvNameQuantity.text = "${model.name} (${model.itemCount})"
@@ -127,7 +133,8 @@ class AdapterGroupItem(
             1 -> {
                 with(holder as GroupItemVideoViewHolder) {
                     val model = listGroupItem[adapterPosition]
-                    Glide.with(itemView.context).load(model.dataList[0]).centerCrop()
+                    val requestOptions = RequestOptions().transforms(CenterCrop(), RoundedCorners(16))
+                    Glide.with(itemView.context).load(model.dataList[0]).centerCrop().apply(requestOptions)
                         .error(ContextCompat.getDrawable(itemView.context, R.drawable.ic_file_unknow))
                         .into(binding.imvThumb)
                     binding.tvNameQuantity.text = "${model.name} (${model.itemCount})"
@@ -139,7 +146,8 @@ class AdapterGroupItem(
             2 -> {
                 with(holder as GroupItemAudioViewHolder) {
                     val model = listGroupItem[adapterPosition]
-                    Glide.with(itemView.context).asBitmap().load(model.dataThumb[0]).centerCrop()
+                    val requestOptions = RequestOptions().transforms(CenterCrop(), RoundedCorners(16))
+                    Glide.with(itemView.context).asBitmap().load(model.dataThumb[0]).centerCrop().apply(requestOptions)
                         .error(ContextCompat.getDrawable(itemView.context, R.drawable.ic_file_unknow))
                         .into(binding.imvThumb)
                     binding.tvNameQuantity.text = "${model.name} (${model.itemCount})"
@@ -150,7 +158,6 @@ class AdapterGroupItem(
             }
             3 -> {
                 with(holder as GroupItemFileViewHolder) {
-                    Log.d("TAG", "lmao: "+fileDataFolder[adapterPosition])
                     when (fileDataFolder[adapterPosition]) {
                         Constant.TYPE_PDF -> {
                             binding.imvThumb.setImageResource(R.drawable.ic_pdf_album)

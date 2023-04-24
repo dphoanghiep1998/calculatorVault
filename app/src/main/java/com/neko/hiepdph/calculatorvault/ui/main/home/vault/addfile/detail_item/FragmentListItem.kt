@@ -92,11 +92,9 @@ class FragmentListItem : Fragment() {
                 listItemSelected.map { File(it.mPath) }.toMutableList(),
                 File(args.vaultPath),
                 progress = { state: Int, value: Float, currentFile: File? ->
-                    Log.d("TAG", "progress: ")
 
                 },
                 onSuccess = {
-                    Log.d("TAG", "initButton: ")
                     val newList = listItemSelected.toMutableList()
                     newList.forEach {
                         it.path = args.vaultPath + "/${it.mName}"

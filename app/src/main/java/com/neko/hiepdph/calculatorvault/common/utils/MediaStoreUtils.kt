@@ -7,6 +7,7 @@ import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_AUDIOS
 import com.neko.hiepdph.calculatorvault.common.Constant.archiveMimeTypes
@@ -31,7 +32,7 @@ object MediaStoreUtils {
             MediaStore.Files.FileColumns.DATE_MODIFIED,
             MediaStore.Files.FileColumns._ID
         )
-        val folders = mutableMapOf<String, GroupItem>()
+        val folders = mutableListOf<Pair<String, GroupItem>>()
 
         try {
             context.queryCursor(uri, projection) { cursor ->
@@ -57,24 +58,41 @@ object MediaStoreUtils {
                     when (type) {
                         Constant.TYPE_PICTURE -> {
                             if (mimetype == "image") {
-
+                                val parentFolderPath = File(path).parentFile?.path
                                 val parentFolder = File(path).parentFile?.name ?: "No_name"
                                 if (parentFolder.startsWith(".")) {
                                     return@queryCursor
                                 }
-                                if (!folders.containsKey(parentFolder)) {
-                                    folders[parentFolder] = GroupItem(
-                                        parentFolder,
-                                        Constant.TYPE_PICTURE,
-                                        path,
-                                        mutableListOf(),
-                                        mutableListOf(),
-                                        File(path).parentFile?.path ?: ""
-
+                                if (!folders.any { it.first == parentFolder }) {
+                                    folders.add(
+                                        Pair(
+                                            parentFolder, GroupItem(
+                                                parentFolder,
+                                                Constant.TYPE_PICTURE,
+                                                path,
+                                                mutableListOf(),
+                                                mutableListOf(),
+                                                parentFolderPath.toString()
+                                            )
+                                        )
+                                    )
+                                } else if (folders.any { it.second?.folderPath != parentFolderPath }) {
+                                    folders.add(
+                                        Pair(
+                                            parentFolder, GroupItem(
+                                                parentFolder,
+                                                Constant.TYPE_PICTURE,
+                                                path,
+                                                mutableListOf(),
+                                                mutableListOf(),
+                                                parentFolderPath.toString()
+                                            )
+                                        )
                                     )
                                 }
+
                                 if (path.isNotEmpty()) {
-                                    folders[parentFolder]?.dataList?.add(
+                                    folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataList?.add(
                                         path
                                     )
                                 }
@@ -83,48 +101,85 @@ object MediaStoreUtils {
                         Constant.TYPE_VIDEOS -> {
                             if (mimetype == "video") {
 
+                                val parentFolderPath = File(path).parentFile?.path
                                 val parentFolder = File(path).parentFile?.name ?: "No_name"
-
-                                if (!folders.containsKey(parentFolder)) {
-                                    folders[parentFolder] = GroupItem(
-                                        parentFolder,
-                                        Constant.TYPE_VIDEOS,
-                                        path,
-                                        mutableListOf(),
-                                        mutableListOf(),
-                                        File(path).parentFile?.path ?: ""
-
+                                if (parentFolder.startsWith(".")) {
+                                    return@queryCursor
+                                }
+                                if (!folders.any { it.first == parentFolder }) {
+                                    folders.add(
+                                        Pair(
+                                            parentFolder, GroupItem(
+                                                parentFolder,
+                                                Constant.TYPE_VIDEOS,
+                                                path,
+                                                mutableListOf(),
+                                                mutableListOf(),
+                                                File(path).parentFile?.path ?: ""
+                                            )
+                                        )
+                                    )
+                                } else if (folders.any { it.second?.folderPath != parentFolderPath }) {
+                                    folders.add(
+                                        Pair(
+                                            parentFolder, GroupItem(
+                                                parentFolder,
+                                                Constant.TYPE_VIDEOS,
+                                                path,
+                                                mutableListOf(),
+                                                mutableListOf(),
+                                                File(path).parentFile?.path ?: ""
+                                            )
+                                        )
                                     )
                                 }
+
                                 if (path.isNotEmpty()) {
-                                    folders[parentFolder]?.dataList?.add(
+                                    folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataList?.add(
                                         path
                                     )
                                 }
                             }
                         }
-                        Constant.TYPE_AUDIOS -> {
+                        TYPE_AUDIOS -> {
                             if (mimetype == "audio" || extraAudioMimeTypes.contains(fullMimetype)) {
 
+                                val parentFolderPath = File(path).parentFile?.path
                                 val parentFolder = File(path).parentFile?.name ?: "No_name"
-
-                                if (!folders.containsKey(parentFolder)) {
-                                    folders[parentFolder] = GroupItem(
-                                        parentFolder,
-                                        Constant.TYPE_AUDIOS,
-                                        path,
-                                        mutableListOf(),
-                                        mutableListOf(),
-                                        File(path).parentFile?.path ?: ""
-
+                                if (parentFolder.startsWith(".")) {
+                                    return@queryCursor
+                                }
+                                if (!folders.any { it.first == parentFolder }) {
+                                    folders.add(
+                                        Pair(
+                                            parentFolder, GroupItem(
+                                                parentFolder,
+                                                Constant.TYPE_AUDIOS,
+                                                path,
+                                                mutableListOf(),
+                                                mutableListOf(),
+                                                File(path).parentFile?.path ?: ""
+                                            )
+                                        )
+                                    )
+                                } else if (folders.any { it.second?.folderPath != parentFolderPath }) {
+                                    folders.add(
+                                        Pair(
+                                            parentFolder, GroupItem(
+                                                parentFolder,
+                                                Constant.TYPE_AUDIOS,
+                                                path,
+                                                mutableListOf(),
+                                                mutableListOf(),
+                                                File(path).parentFile?.path ?: ""
+                                            )
+                                        )
                                     )
                                 }
+
                                 if (path.isNotEmpty()) {
-                                    folders[parentFolder]?.dataList?.add(
+                                    folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataList?.add(
                                         path
-                                    )
-                                    folders[parentFolder]?.dataThumb?.add(
-                                        getThumbnail(path)
                                     )
                                 }
                             }
@@ -134,56 +189,99 @@ object MediaStoreUtils {
                                     fullMimetype
                                 )
                             ) {
-                                val parentFolder =
-                                    Constant.FILES_FOLDER_NAME + "utra+super+promax+12345"
-                                if (!folders.containsKey(parentFolder)) {
-                                    folders[parentFolder] = GroupItem(
-                                        parentFolder,
-                                        Constant.TYPE_FILE,
-                                        path,
-                                        mutableListOf(),
-                                        mutableListOf(),
-                                        File(path).parentFile?.path ?: "",
-                                        mutableSetOf()
+                                val parentFolderPath = File(path).parentFile?.path
+                                val parentFolder = File(path).parentFile?.name ?: "No_name"
+                                if (parentFolder.startsWith(".")) {
+                                    return@queryCursor
+                                }
+                                if (!folders.any { it.first == parentFolder }) {
+                                    folders.add(
+                                        Pair(
+                                            parentFolder, GroupItem(
+                                                parentFolder,
+                                                Constant.TYPE_FILE,
+                                                path,
+                                                mutableListOf(),
+                                                mutableListOf(),
+                                                File(path).parentFile?.path ?: ""
+                                            )
+                                        )
+                                    )
+                                } else if (folders.any { it.second?.folderPath != parentFolderPath }) {
+                                    folders.add(
+                                        Pair(
+                                            parentFolder, GroupItem(
+                                                parentFolder,
+                                                Constant.TYPE_FILE,
+                                                path,
+                                                mutableListOf(),
+                                                mutableListOf(),
+                                                File(path).parentFile?.path ?: ""
+                                            )
+                                        )
                                     )
                                 }
+
                                 if (path.isNotEmpty()) {
+
                                     if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF)) {
-                                        folders[parentFolder]?.dataTypeList?.add(Constant.TYPE_PDF)
+                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
+                                            Constant.TYPE_PDF
+                                        )
                                     } else if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_CSV)
                                     ) {
-                                        folders[parentFolder]?.dataTypeList?.add(Constant.TYPE_CSV)
+                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
+                                            Constant.TYPE_CSV
+                                        )
+
                                     } else if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_PPT)
                                     ) {
-                                        folders[parentFolder]?.dataTypeList?.add(Constant.TYPE_PPT)
+                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
+                                            Constant.TYPE_PPT
+                                        )
                                     } else if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_PPT)
                                     ) {
-                                        folders[parentFolder]?.dataTypeList?.add(Constant.TYPE_PPTX)
+                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
+                                            Constant.TYPE_PPTX
+                                        )
+
                                     } else if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_TEXT)
                                     ) {
-                                        folders[parentFolder]?.dataTypeList?.add(Constant.TYPE_TEXT)
+                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
+                                            Constant.TYPE_TEXT
+                                        )
                                     } else if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_WORD)
                                     ) {
-                                        folders[parentFolder]?.dataTypeList?.add(Constant.TYPE_WORD)
+                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
+                                            Constant.TYPE_WORD
+                                        )
                                     } else if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_EXCEL)
                                     ) {
-                                        folders[parentFolder]?.dataTypeList?.add(Constant.TYPE_EXCEL)
+                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
+                                            Constant.TYPE_EXCEL
+                                        )
                                     } else if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_WORDX)
                                     ) {
-                                        folders[parentFolder]?.dataTypeList?.add(Constant.TYPE_WORD)
+                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
+                                            Constant.TYPE_WORD
+                                        )
+
                                     } else if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_ZIP)
                                     ) {
-                                        folders[parentFolder]?.dataTypeList?.add(Constant.TYPE_ZIP)
+                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
+                                            Constant.TYPE_ZIP
+                                        )
                                     }
                                 }
+
 
                             }
                         }
@@ -197,7 +295,8 @@ object MediaStoreUtils {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        return folders.values.toList()
+        Log.d("TAG", "getListGroupItem: "+folders.map { it.second })
+        return folders.map { it.second }
     }
 
     fun getThumbnail(path: String): Bitmap? {
@@ -212,7 +311,8 @@ object MediaStoreUtils {
             null
         }
     }
-    fun getAllImage(context: Context):List<ListItem>{
+
+    fun getAllImage(context: Context): List<ListItem> {
         try {
             val listImageChild = mutableListOf<ListItem>()
             val uri = MediaStore.Images.Media.getContentUri("external")
@@ -226,7 +326,7 @@ object MediaStoreUtils {
             val sortOrder = "${MediaStore.Images.Media.DATE_MODIFIED} DESC"
 
 
-            context.queryCursor(uri, projection,sortOrder=sortOrder) { cursor ->
+            context.queryCursor(uri, projection, sortOrder = sortOrder) { cursor ->
 
                 val id = cursor.getLongValue(MediaStore.Images.Media._ID)
                 val childPath = cursor.getStringValue(MediaStore.Images.Media.DATA)
@@ -239,7 +339,7 @@ object MediaStoreUtils {
                         ListItem(
                             id,
                             childPath,
-                            childPath,
+                            File(childPath).parentFile?.path.toString(),
                             name,
                             false,
                             0,
@@ -268,8 +368,10 @@ object MediaStoreUtils {
                 MediaStore.Images.Media.DATE_MODIFIED,
                 MediaStore.Images.Media._ID
             )
-            val selection = MediaStore.Images.Media.DATA + " LIKE ?"
-            val selectionArgs = arrayOf("%$path%")
+            Log.d("TAG", "getChildImageFromPath: " + path)
+            val selection =
+                MediaStore.Images.Media.DATA + " LIKE ? AND " + MediaStore.Images.Media.DATA + " NOT LIKE ?"
+            val selectionArgs = arrayOf("$path/%", "$path/%/%")
 
             context.queryCursor(uri, projection, selection, selectionArgs) { cursor ->
 
@@ -284,7 +386,7 @@ object MediaStoreUtils {
                         ListItem(
                             id,
                             childPath,
-                            childPath,
+                            path,
                             name,
                             false,
                             0,
@@ -330,7 +432,7 @@ object MediaStoreUtils {
                         ListItem(
                             id,
                             childPath,
-                            childPath,
+                            path,
                             name,
                             false,
                             0,
@@ -423,7 +525,7 @@ object MediaStoreUtils {
                                         ListItem(
                                             id,
                                             childPath,
-                                            childPath,
+                                            File(childPath).parentFile?.path ?: "",
                                             name,
                                             false,
                                             0,
@@ -445,7 +547,7 @@ object MediaStoreUtils {
                                         ListItem(
                                             id,
                                             childPath,
-                                            childPath,
+                                            File(childPath).parentFile?.path ?: "",
                                             name,
                                             false,
                                             0,
@@ -466,7 +568,8 @@ object MediaStoreUtils {
                                         ListItem(
                                             id,
                                             childPath,
-                                            childPath,
+                                            File(childPath).parentFile?.path ?: "",
+
                                             name,
                                             false,
                                             0,
@@ -484,7 +587,8 @@ object MediaStoreUtils {
                                         ListItem(
                                             id,
                                             childPath,
-                                            childPath,
+                                            File(childPath).parentFile?.path ?: "",
+
                                             name,
                                             false,
                                             0,
@@ -502,7 +606,8 @@ object MediaStoreUtils {
                                         ListItem(
                                             id,
                                             childPath,
-                                            childPath,
+                                            File(childPath).parentFile?.path ?: "",
+
                                             name,
                                             false,
                                             0,
@@ -520,7 +625,8 @@ object MediaStoreUtils {
                                         ListItem(
                                             id,
                                             childPath,
-                                            childPath,
+                                            File(childPath).parentFile?.path ?: "",
+
                                             name,
                                             false,
                                             0,
@@ -538,7 +644,8 @@ object MediaStoreUtils {
                                         ListItem(
                                             id,
                                             childPath,
-                                            childPath,
+                                            File(childPath).parentFile?.path ?: "",
+
                                             name,
                                             false,
                                             0,
@@ -556,7 +663,8 @@ object MediaStoreUtils {
                                         ListItem(
                                             id,
                                             childPath,
-                                            childPath,
+                                            File(childPath).parentFile?.path ?: "",
+
                                             name,
                                             false,
                                             0,

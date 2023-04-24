@@ -214,7 +214,7 @@ class FragmentVault : Fragment() {
                             viewModel.getListFolderInVault(
                                 requireContext(), requireContext().config.privacyFolder
                             )
-                            showSnackBar(getString(R.string.error_rename), SnackBarType.SUCCESS)
+                            showSnackBar(getString(R.string.rename_successfully), SnackBarType.SUCCESS)
                         },
                         onError = {
                             showSnackBar(

@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,9 +13,6 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.CenterCrop
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.bumptech.glide.request.RequestOptions
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
@@ -61,6 +59,10 @@ class AdapterRecyclerBin(
     companion object {
         var editMode = false
     }
+    fun changeToEditView(){
+        editMode = true
+        notifyDataSetChanged()
+    }
 
 
     inner class ItemFileViewHolder(val binding: LayoutItemRecyclerBinFileBinding) :
@@ -100,14 +102,12 @@ class AdapterRecyclerBin(
         with(holder) {
             val item = listItem[adapterPosition]
 
-
             binding.tvNameDocument.isSelected = true
 
+            binding.checkBox.isChecked = item in listOfItemSelected
             when (item.type) {
                 Constant.TYPE_PICTURE -> {
-                    var requestOptions = RequestOptions()
-                    requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
+                    Glide.with(itemView.context).load(item.path).centerCrop()
                         .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
@@ -116,10 +116,8 @@ class AdapterRecyclerBin(
                 }
 
                 Constant.TYPE_AUDIOS -> {
-                    var requestOptions = RequestOptions()
-                    requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).asBitmap().load(getThumbnail(item.mPath))
-                        .apply(requestOptions).error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+                        .centerCrop().error(R.drawable.ic_file_unknow).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
                         showPopupWindow(itemView.context, binding.option)
@@ -127,9 +125,7 @@ class AdapterRecyclerBin(
                 }
 
                 Constant.TYPE_VIDEOS -> {
-                    var requestOptions = RequestOptions()
-                    requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
+                    Glide.with(itemView.context).load(item.mPath).centerCrop()
                         .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {

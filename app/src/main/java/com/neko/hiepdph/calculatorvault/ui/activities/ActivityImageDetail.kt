@@ -1,7 +1,6 @@
 package com.neko.hiepdph.calculatorvault.ui.activities
 
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.animation.AccelerateInterpolator
@@ -17,6 +16,7 @@ import com.neko.hiepdph.calculatorvault.common.transformer.*
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
+import com.neko.hiepdph.calculatorvault.data.model.ItemMoved
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityImageDetailBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
@@ -90,7 +90,7 @@ class ActivityImageDetail : AppCompatActivity() {
                     showController()
                     viewPagerAdapter = ImagePagerAdapter(this@ActivityImageDetail, it)
                     binding.imageViewPager.adapter = viewPagerAdapter
-                    binding.imageViewPager.setCurrentItem(currentPage,false)
+                    binding.imageViewPager.setCurrentItem(currentPage, false)
 
                 }
             })
@@ -107,7 +107,9 @@ class ActivityImageDetail : AppCompatActivity() {
             binding.imageViewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
                 override fun onPageScrolled(
                     position: Int, positionOffset: Float, positionOffsetPixels: Int
-                ) {}
+                ) {
+                }
+
                 override fun onPageSelected(position: Int) {
                     currentItem = it[position]
                     currentPage = position
@@ -134,7 +136,35 @@ class ActivityImageDetail : AppCompatActivity() {
 
         binding.tvDelete.clickWithDebounce {
             val confirmDialog = DialogConfirm(onPositiveClicked = {
-                FileUtils.deleteFolderInDirectory(currentItem?.path.toString(), onSuccess = {
+                if (config.moveToRecyclerBin) {
+                    val listPathRecyclerBin = config.listPathRecyclerBin?.toMutableList()
+
+                    listPathRecyclerBin?.add(
+                        ItemMoved(
+                           File(currentItem?.path.toString()).parentFile?.path.toString(),
+                            config.recyclerBinFolder.path + "/${currentItem?.name}"
+                        )
+                    )
+                    config.listPathRecyclerBin = listPathRecyclerBin
+
+                    CopyFiles.copy(this,
+                        File(currentItem?.path.toString()),
+                        config.recyclerBinFolder,
+                        0L,
+                        progress = { _: Int, _: Float, _: File? -> },
+                        true,
+                        onSuccess = {
+                            listItem.remove(currentItem)
+                            if (listItem.isEmpty()) {
+                                ShareData.getInstance().setListItemImage(mutableListOf())
+                                finish()
+                            } else {
+                                ShareData.getInstance().setListItemImage(listItem)
+                            }
+                        },
+
+                        onError = {})
+                } else FileUtils.deleteFolderInDirectory(currentItem?.path.toString(), onSuccess = {
                     listItem.remove(currentItem)
                     if (listItem.isEmpty()) {
                         ShareData.getInstance().setListItemImage(mutableListOf())
@@ -241,7 +271,7 @@ class ActivityImageDetail : AppCompatActivity() {
                 File(item?.originalPath.toString()),
                 0L,
                 progress = { _: Int, _: Float, _: File? -> },
-                false,
+                true,
                 onSuccess = {
                     listItem.remove(currentItem)
                     if (listItem.isEmpty()) {

@@ -6,6 +6,7 @@ import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionQ
+import com.neko.hiepdph.calculatorvault.data.model.ItemMoved
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import java.io.File
 
@@ -135,6 +136,12 @@ class MainConfig(val context: Context) {
             .getObjectFromSharePreference<List<ListItem>>(Constant.KEY_LIST_ITEM_VAULT)
         set(listItemVault) = AppSharePreference.getInstance(context)
             .saveObjectToSharePreference(Constant.KEY_LIST_ITEM_VAULT, listItemVault)
+
+    var listPathRecyclerBin : List<ItemMoved>?
+        get() = AppSharePreference.getInstance(context)
+            .getObjectFromSharePreference<List<ItemMoved>>(Constant.KEY_LIST_RECYCLER_BIN)
+        set(listPathRecyclerBin) = AppSharePreference.getInstance(context)
+            .saveObjectToSharePreference(Constant.KEY_LIST_RECYCLER_BIN, listPathRecyclerBin)
 
 
     private fun getDefaultInternalPath(): String {

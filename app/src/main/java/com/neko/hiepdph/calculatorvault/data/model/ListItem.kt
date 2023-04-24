@@ -16,9 +16,6 @@ class ListItem(
     var mModified: Long = 0L,
     var type: String? = "",
     var realType: String? = "",
-    var vaultPath: String? = ""
-
-
 ) : FileDirItem(mPath, mOriginalPath, mName, mIsDirectory, mChildren, mSize, mModified),
     Parcelable {
     override fun equals(other: Any?): Boolean {

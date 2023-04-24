@@ -2,6 +2,7 @@ package com.neko.hiepdph.calculatorvault.common
 
 
 object Constant {
+    const val KEY_LIST_RECYCLER_BIN ="KEY_LIST_RECYCLER_BIN"
     const val KEY_LIST_ITEM_VAULT ="KEY_LIST_ITEM_VAULT"
 
     const val INTERNAL_STORAGE_PATH ="INTERNAL_STORAGE_PATH"
@@ -121,7 +122,7 @@ object Constant {
 
     val photoExtensions: Array<String>
         get() = arrayOf(
-            ".jpg", ".png", ".jpeg", ".bmp", ".webp", ".heic", ".heif", ".apng", ".avif"
+            ".jpg", ".png", ".jpeg", ".bmp", ".webp", ".heic", ".heif", ".apng", ".avif",".jif",".jfif",".gif",".svg"
         )
     val videoExtensions: Array<String>
         get() = arrayOf(
