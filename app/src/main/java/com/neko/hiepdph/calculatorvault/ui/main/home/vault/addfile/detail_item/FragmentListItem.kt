@@ -52,7 +52,6 @@ class FragmentListItem : Fragment() {
         initView()
         observeData()
         setupTitle()
-
     }
 
     private fun setupTitle() {
@@ -92,7 +91,6 @@ class FragmentListItem : Fragment() {
                 listItemSelected.map { File(it.mPath) }.toMutableList(),
                 File(args.vaultPath),
                 progress = { state: Int, value: Float, currentFile: File? ->
-
                 },
                 onSuccess = {
                     val newList = listItemSelected.toMutableList()
@@ -172,6 +170,7 @@ class FragmentListItem : Fragment() {
                     binding.tvEmpty.hide()
                 } else {
                     binding.tvEmpty.show()
+                    popBackStack(R.id.fragmentListItem)
                 }
 
             }

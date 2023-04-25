@@ -106,7 +106,7 @@ class FragmentChangePattern : Fragment() {
                         }
                         requireContext().config.patternLock = pattern.toMutableList()
                         showSnackBar(getString(R.string.pattern_lock_set_success),SnackBarType.SUCCESS)
-                        popBackStack()
+                        popBackStack(R.id.fragmentChangePattern)
                     }
                 }
             }else{
@@ -141,7 +141,7 @@ class FragmentChangePattern : Fragment() {
                         }
                         requireContext().config.patternLock = pattern.toMutableList()
                         showSnackBar(getString(R.string.pattern_lock_set_success),SnackBarType.SUCCESS)
-                        popBackStack()
+                        popBackStack(R.id.fragmentChangePattern)
                     }
                 }
             }

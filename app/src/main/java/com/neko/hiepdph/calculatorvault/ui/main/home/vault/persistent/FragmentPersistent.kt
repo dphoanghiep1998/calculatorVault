@@ -2,6 +2,7 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.CheckBox
 import android.widget.Toast
@@ -11,6 +12,7 @@ import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -32,6 +34,7 @@ import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.Ad
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterPersistent
 import com.neko.hiepdph.calculatorvault.viewmodel.PersistentViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.io.File
 
 @AndroidEntryPoint
@@ -340,6 +343,7 @@ class FragmentPersistent : Fragment() {
             } else {
                 viewModel.deleteMultipleFolder(listItemSelected.map { it.mPath }, onSuccess = {
                     getDataFile()
+                    listItemSelected.clear()
                     showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
                 }, onError = {
                     showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
@@ -374,14 +378,33 @@ class FragmentPersistent : Fragment() {
             else -> getString(R.string.files)
         }
         val confirmDialog = DialogConfirm(onPositiveClicked = {
-
+            unLockFile()
         }, DialogConfirmType.UNLOCK, name)
 
         confirmDialog.show(childFragmentManager, confirmDialog.tag)
     }
 
-    private fun unLockPicture() {
-
+    private fun unLockFile() {
+        lifecycleScope.launch {
+            val listFilterItem = requireContext().config.listItemVault?.filter {
+                it.path in listItemSelected.map { item -> item.path }
+            } ?: mutableListOf()
+            CopyFiles.copy(requireContext(),
+                listItemSelected.map { File(it.path) }.toMutableList(),
+                listFilterItem.map { File(it.originalPath) }.toMutableList(),
+                0L,
+                progress = { _: Int, _: Float, _: File? -> },
+                true,
+                onSuccess = {
+                    listItemSelected.clear()
+                    adapterPersistent?.unSelectAll()
+                    adapterOtherFolder?.unSelectAll()
+                    getDataFile()
+                },
+                onError = {
+                    Log.d("TAG", "unLockFile: " + it.printStackTrace())
+                })
+        }
     }
 
 

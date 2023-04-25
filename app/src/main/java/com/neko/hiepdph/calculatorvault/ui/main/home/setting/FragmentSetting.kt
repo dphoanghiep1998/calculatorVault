@@ -91,6 +91,10 @@ class FragmentSetting : Fragment() {
         binding.itemGeneral.root.clickWithDebounce {
             navigateToPage(R.id.fragmentSetting,R.id.fragmentGeneral)
         }
+        binding.itemDisguiseIcon.root.clickWithDebounce {
+            navigateToPage(R.id.fragmentSetting,R.id.fragmentDisguiseIcon)
+
+        }
     }
 
     private fun createShortcutsCamera() {

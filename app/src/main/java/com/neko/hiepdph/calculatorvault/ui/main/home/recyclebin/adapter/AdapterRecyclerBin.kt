@@ -5,7 +5,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,6 +27,9 @@ class AdapterRecyclerBin(
     private val onEditItem: (List<ListItem>) -> Unit,
     private val onSelectAll: (List<ListItem>) -> Unit,
     private val onUnSelect: () -> Unit,
+    private val onRestoreItem: (ListItem) -> Unit,
+    private val onDeleteItem: (ListItem) -> Unit,
+    private val onDetailItem: (ListItem) -> Unit,
 
     ) : RecyclerView.Adapter<AdapterRecyclerBin.ItemFileViewHolder>() {
     private var listItem = mutableListOf<ListItem>()
@@ -59,7 +61,8 @@ class AdapterRecyclerBin(
     companion object {
         var editMode = false
     }
-    fun changeToEditView(){
+
+    fun changeToEditView() {
         editMode = true
         notifyDataSetChanged()
     }
@@ -111,7 +114,7 @@ class AdapterRecyclerBin(
                         .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
-                        showPopupWindowFile(itemView.context, binding.option)
+                        showPopupWindow(itemView.context, binding.option, item)
                     }
                 }
 
@@ -120,7 +123,7 @@ class AdapterRecyclerBin(
                         .centerCrop().error(R.drawable.ic_file_unknow).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
-                        showPopupWindow(itemView.context, binding.option)
+                        showPopupWindow(itemView.context, binding.option, item)
                     }
                 }
 
@@ -129,7 +132,7 @@ class AdapterRecyclerBin(
                         .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
-                        showPopupWindowFile(itemView.context, binding.option)
+                        showPopupWindow(itemView.context, binding.option, item)
                     }
                 }
 
@@ -141,8 +144,8 @@ class AdapterRecyclerBin(
                     ).error(R.drawable.ic_file_unknow).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
-                        showPopupWindowFile(
-                            itemView.context, binding.option
+                        showPopupWindow(
+                            itemView.context, binding.option, item
                         )
                     }
                 }
@@ -202,6 +205,35 @@ class AdapterRecyclerBin(
         }
     }
 
+    private fun showPopupWindow(context: Context, view: View, item: ListItem) {
+        val inflater: LayoutInflater =
+            (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater?)!!
+        val bindingLayout = LayoutRecyclerbinOptionMenuBinding.inflate(inflater, null, false)
+
+        val popupWindow = PopupWindow(
+            bindingLayout.root,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            true
+        )
+        bindingLayout.root.clickWithDebounce {
+            popupWindow.dismiss()
+        }
+        bindingLayout.containerRestore.clickWithDebounce {
+            onRestoreItem(item)
+            popupWindow.dismiss()
+        }
+        bindingLayout.containerDelete.clickWithDebounce {
+            onDeleteItem(item)
+            popupWindow.dismiss()
+        }
+        bindingLayout.containerInfo.clickWithDebounce {
+            onDetailItem(item)
+            popupWindow.dismiss()
+        }
+        popupWindow.showAsDropDown(view)
+    }
+
 
 }
 
@@ -234,63 +266,5 @@ private fun getThumbnail(path: String): Bitmap? {
     }
 }
 
-private fun showPopupWindow(context: Context, view: View) {
-    val inflater: LayoutInflater =
-        (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater?)!!
-    val bindingLayout = LayoutPersistentItemOptionMenuBinding.inflate(inflater, null, false)
 
-    val popupWindow = PopupWindow(
-        bindingLayout.root,
-        LinearLayout.LayoutParams.WRAP_CONTENT,
-        LinearLayout.LayoutParams.WRAP_CONTENT,
-        true
-    )
-    bindingLayout.root.clickWithDebounce {
-        popupWindow.dismiss()
-    }
-
-    bindingLayout.root.clickWithDebounce {
-        popupWindow.dismiss()
-    }
-    bindingLayout.containerPlay.clickWithDebounce {
-        popupWindow.dismiss()
-    }
-    bindingLayout.containerDelete.clickWithDebounce {
-        popupWindow.dismiss()
-    }
-    bindingLayout.containerInfo.clickWithDebounce {
-        popupWindow.dismiss()
-    }
-    popupWindow.showAsDropDown(view)
-}
-
-private fun showPopupWindowFile(context: Context, view: View) {
-    val inflater: LayoutInflater =
-        (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater?)!!
-    val bindingLayout = LayoutPersistentItemFileOptionMenuBinding.inflate(inflater, null, false)
-
-    val popupWindow = PopupWindow(
-        bindingLayout.root,
-        LinearLayout.LayoutParams.WRAP_CONTENT,
-        LinearLayout.LayoutParams.WRAP_CONTENT,
-        true
-    )
-    bindingLayout.root.clickWithDebounce {
-        popupWindow.dismiss()
-    }
-
-    bindingLayout.root.clickWithDebounce {
-        popupWindow.dismiss()
-    }
-    bindingLayout.containerOpen.clickWithDebounce {
-        popupWindow.dismiss()
-    }
-    bindingLayout.containerDelete.clickWithDebounce {
-        popupWindow.dismiss()
-    }
-    bindingLayout.containerInfo.clickWithDebounce {
-        popupWindow.dismiss()
-    }
-    popupWindow.showAsDropDown(view)
-}
 

@@ -62,13 +62,14 @@
             android:layout_width="@dimen/_26sdp"
             android:layout_height="@dimen/_26sdp"
             android:padding="@dimen/_6sdp"
+            android:layout_marginEnd="@dimen/_6sdp"
             android:src="@drawable/ic_option" />
 
         <CheckBox
             android:id="@+id/check_box"
             android:layout_width="@dimen/_20sdp"
             android:layout_height="@dimen/_20sdp"
-            android:layout_margin="@dimen/_2sdp"
+            android:layout_marginEnd="@dimen/_6sdp"
             android:background="@drawable/bg_checkbox_pick_selector"
             android:button="@null"
             android:minWidth="0dp"

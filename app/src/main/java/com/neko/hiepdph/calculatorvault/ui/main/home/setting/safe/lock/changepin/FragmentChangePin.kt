@@ -164,7 +164,7 @@ class FragmentChangePin : Fragment() {
                     showSnackBar(
                         getString(R.string.change_pin_success), SnackBarType.SUCCESS
                     )
-                    popBackStack()
+                    popBackStack(R.id.fragmentChangePin)
                 }
             }
         }

@@ -29,6 +29,9 @@
         <action
             android:id="@+id/action_fragmentSetting_to_fragmentGeneral"
             app:destination="@id/fragmentGeneral" />
+        <action
+            android:id="@+id/action_fragmentSetting_to_fragmentDisguiseIcon"
+            app:destination="@id/fragmentDisguiseIcon" />
     </fragment>
     <fragment
         android:id="@+id/fragmentLanguage"
@@ -161,4 +164,16 @@
         android:id="@+id/fragmentGeneral"
         android:name="com.neko.hiepdph.calculatorvault.ui.main.home.setting.general.FragmentGeneral"
         android:label="@string/general" />
+    <fragment
+        android:id="@+id/fragmentDisguiseIcon"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.setting.disguiseicon.FragmentDisguiseIcon"
+        android:label="@string/disguise_icon" >
+        <action
+            android:id="@+id/action_fragmentDisguiseIcon_to_fragmentHideAppIcon"
+            app:destination="@id/fragmentHideAppIcon" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentHideAppIcon"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.setting.disguiseicon.hideappicon.FragmentHideAppIcon"
+        android:label="@string/hide_app_icon" />
 </navigation>

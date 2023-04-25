@@ -1,6 +1,5 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -12,7 +11,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
-import com.neko.hiepdph.calculatorvault.data.model.FileDirItem
+import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils.getThumbnail
 import com.neko.hiepdph.calculatorvault.data.model.GroupItem
 import com.neko.hiepdph.calculatorvault.databinding.LayoutItemAddFileAudioBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutItemAddFileFileBinding
@@ -117,12 +116,18 @@ class AdapterGroupItem(
             0 -> {
                 with(holder as GroupItemPictureViewHolder) {
                     val model = listGroupItem[adapterPosition]
-                    Log.d("TAG", "onBindViewHolder: "+ model.itemCount)
 
-                    val requestOptions = RequestOptions().transforms(CenterCrop(), RoundedCorners(16))
-                    Glide.with(itemView.context).load(model.dataList[0]).apply(requestOptions)
-                        .error(ContextCompat.getDrawable(itemView.context, R.drawable.ic_file_unknow))
-                        .into(binding.imvThumb)
+                    val requestOptions =
+                        RequestOptions().transforms(CenterCrop(), RoundedCorners(16))
+                    if (model.dataList.isNotEmpty()) {
+                        Glide.with(itemView.context).load(model.dataList[0]).apply(requestOptions)
+                            .error(
+                                ContextCompat.getDrawable(
+                                    itemView.context, R.drawable.ic_file_unknow
+                                )
+                            ).into(binding.imvThumb)
+                    }
+
                     binding.tvNameQuantity.text = "${model.name} (${model.itemCount})"
 
                     binding.root.clickWithDebounce {
@@ -133,10 +138,14 @@ class AdapterGroupItem(
             1 -> {
                 with(holder as GroupItemVideoViewHolder) {
                     val model = listGroupItem[adapterPosition]
-                    val requestOptions = RequestOptions().transforms(CenterCrop(), RoundedCorners(16))
-                    Glide.with(itemView.context).load(model.dataList[0]).centerCrop().apply(requestOptions)
-                        .error(ContextCompat.getDrawable(itemView.context, R.drawable.ic_file_unknow))
-                        .into(binding.imvThumb)
+                    val requestOptions =
+                        RequestOptions().transforms(CenterCrop(), RoundedCorners(16))
+                    Glide.with(itemView.context).load(model.dataList[0]).centerCrop()
+                        .apply(requestOptions).error(
+                            ContextCompat.getDrawable(
+                                itemView.context, R.drawable.ic_file_unknow
+                            )
+                        ).into(binding.imvThumb)
                     binding.tvNameQuantity.text = "${model.name} (${model.itemCount})"
                     binding.root.clickWithDebounce {
                         onClickFolderItem.invoke(listGroupItem[adapterPosition], null)
@@ -146,10 +155,17 @@ class AdapterGroupItem(
             2 -> {
                 with(holder as GroupItemAudioViewHolder) {
                     val model = listGroupItem[adapterPosition]
-                    val requestOptions = RequestOptions().transforms(CenterCrop(), RoundedCorners(16))
-                    Glide.with(itemView.context).asBitmap().load(model.dataThumb[0]).centerCrop().apply(requestOptions)
-                        .error(ContextCompat.getDrawable(itemView.context, R.drawable.ic_file_unknow))
-                        .into(binding.imvThumb)
+                    val requestOptions =
+                        RequestOptions().transforms(CenterCrop(), RoundedCorners(16))
+                    if(model.dataList.isNotEmpty()){
+                        Glide.with(itemView.context).asBitmap().load(getThumbnail(model.dataList[0])).centerCrop()
+                            .apply(requestOptions).error(
+                                ContextCompat.getDrawable(
+                                    itemView.context, R.drawable.ic_file_unknow
+                                )
+                            ).into(binding.imvThumb)
+                    }
+
                     binding.tvNameQuantity.text = "${model.name} (${model.itemCount})"
                     binding.root.clickWithDebounce {
                         onClickFolderItem.invoke(listGroupItem[adapterPosition], null)

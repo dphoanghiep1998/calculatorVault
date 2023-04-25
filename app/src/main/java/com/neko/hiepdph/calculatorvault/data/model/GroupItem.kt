@@ -9,9 +9,7 @@ import kotlinx.parcelize.Parcelize
 data class GroupItem(
     var name: String,
     var type: String,
-    var path: String,
     var dataList: MutableList<String>,
-    var dataThumb: MutableList<Bitmap?>,
     var folderPath: String,
     var dataTypeList: MutableSet<String>? = null //document only
 ) : Parcelable {

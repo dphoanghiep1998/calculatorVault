@@ -61,24 +61,25 @@ fun Fragment.navigateToPage(id: Int, navDirections: NavDirections) {
             }
         }
     }
-
 }
 
-fun Fragment.popBackStack() {
-    lifecycleScope.launch {
+fun Fragment.popBackStack(id: Int) {
+    viewLifecycleOwner.lifecycleScope.launch {
         lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            findNavController().popBackStack()
+            if (id == findNavController().currentDestination?.id && isAdded) {
+                findNavController().popBackStack()
+            }
         }
     }
 
-
 }
 
-fun Fragment.toastLocation(){
+fun Fragment.toastLocation() {
     Log.d("TAG", "I am in : ${this::class.java}")
 }
-fun Fragment.toast(mess:String){
-  Toast.makeText(requireContext(),mess,Toast.LENGTH_SHORT).show()
+
+fun Fragment.toast(mess: String) {
+    Toast.makeText(requireContext(), mess, Toast.LENGTH_SHORT).show()
 }
 
 fun Fragment.getColor(res: Int): Int {
@@ -88,8 +89,7 @@ fun Fragment.getColor(res: Int): Int {
 
 @SuppressLint("ResourceAsColor")
 fun Fragment.showSnackBar(text: String, type: SnackBarType) {
-    val snackBar: Snackbar =
-        Snackbar.make(requireView(), text, Snackbar.LENGTH_SHORT)
+    val snackBar: Snackbar = Snackbar.make(requireView(), text, Snackbar.LENGTH_SHORT)
     snackBar.setAction("Action", null)
     when (type) {
         SnackBarType.FAILED -> snackBar.setBackgroundTint(requireContext().getColor(R.color.theme_01))
@@ -135,7 +135,6 @@ fun Fragment.setStatusColor(color: Int) {
     requireActivity().window.statusBarColor = ContextCompat.getColor(requireContext(), color)
 
 }
-
 
 
 fun hideSoftKeyboard(activity: Activity, view: View) {

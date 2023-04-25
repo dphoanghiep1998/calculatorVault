@@ -1,14 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.main.home.setting.disguiseicon.FragmentDisguiseIcon">
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="match_parent">
 
-</FrameLayout>
+        <include
+            android:id="@+id/container_hide_app_icon"
+            layout="@layout/layout_item_custom_single"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <include
+            android:id="@+id/container_unlock_after_dialing"
+            layout="@layout/layout_item_custom_double"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            app:layout_constraintTop_toBottomOf="@id/container_hide_app_icon" />
+
+        <include
+            android:id="@+id/container_change_calculator_icon"
+            layout="@layout/layout_item_custom_change_icon"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            app:layout_constraintTop_toBottomOf="@id/container_unlock_after_dialing" />
+
+        <include
+            android:id="@+id/container_press_button_to_unlock"
+            layout="@layout/layout_item_custom_double"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            app:layout_constraintTop_toBottomOf="@id/container_change_calculator_icon" />
+
+        <include
+            android:id="@+id/container_unlock_by_long_press_title"
+            layout="@layout/layout_item_custom_double"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            app:layout_constraintTop_toBottomOf="@id/container_press_button_to_unlock" />
+
+        <include
+            android:id="@+id/container_unlock_by_fingerprint"
+            layout="@layout/layout_item_custom_double"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            app:layout_constraintTop_toBottomOf="@id/container_unlock_by_long_press_title" />
+
+        <include
+            android:id="@+id/container_unlock_fingerprint_failure"
+            layout="@layout/layout_item_custom_double"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            app:layout_constraintTop_toBottomOf="@id/container_unlock_by_fingerprint" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

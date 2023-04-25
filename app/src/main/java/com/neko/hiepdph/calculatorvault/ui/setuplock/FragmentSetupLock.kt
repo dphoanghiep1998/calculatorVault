@@ -66,7 +66,7 @@ class FragmentSetupLock : Fragment() {
         binding.btnConfim.clickWithDebounce {
             requireContext().config.securityQuestion = binding.question.text.toString()
             requireContext().config.securityAnswer = binding.edtAnswer.text.toString()
-            popBackStack()
+            popBackStack(R.id.fragmentSetupLock)
         }
     }
 

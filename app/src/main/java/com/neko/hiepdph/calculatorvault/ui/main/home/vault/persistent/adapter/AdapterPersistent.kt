@@ -141,8 +141,7 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
-                        .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+                    Glide.with(itemView.context).load(item.mPath).placeholder(R.drawable.ic_file_unknow).apply(requestOptions).into(binding.imvThumb)
 
                     if (editMode) {
                         binding.checkBox.show()
@@ -249,8 +248,10 @@ class AdapterPersistent(
                     binding.checkBox.isChecked = item in listOfItemSelected
 
                     if (editMode) {
+                        binding.option.hide()
                         binding.checkBox.show()
                     } else {
+                        binding.option.show()
                         binding.checkBox.hide()
                     }
                     binding.tvNameAudio.text = item.mName
@@ -261,6 +262,7 @@ class AdapterPersistent(
                     binding.option.clickWithDebounce {
                         showPopupWindow(itemView.context, binding.option)
                     }
+
 
                     binding.root.setOnLongClickListener {
                         if(editMode){
@@ -289,7 +291,6 @@ class AdapterPersistent(
                     }
 
                     binding.checkBox.setOnClickListener {
-                        binding.checkBox.isChecked = !binding.checkBox.isChecked
                         if (binding.checkBox.isChecked) {
                             listOfItemSelected.add(item)
                         } else {

@@ -103,7 +103,6 @@ class AdapterNote(
             }
 
             binding.checkBox.setOnClickListener {
-                binding.checkBox.isChecked = !binding.checkBox.isChecked
                 if (binding.checkBox.isChecked) {
                     listOfId.add(item.id)
                 } else {
@@ -117,7 +116,7 @@ class AdapterNote(
     fun changeToNormalView() {
         editMode = false
         listOfId.clear()
-        notifyItemRangeChanged(0, listOfNote.size)
+        notifyDataSetChanged()
     }
 
     fun filterNote(query: String) {

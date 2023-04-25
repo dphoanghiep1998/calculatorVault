@@ -1,5 +1,6 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView

@@ -252,4 +252,35 @@
     <string name="rename_successfully">Rename successfully!</string>
     <string name="empty_bin_instruction">Empty files from recycle Bin is permanent. Are you sure want to empty?</string>
     <string name="no">No</string>
+    <string name="hide_app_icon">Hide App Icon</string>
+    <string name="on">ON</string>
+    <string name="off">OFF</string>
+    <string name="need_to_unlock_after_dialing">Need to unlock after dialing</string>
+    <string name="unlock_after_dialing_content_2">Need to unlock again after launcher  the Sgallery from Dialer</string>
+    <string name="change_calculator_icon">Change Calculator icon</string>
+    <string name="change_caculator_icon_content_2">Choose the Calculator icon. Disguise \"Sgallery\" as a \"Calculator\"</string>
+    <string name="press_button_to_unlock">Press the \"=\" button to unlock</string>
+    <string name="press_button_to_unlock_content_2">If you\'ve selected using a PIN to unlock, you can enter your PIN into the calculator to unlock Sgallery. You can require Pressing the \"=\" after entering the PIN.</string>
+    <string name="short_press">Short Press</string>
+    <string name="long_press">Long Press</string>
+    <string name="prohibit_unlocking_by_long_press">Prohibit unlocking by long press title</string>
+    <string name="prohibit_unlocking_by_long_press_content_2">Prohibit unlocking the sgallery by long pressing the title on the Calculator. (This will be invalid if no other entry method is set)</string>
+    <string name="unlock_by_fingerprint">Unlock by fingerprint</string>
+    <string name="unlock_by_fingerprint_content_2">Use your fingerprint to enter the Sgallery from Calculator</string>
+    <string name="fingerprint_failure">Fingerprint Failure</string>
+    <string name="fingerprint_failure_content_2">Go to Home Screen when fingerprint recognition fails</string>
+    <string name="tips">Tips</string>
+    <string name="tips_hide_app_instruction">Using the “Hide App Icon” feature, you need to ensure that the app is not killed. In some special cases launcher from dialer may be invalid, continue to operate it?</string>
+    <string name="launch_method">Launch Methods</string>
+    <string name="launch_from_dialer">Launch from Phone Dialer (Galaxy is invalid)</string>
+    <string name="launch_from_dialer_first_step">1) Open phone dialer</string>
+    <string name="launch_from_dialer_second_step">2) Enter the Launcher Number</string>
+    <string name="launch_from_dialer_third_step">3) Press the dial key</string>
+    <string name="launcher_number">Launcher number is *#*#0101#*#*</string>
+    <string name="launch_by_manage_setting_first_step"><![CDATA[1) > Open Settings]]></string>
+    <string name="launch_by_manage_setting_second_step"><![CDATA[2) > Find Apps]]></string>
+    <string name="launch_by_manage_setting_third_step"><![CDATA[3) > Find CalculatorVault]]></string>
+    <string name="launch_by_manage_setting_fourth_step"><![CDATA[4) > Tap Storage]]></string>
+    <string name="launch_by_manage_setting_fifth_step"><![CDATA[5) > Tap Manage Space button]]></string>
+    <string name="launch_by_manage_setting">Launch by Manage Space button</string>
 </resources>

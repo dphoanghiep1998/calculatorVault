@@ -13,7 +13,7 @@
         app:buttonText="2nd"
         app:expand="true"
         android:visibility="gone"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_flex_deg"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -27,7 +27,7 @@
         app:buttonText="deg"
         app:expand="true"
         android:visibility="gone"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_flex_sin"
         app:layout_constraintStart_toEndOf="@id/btn_2nd"
         app:layout_constraintTop_toTopOf="parent" />
@@ -41,7 +41,7 @@
         app:buttonText="sin"
         app:expand="true"
         android:visibility="gone"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_flex_cos"
         app:layout_constraintStart_toEndOf="@id/btn_flex_deg"
         app:layout_constraintTop_toTopOf="parent" />
@@ -55,7 +55,7 @@
         app:buttonText="cos"
         app:expand="true"
         android:visibility="gone"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_flex_tan"
         app:layout_constraintStart_toEndOf="@id/btn_flex_sin"
         app:layout_constraintTop_toTopOf="parent" />
@@ -68,7 +68,7 @@
         app:buttonText="tan"
         app:expand="true"
         android:visibility="gone"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/btn_flex_cos"
         app:layout_constraintTop_toTopOf="parent" />
@@ -84,7 +84,7 @@
         app:buttonText="X^y"
         app:expand="true"
         android:visibility="gone"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_lg"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_2nd" />
@@ -98,7 +98,7 @@
         app:buttonText="lg"
         app:expand="true"
         android:visibility="gone"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_ln"
         app:layout_constraintStart_toEndOf="@id/btn_pow"
         app:layout_constraintTop_toTopOf="@id/btn_pow" />
@@ -112,7 +112,7 @@
         app:buttonText="ln"
         app:expand="true"
         android:visibility="gone"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_open_bracket"
         app:layout_constraintStart_toEndOf="@id/btn_lg"
         app:layout_constraintTop_toTopOf="@id/btn_pow" />
@@ -126,7 +126,7 @@
         app:buttonText="("
         app:expand="true"
         android:visibility="gone"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_close_bracket"
         app:layout_constraintStart_toEndOf="@id/btn_ln"
         app:layout_constraintTop_toTopOf="@id/btn_pow" />
@@ -139,7 +139,7 @@
         app:buttonText=")"
         app:expand="true"
         android:visibility="gone"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/btn_open_bracket"
         app:layout_constraintTop_toTopOf="@id/btn_pow" />
@@ -153,7 +153,7 @@
         app:expand="true"
         android:visibility="gone"
         android:layout_marginTop="@dimen/_4sdp"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_reset"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_pow"
@@ -167,7 +167,7 @@
         android:layout_marginEnd="@dimen/_2sdp"
         app:buttonText="AC"
         android:layout_marginTop="@dimen/_4sdp"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_delete"
         app:layout_constraintStart_toEndOf="@id/btn_sqrt"
         app:layout_constraintTop_toBottomOf="@id/btn_lg" />
@@ -180,7 +180,7 @@
 
         android:layout_marginEnd="@dimen/_2sdp"
 
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_percent"
         app:layout_constraintStart_toEndOf="@id/btn_reset"
         app:layout_constraintTop_toTopOf="@id/btn_reset"
@@ -193,7 +193,7 @@
         android:layout_marginStart="@dimen/_2sdp"
         android:layout_marginEnd="@dimen/_2sdp"
         app:buttonText="%"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_divide"
         app:layout_constraintStart_toEndOf="@id/btn_delete"
         app:layout_constraintTop_toTopOf="@id/btn_reset" />
@@ -204,7 +204,7 @@
         android:layout_height="0dp"
         android:layout_marginStart="@dimen/_2sdp"
 
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/btn_percent"
         app:layout_constraintTop_toTopOf="@id/btn_reset"
@@ -221,7 +221,7 @@
         app:buttonText="X!"
         app:expand="true"
         android:visibility="gone"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_7"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_sqrt" />
@@ -235,7 +235,7 @@
         android:layout_marginEnd="@dimen/_2sdp"
         android:layout_marginBottom="@dimen/_4sdp"
         app:buttonText="7"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_8"
         app:layout_constraintStart_toEndOf="@id/btn_exponentiation"
         app:layout_constraintTop_toBottomOf="@id/btn_reset" />
@@ -247,7 +247,7 @@
         android:layout_marginStart="@dimen/_2sdp"
         android:layout_marginEnd="@dimen/_2sdp"
         app:buttonText="8"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_9"
         app:layout_constraintStart_toEndOf="@id/btn_7"
         app:layout_constraintTop_toTopOf="@id/btn_7" />
@@ -259,7 +259,7 @@
         android:layout_marginStart="@dimen/_2sdp"
         android:layout_marginEnd="@dimen/_2sdp"
         app:buttonText="9"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_times"
         app:layout_constraintStart_toEndOf="@id/btn_8"
         app:layout_constraintTop_toTopOf="@id/btn_7" />
@@ -270,7 +270,7 @@
         android:layout_height="0dp"
         android:layout_marginStart="@dimen/_2sdp"
         app:buttonText="x"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/btn_9"
         app:layout_constraintTop_toTopOf="@id/btn_7" />
@@ -286,7 +286,7 @@
         app:buttonText="1/x"
         android:visibility="gone"
         app:expand="true"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_4"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_exponentiation" />
@@ -300,7 +300,7 @@
         android:layout_marginEnd="@dimen/_2sdp"
         android:layout_marginBottom="@dimen/_4sdp"
         app:buttonText="4"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_5"
         app:layout_constraintStart_toEndOf="@id/btn_inverse"
         app:layout_constraintTop_toBottomOf="@id/btn_7" />
@@ -312,7 +312,7 @@
         android:layout_marginStart="@dimen/_2sdp"
         android:layout_marginEnd="@dimen/_2sdp"
         app:buttonText="5"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_6"
         app:layout_constraintStart_toEndOf="@id/btn_4"
         app:layout_constraintTop_toTopOf="@id/btn_4" />
@@ -324,7 +324,7 @@
         android:layout_marginStart="@dimen/_2sdp"
         android:layout_marginEnd="@dimen/_2sdp"
         app:buttonText="6"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_subtract"
         app:layout_constraintStart_toEndOf="@id/btn_5"
         app:layout_constraintTop_toTopOf="@id/btn_4" />
@@ -335,7 +335,7 @@
         android:layout_height="0dp"
         android:layout_marginStart="@dimen/_2sdp"
         app:buttonText="-"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/btn_6"
         app:layout_constraintTop_toTopOf="@id/btn_4" />
@@ -350,7 +350,7 @@
         android:layout_marginBottom="@dimen/_4sdp"
         app:expand="true"
         android:visibility="gone"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_inverse"
@@ -366,7 +366,7 @@
         android:layout_marginEnd="@dimen/_2sdp"
         android:layout_marginBottom="@dimen/_4sdp"
         app:buttonText="1"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_2"
         app:layout_constraintStart_toEndOf="@id/btn_pi"
         app:layout_constraintTop_toBottomOf="@id/btn_4" />
@@ -378,7 +378,7 @@
         android:layout_marginStart="@dimen/_2sdp"
         android:layout_marginEnd="@dimen/_2sdp"
         app:buttonText="2"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_3"
         app:layout_constraintStart_toEndOf="@id/btn_1"
         app:layout_constraintTop_toTopOf="@id/btn_1" />
@@ -391,7 +391,7 @@
         android:layout_marginEnd="@dimen/_2sdp"
         app:buttonText="3"
 
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_plus"
         app:layout_constraintStart_toEndOf="@id/btn_2"
         app:layout_constraintTop_toTopOf="@id/btn_1" />
@@ -402,7 +402,7 @@
         android:layout_height="0dp"
         android:layout_marginStart="@dimen/_2sdp"
         app:buttonText="+"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/btn_3"
         app:layout_constraintTop_toTopOf="@id/btn_1" />
@@ -416,7 +416,7 @@
         android:layout_marginBottom="@dimen/_4sdp"
         android:layout_marginStart="@dimen/_2sdp"
         app:expand="true"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_e"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_1"
@@ -432,7 +432,7 @@
         android:layout_marginBottom="@dimen/_4sdp"
         app:buttonText="e"
         android:visibility="gone"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_0"
         app:layout_constraintStart_toEndOf="@id/btn_switch"
         app:layout_constraintTop_toTopOf="@id/btn_switch" />
@@ -444,7 +444,7 @@
         android:layout_marginStart="@dimen/_2sdp"
         android:layout_marginEnd="@dimen/_2sdp"
         app:buttonText="0"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_comma"
         app:layout_constraintStart_toEndOf="@id/btn_e"
         app:layout_constraintTop_toTopOf="@id/btn_switch" />
@@ -458,7 +458,7 @@
         android:layout_marginEnd="@dimen/_2sdp"
 
         app:buttonText=","
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
 
         app:layout_constraintEnd_toStartOf="@id/btn_equal"
         app:layout_constraintStart_toEndOf="@id/btn_0"
@@ -470,7 +470,7 @@
         android:layout_height="0dp"
         android:layout_marginStart="@dimen/_2sdp"
         app:buttonText="="
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/btn_comma"
         app:layout_constraintTop_toTopOf="@id/btn_switch"

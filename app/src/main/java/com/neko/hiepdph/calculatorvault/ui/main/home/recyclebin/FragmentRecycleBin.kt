@@ -107,7 +107,7 @@ class FragmentRecycleBin : Fragment() {
     }
 
     private fun changeToEditView() {
-        if(sizeList == 0){
+        if (sizeList == 0) {
             toast(getString(R.string.require_size_more_than_1))
             return
         }
@@ -179,7 +179,7 @@ class FragmentRecycleBin : Fragment() {
             listItemSelected.clear()
             listItemSelected.addAll(it)
             checkItem()
-        })
+        }, onDeleteItem = {}, onDetailItem = {}, onRestoreItem = {})
 
         val layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
         binding.rcvItems.layoutManager = layoutManager

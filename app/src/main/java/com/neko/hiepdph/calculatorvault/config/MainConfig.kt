@@ -137,11 +137,41 @@ class MainConfig(val context: Context) {
         set(listItemVault) = AppSharePreference.getInstance(context)
             .saveObjectToSharePreference(Constant.KEY_LIST_ITEM_VAULT, listItemVault)
 
-    var listPathRecyclerBin : List<ItemMoved>?
+    var listPathRecyclerBin: List<ItemMoved>?
         get() = AppSharePreference.getInstance(context)
             .getObjectFromSharePreference<List<ItemMoved>>(Constant.KEY_LIST_RECYCLER_BIN)
         set(listPathRecyclerBin) = AppSharePreference.getInstance(context)
             .saveObjectToSharePreference(Constant.KEY_LIST_RECYCLER_BIN, listPathRecyclerBin)
+
+    var hideAppIcon: Boolean
+        get() = AppSharePreference.getInstance(context).getHideAppIcon(HideAppIcon.OFF)
+        set(hideAppIcon) = AppSharePreference.getInstance(context).setHideAppIcon(hideAppIcon)
+
+    var unlockAfterDialing:Boolean
+        get() = AppSharePreference.getInstance(context).getUnlockAfterDialing(UnlockAfterDialing.ENABLE)
+        set(unlockAfterDialing) = AppSharePreference.getInstance(context).setUnlockAfterDialing(unlockAfterDialing)
+
+    var changeCalculatorIcon:Int
+        get() = AppSharePreference.getInstance(context).getChangeCalculatorIcon(ChangeCalculatorIcon.ICON_DEFAULT)
+        set(changeCalculatorIcon) = AppSharePreference.getInstance(context).setChangeCalculatorIcon(changeCalculatorIcon)
+
+    var buttonToUnlock:Int
+        get() = AppSharePreference.getInstance(context).getButtonToUnlock(ButtonToUnlock.SHORT_PRESS)
+        set(buttonToUnlock) = AppSharePreference.getInstance(context).setButtonToUnlock(buttonToUnlock)
+
+    var prohibitUnlockingByLongPressTitle:Boolean
+        get() = AppSharePreference.getInstance(context).getProhibitUnlockingByLongPressTitle(UnlockByLongPress.DISABLE)
+        set(prohibitUnlockingByLongPressTitle) = AppSharePreference.getInstance(context).setProhibitUnlockingByLongPressTitle(prohibitUnlockingByLongPressTitle)
+
+    var unlockByFingerprint:Boolean
+        get() = AppSharePreference.getInstance(context).getUnlockByFingerprint(UnlockByFingerprint.DISABLE)
+        set(unlockByFingerprint) = AppSharePreference.getInstance(context).setUnlockByFingerprint(unlockByFingerprint)
+
+    var fingerprintFailure:Boolean
+        get() = AppSharePreference.getInstance(context).getFingerprintFailure(FingerprintFailure.DISABLE)
+        set(fingerprintFailure) = AppSharePreference.getInstance(context).setFingerprintFailure(fingerprintFailure)
+
+
 
 
     private fun getDefaultInternalPath(): String {

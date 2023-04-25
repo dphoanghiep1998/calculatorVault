@@ -237,10 +237,10 @@ class AppSharePreference(private val context: Context?) {
         }
     }
 
-     fun saveString(key: String, values: String): Unit =
+    fun saveString(key: String, values: String): Unit =
         sharedPreferences().edit { putString(key, values) }
 
-     fun getString(key: String, defaultValues: String): String {
+    fun getString(key: String, defaultValues: String): String {
         return try {
             sharedPreferences().getString(key, defaultValues)!!
         } catch (e: Exception) {
@@ -415,11 +415,68 @@ class AppSharePreference(private val context: Context?) {
     }
 
     fun getExternalStoragePath(defaultExternalPath: String): String {
-        return getString(Constant.EXTERNAL_STORAGE_PATH,defaultExternalPath)
+        return getString(Constant.EXTERNAL_STORAGE_PATH, defaultExternalPath)
     }
 
-    fun setExternalStoragePath( values: String) {
-        saveString(Constant.EXTERNAL_STORAGE_PATH,values)
+    fun setExternalStoragePath(values: String) {
+        saveString(Constant.EXTERNAL_STORAGE_PATH, values)
+    }
+
+    fun getHideAppIcon(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_HIDE_APP_ICON, defaultValues)
+    }
+
+    fun setHideAppIcon(values: Boolean) {
+        saveBoolean(Constant.KEY_HIDE_APP_ICON, values)
+    }
+
+    fun getUnlockAfterDialing(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_UNLOCK_AFTER_DIALING, defaultValues)
+    }
+
+    fun setUnlockAfterDialing(values: Boolean) {
+        saveBoolean(Constant.KEY_UNLOCK_AFTER_DIALING, values)
+    }
+
+    fun getChangeCalculatorIcon(defaultValues: Int): Int {
+        return getInt(Constant.KEY_CHANGE_ICON, defaultValues)
+    }
+
+    fun setChangeCalculatorIcon(values: Int) {
+        saveInt(Constant.KEY_CHANGE_ICON, values)
+
+    }
+
+    fun getButtonToUnlock(defaultValues: Int): Int {
+        return getInt(Constant.KEY_BUTTON_UNLOCK, defaultValues)
+    }
+
+    fun setButtonToUnlock(values: Int) {
+        saveInt(Constant.KEY_BUTTON_UNLOCK, values)
+    }
+
+    fun getProhibitUnlockingByLongPressTitle(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_UNLOCK_BY_PRESS_TITLE, defaultValues)
+    }
+
+    fun setProhibitUnlockingByLongPressTitle(values: Boolean) {
+        saveBoolean(Constant.KEY_UNLOCK_BY_PRESS_TITLE, values)
+    }
+
+    fun getUnlockByFingerprint(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_UNLOCK_BY_FINGERPRINT, defaultValues)
+    }
+
+    fun setUnlockByFingerprint(values: Boolean) {
+        saveBoolean(Constant.KEY_UNLOCK_BY_FINGERPRINT, values)
+    }
+
+    fun getFingerprintFailure(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_FINGERPRINT_FAILURE, defaultValues)
+    }
+
+    fun setFingerprintFailure(values: Boolean) {
+        saveBoolean(Constant.KEY_FINGERPRINT_FAILURE, values)
     }
 
 

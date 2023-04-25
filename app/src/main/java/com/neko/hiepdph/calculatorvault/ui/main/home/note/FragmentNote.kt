@@ -97,7 +97,7 @@ class FragmentNote : Fragment() {
     private fun initRecyclerView() {
         adapterNote = AdapterNote(onClickItem = {}, onLongClickItem = {
             initToolBar()
-            editView()
+            editHome()
 //            (requireActivity() as ActivityVault).getToolbar().setNavigationIcon(R.drawable.ic_exit)
 //            (requireActivity() as ActivityVault).getToolbar().setNavigationOnClickListener {
 //                adapterNote?.changeToNormalView()
@@ -193,6 +193,12 @@ class FragmentNote : Fragment() {
                             deleteNote()
                             true
                         }
+                        android.R.id.home -> {
+                            adapterNote?.changeToNormalView()
+                            (requireActivity() as ActivityVault).setupActionBar()
+                            initToolBar()
+                            true
+                        }
                         else -> false
                     }
 
@@ -211,6 +217,14 @@ class FragmentNote : Fragment() {
         requireActivity().addMenuProvider(
             normalMenuProvider as MenuProvider, viewLifecycleOwner, Lifecycle.State.CREATED
         )
+    }
+    private fun editHome() {
+        val actionBar = (requireActivity() as? ActivityVault)?.supportActionBar
+        val exitIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_exit)
+        exitIcon?.let {
+            actionBar?.setHomeAsUpIndicator(it)
+        }
+
     }
 
     private fun checkNote() {
@@ -238,17 +252,7 @@ class FragmentNote : Fragment() {
         }
     }
 
-    private fun editView() {
-        listener?.setOnClickToNavigationIcon {
-            adapterNote?.changeToNormalView()
-            requireActivity().invalidateOptionsMenu()
-        }
-        listener?.setToolBarNavigationIcon(
-            ContextCompat.getDrawable(
-                requireContext(), R.drawable.ic_exit
-            )!!
-        )
-    }
+
 
 
     private fun changeLayout(item: MenuItem) {

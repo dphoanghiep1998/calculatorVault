@@ -1,60 +1,167 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.setting.disguiseicon
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.common.extensions.*
+import com.neko.hiepdph.calculatorvault.config.ButtonToUnlock
+import com.neko.hiepdph.calculatorvault.databinding.FragmentDisguiseIconBinding
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
+import dagger.hilt.android.AndroidEntryPoint
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [FragmentDisguiseIcon.newInstance] factory method to
- * create an instance of this fragment.
- */
+@AndroidEntryPoint
 class FragmentDisguiseIcon : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private var _binding: FragmentDisguiseIconBinding? = null
+    private val binding get() = _binding!!
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View? {
+        _binding = FragmentDisguiseIconBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initView()
+    }
+
+    private fun initView() {
+        setupView()
+        initButton()
+    }
+
+    private fun initButton() {
+        binding.containerHideAppIcon.root.clickWithDebounce {
+            if (!requireContext().config.hideAppIcon) {
+                val confirmDialog = DialogConfirm(onPositiveClicked = {
+                    navigateToPage(R.id.fragmentDisguiseIcon, R.id.fragmentHideAppIcon)
+                }, DialogConfirmType.TIP_HIDE_APP)
+                confirmDialog.show(childFragmentManager, confirmDialog.tag)
+            }
+        }
+
+        binding.containerUnlockAfterDialing.root.clickWithDebounce {
+            binding.containerUnlockAfterDialing.switchChange.isChecked =
+                !binding.containerUnlockAfterDialing.switchChange.isChecked
+            requireContext().config.unlockAfterDialing =
+                binding.containerUnlockAfterDialing.switchChange.isChecked
+        }
+
+        binding.containerUnlockAfterDialing.switchChange.setOnClickListener {
+            requireContext().config.unlockAfterDialing =
+                binding.containerUnlockAfterDialing.switchChange.isChecked
+        }
+
+        binding.containerChangeCalculatorIcon.root.clickWithDebounce {
+            binding.containerChangeCalculatorIcon.imvAppIcon
+        }
+
+        binding.containerPressButtonToUnlock.root.clickWithDebounce {
+
+        }
+
+        binding.containerUnlockByLongPressTitle.root.clickWithDebounce {
+            binding.containerUnlockByLongPressTitle.switchChange.isChecked =
+                !binding.containerUnlockByLongPressTitle.switchChange.isChecked
+            requireContext().config.prohibitUnlockingByLongPressTitle =
+                binding.containerUnlockByLongPressTitle.switchChange.isChecked
+        }
+
+        binding.containerUnlockByLongPressTitle.switchChange.setOnClickListener {
+            requireContext().config.prohibitUnlockingByLongPressTitle =
+                binding.containerUnlockByLongPressTitle.switchChange.isChecked
+        }
+
+        binding.containerUnlockByFingerprint.root.clickWithDebounce {
+            binding.containerUnlockByFingerprint.switchChange.isChecked =
+                !binding.containerUnlockByFingerprint.switchChange.isChecked
+            requireContext().config.unlockByFingerprint =
+                binding.containerUnlockByFingerprint.switchChange.isChecked
+        }
+        binding.containerUnlockByFingerprint.switchChange.setOnClickListener {
+            requireContext().config.unlockByFingerprint =
+                binding.containerUnlockByFingerprint.switchChange.isChecked
+        }
+
+        binding.containerUnlockFingerprintFailure.root.clickWithDebounce {
+            binding.containerUnlockFingerprintFailure.switchChange.isChecked =
+                !binding.containerUnlockFingerprintFailure.switchChange.isChecked
+            requireContext().config.fingerprintFailure =
+                binding.containerUnlockFingerprintFailure.switchChange.isChecked
+        }
+
+        binding.containerUnlockFingerprintFailure.switchChange.setOnClickListener {
+            requireContext().config.fingerprintFailure =
+                binding.containerUnlockFingerprintFailure.switchChange.isChecked
+        }
+
+    }
+
+    private fun setupView() {
+        binding.containerHideAppIcon.apply {
+            imvIcon.setImageResource(R.drawable.ic_hide_app)
+            tvContent.text = getString(R.string.hide_app_icon)
+            tvStatus.show()
+            tvStatus.text =
+                if (requireContext().config.hideAppIcon) getString(R.string.on) else getString(R.string.off)
+        }
+        binding.containerUnlockAfterDialing.apply {
+            imvIcon.setImageResource(R.drawable.ic_setup_pin)
+            tvContent.text = getString(R.string.need_to_unlock_after_dialing)
+            tvContent2.text = getString(R.string.unlock_after_dialing_content_2)
+            switchChange.show()
+            switchChange.isChecked = requireContext().config.unlockAfterDialing
+            imvNext.hide()
+        }
+        binding.containerChangeCalculatorIcon.apply {
+            imvIcon.setImageResource(R.drawable.ic_calculator_dark)
+            tvContent.text = getString(R.string.change_calculator_icon)
+            tvContent2.text = getString(R.string.change_caculator_icon_content_2)
+            imvAppIcon.setImageResource(R.drawable.ic_lock_safe)
+        }
+        binding.containerPressButtonToUnlock.apply {
+            imvIcon.setImageResource(R.drawable.ic_unlock)
+            tvContent.text = getString(R.string.press_button_to_unlock)
+            tvContent2.text = getString(R.string.press_button_to_unlock_content_2)
+            tvStatus.show()
+            tvStatus.text = when (requireContext().config.buttonToUnlock) {
+                ButtonToUnlock.SHORT_PRESS -> getString(R.string.short_press)
+                ButtonToUnlock.LONG_PRESS -> getString(R.string.long_press)
+                else -> getString(R.string.none)
+            }
+
+        }
+        binding.containerUnlockByLongPressTitle.apply {
+            imvIcon.setImageResource(R.drawable.ic_lock_safe)
+            tvContent.text = getString(R.string.prohibit_unlocking_by_long_press)
+            tvContent2.text = getString(R.string.prohibit_unlocking_by_long_press_content_2)
+            tvStatus.hide()
+            switchChange.show()
+            imvNext.hide()
+            switchChange.isChecked = requireContext().config.prohibitUnlockingByLongPressTitle
+        }
+        binding.containerUnlockByFingerprint.apply {
+            imvIcon.setImageResource(R.drawable.ic_fingerprint_lock_display)
+            tvContent.text = getString(R.string.unlock_by_fingerprint)
+            tvContent2.text = getString(R.string.unlock_by_fingerprint_content_2)
+            imvNext.hide()
+            switchChange.show()
+            switchChange.isChecked = requireContext().config.unlockByFingerprint
+        }
+        binding.containerUnlockFingerprintFailure.apply {
+            imvIcon.setImageResource(R.drawable.ic_fingerprint_failure)
+            tvContent.text = getString(R.string.fingerprint_failure)
+            tvContent2.text = getString(R.string.fingerprint_failure_content_2)
+            imvNext.hide()
+            switchChange.show()
+            switchChange.isChecked = requireContext().config.fingerprintFailure
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_disguise_icon, container, false)
-    }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment FragmentDisguiseIcon.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            FragmentDisguiseIcon().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
-    }
 }

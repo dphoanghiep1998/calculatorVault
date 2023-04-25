@@ -9,6 +9,7 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
 import com.neko.hiepdph.calculatorvault.common.Constant
+import com.neko.hiepdph.calculatorvault.common.Constant.PRIVACY_FOLDER_NAME
 import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_AUDIOS
 import com.neko.hiepdph.calculatorvault.common.Constant.archiveMimeTypes
 import com.neko.hiepdph.calculatorvault.common.Constant.extraAudioMimeTypes
@@ -60,7 +61,7 @@ object MediaStoreUtils {
                             if (mimetype == "image") {
                                 val parentFolderPath = File(path).parentFile?.path
                                 val parentFolder = File(path).parentFile?.name ?: "No_name"
-                                if (parentFolder.startsWith(".")) {
+                                if (parentFolder.startsWith(".") || parentFolderPath?.contains(Constant.PRIVACY_FOLDER_NAME) == true) {
                                     return@queryCursor
                                 }
                                 if (!folders.any { it.first == parentFolder }) {
@@ -69,29 +70,28 @@ object MediaStoreUtils {
                                             parentFolder, GroupItem(
                                                 parentFolder,
                                                 Constant.TYPE_PICTURE,
-                                                path,
-                                                mutableListOf(),
                                                 mutableListOf(),
                                                 parentFolderPath.toString()
                                             )
                                         )
                                     )
-                                } else if (folders.any { it.second?.folderPath != parentFolderPath }) {
-                                    folders.add(
-                                        Pair(
-                                            parentFolder, GroupItem(
-                                                parentFolder,
-                                                Constant.TYPE_PICTURE,
-                                                path,
-                                                mutableListOf(),
-                                                mutableListOf(),
-                                                parentFolderPath.toString()
+                                } else {
+                                    if (!folders.any { it.second?.folderPath == parentFolderPath }) {
+                                        folders.add(
+                                            Pair(
+                                                parentFolder, GroupItem(
+                                                    parentFolder,
+                                                    Constant.TYPE_PICTURE,
+                                                    mutableListOf(),
+                                                    parentFolderPath.toString()
+                                                )
                                             )
                                         )
-                                    )
+                                    }
                                 }
 
                                 if (path.isNotEmpty()) {
+
                                     folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataList?.add(
                                         path
                                     )
@@ -103,7 +103,7 @@ object MediaStoreUtils {
 
                                 val parentFolderPath = File(path).parentFile?.path
                                 val parentFolder = File(path).parentFile?.name ?: "No_name"
-                                if (parentFolder.startsWith(".")) {
+                                if (parentFolder.startsWith(".") || parentFolderPath?.contains(Constant.PRIVACY_FOLDER_NAME) == true) {
                                     return@queryCursor
                                 }
                                 if (!folders.any { it.first == parentFolder }) {
@@ -112,27 +112,24 @@ object MediaStoreUtils {
                                             parentFolder, GroupItem(
                                                 parentFolder,
                                                 Constant.TYPE_VIDEOS,
-                                                path,
-                                                mutableListOf(),
                                                 mutableListOf(),
                                                 File(path).parentFile?.path ?: ""
                                             )
                                         )
                                     )
-                                } else if (folders.any { it.second?.folderPath != parentFolderPath }) {
-                                    folders.add(
-                                        Pair(
-                                            parentFolder, GroupItem(
-                                                parentFolder,
-                                                Constant.TYPE_VIDEOS,
-                                                path,
-                                                mutableListOf(),
-                                                mutableListOf(),
-                                                File(path).parentFile?.path ?: ""
+                                } else
+                                    if (!folders.any { it.second?.folderPath == parentFolderPath }) {
+                                        folders.add(
+                                            Pair(
+                                                parentFolder, GroupItem(
+                                                    parentFolder,
+                                                    Constant.TYPE_VIDEOS,
+                                                    mutableListOf(),
+                                                    File(path).parentFile?.path ?: ""
+                                                )
                                             )
                                         )
-                                    )
-                                }
+                                    }
 
                                 if (path.isNotEmpty()) {
                                     folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataList?.add(
@@ -146,7 +143,7 @@ object MediaStoreUtils {
 
                                 val parentFolderPath = File(path).parentFile?.path
                                 val parentFolder = File(path).parentFile?.name ?: "No_name"
-                                if (parentFolder.startsWith(".")) {
+                                if (parentFolder.startsWith(".")|| parentFolderPath?.contains(Constant.PRIVACY_FOLDER_NAME) == true) {
                                     return@queryCursor
                                 }
                                 if (!folders.any { it.first == parentFolder }) {
@@ -154,27 +151,25 @@ object MediaStoreUtils {
                                         Pair(
                                             parentFolder, GroupItem(
                                                 parentFolder,
-                                                Constant.TYPE_AUDIOS,
-                                                path,
-                                                mutableListOf(),
+                                                TYPE_AUDIOS,
                                                 mutableListOf(),
                                                 File(path).parentFile?.path ?: ""
                                             )
                                         )
                                     )
-                                } else if (folders.any { it.second?.folderPath != parentFolderPath }) {
-                                    folders.add(
-                                        Pair(
-                                            parentFolder, GroupItem(
-                                                parentFolder,
-                                                Constant.TYPE_AUDIOS,
-                                                path,
-                                                mutableListOf(),
-                                                mutableListOf(),
-                                                File(path).parentFile?.path ?: ""
+                                } else {
+                                    if (!folders.any { it.second?.folderPath == parentFolderPath }) {
+                                        folders.add(
+                                            Pair(
+                                                parentFolder, GroupItem(
+                                                    parentFolder,
+                                                    TYPE_AUDIOS,
+                                                    mutableListOf(),
+                                                    File(path).parentFile?.path ?: ""
+                                                )
                                             )
                                         )
-                                    )
+                                    }
                                 }
 
                                 if (path.isNotEmpty()) {
@@ -189,96 +184,55 @@ object MediaStoreUtils {
                                     fullMimetype
                                 )
                             ) {
-                                val parentFolderPath = File(path).parentFile?.path
-                                val parentFolder = File(path).parentFile?.name ?: "No_name"
-                                if (parentFolder.startsWith(".")) {
-                                    return@queryCursor
-                                }
+                                val parentFolder = Constant.FILES_FOLDER_NAME
                                 if (!folders.any { it.first == parentFolder }) {
                                     folders.add(
                                         Pair(
                                             parentFolder, GroupItem(
                                                 parentFolder,
                                                 Constant.TYPE_FILE,
-                                                path,
                                                 mutableListOf(),
-                                                mutableListOf(),
-                                                File(path).parentFile?.path ?: ""
-                                            )
-                                        )
-                                    )
-                                } else if (folders.any { it.second?.folderPath != parentFolderPath }) {
-                                    folders.add(
-                                        Pair(
-                                            parentFolder, GroupItem(
-                                                parentFolder,
-                                                Constant.TYPE_FILE,
-                                                path,
-                                                mutableListOf(),
-                                                mutableListOf(),
-                                                File(path).parentFile?.path ?: ""
+                                                File(path).parentFile?.path ?: "",
+                                                mutableSetOf()
                                             )
                                         )
                                     )
                                 }
-
-                                if (path.isNotEmpty()) {
-
+                                if (path.isNotEmpty() && !path.contains(PRIVACY_FOLDER_NAME)) {
                                     if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF)) {
-                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
-                                            Constant.TYPE_PDF
-                                        )
+                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_PDF)
                                     } else if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_CSV)
                                     ) {
-                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
-                                            Constant.TYPE_CSV
-                                        )
-
+                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_CSV)
                                     } else if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_PPT)
                                     ) {
-                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
-                                            Constant.TYPE_PPT
-                                        )
+                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_PPT)
                                     } else if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_PPT)
                                     ) {
-                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
-                                            Constant.TYPE_PPTX
-                                        )
-
+                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_PPTX)
                                     } else if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_TEXT)
                                     ) {
-                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
-                                            Constant.TYPE_TEXT
-                                        )
+                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_TEXT)
                                     } else if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_WORD)
                                     ) {
-                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
-                                            Constant.TYPE_WORD
-                                        )
+                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_WORD)
                                     } else if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_EXCEL)
                                     ) {
-                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
-                                            Constant.TYPE_EXCEL
-                                        )
+                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_EXCEL)
                                     } else if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_WORDX)
                                     ) {
-                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
-                                            Constant.TYPE_WORD
-                                        )
-
+                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_WORD)
                                     } else if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_ZIP)
                                     ) {
-                                        folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataTypeList?.add(
-                                            Constant.TYPE_ZIP
-                                        )
+                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_ZIP)
                                     }
                                 }
 
@@ -295,7 +249,6 @@ object MediaStoreUtils {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        Log.d("TAG", "getListGroupItem: "+folders.map { it.second })
         return folders.map { it.second }
     }
 
@@ -517,7 +470,8 @@ object MediaStoreUtils {
                         fullMimetype
                     )
                 ) {
-                    if (path.isNotEmpty()) {
+                    if (path.isNotEmpty() && !childPath.contains(PRIVACY_FOLDER_NAME)) {
+                        Log.d("TAG", "getChildFileFromPath: " + childPath)
                         when (type) {
                             Constant.TYPE_PDF -> {
                                 if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF)) {

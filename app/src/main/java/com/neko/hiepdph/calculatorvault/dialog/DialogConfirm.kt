@@ -63,17 +63,22 @@ enum class DialogConfirmType(
         R.drawable.ic_unlock,
         R.string.cancel,
         R.string.custom_ok
+    ),
+    TIP_HIDE_APP(
+        R.string.tips,
+        R.string.tips_hide_app_instruction,
+        R.drawable.ic_tips,
+        R.string.cancel,
+        R.string.custom_ok
     )
 
 }
 
 
-
 class DialogConfirm(
     private val onPositiveClicked: () -> Unit,
 
-    private val dialogType: DialogConfirmType,
-    val name: String?
+    private val dialogType: DialogConfirmType, val name: String? = null
 ) : DialogFragment() {
     private lateinit var binding: DialogConfirmBinding
 
@@ -109,9 +114,9 @@ class DialogConfirm(
     }
 
     private fun initView() {
-        if(dialogType.imageRes != 0){
+        if (dialogType.imageRes != 0) {
             binding.imvTitle.setImageResource(dialogType.imageRes)
-        }else{
+        } else {
             binding.imvTitle.hide()
         }
         binding.tvTitle.text = requireContext().getText(dialogType.title)
