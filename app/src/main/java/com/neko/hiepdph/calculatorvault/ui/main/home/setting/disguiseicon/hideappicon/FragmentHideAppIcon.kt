@@ -57,6 +57,7 @@ class FragmentHideAppIcon : Fragment() {
             switchChange.isChecked = requireContext().config.hideAppIcon
             imvNext.hide()
             imvIcon.hide()
+            line.hide()
         }
     }
 

@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.config.ButtonToUnlock
+import com.neko.hiepdph.calculatorvault.config.HideAppIcon
 import com.neko.hiepdph.calculatorvault.databinding.FragmentDisguiseIconBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
@@ -42,6 +43,8 @@ class FragmentDisguiseIcon : Fragment() {
                     navigateToPage(R.id.fragmentDisguiseIcon, R.id.fragmentHideAppIcon)
                 }, DialogConfirmType.TIP_HIDE_APP)
                 confirmDialog.show(childFragmentManager, confirmDialog.tag)
+            }else{
+                requireContext().config.hideAppIcon = HideAppIcon.OFF
             }
         }
 
