@@ -171,6 +171,10 @@ class MainConfig(val context: Context) {
         get() = AppSharePreference.getInstance(context).getFingerprintFailure(FingerprintFailure.DISABLE)
         set(fingerprintFailure) = AppSharePreference.getInstance(context).setFingerprintFailure(fingerprintFailure)
 
+    var secretKey:String
+        get() = AppSharePreference.getInstance(context).getSecretKey(Constant.SECRET_KEY)
+        set(secretKey) = AppSharePreference.getInstance(context).setSecretKey(secretKey)
+
 
 
 

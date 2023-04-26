@@ -23,6 +23,12 @@ class ShareData() {
         _listItemImage.postValue(list)
     }
 
+    private val _listItemVideo = MutableLiveData<MutableList<ListItem>>()
+    val listItemVideo: LiveData<MutableList<ListItem>> get() = _listItemVideo
+    fun setListItemVideo(list: MutableList<ListItem>) {
+        _listItemVideo.postValue(list)
+    }
+
 
 
 

@@ -479,6 +479,15 @@ class AppSharePreference(private val context: Context?) {
         saveBoolean(Constant.KEY_FINGERPRINT_FAILURE, values)
     }
 
+    fun getSecretKey(defaultValues: String): String {
+        return getString(Constant.KEY_CIPHER_CODE, defaultValues)
+    }
+
+    fun setSecretKey(values: String) {
+        saveString(Constant.KEY_CIPHER_CODE, values)
+
+    }
+
 
 }
 

@@ -36,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/app_font_500"
-            android:text="@string/select_an_encryption_mode"
+            android:text="@string/press_button_to_unlock"
             android:textColor="@color/neutral_06"
             android:textSize="@dimen/_18sdp"
             app:layout_constraintBottom_toBottomOf="@id/imv_title"
@@ -53,7 +53,7 @@
 
 
             <RadioButton
-                android:id="@+id/checkbox_encryption"
+                android:id="@+id/checkbox_none"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?android:selectableItemBackground"
@@ -62,13 +62,13 @@
                 android:drawablePadding="@dimen/_20sdp"
                 android:fontFamily="@font/app_font_400"
                 android:layoutDirection="ltr"
-                android:text="@string/encryption"
+                android:text="@string/none"
                 android:textAlignment="textStart"
                 android:textColor="@color/neutral_06"
                 android:textSize="@dimen/_14sdp" />
 
             <RadioButton
-                android:id="@+id/checkbox_hidden"
+                android:id="@+id/checkbox_shortpress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?android:selectableItemBackground"
@@ -77,13 +77,13 @@
                 android:drawablePadding="@dimen/_20sdp"
                 android:fontFamily="@font/app_font_400"
                 android:layoutDirection="ltr"
-                android:text="@string/hidden"
+                android:text="@string/short_press"
                 android:textAlignment="textStart"
                 android:textColor="@color/neutral_06"
                 android:textSize="@dimen/_14sdp" />
 
             <RadioButton
-                android:id="@+id/checkbox_always_ask"
+                android:id="@+id/checkbox_longpress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?android:selectableItemBackground"
@@ -92,7 +92,7 @@
                 android:drawablePadding="@dimen/_20sdp"
                 android:fontFamily="@font/app_font_400"
                 android:layoutDirection="ltr"
-                android:text="@string/always_ask"
+                android:text="@string/long_press"
                 android:textAlignment="textStart"
                 android:textColor="@color/neutral_06"
                 android:textSize="@dimen/_14sdp" />

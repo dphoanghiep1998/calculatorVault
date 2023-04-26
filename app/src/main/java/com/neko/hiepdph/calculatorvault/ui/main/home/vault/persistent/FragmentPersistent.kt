@@ -30,6 +30,7 @@ import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityImageDetail
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
+import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVideoPlayer
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterOtherFolder
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterPersistent
 import com.neko.hiepdph.calculatorvault.viewmodel.PersistentViewModel
@@ -491,7 +492,13 @@ class FragmentPersistent : Fragment() {
                 startActivity(intent)
             }
             Constant.TYPE_AUDIOS -> {}
-            Constant.TYPE_VIDEOS -> {}
+            Constant.TYPE_VIDEOS -> {
+                val list = mutableListOf<ListItem>()
+                list.add(item)
+                ShareData.getInstance().setListItemVideo(list)
+                val intent = Intent(requireContext(), ActivityVideoPlayer::class.java)
+                startActivity(intent)
+            }
             else -> {
 
             }
@@ -499,6 +506,15 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun showController() {
+        when(args.type){
+            Constant.TYPE_PICTURE -> {
+                binding.tvSlideshow.show()
+
+            }
+            Constant.TYPE_VIDEOS -> {
+                binding.tvSlideshow.hide()
+            }
+        }
         binding.containerController.show()
     }
 

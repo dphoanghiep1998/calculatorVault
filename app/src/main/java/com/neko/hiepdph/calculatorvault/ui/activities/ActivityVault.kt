@@ -10,7 +10,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
-import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -67,10 +66,6 @@ class ActivityVault : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityVaultBinding.inflate(layoutInflater)
-        Log.d("TAG", "onCreate: " + config.externalStoragePath + "/${Constant.PRIVACY_FOLDER_NAME}")
-        Log.d("TAG", "onCreate: " + config.externalStoragePath)
-        Log.d("TAG", "onCreate: " + this.getExternalFilesDir(null)?.path + "")
-
         setContentView(binding.root)
         initScreenOffAction()
         setupNavigationDrawer()

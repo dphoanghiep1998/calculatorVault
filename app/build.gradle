@@ -98,9 +98,10 @@ dependencies {
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
     implementation("com.google.guava:guava:31.1-android")
     implementation 'commons-io:commons-io:2.11.0'
-
+    // anim viewpager
     implementation 'in.dd4you.animatoo:anim:1.0.0'
-
+    // exoplayer2
+    implementation 'com.google.android.exoplayer:exoplayer:2.18.6'
 }
 
 

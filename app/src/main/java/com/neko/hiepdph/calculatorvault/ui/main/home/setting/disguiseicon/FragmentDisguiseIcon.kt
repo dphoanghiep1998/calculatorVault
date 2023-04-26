@@ -1,15 +1,19 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.setting.disguiseicon
 
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
+import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import com.neko.hiepdph.calculatorvault.config.ButtonToUnlock
 import com.neko.hiepdph.calculatorvault.config.HideAppIcon
 import com.neko.hiepdph.calculatorvault.databinding.FragmentDisguiseIconBinding
+import com.neko.hiepdph.calculatorvault.dialog.DialogButtonToUnlock
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import dagger.hilt.android.AndroidEntryPoint
@@ -23,6 +27,7 @@ class FragmentDisguiseIcon : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentDisguiseIconBinding.inflate(inflater, container, false)
+        AppSharePreference.INSTANCE.registerOnSharedPreferenceChangeListener(listener)
         return binding.root
     }
 
@@ -36,6 +41,17 @@ class FragmentDisguiseIcon : Fragment() {
         initButton()
     }
 
+    private val listener = OnSharedPreferenceChangeListener { sharedPreferences, key ->
+        if (key == Constant.KEY_BUTTON_UNLOCK) {
+            binding.containerPressButtonToUnlock.tvStatus.text =
+                when (requireContext().config.buttonToUnlock) {
+                    ButtonToUnlock.SHORT_PRESS -> getString(R.string.short_press)
+                    ButtonToUnlock.LONG_PRESS -> getString(R.string.long_press)
+                    else -> getString(R.string.none)
+                }
+        }
+    }
+
     private fun initButton() {
         binding.containerHideAppIcon.root.clickWithDebounce {
             if (!requireContext().config.hideAppIcon) {
@@ -43,7 +59,7 @@ class FragmentDisguiseIcon : Fragment() {
                     navigateToPage(R.id.fragmentDisguiseIcon, R.id.fragmentHideAppIcon)
                 }, DialogConfirmType.TIP_HIDE_APP)
                 confirmDialog.show(childFragmentManager, confirmDialog.tag)
-            }else{
+            } else {
                 requireContext().config.hideAppIcon = HideAppIcon.OFF
             }
         }
@@ -65,7 +81,8 @@ class FragmentDisguiseIcon : Fragment() {
         }
 
         binding.containerPressButtonToUnlock.root.clickWithDebounce {
-
+            val dialogButtonToUnlock = DialogButtonToUnlock()
+            dialogButtonToUnlock.show(childFragmentManager, dialogButtonToUnlock.tag)
         }
 
         binding.containerUnlockByLongPressTitle.root.clickWithDebounce {
@@ -137,7 +154,6 @@ class FragmentDisguiseIcon : Fragment() {
                 ButtonToUnlock.LONG_PRESS -> getString(R.string.long_press)
                 else -> getString(R.string.none)
             }
-
         }
         binding.containerUnlockByLongPressTitle.apply {
             imvIcon.setImageResource(R.drawable.ic_lock_safe)
@@ -166,5 +182,9 @@ class FragmentDisguiseIcon : Fragment() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        AppSharePreference.INSTANCE.unregisterListener(listener)
+    }
 
 }

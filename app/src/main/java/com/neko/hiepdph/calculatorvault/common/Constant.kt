@@ -2,6 +2,7 @@ package com.neko.hiepdph.calculatorvault.common
 
 
 object Constant {
+    const val KEY_CIPHER_CODE ="KEY_CIPHER_CODE"
     const val KEY_FINGERPRINT_FAILURE ="KEY_FINGERPRINT_FAILURE"
     const val KEY_UNLOCK_BY_FINGERPRINT="KEY_UNLOCK_BY_FINGERPRINT"
     const val KEY_UNLOCK_BY_PRESS_TITLE = "KEY_UNLOCK_BY_PRESS_TITLE"
