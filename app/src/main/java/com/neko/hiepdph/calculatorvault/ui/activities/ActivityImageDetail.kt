@@ -131,7 +131,7 @@ class ActivityImageDetail : AppCompatActivity() {
     private fun initButton() {
 
         binding.tvUnlock.clickWithDebounce {
-            unlock()
+            showDialogUnlock()
         }
 
         binding.tvDelete.clickWithDebounce {
@@ -247,9 +247,7 @@ class ActivityImageDetail : AppCompatActivity() {
         jobSlide?.cancel()
     }
 
-    private fun unlock() {
-        showDialogUnlock()
-    }
+
 
     private fun showDialogUnlock() {
         val name = getString(R.string.pictures)

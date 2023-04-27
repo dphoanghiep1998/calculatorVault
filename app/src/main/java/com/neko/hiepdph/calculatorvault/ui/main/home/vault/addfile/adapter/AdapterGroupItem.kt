@@ -123,7 +123,7 @@ class AdapterGroupItem(
                         Glide.with(itemView.context).load(model.dataList[0]).apply(requestOptions)
                             .error(
                                 ContextCompat.getDrawable(
-                                    itemView.context, R.drawable.ic_file_unknow
+                                    itemView.context, R.drawable.ic_error_image
                                 )
                             ).into(binding.imvThumb)
                     }
@@ -143,7 +143,7 @@ class AdapterGroupItem(
                     Glide.with(itemView.context).load(model.dataList[0]).centerCrop()
                         .apply(requestOptions).error(
                             ContextCompat.getDrawable(
-                                itemView.context, R.drawable.ic_file_unknow
+                                itemView.context, R.drawable.ic_error_video
                             )
                         ).into(binding.imvThumb)
                     binding.tvNameQuantity.text = "${model.name} (${model.itemCount})"
@@ -161,7 +161,7 @@ class AdapterGroupItem(
                         Glide.with(itemView.context).asBitmap().load(getThumbnail(model.dataList[0])).centerCrop()
                             .apply(requestOptions).error(
                                 ContextCompat.getDrawable(
-                                    itemView.context, R.drawable.ic_file_unknow
+                                    itemView.context, R.drawable.ic_error_audio
                                 )
                             ).into(binding.imvThumb)
                     }
@@ -202,6 +202,10 @@ class AdapterGroupItem(
                         Constant.TYPE_ZIP -> {
                             binding.imvThumb.setImageResource(R.drawable.ic_zip_album)
                             binding.tvName.text = itemView.context.getString(R.string.zip)
+                        }
+                        else -> {
+                            binding.imvThumb.setImageResource(R.drawable.ic_other_file_album)
+                            binding.tvName.text = itemView.context.getString(R.string.other_file)
                         }
                     }
                     binding.root.clickWithDebounce {

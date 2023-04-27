@@ -24,15 +24,17 @@
     </com.google.android.material.appbar.AppBarLayout>
 
 
-    <com.google.android.exoplayer2.ui.StyledPlayerView
+    <com.google.android.exoplayer2.ui.PlayerView
         android:id="@+id/player_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:controller_layout_id="@layout/layout_controller_exoplayer"
+        app:hide_on_touch="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/action_bar"
-        app:controller_layout_id="@layout/layout_controller_exoplayer"
-        app:surface_type="texture_view" />
-
-
+        app:resize_mode="fit"
+        app:show_timeout="5000"
+        app:surface_type="texture_view"
+        app:use_controller="true" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

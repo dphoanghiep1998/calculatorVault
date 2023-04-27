@@ -170,7 +170,7 @@ class FragmentListItem : Fragment() {
                     binding.tvEmpty.hide()
                 } else {
                     binding.tvEmpty.show()
-                    popBackStack(R.id.fragmentListItem)
+//                    popBackStack(R.id.fragmentListItem)
                 }
 
             }

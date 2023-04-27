@@ -109,7 +109,7 @@ class AdapterOtherFolder(
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
-                        .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+                        .error(R.drawable.ic_error_image).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
                         showPopupWindowFile(itemView.context, binding.option)
@@ -120,7 +120,7 @@ class AdapterOtherFolder(
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).asBitmap().load(getThumbnail(item.mPath))
-                        .apply(requestOptions).error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+                        .apply(requestOptions).error(R.drawable.ic_error_audio).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
                         showPopupWindow(itemView.context, binding.option)
@@ -131,7 +131,7 @@ class AdapterOtherFolder(
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
-                        .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+                        .error(R.drawable.ic_error_video).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
                         showPopupWindowFile(itemView.context, binding.option)

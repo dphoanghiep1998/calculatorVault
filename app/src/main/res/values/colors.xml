@@ -27,6 +27,8 @@
     <color name="neutral_05">#7C7E8B</color>
     <color name="neutral_06">#3F455D</color>
     <color name="neutral_07">#01355A</color>
+    <color name="neutral_08">#000</color>
+
 
     <color name="theme_default">#29BBCF</color>
     <color name="theme_01">#EA1E63</color>

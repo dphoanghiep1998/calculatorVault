@@ -109,7 +109,7 @@ class AdapterListItem(private val onClickItem: (MutableSet<ListItem>) -> Unit) :
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
-                        .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+                        .error(R.drawable.ic_error_image).into(binding.imvThumb)
                     binding.checkBox.isChecked = item in listItemSelected
 
                     binding.root.setOnClickListener {
@@ -137,7 +137,7 @@ class AdapterListItem(private val onClickItem: (MutableSet<ListItem>) -> Unit) :
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).load(item.path).apply(requestOptions)
-                        .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+                        .error(R.drawable.ic_error_video).into(binding.imvThumb)
                     binding.tvDuration.text = item.getDuration(itemView.context).toString()
                     binding.checkBox.isChecked = item in listItemSelected
 
@@ -165,8 +165,8 @@ class AdapterListItem(private val onClickItem: (MutableSet<ListItem>) -> Unit) :
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).asBitmap().load(item.getThumb())
-                        .apply(requestOptions).error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+                    Glide.with(itemView.context).asBitmap().load(item.thumb)
+                        .apply(requestOptions).error(R.drawable.ic_error_audio).into(binding.imvThumb)
 
                     binding.tvNameAudio.isSelected = true
 

@@ -1,10 +1,13 @@
 package com.neko.hiepdph.calculatorvault.common.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.viewpager.widget.PagerAdapter
 import com.bumptech.glide.Glide
+import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.customview.CustomPhotoView
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 
@@ -34,6 +37,7 @@ class ImagePagerAdapter(val context: Context,private val listImage: MutableList<
         container.addView(
             photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
         )
+        container.background = ContextCompat.getDrawable(context,R.color.neutral_06)
         photoView.setOnViewTapListener { view, x, y ->
             mListener?.onTap()
         }

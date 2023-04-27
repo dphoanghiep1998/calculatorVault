@@ -1,5 +1,6 @@
 package com.neko.hiepdph.calculatorvault.data.model
 
+import android.graphics.Bitmap
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
@@ -16,6 +17,7 @@ class ListItem(
     var mModified: Long = 0L,
     var type: String? = "",
     var realType: String? = "",
+    var thumb: Bitmap? = null
 ) : FileDirItem(mPath, mOriginalPath, mName, mIsDirectory, mChildren, mSize, mModified),
     Parcelable {
     override fun equals(other: Any?): Boolean {

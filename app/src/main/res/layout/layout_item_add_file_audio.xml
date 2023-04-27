@@ -15,7 +15,7 @@
         app:cornerRadiusBotRight="16dp"
         app:cornerRadiusTopLeft="16dp"
         app:cornerRadiusTopRight="16dp"
-        app:layout_constraintDimensionRatio="1:0.8"
+        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

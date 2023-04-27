@@ -61,7 +61,10 @@ object MediaStoreUtils {
                             if (mimetype == "image") {
                                 val parentFolderPath = File(path).parentFile?.path
                                 val parentFolder = File(path).parentFile?.name ?: "No_name"
-                                if (parentFolder.startsWith(".") || parentFolderPath?.contains(Constant.PRIVACY_FOLDER_NAME) == true) {
+                                if (parentFolder.startsWith(".") || parentFolderPath?.contains(
+                                        Constant.PRIVACY_FOLDER_NAME
+                                    ) == true
+                                ) {
                                     return@queryCursor
                                 }
                                 if (!folders.any { it.first == parentFolder }) {
@@ -103,7 +106,10 @@ object MediaStoreUtils {
 
                                 val parentFolderPath = File(path).parentFile?.path
                                 val parentFolder = File(path).parentFile?.name ?: "No_name"
-                                if (parentFolder.startsWith(".") || parentFolderPath?.contains(Constant.PRIVACY_FOLDER_NAME) == true) {
+                                if (parentFolder.startsWith(".") || parentFolderPath?.contains(
+                                        Constant.PRIVACY_FOLDER_NAME
+                                    ) == true
+                                ) {
                                     return@queryCursor
                                 }
                                 if (!folders.any { it.first == parentFolder }) {
@@ -143,7 +149,10 @@ object MediaStoreUtils {
 
                                 val parentFolderPath = File(path).parentFile?.path
                                 val parentFolder = File(path).parentFile?.name ?: "No_name"
-                                if (parentFolder.startsWith(".")|| parentFolderPath?.contains(Constant.PRIVACY_FOLDER_NAME) == true) {
+                                if (parentFolder.startsWith(".") || parentFolderPath?.contains(
+                                        Constant.PRIVACY_FOLDER_NAME
+                                    ) == true
+                                ) {
                                     return@queryCursor
                                 }
                                 if (!folders.any { it.first == parentFolder }) {
@@ -201,39 +210,59 @@ object MediaStoreUtils {
                                 if (path.isNotEmpty() && !path.contains(PRIVACY_FOLDER_NAME)) {
                                     if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF)) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_PDF)
-                                    } else if (name.lowercase(Locale.ROOT)
+                                        return@queryCursor
+                                    }
+                                    if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_CSV)
                                     ) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_CSV)
-                                    } else if (name.lowercase(Locale.ROOT)
+                                        return@queryCursor
+                                    }
+                                    if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_PPT)
                                     ) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_PPT)
-                                    } else if (name.lowercase(Locale.ROOT)
+                                        return@queryCursor
+                                    }
+                                    if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_PPT)
                                     ) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_PPTX)
-                                    } else if (name.lowercase(Locale.ROOT)
+                                        return@queryCursor
+                                    }
+                                    if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_TEXT)
                                     ) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_TEXT)
-                                    } else if (name.lowercase(Locale.ROOT)
+                                        return@queryCursor
+                                    }
+                                    if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_WORD)
                                     ) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_WORD)
-                                    } else if (name.lowercase(Locale.ROOT)
+                                        return@queryCursor
+                                    }
+                                    if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_EXCEL)
                                     ) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_EXCEL)
-                                    } else if (name.lowercase(Locale.ROOT)
+                                        return@queryCursor
+                                    }
+                                    if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_WORDX)
                                     ) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_WORD)
-                                    } else if (name.lowercase(Locale.ROOT)
+                                        return@queryCursor
+                                    }
+                                    if (name.lowercase(Locale.ROOT)
                                             .endsWith(Constant.TYPE_ZIP)
                                     ) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_ZIP)
+                                        return@queryCursor
                                     }
+                                    Log.d("TAG", "getListGroupItem: " + path)
+                                    folders[0].second?.dataTypeList?.add(Constant.TYPE_OTHER)
+
                                 }
 
 
@@ -379,8 +408,8 @@ object MediaStoreUtils {
                 val modified = cursor.getLongValue(MediaStore.Video.Media.DATE_MODIFIED)
                 val name = cursor.getStringValue(MediaStore.Video.Media.DISPLAY_NAME)
 
+                Log.d("TAG", "getChildVideoFromPath: " + childPath)
                 if (childPath.isNotBlank()) {
-                    val duration = getDuration(context, childPath)
                     listVideoChild.add(
                         ListItem(
                             id,
@@ -432,7 +461,16 @@ object MediaStoreUtils {
                     val thumb = getThumbnail(childPath)
                     listAudioChild.add(
                         ListItem(
-                            id, childPath, childPath, name, false, 0, size, modified, TYPE_AUDIOS
+                            id,
+                            childPath,
+                            childPath,
+                            name,
+                            false,
+                            0,
+                            size,
+                            modified,
+                            TYPE_AUDIOS,
+                            thumb = thumb
                         )
                     )
                 }
@@ -471,7 +509,6 @@ object MediaStoreUtils {
                     )
                 ) {
                     if (path.isNotEmpty() && !childPath.contains(PRIVACY_FOLDER_NAME)) {
-                        Log.d("TAG", "getChildFileFromPath: " + childPath)
                         when (type) {
                             Constant.TYPE_PDF -> {
                                 if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF)) {
@@ -612,7 +649,16 @@ object MediaStoreUtils {
                                 }
                             }
                             else -> {
-                                if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF)) {
+                                if (!name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF) &&
+                                    !name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPTX) &&
+                                    !name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPT) &&
+                                    !name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_ZIP) &&
+                                    !name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_TEXT) &&
+                                    !name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_CSV) &&
+                                    !name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_EXCEL) &&
+                                    !name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORD) &&
+                                    !name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORDX)
+                                        ) {
                                     listFileChild.add(
                                         ListItem(
                                             id,

@@ -40,7 +40,7 @@ open class FileDirItem(
 
     fun getImageResolution(context: Context) = context.getImageResolution(path)
 
-    fun getThumb() = MediaStoreUtils.getThumbnail(path)
+//    fun getThumb() = MediaStoreUtils.getThumbnail(path)
 
 
     fun getLastModified(context: Context): Long {

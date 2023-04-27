@@ -115,7 +115,7 @@ object FileUtils {
                             }
                         }
                     }
-
+                    val thumb = MediaStoreUtils.getThumbnail(file.path)
                     listOfFolder.add(
                         ListItem(
                             0,
@@ -127,7 +127,8 @@ object FileUtils {
                             file.length(),
                             file.lastModified(),
                             type,
-                            realType
+                            realType,
+                            thumb = thumb
                         )
                     )
                 }

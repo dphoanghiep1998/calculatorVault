@@ -141,7 +141,7 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(item.mPath).placeholder(R.drawable.ic_file_unknow).apply(requestOptions).into(binding.imvThumb)
+                    Glide.with(itemView.context).load(item.mPath).placeholder(R.drawable.ic_error_image).apply(requestOptions).into(binding.imvThumb)
 
                     if (editMode) {
                         binding.checkBox.show()
@@ -191,7 +191,7 @@ class AdapterPersistent(
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
-                        .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+                        .error(R.drawable.ic_error_video).into(binding.imvThumb)
 
                     binding.checkBox.isChecked = item in listOfItemSelected
 
@@ -243,8 +243,8 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).asBitmap().load(getThumbnail(item.mPath))
-                        .apply(requestOptions).error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+                    Glide.with(itemView.context).asBitmap().load(item.thumb)
+                        .apply(requestOptions).error(R.drawable.ic_error_audio).into(binding.imvThumb)
                     binding.checkBox.isChecked = item in listOfItemSelected
 
                     if (editMode) {
