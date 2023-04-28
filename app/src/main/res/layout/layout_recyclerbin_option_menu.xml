@@ -41,7 +41,7 @@
         android:paddingVertical="@dimen/_4sdp"
         android:gravity="center_vertical"
         android:foreground="@drawable/fg_ripple_effect"
-        app:layout_constraintTop_toBottomOf="@id/container_open">
+        app:layout_constraintTop_toBottomOf="@id/container_restore">
 
         <ImageView
             android:layout_width="@dimen/_24sdp"

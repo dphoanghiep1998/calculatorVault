@@ -111,7 +111,7 @@ class AdapterRecyclerBin(
             when (item.type) {
                 Constant.TYPE_PICTURE -> {
                     Glide.with(itemView.context).load(item.path).centerCrop()
-                        .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+                        .error(R.drawable.ic_error_image).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
                         showPopupWindow(itemView.context, binding.option, item)
@@ -120,7 +120,7 @@ class AdapterRecyclerBin(
 
                 Constant.TYPE_AUDIOS -> {
                     Glide.with(itemView.context).asBitmap().load(getThumbnail(item.mPath))
-                        .centerCrop().error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+                        .centerCrop().error(R.drawable.ic_error_audio).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
                         showPopupWindow(itemView.context, binding.option, item)
@@ -129,7 +129,7 @@ class AdapterRecyclerBin(
 
                 Constant.TYPE_VIDEOS -> {
                     Glide.with(itemView.context).load(item.mPath).centerCrop()
-                        .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+                        .error(R.drawable.ic_error_video).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
                         showPopupWindow(itemView.context, binding.option, item)

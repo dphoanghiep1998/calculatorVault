@@ -488,6 +488,14 @@ class AppSharePreference(private val context: Context?) {
 
     }
 
+    fun getShakeGravity(defaultValues: Float): Float {
+        return getString(Constant.KEY_SHAKE_GRAVITY, defaultValues.toString()).toFloat()
+    }
+
+    fun setShakeGravity(values: Float) {
+        saveString(Constant.KEY_SHAKE_GRAVITY, values.toString())
+    }
+
 
 }
 

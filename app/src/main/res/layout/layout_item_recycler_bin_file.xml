@@ -8,14 +8,10 @@
 
     <com.neko.hiepdph.calculatorvault.common.customview.RoundedImageView
         android:id="@+id/imv_thumb"
-        android:layout_width="@dimen/_30sdp"
-        android:layout_height="@dimen/_30sdp"
+        android:layout_width="@dimen/_40sdp"
+        android:layout_height="@dimen/_40sdp"
         android:layout_marginVertical="@dimen/_12sdp"
         android:layout_marginStart="@dimen/_12sdp"
-        app:cornerRadiusBotLeft="@dimen/_15sdp"
-        app:cornerRadiusBotRight="@dimen/_15sdp"
-        app:cornerRadiusTopLeft="@dimen/_15sdp"
-        app:cornerRadiusTopRight="@dimen/_15sdp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintStart_toStartOf="parent"

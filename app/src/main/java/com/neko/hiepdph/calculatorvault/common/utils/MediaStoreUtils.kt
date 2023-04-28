@@ -664,7 +664,6 @@ object MediaStoreUtils {
                                             id,
                                             childPath,
                                             File(childPath).parentFile?.path ?: "",
-
                                             name,
                                             false,
                                             0,

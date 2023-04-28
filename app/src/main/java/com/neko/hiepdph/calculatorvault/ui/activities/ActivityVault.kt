@@ -6,10 +6,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -32,6 +35,7 @@ import com.neko.hiepdph.calculatorvault.config.LockType
 import com.neko.hiepdph.calculatorvault.config.LockWhenLeavingApp
 import com.neko.hiepdph.calculatorvault.config.ScreenOffAction
 import com.neko.hiepdph.calculatorvault.databinding.ActivityVaultBinding
+import com.neko.hiepdph.calculatorvault.shake.ShakeDetector
 import com.neko.hiepdph.calculatorvault.viewmodel.VaultViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -44,8 +48,13 @@ class ActivityVault : AppCompatActivity() {
     private var screenOffBroadcastReceiver: BroadcastReceiver? = null
     private val viewModel by viewModels<VaultViewModel>()
 
+    private var mSensorManager: SensorManager? = null
+    private var mAccelerometer: Sensor? = null
+    private var mShakeDetector: ShakeDetector? = null
+
     override fun onResume() {
         super.onResume()
+        mSensorManager?.registerListener(mShakeDetector, mAccelerometer,	SensorManager.SENSOR_DELAY_UI);
         if (config.lockWhenLeavingApp == LockWhenLeavingApp.ENABLE && !config.isShowLock) {
             when (config.lockType) {
                 LockType.PATTERN -> {
@@ -72,6 +81,7 @@ class ActivityVault : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         setupActionBar()
         requestAllFileManage()
+        initShakeDetector()
 
     }
 
@@ -137,6 +147,19 @@ class ActivityVault : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
             createSecretFolderFirstTime()
         }
+
+    private fun initShakeDetector(){
+        mSensorManager  = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        mAccelerometer = mSensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        mShakeDetector = ShakeDetector()
+        mShakeDetector?.setOnShakeListener(object :ShakeDetector.OnShakeListener{
+            override fun onShake(count: Int) {
+                Log.d("TAG", "onShake: ")
+            }
+
+        })
+
+    }
 
 
     fun setupActionBar() {
@@ -207,6 +230,8 @@ class ActivityVault : AppCompatActivity() {
         }
     }
 
+
+
     fun getToolbar(): Toolbar {
         return binding.toolbar
     }
@@ -219,6 +244,7 @@ class ActivityVault : AppCompatActivity() {
 
     override fun onDestroy() {
         removeScreenOffAction()
+        mSensorManager?.unregisterListener(mShakeDetector);
         super.onDestroy()
     }
 
