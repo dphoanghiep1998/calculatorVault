@@ -8,7 +8,10 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true"/>
+
+    <uses-feature
+        android:name="android.hardware.sensor.accelerometer"
+        android:required="true" />
 
     <application
         android:name=".CustomApplication"
@@ -26,6 +29,8 @@
             android:name=".ui.activities.ActivityVideoPlayer"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="false" />
+
+        <activity android:name=".ui.activities.ActivityAudioPlayer" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -151,7 +151,7 @@ class ActivityVault : AppCompatActivity() {
     private fun initShakeDetector(){
         mSensorManager  = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mAccelerometer = mSensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        mShakeDetector = ShakeDetector()
+        mShakeDetector = ShakeDetector(this)
         mShakeDetector?.setOnShakeListener(object :ShakeDetector.OnShakeListener{
             override fun onShake(count: Int) {
                 Log.d("TAG", "onShake: ")
