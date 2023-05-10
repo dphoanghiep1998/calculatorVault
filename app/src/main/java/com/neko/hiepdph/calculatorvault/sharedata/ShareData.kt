@@ -29,6 +29,12 @@ class ShareData() {
         _listItemVideo.postValue(list)
     }
 
+    private val _listItemAudio = MutableLiveData<MutableList<ListItem>>()
+    val listItemAudio: LiveData<MutableList<ListItem>> get() = _listItemAudio
+    fun setListItemAudio(list: MutableList<ListItem>) {
+        _listItemAudio.postValue(list)
+    }
+
 
 
 

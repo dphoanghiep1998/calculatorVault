@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="@dimen/_12sdp">
+    android:layout_marginHorizontal="@dimen/_12sdp"
+    android:foreground="@drawable/fg_ripple_effect">
 
     <com.neko.hiepdph.calculatorvault.common.customview.RoundedImageView
         android:id="@+id/imv_thumb"
@@ -30,7 +31,7 @@
         android:textColor="@color/neutral_06"
         android:textSize="@dimen/_14sdp"
         app:layout_constraintBottom_toTopOf="@id/tv_duration_author"
-        app:layout_constraintEnd_toStartOf="@id/option"
+        app:layout_constraintEnd_toStartOf="@id/container_checkbox"
         app:layout_constraintStart_toEndOf="@id/imv_thumb"
         app:layout_constraintTop_toTopOf="@id/imv_thumb"
         app:layout_constraintVertical_chainStyle="spread_inside" />
@@ -41,40 +42,44 @@
         android:layout_height="wrap_content"
         android:ellipsize="marquee"
         android:marqueeRepeatLimit="marquee_forever"
+        android:paddingHorizontal="@dimen/_6sdp"
         android:scrollHorizontally="true"
         android:singleLine="true"
-        android:paddingHorizontal="@dimen/_6sdp"
         android:textColor="@color/neutral_05"
         android:textSize="@dimen/_10sdp"
         app:layout_constraintBottom_toBottomOf="@id/imv_thumb"
-        app:layout_constraintEnd_toStartOf="@id/option"
+        app:layout_constraintEnd_toStartOf="@id/container_checkbox"
         app:layout_constraintStart_toStartOf="@id/tv_name_audio"
         app:layout_constraintTop_toBottomOf="@id/tv_name_audio" />
 
-    <CheckBox
-        android:id="@+id/check_box"
-        android:layout_width="@dimen/_20sdp"
-        android:layout_height="@dimen/_20sdp"
-        android:layout_margin="@dimen/_2sdp"
-        android:background="@drawable/bg_checkbox_pick_selector"
-        android:button="@null"
-        android:minWidth="0dp"
-        android:minHeight="0dp"
-        android:visibility="gone"
+    <FrameLayout
+        android:id="@+id/container_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <ImageView
-        android:id="@+id/option"
-        android:layout_width="@dimen/_26sdp"
-        android:layout_height="@dimen/_26sdp"
-        android:foreground="@drawable/fg_ripple_effect"
-        android:padding="@dimen/_6sdp"
-        android:src="@drawable/ic_option"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <CheckBox
+            android:id="@+id/check_box"
+            android:layout_width="@dimen/_20sdp"
+            android:layout_height="@dimen/_20sdp"
+            android:layout_margin="@dimen/_2sdp"
+            android:background="@drawable/bg_checkbox_pick_selector"
+            android:button="@null"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/option"
+            android:layout_width="@dimen/_26sdp"
+            android:layout_height="@dimen/_26sdp"
+            android:foreground="@drawable/fg_ripple_effect"
+            android:padding="@dimen/_6sdp"
+            android:src="@drawable/ic_option" />
+    </FrameLayout>
+
 
     <View
         android:layout_width="match_parent"

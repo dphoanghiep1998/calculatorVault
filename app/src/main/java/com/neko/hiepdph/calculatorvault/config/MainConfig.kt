@@ -179,6 +179,10 @@ class MainConfig(val context: Context) {
         get() = AppSharePreference.getInstance(context).getShakeGravity(2.0f)
         set(shakeGravity) = AppSharePreference.getInstance(context).setShakeGravity(shakeGravity)
 
+    var repeat:Int
+        get() =  AppSharePreference.getInstance(context).getRepeatType(RepeatMode.REPEAT_ALL)
+        set(repeat) = AppSharePreference.getInstance(context).setRepeatType(repeat)
+
 
 
 

@@ -5,7 +5,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,8 +31,10 @@ class AdapterPersistent(
     private val onEditItem: (List<ListItem>) -> Unit,
     private val onSelectAll: (List<ListItem>) -> Unit,
     private val onUnSelect: () -> Unit,
+    private val onOpenDetail: (ListItem) -> Unit,
+    private val onDeleteItem: (ListItem) -> Unit
 
-    ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var listItem = mutableListOf<ListItem>()
     private var mType: String = Constant.TYPE_PICTURE
     private var listOfItemSelected = mutableSetOf<ListItem>()
@@ -117,7 +118,7 @@ class AdapterPersistent(
     fun changeToNormalView() {
         editMode = false
         listOfItemSelected.clear()
-       notifyDataSetChanged()
+        notifyDataSetChanged()
     }
 
 
@@ -141,7 +142,9 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(item.mPath).placeholder(R.drawable.ic_error_image).apply(requestOptions).into(binding.imvThumb)
+                    Glide.with(itemView.context).load(item.mPath)
+                        .placeholder(R.drawable.ic_error_image).apply(requestOptions)
+                        .into(binding.imvThumb)
 
                     if (editMode) {
                         binding.checkBox.show()
@@ -151,7 +154,7 @@ class AdapterPersistent(
                     binding.checkBox.isChecked = item in listOfItemSelected
 
                     binding.root.setOnLongClickListener {
-                        if(editMode){
+                        if (editMode) {
                             return@setOnLongClickListener false
                         }
                         editMode = true
@@ -203,7 +206,7 @@ class AdapterPersistent(
                     binding.tvDuration.text = item.getDuration(itemView.context).toString()
 
                     binding.root.setOnLongClickListener {
-                        if(editMode){
+                        if (editMode) {
                             return@setOnLongClickListener false
                         }
                         editMode = true
@@ -243,8 +246,8 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).asBitmap().load(item.thumb)
-                        .apply(requestOptions).error(R.drawable.ic_error_audio).into(binding.imvThumb)
+                    Glide.with(itemView.context).asBitmap().load(item.thumb).apply(requestOptions)
+                        .error(R.drawable.ic_error_audio).into(binding.imvThumb)
                     binding.checkBox.isChecked = item in listOfItemSelected
 
                     if (editMode) {
@@ -260,12 +263,19 @@ class AdapterPersistent(
                             itemView.context
                         )
                     binding.option.clickWithDebounce {
-                        showPopupWindow(itemView.context, binding.option)
+                        showPopupWindow(
+                            itemView.context,
+                            binding.option,
+                            item,
+                            onClickItem,
+                            onDeleteItem,
+                            onOpenDetail
+                        )
                     }
 
 
                     binding.root.setOnLongClickListener {
-                        if(editMode){
+                        if (editMode) {
                             return@setOnLongClickListener false
                         }
                         editMode = true
@@ -318,11 +328,18 @@ class AdapterPersistent(
                     binding.tvNameDocument.text = item.mName
                     binding.tvSize.text = item.mSize.formatSize()
                     binding.option.clickWithDebounce {
-                        showPopupWindowFile(itemView.context, binding.option)
+                        showPopupWindowFile(
+                            itemView.context,
+                            binding.option,
+                            item,
+                            onClickItem,
+                            onDeleteItem,
+                            onOpenDetail
+                        )
                     }
 
                     binding.root.setOnLongClickListener {
-                        if(editMode){
+                        if (editMode) {
                             return@setOnLongClickListener false
                         }
                         editMode = true
@@ -370,7 +387,7 @@ class AdapterPersistent(
                         binding.checkBox.hide()
                     }
                     binding.root.setOnLongClickListener {
-                        if(editMode){
+                        if (editMode) {
                             return@setOnLongClickListener false
                         }
                         editMode = true
@@ -440,7 +457,13 @@ private fun getThumbnail(path: String): Bitmap? {
     }
 }
 
-private fun showPopupWindow(context: Context, view: View) {
+private fun showPopupWindow(
+    context: Context, view: View,
+    item: ListItem,
+    onClickItem: (ListItem) -> Unit,
+    onDeleteItem: (ListItem) -> Unit,
+    onOpenDetail: (ListItem) -> Unit
+) {
     val inflater: LayoutInflater =
         (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater?)!!
     val bindingLayout = LayoutPersistentItemOptionMenuBinding.inflate(inflater, null, false)
@@ -454,23 +477,29 @@ private fun showPopupWindow(context: Context, view: View) {
     bindingLayout.root.clickWithDebounce {
         popupWindow.dismiss()
     }
-
-    bindingLayout.root.clickWithDebounce {
-        popupWindow.dismiss()
-    }
     bindingLayout.containerPlay.clickWithDebounce {
+        onClickItem(item)
         popupWindow.dismiss()
     }
     bindingLayout.containerDelete.clickWithDebounce {
+        onDeleteItem(item)
         popupWindow.dismiss()
     }
     bindingLayout.containerInfo.clickWithDebounce {
+        onOpenDetail(item)
         popupWindow.dismiss()
     }
     popupWindow.showAsDropDown(view)
 }
 
-private fun showPopupWindowFile(context: Context, view: View) {
+private fun showPopupWindowFile(
+    context: Context,
+    view: View,
+    item: ListItem,
+    onClickItem: (ListItem) -> Unit,
+    onDeleteItem: (ListItem) -> Unit,
+    onOpenDetail: (ListItem) -> Unit
+) {
     val inflater: LayoutInflater =
         (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater?)!!
     val bindingLayout = LayoutPersistentItemFileOptionMenuBinding.inflate(inflater, null, false)
@@ -485,16 +514,16 @@ private fun showPopupWindowFile(context: Context, view: View) {
         popupWindow.dismiss()
     }
 
-    bindingLayout.root.clickWithDebounce {
-        popupWindow.dismiss()
-    }
     bindingLayout.containerOpen.clickWithDebounce {
+        onClickItem(item)
         popupWindow.dismiss()
     }
     bindingLayout.containerDelete.clickWithDebounce {
+        onDeleteItem(item)
         popupWindow.dismiss()
     }
     bindingLayout.containerInfo.clickWithDebounce {
+        onOpenDetail(item)
         popupWindow.dismiss()
     }
     popupWindow.showAsDropDown(view)

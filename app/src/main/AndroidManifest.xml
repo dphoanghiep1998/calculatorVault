@@ -30,7 +30,10 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="false" />
 
-        <activity android:name=".ui.activities.ActivityAudioPlayer" />
+        <activity
+            android:name=".ui.activities.ActivityAudioPlayer"
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -76,6 +79,13 @@
         <activity
             android:name=".ui.activities.ActivityCalculator"
             android:exported="true" />
+
+<!--        <service android:name=".service.MediaPlayerService"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.media.browse.MediaBrowserService" />-->
+<!--            </intent-filter>-->
+<!--        </service>-->
     </application>
 
 </manifest>

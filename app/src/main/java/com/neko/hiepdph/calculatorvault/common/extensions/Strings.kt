@@ -5,7 +5,6 @@ import com.neko.hiepdph.calculatorvault.common.Constant.audioExtensions
 import com.neko.hiepdph.calculatorvault.common.Constant.photoExtensions
 import com.neko.hiepdph.calculatorvault.common.Constant.rawExtensions
 import com.neko.hiepdph.calculatorvault.common.Constant.videoExtensions
-import java.util.HashMap
 
 fun String.getParentPath() = removeSuffix("/${getFilenameFromPath()}")
 
@@ -635,4 +634,16 @@ fun String.getMimeType(): String {
     }
 
     return typesMap[getFilenameExtension().toLowerCase()] ?: ""
+}
+fun getReadableTime(totalDuration: Int): String {
+    val time: String
+    val hrs = totalDuration / (1000 * 60 * 60)
+    val min = totalDuration % (1000 * 60 * 60) / (1000 * 60)
+    val secs = totalDuration % (1000 * 60 * 60) % (1000 * 60 * 60) % (1000 * 60) / 1000
+    time = if (hrs < 1) {
+        "$min:$secs"
+    } else {
+        "$hrs:$min:$secs"
+    }
+    return time
 }

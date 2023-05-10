@@ -38,6 +38,7 @@ import com.neko.hiepdph.calculatorvault.databinding.ActivityVaultBinding
 import com.neko.hiepdph.calculatorvault.shake.ShakeDetector
 import com.neko.hiepdph.calculatorvault.viewmodel.VaultViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlin.system.exitProcess
 
 
 @AndroidEntryPoint
@@ -154,7 +155,8 @@ class ActivityVault : AppCompatActivity() {
         mShakeDetector = ShakeDetector(this)
         mShakeDetector?.setOnShakeListener(object :ShakeDetector.OnShakeListener{
             override fun onShake(count: Int) {
-                Log.d("TAG", "onShake: ")
+                finishAffinity()
+                exitProcess(-1)
             }
 
         })

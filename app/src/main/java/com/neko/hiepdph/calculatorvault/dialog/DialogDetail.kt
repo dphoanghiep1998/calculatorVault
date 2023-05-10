@@ -18,12 +18,14 @@ import com.neko.hiepdph.calculatorvault.databinding.DialogDetailBinding
 
 
 class DialogDetail(
-   private var name: String? = null,
-   private var size: Long? = null,
-   private var resolution: String? = null,
-   private var time: Long? = null,
-   private var timeLock: Long? = null,
-   private var path:String?=null
+    private var name: String? = null,
+    private var size: Long? = null,
+    private var resolution: String? = null,
+    private var time: Long? = null,
+    private var timeLock: Long? = null,
+    private var path: String? = null,
+    private var originalPath: String? = null,
+    private var encryptionMode: String? = null,
 ) : DialogFragment() {
     private lateinit var binding: DialogDetailBinding
 
@@ -34,7 +36,10 @@ class DialogDetail(
         builder.resolution,
         builder.time,
         builder.timeLock,
-        builder.path
+        builder.path,
+        builder.originalPath,
+        builder.encryptionMode
+
     )
 
     companion object {
@@ -47,7 +52,9 @@ class DialogDetail(
         var resolution: String? = null
         var time: Long? = null
         var timeLock: Long? = null
-        var path:String?=null
+        var path: String? = null
+        var originalPath: String? = null
+        var encryptionMode: String? = null
 
         fun build() = DialogDetail(this)
 

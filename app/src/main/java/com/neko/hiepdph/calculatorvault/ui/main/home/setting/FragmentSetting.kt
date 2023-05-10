@@ -4,17 +4,21 @@ import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.navigateToPage
+import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionO
+import com.neko.hiepdph.calculatorvault.common.utils.formatSize
 import com.neko.hiepdph.calculatorvault.databinding.FragmentSettingBinding
-import com.neko.hiepdph.calculatorvault.databinding.LayoutItemCustomSingleBinding
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityCamera
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -38,6 +42,7 @@ class FragmentSetting : Fragment() {
 
 
     private fun initView() {
+        setupView()
         val groupData = mutableListOf(
             Pair(R.drawable.ic_setting_general, getString(R.string.general)),
             Pair(R.drawable.ic_setting_safe, getString(R.string.safe)),
@@ -74,11 +79,30 @@ class FragmentSetting : Fragment() {
         groupView.forEachIndexed { index, item ->
             item.imvIcon.setBackgroundResource(groupData[index].first)
             item.tvContent.text = groupData[index].second
-            if(item == binding.itemAdvanced || item == binding.itemDeviceMigration || item == binding.itemLanguage || item == binding.itemFaq){
+            if (item == binding.itemAdvanced || item == binding.itemDeviceMigration || item == binding.itemLanguage || item == binding.itemFaq) {
                 item.line.hide()
             }
         }
         initButton()
+    }
+
+    private fun setupView() {
+        if (buildMinVersionO()) {
+            binding.itemPrivateCamera.root.show()
+        } else {
+            binding.itemPrivateCamera.root.hide()
+        }
+        binding.itemClearCache.tvStatus.show()
+        binding.itemClearCache.tvStatus.text =
+            requireContext().cacheDir.walkBottomUp().fold(0L) { acc, file -> acc + file.length() }
+                .formatSize()
+    }
+
+    private fun clearCache() {
+        requireContext().cacheDir.deleteRecursively()
+        binding.itemClearCache.tvStatus.text =
+            requireContext().cacheDir.walkBottomUp().fold(0L) { acc, file -> acc + file.length() }
+                .formatSize()
     }
 
     private fun initButton() {
@@ -86,17 +110,24 @@ class FragmentSetting : Fragment() {
             navigateToPage(R.id.fragmentSetting, R.id.fragmentSafe)
         }
         binding.itemPrivateCamera.root.clickWithDebounce {
-            createShortcutsCamera()
+            if (buildMinVersionO()) {
+                createShortcutsCamera()
+            }
         }
         binding.itemGeneral.root.clickWithDebounce {
-            navigateToPage(R.id.fragmentSetting,R.id.fragmentGeneral)
+            navigateToPage(R.id.fragmentSetting, R.id.fragmentGeneral)
         }
         binding.itemDisguiseIcon.root.clickWithDebounce {
-            navigateToPage(R.id.fragmentSetting,R.id.fragmentDisguiseIcon)
+            navigateToPage(R.id.fragmentSetting, R.id.fragmentDisguiseIcon)
 
+        }
+
+        binding.itemClearCache.root.clickWithDebounce {
+            clearCache()
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun createShortcutsCamera() {
         val shortcutManager = requireActivity().getSystemService(ShortcutManager::class.java)
         val intent = Intent(requireContext(), ActivityCamera::class.java)

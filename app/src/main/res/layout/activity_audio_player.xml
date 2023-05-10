@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.activities.ActivityVideoPlayer">
+    tools:context=".ui.activities.ActivityAudioPlayer">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/action_bar"
@@ -80,6 +80,7 @@
         android:id="@+id/btn_repeat"
         android:layout_width="@dimen/_30sdp"
         android:layout_height="@dimen/_30sdp"
+        android:foreground="@drawable/fg_ripple_effect"
         android:padding="@dimen/_6sdp"
         android:src="@drawable/ic_repeat"
         app:layout_constraintBottom_toBottomOf="@id/btn_play_pause"
@@ -91,6 +92,7 @@
         android:id="@+id/btn_prev"
         android:layout_width="@dimen/_30sdp"
         android:layout_height="@dimen/_30sdp"
+        android:foreground="@drawable/fg_ripple_effect"
         android:padding="@dimen/_6sdp"
         android:src="@drawable/ic_video_previous"
         app:layout_constraintEnd_toStartOf="@id/btn_play_pause"
@@ -104,6 +106,7 @@
         android:layout_width="@dimen/_50sdp"
         android:layout_height="@dimen/_50sdp"
         android:layout_marginBottom="@dimen/_12sdp"
+        android:foreground="@drawable/fg_ripple_effect"
         android:src="@drawable/ic_audio_play"
         app:layout_constraintBottom_toTopOf="@id/container_controller"
         app:layout_constraintEnd_toStartOf="@id/btn_next"
@@ -114,6 +117,7 @@
         android:id="@+id/btn_next"
         android:layout_width="@dimen/_30sdp"
         android:layout_height="@dimen/_30sdp"
+        android:foreground="@drawable/fg_ripple_effect"
         android:padding="@dimen/_6sdp"
         android:src="@drawable/ic_video_next"
         app:layout_constraintEnd_toStartOf="@id/btn_playlist"
@@ -125,6 +129,7 @@
         android:id="@+id/btn_playlist"
         android:layout_width="@dimen/_30sdp"
         android:layout_height="@dimen/_30sdp"
+        android:foreground="@drawable/fg_ripple_effect"
         android:padding="@dimen/_6sdp"
         android:src="@drawable/ic_playlist"
         app:layout_constraintEnd_toEndOf="parent"
@@ -132,27 +137,41 @@
         app:layout_constraintTop_toTopOf="@id/btn_prev" />
 
     <TextView
-        android:id="@+id/exo_position"
+        android:id="@+id/progressDuration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/app_font_500"
+        android:text="0:07"
+        android:textColor="@color/neutral_06"
+        android:textSize="@dimen/_12sdp"
         android:layout_marginStart="@dimen/_12sdp"
-        android:textColor="@color/neutral_01"
-        android:textSize="@dimen/_10sdp"
-        app:layout_constraintBottom_toBottomOf="@id/exo_duration"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/exo_duration" />
+        app:layout_constraintBottom_toBottomOf="@id/audio_progress"
+        app:layout_constraintTop_toTopOf="@id/audio_progress" />
 
-    <com.google.android.exoplayer2.ui.DefaultTimeBar
-        android:id="@+id/exo_progress"
+    <SeekBar
+        android:layout_marginTop="@dimen/_14sdp"
+        android:id="@+id/audio_progress"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:buffered_color="@color/neutral_02"
-        app:layout_constraintBottom_toBottomOf="@id/exo_duration"
-        app:layout_constraintEnd_toStartOf="@id/exo_duration"
-        app:layout_constraintStart_toEndOf="@id/exo_position"
-        app:layout_constraintTop_toTopOf="@id/exo_duration"
-        app:played_color="@color/gradient_01"
-        app:unplayed_color="@color/neutral_04" />
+        app:buffered_color="@color/neutral_06"
+        android:layout_marginHorizontal="@dimen/_6sdp"
+        app:layout_constraintEnd_toStartOf="@id/totalDuration"
+        app:layout_constraintStart_toEndOf="@id/progressDuration"
+        app:layout_constraintTop_toBottomOf="@id/tv_audio_name_full" />
+
+    <TextView
+        android:id="@+id/totalDuration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/app_font_500"
+        android:text="45:00"
+        android:textColor="@color/neutral_06"
+        android:textSize="@dimen/_12sdp"
+        android:layout_marginEnd="@dimen/_12sdp"
+        app:layout_constraintBottom_toBottomOf="@id/audio_progress"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/audio_progress" />
 
     <TextView
         android:id="@+id/exo_duration"
@@ -175,21 +194,21 @@
 
 
         <TextView
-            android:id="@+id/tv_speed"
+            android:id="@+id/tv_speed_audio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/app_font_400"
             android:foreground="@drawable/fg_ripple_effect"
-            android:text="@string/unlock"
+            android:text="@string/speed"
             android:textColor="@color/neutral_06"
             android:textSize="@dimen/_12sdp"
             app:drawableTopCompat="@drawable/ic_speed"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/tv_share"
+            app:layout_constraintEnd_toStartOf="@id/tv_share_audio"
             app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
-            android:id="@+id/tv_share"
+            android:id="@+id/tv_share_audio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/app_font_400"
@@ -199,12 +218,12 @@
             android:textSize="@dimen/_12sdp"
             app:drawableTopCompat="@drawable/ic_share_border"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/tv_detail"
-            app:layout_constraintStart_toEndOf="@id/tv_speed" />
+            app:layout_constraintEnd_toStartOf="@id/tv_detail_audio"
+            app:layout_constraintStart_toEndOf="@id/tv_speed_audio" />
 
 
         <TextView
-            android:id="@+id/tv_detail"
+            android:id="@+id/tv_detail_audio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/app_font_400"
@@ -214,12 +233,12 @@
             android:textSize="@dimen/_12sdp"
             app:drawableTopCompat="@drawable/ic_detail_border"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/tv_delete"
-            app:layout_constraintStart_toEndOf="@id/tv_share" />
+            app:layout_constraintEnd_toStartOf="@id/tv_delete_audio"
+            app:layout_constraintStart_toEndOf="@id/tv_share_audio" />
 
 
         <TextView
-            android:id="@+id/tv_delete"
+            android:id="@+id/tv_delete_audio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/app_font_400"
@@ -230,10 +249,9 @@
             app:drawableTopCompat="@drawable/ic_delete_border"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/tv_detail" />
+            app:layout_constraintStart_toEndOf="@id/tv_detail_audio" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -95,6 +95,7 @@ class FragmentListItem : Fragment() {
                 onSuccess = {
                     val newList = listItemSelected.toMutableList()
                     newList.forEach {
+                        Log.d("TAG", "initButton: "+it.mOriginalPath)
                         it.path = args.vaultPath + "/${it.mName}"
                     }
                     val listItemVault = requireContext().config.listItemVault?.toMutableList()

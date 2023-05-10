@@ -92,10 +92,8 @@ object CopyFiles {
             files?.forEachIndexed { index, itemFile ->
                 val targetFile = if (itemFile.isDirectory) {
                     File(createNewFolder(context, targetFolder[index], itemFile.name))
-
                 } else {
                     File(createNewFile(context, targetFolder[index], itemFile.name).toString())
-
                 }
                 copyDirectoryOneLocationToAnotherLocation(context, itemFile, targetFile,
                     // on progress
@@ -103,7 +101,7 @@ object CopyFiles {
                         run {
                             currentSize += len
                             progress(
-                                STATE_PROCESSING, (currentSize * 100 / tSize).toFloat(), file
+                                STATE_PROCESSING, (currentSize * 100 / tSize), file
                             )
                         }
                     },

@@ -463,7 +463,7 @@ object MediaStoreUtils {
                         ListItem(
                             id,
                             childPath,
-                            childPath,
+                            path,
                             name,
                             false,
                             0,

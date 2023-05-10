@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.main.home.setting.advance.FragmentAdvance">
+
+    <include
+        android:id="@+id/item_intruder_selfie"
+        layout="@layout/layout_item_custom_single"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_12sdp" />
+
+    <include
+        android:id="@+id/item_fake_password"
+        layout="@layout/layout_item_custom_single"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_12sdp" />
+
+    <include
+        android:id="@+id/item_prohibitScreenshots"
+        layout="@layout/layout_item_custom_single"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_12sdp" />
+
+</LinearLayout>

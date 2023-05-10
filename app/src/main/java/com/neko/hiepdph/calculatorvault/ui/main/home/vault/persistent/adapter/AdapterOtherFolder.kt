@@ -31,6 +31,8 @@ class AdapterOtherFolder(
     private val onEditItem: (List<ListItem>) -> Unit,
     private val onSelectAll: (List<ListItem>) -> Unit,
     private val onUnSelect: () -> Unit,
+    private val onOpenDetail: (ListItem) -> Unit,
+    private val onDeleteItem: (ListItem) -> Unit
 
     ) : RecyclerView.Adapter<AdapterOtherFolder.ItemFileViewHolder>() {
     private var listItem = mutableListOf<ListItem>()
@@ -112,7 +114,7 @@ class AdapterOtherFolder(
                         .error(R.drawable.ic_error_image).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
-                        showPopupWindowFile(itemView.context, binding.option)
+                        showPopupWindowFile(itemView.context, binding.option,item,onClickItem,onDeleteItem,onOpenDetail)
                     }
                 }
 
@@ -123,7 +125,7 @@ class AdapterOtherFolder(
                         .apply(requestOptions).error(R.drawable.ic_error_audio).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
-                        showPopupWindow(itemView.context, binding.option)
+                        showPopupWindow(itemView.context, binding.option,item,onClickItem,onDeleteItem,onOpenDetail)
                     }
                 }
 
@@ -134,7 +136,7 @@ class AdapterOtherFolder(
                         .error(R.drawable.ic_error_video).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
-                        showPopupWindowFile(itemView.context, binding.option)
+                        showPopupWindowFile(itemView.context, binding.option,item,onClickItem,onDeleteItem,onOpenDetail)
                     }
                 }
 
@@ -147,7 +149,7 @@ class AdapterOtherFolder(
 
                     binding.option.clickWithDebounce {
                         showPopupWindowFile(
-                            itemView.context, binding.option
+                            itemView.context, binding.option,item,onClickItem,onDeleteItem,onOpenDetail
                         )
                     }
                 }
@@ -239,7 +241,13 @@ private fun getThumbnail(path: String): Bitmap? {
     }
 }
 
-private fun showPopupWindow(context: Context, view: View) {
+private fun showPopupWindow(
+    context: Context, view: View,
+    item: ListItem,
+    onClickItem: (ListItem) -> Unit,
+    onDeleteItem: (ListItem) -> Unit,
+    onOpenDetail: (ListItem) -> Unit
+) {
     val inflater: LayoutInflater =
         (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater?)!!
     val bindingLayout = LayoutPersistentItemOptionMenuBinding.inflate(inflater, null, false)
@@ -253,23 +261,29 @@ private fun showPopupWindow(context: Context, view: View) {
     bindingLayout.root.clickWithDebounce {
         popupWindow.dismiss()
     }
-
-    bindingLayout.root.clickWithDebounce {
-        popupWindow.dismiss()
-    }
     bindingLayout.containerPlay.clickWithDebounce {
+        onClickItem(item)
         popupWindow.dismiss()
     }
     bindingLayout.containerDelete.clickWithDebounce {
+        onDeleteItem(item)
         popupWindow.dismiss()
     }
     bindingLayout.containerInfo.clickWithDebounce {
+        onOpenDetail(item)
         popupWindow.dismiss()
     }
     popupWindow.showAsDropDown(view)
 }
 
-private fun showPopupWindowFile(context: Context, view: View) {
+private fun showPopupWindowFile(
+    context: Context,
+    view: View,
+    item: ListItem,
+    onClickItem: (ListItem) -> Unit,
+    onDeleteItem: (ListItem) -> Unit,
+    onOpenDetail: (ListItem) -> Unit
+) {
     val inflater: LayoutInflater =
         (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater?)!!
     val bindingLayout = LayoutPersistentItemFileOptionMenuBinding.inflate(inflater, null, false)
@@ -284,18 +298,19 @@ private fun showPopupWindowFile(context: Context, view: View) {
         popupWindow.dismiss()
     }
 
-    bindingLayout.root.clickWithDebounce {
-        popupWindow.dismiss()
-    }
     bindingLayout.containerOpen.clickWithDebounce {
+        onClickItem(item)
         popupWindow.dismiss()
     }
     bindingLayout.containerDelete.clickWithDebounce {
+        onDeleteItem(item)
         popupWindow.dismiss()
     }
     bindingLayout.containerInfo.clickWithDebounce {
+        onOpenDetail(item)
         popupWindow.dismiss()
     }
     popupWindow.showAsDropDown(view)
+
 }
 

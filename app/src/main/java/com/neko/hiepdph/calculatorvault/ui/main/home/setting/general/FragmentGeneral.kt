@@ -2,10 +2,11 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.setting.general
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SeekBar
+import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.fragment.app.Fragment
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
@@ -41,7 +42,7 @@ class FragmentGeneral : Fragment() {
 
     private fun initView() {
         setupView()
-        initButton()
+        initAction()
     }
 
     private val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
@@ -67,16 +68,17 @@ class FragmentGeneral : Fragment() {
                     }
                 }
             Constant.KEY_ENCRYPTION_MODE -> {
-                binding.containerSelectAnEncryptionMode.tvStatus.text = when (requireContext().config.encryptionMode) {
-                    EncryptionMode.HIDDEN -> getString(R.string.hidden)
-                    EncryptionMode.ENCRYPTION -> getString(R.string.encryption)
-                    else -> getString(R.string.always_ask)
-                }
+                binding.containerSelectAnEncryptionMode.tvStatus.text =
+                    when (requireContext().config.encryptionMode) {
+                        EncryptionMode.HIDDEN -> getString(R.string.hidden)
+                        EncryptionMode.ENCRYPTION -> getString(R.string.encryption)
+                        else -> getString(R.string.always_ask)
+                    }
             }
         }
     }
 
-    private fun initButton() {
+    private fun initAction() {
         binding.containerRecycleBin.root.clickWithDebounce {
             binding.containerRecycleBin.switchChange.isChecked =
                 !binding.containerRecycleBin.switchChange.isChecked
@@ -105,9 +107,21 @@ class FragmentGeneral : Fragment() {
             binding.containerShakeClose.switchChange.isChecked =
                 !binding.containerShakeClose.switchChange.isChecked
             requireContext().config.shakeClose = binding.containerShakeClose.switchChange.isChecked
+            if (binding.containerShakeClose.switchChange.isChecked) {
+                binding.containerShakeClose.tvStatus.show()
+                binding.containerShakeClose.sensitiveSeekbar.show()
+            } else {
+                binding.containerShakeClose.sensitiveSeekbar.hide()
+                binding.containerShakeClose.tvStatus.hide()
+            }
         }
         binding.containerShakeClose.switchChange.setOnClickListener {
             requireContext().config.shakeClose = binding.containerShakeClose.switchChange.isChecked
+            if (binding.containerShakeClose.switchChange.isChecked) {
+                binding.containerShakeClose.sensitiveSeekbar.show()
+            } else {
+                binding.containerShakeClose.sensitiveSeekbar.hide()
+            }
         }
         binding.containerPlayVideoMode.root.setOnClickListener {
             binding.containerPlayVideoMode.switchChange.isChecked =
@@ -135,6 +149,26 @@ class FragmentGeneral : Fragment() {
             val dialogEncryptionMode = DialogEncryptionMode()
             dialogEncryptionMode.show(childFragmentManager, dialogEncryptionMode.tag)
         }
+
+
+        //init seekbar
+        binding.containerShakeClose.sensitiveSeekbar.setOnSeekBarChangeListener(object :
+            OnSeekBarChangeListener {
+            var progressValue = 0
+            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+                progressValue = p1
+            }
+
+            override fun onStartTrackingTouch(p0: SeekBar?) {
+            }
+
+            override fun onStopTrackingTouch(p0: SeekBar?) {
+                binding.containerShakeClose.sensitiveSeekbar.progress = progressValue
+                binding.containerShakeClose.tvStatus.text = progressValue.toString()
+                requireContext().config.shakeGravity = progressValue.toFloat()
+            }
+
+        })
     }
 
     private fun setupView() {
@@ -190,8 +224,17 @@ class FragmentGeneral : Fragment() {
             switchChange.isChecked = requireContext().config.shakeClose
             tvContent2.show()
             tvContent2.text = getString(R.string.shake_close_content_2)
+            if (requireContext().config.shakeClose) {
+                tvStatus.show()
+                sensitiveSeekbar.show()
+            } else {
+                tvStatus.hide()
+                sensitiveSeekbar.hide()
+            }
+            tvStatus.text = requireContext().config.shakeGravity.toString()
             imvIcon.setImageResource(R.drawable.ic_shake_close)
-            imvNext.hide()
+            sensitiveSeekbar.max = 20
+            sensitiveSeekbar.progress = requireContext().config.shakeGravity.toInt()
         }
 
         binding.containerPlayVideoMode.apply {

@@ -103,7 +103,7 @@
             android:layout_height="@dimen/_36sdp"
             android:foreground="@drawable/fg_ripple_effect"
             android:padding="@dimen/_8sdp"
-            android:src="@drawable/ic_next_inactive"
+            android:src="@drawable/ic_next_setting"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btn_reload"
             app:layout_constraintStart_toEndOf="@id/btn_back"

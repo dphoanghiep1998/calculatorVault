@@ -496,6 +496,14 @@ class AppSharePreference(private val context: Context?) {
         saveString(Constant.KEY_SHAKE_GRAVITY, values.toString())
     }
 
+    fun getRepeatType(defaultValues: Int): Int {
+        return getInt(Constant.KEY_REPEAT, defaultValues)
+    }
+
+    fun setRepeatType(values: Int) {
+        saveInt(Constant.KEY_REPEAT, values)
+    }
+
 
 }
 

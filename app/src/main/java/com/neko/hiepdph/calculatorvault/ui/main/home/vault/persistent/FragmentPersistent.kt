@@ -21,13 +21,16 @@ import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
+import com.neko.hiepdph.calculatorvault.common.utils.openWith
 import com.neko.hiepdph.calculatorvault.data.model.ItemMoved
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentPersistentBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogAddFile
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
+import com.neko.hiepdph.calculatorvault.dialog.DialogDetail
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
+import com.neko.hiepdph.calculatorvault.ui.activities.ActivityAudioPlayer
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityImageDetail
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVideoPlayer
@@ -158,6 +161,7 @@ class FragmentPersistent : Fragment() {
                 binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(
                     0, R.drawable.ic_empty_picture, 0, 0
                 )
+                binding.tvSlideshow.show()
             }
             Constant.TYPE_AUDIOS -> {
                 viewModel.getAudioChildFromFolder(args.vaultPath)
@@ -170,6 +174,7 @@ class FragmentPersistent : Fragment() {
                 binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(
                     0, R.drawable.ic_empty_audio, 0, 0
                 )
+                binding.tvSlideshow.hide()
 
             }
             Constant.TYPE_VIDEOS -> {
@@ -182,7 +187,7 @@ class FragmentPersistent : Fragment() {
                 binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(
                     0, R.drawable.ic_empty_video, 0, 0
                 )
-
+                binding.tvSlideshow.hide()
             }
             Constant.TYPE_FILE -> {
                 viewModel.getFileChildFromFolder(args.vaultPath)
@@ -194,7 +199,7 @@ class FragmentPersistent : Fragment() {
                 binding.tvEmpty.setCompoundDrawablesWithIntrinsicBounds(
                     0, R.drawable.ic_empty_file, 0, 0
                 )
-
+                binding.tvSlideshow.hide()
             }
             else -> {
                 viewModel.getFileChildFromFolder(args.vaultPath)
@@ -299,6 +304,48 @@ class FragmentPersistent : Fragment() {
 
     }
 
+    private fun showDialogDelete(item: ListItem) {
+        val confirmDialog = DialogConfirm(onPositiveClicked = {
+
+            if (requireContext().config.moveToRecyclerBin) {
+                val listPathRecyclerBin =
+                    requireContext().config.listPathRecyclerBin?.toMutableList() ?: mutableListOf()
+
+                listPathRecyclerBin.addAll(listItemSelected.map {
+                    ItemMoved(
+                        args.vaultPath,
+                        requireContext().config.recyclerBinFolder.path + "/${it.name}"
+                    )
+                })
+                requireContext().config.listPathRecyclerBin = listPathRecyclerBin
+
+                CopyFiles.copy(requireContext(),
+                    File(item.path),
+                    requireContext().config.recyclerBinFolder,
+                    0L,
+                    progress = { _: Int, _: Float, _: File? -> },
+                    true,
+                    onSuccess = {
+                        getDataFile()
+                        showSnackBar(
+                            getString(R.string.move_to_recycler_bin), SnackBarType.SUCCESS
+                        )
+                    },
+
+                    onError = {})
+            } else {
+                viewModel.deleteFolder(item.mPath, onSuccess = {
+                    getDataFile()
+                    showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
+                }, onError = {
+                    showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
+                })
+            }
+        }, DialogConfirmType.DELETE, item.mName)
+
+        confirmDialog.show(childFragmentManager, confirmDialog.tag)
+    }
+
     private fun showDialogDelete() {
         if (listItemSelected.isEmpty()) {
             Toast.makeText(
@@ -390,6 +437,11 @@ class FragmentPersistent : Fragment() {
             val listFilterItem = requireContext().config.listItemVault?.filter {
                 it.path in listItemSelected.map { item -> item.path }
             } ?: mutableListOf()
+
+            Log.d("TAG", "unLockFile: " + listFilterItem)
+            Log.d(
+                "TAG", "unLockFile: " + listFilterItem.map { File(it.originalPath) }.toMutableList()
+            )
             CopyFiles.copy(requireContext(),
                 listItemSelected.map { File(it.path) }.toMutableList(),
                 listFilterItem.map { File(it.originalPath) }.toMutableList(),
@@ -434,14 +486,17 @@ class FragmentPersistent : Fragment() {
             }, onSelectAll = {
                 listItemSelected.clear()
                 listItemSelected.addAll(it)
-            }, onUnSelect = {
-//            unCheckItem()
-            }, onEditItem = {
+            }, onUnSelect = {}, onEditItem = {
                 listItemSelected.clear()
                 listItemSelected.addAll(it)
                 checkItem()
+            }, onDeleteItem = {
+                showDialogDelete(it)
+            }, onOpenDetail = {
+                openInformationDialog(it)
             })
             binding.rcvItemGroup.adapter = adapterPersistent
+
             val gridLayoutManager = when (args.type) {
                 Constant.TYPE_PICTURE, Constant.TYPE_VIDEOS -> GridLayoutManager(
                     requireContext(), 4, RecyclerView.VERTICAL, false
@@ -469,12 +524,14 @@ class FragmentPersistent : Fragment() {
             }, onSelectAll = {
                 listItemSelected.clear()
                 listItemSelected.addAll(it)
-            }, onUnSelect = {
-//            unCheckItem()
-            }, onEditItem = {
+            }, onUnSelect = {}, onEditItem = {
                 listItemSelected.clear()
                 listItemSelected.addAll(it)
                 checkItem()
+            }, onDeleteItem = {
+                showDialogDelete(it)
+            }, onOpenDetail = {
+                openInformationDialog(it)
             })
             binding.rcvItemGroup.adapter = adapterOtherFolder
             val layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
@@ -483,30 +540,32 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun handleClickItem(item: ListItem) {
+        val list = mutableListOf<ListItem>()
+        list.add(item)
         when (args.type) {
             Constant.TYPE_PICTURE -> {
-                val list = mutableListOf<ListItem>()
-                list.add(item)
                 ShareData.getInstance().setListItemImage(list)
                 val intent = Intent(requireContext(), ActivityImageDetail::class.java)
                 startActivity(intent)
             }
-            Constant.TYPE_AUDIOS -> {}
+            Constant.TYPE_AUDIOS -> {
+                ShareData.getInstance().setListItemAudio(list)
+                val intent = Intent(requireContext(), ActivityAudioPlayer::class.java)
+                startActivity(intent)
+            }
             Constant.TYPE_VIDEOS -> {
-                val list = mutableListOf<ListItem>()
-                list.add(item)
                 ShareData.getInstance().setListItemVideo(list)
                 val intent = Intent(requireContext(), ActivityVideoPlayer::class.java)
                 startActivity(intent)
             }
             else -> {
-
+                item.path.openWith(requireContext())
             }
         }
     }
 
     private fun showController() {
-        when(args.type){
+        when (args.type) {
             Constant.TYPE_PICTURE -> {
                 binding.tvSlideshow.show()
 
@@ -516,6 +575,20 @@ class FragmentPersistent : Fragment() {
             }
         }
         binding.containerController.show()
+    }
+
+    private fun openInformationDialog(item: ListItem) {
+        val dialogDetail = DialogDetail.dialogDetailConfig {
+            name = item.mName
+            size = item.mSize
+            time = item.mModified
+            timeLock = item.mModified
+            path = item.mPath
+            originalPath = item.mOriginalPath
+            encryptionMode = "Hidden"
+
+        }
+        dialogDetail.show(childFragmentManager, dialogDetail.tag)
     }
 
 

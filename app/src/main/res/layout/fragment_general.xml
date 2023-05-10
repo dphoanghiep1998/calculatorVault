@@ -50,7 +50,7 @@
 
                 <include
                     android:id="@+id/container_shake_close"
-                    layout="@layout/layout_item_custom_double"
+                    layout="@layout/layout_item_custom_shake"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/_12sdp"
