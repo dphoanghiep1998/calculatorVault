@@ -32,6 +32,9 @@
         <action
             android:id="@+id/action_fragmentSetting_to_fragmentDisguiseIcon"
             app:destination="@id/fragmentDisguiseIcon" />
+        <action
+            android:id="@+id/action_fragmentSetting_to_fragmentAdvance"
+            app:destination="@id/fragmentAdvance" />
     </fragment>
     <fragment
         android:id="@+id/fragmentLanguage"
@@ -176,4 +179,17 @@
         android:id="@+id/fragmentHideAppIcon"
         android:name="com.neko.hiepdph.calculatorvault.ui.main.home.setting.disguiseicon.hideappicon.FragmentHideAppIcon"
         android:label="@string/hide_app_icon" />
+    <fragment
+        android:id="@+id/fragmentAdvance"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.setting.advance.FragmentAdvance"
+        android:label="@string/advanced"
+        tools:layout="@layout/fragment_advance" >
+        <action
+            android:id="@+id/action_fragmentAdvance_to_fragmentIntruder"
+            app:destination="@id/fragmentIntruder" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentIntruder"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.setting.advance.FragmentIntruder"
+        android:label="@string/intruder_selfie" />
 </navigation>

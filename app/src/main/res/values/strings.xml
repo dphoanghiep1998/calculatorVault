@@ -284,4 +284,10 @@
     <string name="launch_by_manage_setting_fifth_step"><![CDATA[5) > Tap Manage Space button]]></string>
     <string name="launch_by_manage_setting">Launch by Manage Space button</string>
     <string name="speed">Speed</string>
+    <string name="intruder_selfie">Intruder Selfie</string>
+    <string name="intruder_content_2">If the password that unlocks Sgallery is entered incorrectly, a photo of the intruder will be taken</string>
+    <string name="prohibit_screenshot">Prohibit Screenshots</string>
+    <string name="prohibit_screenshot_content_2">Block screenshots of all the interfaces in the app</string>
+    <string name="fake_password">Fake Password</string>
+    <string name="fake_password_content_2">Unlocking Sgallery with the fake password will show fake content</string>
 </resources>

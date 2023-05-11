@@ -2,24 +2,27 @@ package com.neko.hiepdph.calculatorvault.common
 
 
 object Constant {
+    const val KEY_FAKE_PASSWORD = "KEY_FAKE_PASSWORD"
+    const val KEY_PHOTO_INTRUDER = "KEY_PHOTO_INTRUDER"
+    const val KEY_PROHIBIT_SCREENSHOT = "KEY_PROHIBIT_SCREENSHOT"
     const val KEY_REPEAT = "KEY_REPEAT"
-    const val KEY_SHAKE_GRAVITY ="KEY_CIPHER_CODE"
-    const val KEY_CIPHER_CODE ="KEY_CIPHER_CODE"
-    const val KEY_FINGERPRINT_FAILURE ="KEY_FINGERPRINT_FAILURE"
-    const val KEY_UNLOCK_BY_FINGERPRINT="KEY_UNLOCK_BY_FINGERPRINT"
+    const val KEY_SHAKE_GRAVITY = "KEY_CIPHER_CODE"
+    const val KEY_CIPHER_CODE = "KEY_CIPHER_CODE"
+    const val KEY_FINGERPRINT_FAILURE = "KEY_FINGERPRINT_FAILURE"
+    const val KEY_UNLOCK_BY_FINGERPRINT = "KEY_UNLOCK_BY_FINGERPRINT"
     const val KEY_UNLOCK_BY_PRESS_TITLE = "KEY_UNLOCK_BY_PRESS_TITLE"
-    const val KEY_BUTTON_UNLOCK ="KEY_BUTTON_UNLOCK"
-    const val KEY_CHANGE_ICON ="KEY_CHANGE_ICON"
-    const val KEY_UNLOCK_AFTER_DIALING ="KEY_UNLOCK_AFTER_DIALING"
-    const val KEY_HIDE_APP_ICON ="KEY_HIDE_APP_ICON"
-    const val KEY_LIST_RECYCLER_BIN ="KEY_LIST_RECYCLER_BIN"
-    const val KEY_LIST_ITEM_VAULT ="KEY_LIST_ITEM_VAULT"
+    const val KEY_BUTTON_UNLOCK = "KEY_BUTTON_UNLOCK"
+    const val KEY_CHANGE_ICON = "KEY_CHANGE_ICON"
+    const val KEY_UNLOCK_AFTER_DIALING = "KEY_UNLOCK_AFTER_DIALING"
+    const val KEY_HIDE_APP_ICON = "KEY_HIDE_APP_ICON"
+    const val KEY_LIST_RECYCLER_BIN = "KEY_LIST_RECYCLER_BIN"
+    const val KEY_LIST_ITEM_VAULT = "KEY_LIST_ITEM_VAULT"
 
-    const val INTERNAL_STORAGE_PATH ="INTERNAL_STORAGE_PATH"
-    const val EXTERNAL_STORAGE_PATH ="internal_storage_path"
+    const val INTERNAL_STORAGE_PATH = "INTERNAL_STORAGE_PATH"
+    const val EXTERNAL_STORAGE_PATH = "internal_storage_path"
     const val KEY_IMAGE_INTENT = "KEY_IMAGE_INTENT"
-    const val KEY_ENCRYPTION_MODE ="KEY_ENCRYPTION_MODE"
-    const val KEY_PLAY_VIDEO_MODE ="KEY_PLAY_VIDEO_MODE"
+    const val KEY_ENCRYPTION_MODE = "KEY_ENCRYPTION_MODE"
+    const val KEY_PLAY_VIDEO_MODE = "KEY_PLAY_VIDEO_MODE"
     const val KEY_SHAKE_CLOSE = "KEY_SHAKE_CLOSE"
     const val KEY_SLIDE_RANDOM_PLAY = "KEY_SLIDE_RANDOM_PLAY"
     const val KEY_MOVE_TO_RECYCLER_BIN = "KEY_MOVE_TO_RECYCLER_BIN"
@@ -74,7 +77,6 @@ object Constant {
 //        "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
 
 
-
     const val KEY_SECURITY_QUESTION = "KEY_SECURITY_QUESTION"
     const val KEY_SECURITY_ANSWER = "KEY_SECURITY_ANSWER"
 
@@ -89,6 +91,7 @@ object Constant {
     const val AUDIOS_FOLDER_NAME = "Audios"
     const val VIDEOS_FOLDER_NAME = "Videos"
     const val RECYCLER_BIN_FOLDER_NAME = "Bin"
+    const val INTRUDER_FOLDER_NAME = "Intruder"
 
     const val TYPE_PICTURE = "TYPE_PICTURE"
     const val TYPE_RECYCLER_BIN = "TYPE_RECYCLER_BIN"
@@ -132,7 +135,19 @@ object Constant {
 
     val photoExtensions: Array<String>
         get() = arrayOf(
-            ".jpg", ".png", ".jpeg", ".bmp", ".webp", ".heic", ".heif", ".apng", ".avif",".jif",".jfif",".gif",".svg"
+            ".jpg",
+            ".png",
+            ".jpeg",
+            ".bmp",
+            ".webp",
+            ".heic",
+            ".heif",
+            ".apng",
+            ".avif",
+            ".jif",
+            ".jfif",
+            ".gif",
+            ".svg"
         )
     val videoExtensions: Array<String>
         get() = arrayOf(

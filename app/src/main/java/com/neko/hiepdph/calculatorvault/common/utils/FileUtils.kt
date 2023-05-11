@@ -2,6 +2,7 @@ package com.neko.hiepdph.calculatorvault.common.utils
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import com.neko.hiepdph.calculatorvault.common.Constant
@@ -133,6 +134,7 @@ object FileUtils {
                     )
                 }
             }
+            Log.d("TAG", "getFileInDirectory: "+listOfFolder.size)
             listOfFolder
         } catch (e: Exception) {
             e.printStackTrace()

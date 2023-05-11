@@ -17,6 +17,7 @@ class MainConfig(val context: Context) {
 
     var privacyFolder = File(externalStoragePath + "/${Constant.PRIVACY_FOLDER_NAME}")
     var recyclerBinFolder = File(context.filesDir.path + "/${Constant.RECYCLER_BIN_FOLDER_NAME}")
+    var intruderFolder = File(context.filesDir.path + "/${Constant.INTRUDER_FOLDER_NAME}")
     var picturePrivacyFolder = File(privacyFolder, Constant.PICTURE_FOLDER_NAME)
     var filePrivacyFolder = File(privacyFolder, Constant.VIDEOS_FOLDER_NAME)
     var audioPrivacyFolder = File(privacyFolder, Constant.AUDIOS_FOLDER_NAME)
@@ -28,7 +29,7 @@ class MainConfig(val context: Context) {
             .setShouldShowHidden(isShouldShowHidden)
 
     var lockType: Int
-        get() = AppSharePreference.getInstance(context).getLockType(LockType.PATTERN)
+        get() = AppSharePreference.getInstance(context).getLockType(LockType.NONE)
         set(lockType) = AppSharePreference.getInstance(context).saveLockType(lockType)
 
     var lockPressType: Int
@@ -147,44 +148,68 @@ class MainConfig(val context: Context) {
         get() = AppSharePreference.getInstance(context).getHideAppIcon(HideAppIcon.OFF)
         set(hideAppIcon) = AppSharePreference.getInstance(context).setHideAppIcon(hideAppIcon)
 
-    var unlockAfterDialing:Boolean
-        get() = AppSharePreference.getInstance(context).getUnlockAfterDialing(UnlockAfterDialing.ENABLE)
-        set(unlockAfterDialing) = AppSharePreference.getInstance(context).setUnlockAfterDialing(unlockAfterDialing)
+    var unlockAfterDialing: Boolean
+        get() = AppSharePreference.getInstance(context)
+            .getUnlockAfterDialing(UnlockAfterDialing.ENABLE)
+        set(unlockAfterDialing) = AppSharePreference.getInstance(context)
+            .setUnlockAfterDialing(unlockAfterDialing)
 
-    var changeCalculatorIcon:Int
-        get() = AppSharePreference.getInstance(context).getChangeCalculatorIcon(ChangeCalculatorIcon.ICON_DEFAULT)
-        set(changeCalculatorIcon) = AppSharePreference.getInstance(context).setChangeCalculatorIcon(changeCalculatorIcon)
+    var changeCalculatorIcon: Int
+        get() = AppSharePreference.getInstance(context)
+            .getChangeCalculatorIcon(ChangeCalculatorIcon.ICON_DEFAULT)
+        set(changeCalculatorIcon) = AppSharePreference.getInstance(context)
+            .setChangeCalculatorIcon(changeCalculatorIcon)
 
-    var buttonToUnlock:Int
-        get() = AppSharePreference.getInstance(context).getButtonToUnlock(ButtonToUnlock.SHORT_PRESS)
-        set(buttonToUnlock) = AppSharePreference.getInstance(context).setButtonToUnlock(buttonToUnlock)
+    var buttonToUnlock: Int
+        get() = AppSharePreference.getInstance(context)
+            .getButtonToUnlock(ButtonToUnlock.SHORT_PRESS)
+        set(buttonToUnlock) = AppSharePreference.getInstance(context)
+            .setButtonToUnlock(buttonToUnlock)
 
-    var prohibitUnlockingByLongPressTitle:Boolean
-        get() = AppSharePreference.getInstance(context).getProhibitUnlockingByLongPressTitle(UnlockByLongPress.DISABLE)
-        set(prohibitUnlockingByLongPressTitle) = AppSharePreference.getInstance(context).setProhibitUnlockingByLongPressTitle(prohibitUnlockingByLongPressTitle)
+    var prohibitUnlockingByLongPressTitle: Boolean
+        get() = AppSharePreference.getInstance(context)
+            .getProhibitUnlockingByLongPressTitle(UnlockByLongPress.DISABLE)
+        set(prohibitUnlockingByLongPressTitle) = AppSharePreference.getInstance(context)
+            .setProhibitUnlockingByLongPressTitle(prohibitUnlockingByLongPressTitle)
 
-    var unlockByFingerprint:Boolean
-        get() = AppSharePreference.getInstance(context).getUnlockByFingerprint(UnlockByFingerprint.DISABLE)
-        set(unlockByFingerprint) = AppSharePreference.getInstance(context).setUnlockByFingerprint(unlockByFingerprint)
+    var unlockByFingerprint: Boolean
+        get() = AppSharePreference.getInstance(context)
+            .getUnlockByFingerprint(UnlockByFingerprint.DISABLE)
+        set(unlockByFingerprint) = AppSharePreference.getInstance(context)
+            .setUnlockByFingerprint(unlockByFingerprint)
 
-    var fingerprintFailure:Boolean
-        get() = AppSharePreference.getInstance(context).getFingerprintFailure(FingerprintFailure.DISABLE)
-        set(fingerprintFailure) = AppSharePreference.getInstance(context).setFingerprintFailure(fingerprintFailure)
+    var fingerprintFailure: Boolean
+        get() = AppSharePreference.getInstance(context)
+            .getFingerprintFailure(FingerprintFailure.DISABLE)
+        set(fingerprintFailure) = AppSharePreference.getInstance(context)
+            .setFingerprintFailure(fingerprintFailure)
 
-    var secretKey:String
+    var secretKey: String
         get() = AppSharePreference.getInstance(context).getSecretKey(Constant.SECRET_KEY)
         set(secretKey) = AppSharePreference.getInstance(context).setSecretKey(secretKey)
 
-    var shakeGravity:Float
+    var shakeGravity: Float
         get() = AppSharePreference.getInstance(context).getShakeGravity(2.0f)
         set(shakeGravity) = AppSharePreference.getInstance(context).setShakeGravity(shakeGravity)
 
-    var repeat:Int
-        get() =  AppSharePreference.getInstance(context).getRepeatType(RepeatMode.REPEAT_ALL)
+    var repeat: Int
+        get() = AppSharePreference.getInstance(context).getRepeatType(RepeatMode.REPEAT_ALL)
         set(repeat) = AppSharePreference.getInstance(context).setRepeatType(repeat)
 
 
+    var prohibitScreenShot: Boolean
+        get() = AppSharePreference.getInstance(context)
+            .getProhibitScreenShot(ProhibitScreenShot.DISABLE)
+        set(prohibitScreenShot) = AppSharePreference.getInstance(context)
+            .setProhibitScreenShot(prohibitScreenShot)
 
+    var photoIntruder: Boolean
+        get() = AppSharePreference.getInstance(context).getPhotoIntruder(PhotoIntruder.DISABLE)
+        set(photoIntruder) = AppSharePreference.getInstance(context).setPhotoIntruder(photoIntruder)
+
+    var fakePassword: Boolean
+        get() = AppSharePreference.getInstance(context).getFakePassword(FakePassword.DISABLE)
+        set(fakePassword) = AppSharePreference.getInstance(context).setFakePassword(fakePassword)
 
 
     private fun getDefaultInternalPath(): String {

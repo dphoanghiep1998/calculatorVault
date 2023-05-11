@@ -1,11 +1,13 @@
 package com.neko.hiepdph.calculatorvault.ui.activities
 
 import android.content.Intent
+import android.graphics.SurfaceTexture
+import android.hardware.Camera
 import android.os.Bundle
-import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import androidx.appcompat.app.AppCompatActivity
+import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.biometric.BiometricConfig
 import com.neko.hiepdph.calculatorvault.common.customview.PinFunction
@@ -15,10 +17,15 @@ import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.databinding.ActivityPinLockBinding
 import com.neko.hiepdph.calculatorvault.dialog.*
+import java.io.File
+import java.io.FileOutputStream
 
 class ActivityPinLock : AppCompatActivity() {
     private lateinit var binding: ActivityPinLockBinding
     private var currentPassword = ""
+    private var byteArray: ByteArray? = null
+    private var takePhotoIntruder = false
+    private var camera: Camera? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPinLockBinding.inflate(layoutInflater)
@@ -89,10 +96,16 @@ class ActivityPinLock : AppCompatActivity() {
             val biometric = BiometricConfig.biometricConfig {
                 ownerFragmentActivity = this@ActivityPinLock
                 authenticateSuccess = {
-                    Log.d("TAG", "authenticateSuccess: ")
+                    (application as CustomApplication).authority = true
+                    startActivity(
+                        Intent(this@ActivityPinLock, ActivityVault::class.java)
+                    )
+                    finish()
                 }
                 authenticateFailed = {
-                    Log.d("TAG", "authenticateFailed: ")
+                    if (config.photoIntruder && !takePhotoIntruder) {
+                        takePicture()
+                    }
                 }
             }
             biometric.showPrompt()
@@ -107,6 +120,36 @@ class ActivityPinLock : AppCompatActivity() {
                 showDialogConfirmSecurityQuestion()
             }, DialogConfirmType.FORGOT_PASSWORD, null)
             confirmDialog.show(supportFragmentManager, confirmDialog.tag)
+        }
+    }
+
+    private fun takePhotoIntruder() {
+        try {
+            camera?.takePicture(
+                null, null
+            ) { data, camera ->
+                byteArray = data
+
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopCamera()
+        if (!(application as CustomApplication).authority) {
+            if (!config.intruderFolder.exists()) {
+                config.intruderFolder.mkdirs()
+            }
+            val file = File(
+                config.intruderFolder,
+                "lmao_intruder_${config.intruderFolder.listFiles().size}.jpeg"
+            )
+            val fos = FileOutputStream(file)
+            fos.write(byteArray)
+            fos.close()
         }
     }
 
@@ -133,6 +176,9 @@ class ActivityPinLock : AppCompatActivity() {
             anim.repeatMode = Animation.REVERSE // repeat animation in reverse mode
             anim.repeatCount = 2 // repeat animation 2 times
             binding.tvStatus.startAnimation(anim)
+            if (config.photoIntruder && !takePhotoIntruder) {
+                takePicture()
+            }
             return
         }
         if (currentPassword != config.secretPin) {
@@ -143,9 +189,13 @@ class ActivityPinLock : AppCompatActivity() {
             anim.repeatMode = Animation.REVERSE // repeat animation in reverse mode
             anim.repeatCount = 2 // repeat animation 2 times
             binding.tvStatus.startAnimation(anim)
+            if (config.photoIntruder && !takePhotoIntruder) {
+                takePicture()
+            }
             return
         }
         if (config.secretPin == currentPassword) {
+            (application as CustomApplication).authority = true
             config.isShowLock = true
             startActivity(
                 Intent(this@ActivityPinLock, ActivityVault::class.java)
@@ -170,5 +220,49 @@ class ActivityPinLock : AppCompatActivity() {
                 item.setBackgroundResource(R.drawable.bg_pin_inactive)
             }
         }
+    }
+
+    private fun takePicture() {
+        startCamera()
+        takePhotoIntruder()
+        takePhotoIntruder = true
+    }
+
+    private fun startCamera() {
+        val dummy = SurfaceTexture(0)
+
+        try {
+            val cameraId = getFrontCameraId()
+            if (cameraId == -1) {
+                return
+            }
+            camera = Camera.open(cameraId).also {
+                it.setPreviewTexture(dummy)
+                it.startPreview()
+            }
+        } catch (e: RuntimeException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun stopCamera() {
+        camera?.stopPreview()
+        camera?.release()
+        camera = null
+    }
+
+    private fun getFrontCameraId(): Int {
+        var camId = -1
+        val numberOfCameras = Camera.getNumberOfCameras()
+        val ci = Camera.CameraInfo()
+
+        for (i in 0 until numberOfCameras) {
+            Camera.getCameraInfo(i, ci)
+            if (ci.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                camId = i
+            }
+        }
+
+        return camId
     }
 }

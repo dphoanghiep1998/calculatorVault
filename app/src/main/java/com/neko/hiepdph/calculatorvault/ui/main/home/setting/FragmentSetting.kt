@@ -122,6 +122,10 @@ class FragmentSetting : Fragment() {
 
         }
 
+        binding.itemAdvanced.root.clickWithDebounce {
+            navigateToPage(R.id.fragmentSetting, R.id.fragmentAdvance)
+        }
+
         binding.itemClearCache.root.clickWithDebounce {
             clearCache()
         }

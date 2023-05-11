@@ -55,7 +55,7 @@ class ActivityVault : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        mSensorManager?.registerListener(mShakeDetector, mAccelerometer,	SensorManager.SENSOR_DELAY_UI);
+        mSensorManager?.registerListener(mShakeDetector, mAccelerometer,	SensorManager.SENSOR_DELAY_UI)
         if (config.lockWhenLeavingApp == LockWhenLeavingApp.ENABLE && !config.isShowLock) {
             when (config.lockType) {
                 LockType.PATTERN -> {
@@ -94,6 +94,7 @@ class ActivityVault : AppCompatActivity() {
             viewModel.createFolder(config.privacyFolder, Constant.VIDEOS_FOLDER_NAME)
             viewModel.createFolder(config.privacyFolder, Constant.AUDIOS_FOLDER_NAME)
             viewModel.createFolder(config.privacyFolder, Constant.FILES_FOLDER_NAME)
+            viewModel.createFolder(filesDir, Constant.INTRUDER_FOLDER_NAME)
             viewModel.createFolder(filesDir, Constant.RECYCLER_BIN_FOLDER_NAME)
             AppSharePreference.INSTANCE.saveInitFirstDone(true)
             viewModel.getListFolderInVault(this,config.privacyFolder)

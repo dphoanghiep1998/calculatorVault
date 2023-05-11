@@ -8,21 +8,21 @@
 
     <include
         android:id="@+id/item_intruder_selfie"
-        layout="@layout/layout_item_custom_single"
+        layout="@layout/layout_item_custom_double"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/_12sdp" />
 
     <include
         android:id="@+id/item_fake_password"
-        layout="@layout/layout_item_custom_single"
+        layout="@layout/layout_item_custom_double"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/_12sdp" />
 
     <include
         android:id="@+id/item_prohibitScreenshots"
-        layout="@layout/layout_item_custom_single"
+        layout="@layout/layout_item_custom_double"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/_12sdp" />

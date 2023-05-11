@@ -504,6 +504,30 @@ class AppSharePreference(private val context: Context?) {
         saveInt(Constant.KEY_REPEAT, values)
     }
 
+    fun getProhibitScreenShot(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_PROHIBIT_SCREENSHOT, defaultValues)
+    }
+
+    fun setProhibitScreenShot(values: Boolean) {
+        saveBoolean(Constant.KEY_PROHIBIT_SCREENSHOT, values)
+    }
+
+    fun getPhotoIntruder(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_PHOTO_INTRUDER, defaultValues)
+    }
+
+    fun setPhotoIntruder(values: Boolean) {
+        saveBoolean(Constant.KEY_PHOTO_INTRUDER, values)
+    }
+
+    fun getFakePassword(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_FAKE_PASSWORD, defaultValues)
+    }
+
+    fun setFakePassword(values: Boolean) {
+        saveBoolean(Constant.KEY_FAKE_PASSWORD, values)
+    }
+
 
 }
 

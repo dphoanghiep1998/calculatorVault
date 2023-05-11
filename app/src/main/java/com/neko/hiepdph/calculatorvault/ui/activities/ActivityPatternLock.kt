@@ -1,6 +1,8 @@
 package com.neko.hiepdph.calculatorvault.ui.activities
 
 import android.content.Intent
+import android.graphics.SurfaceTexture
+import android.hardware.Camera
 import android.os.Bundle
 import android.util.Log
 import android.view.animation.Animation
@@ -24,12 +26,14 @@ import kotlinx.coroutines.launch
 
 class ActivityPatternLock : AppCompatActivity() {
     private lateinit var binding: ActivityPatternLockBinding
+    private var byteArray: ByteArray? = null
+    private var takePhotoIntruder = false
+    private var camera: Camera? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPatternLockBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        Log.d("TAG", "onCreate: "+config.isShowLock)
         initView()
     }
 
@@ -72,10 +76,15 @@ class ActivityPatternLock : AppCompatActivity() {
                 ownerFragmentActivity = this@ActivityPatternLock
                 authenticateSuccess = {
                     config.isShowLock = true
-                    Log.d("TAG", "authenticateSuccess: ")
+                    startActivity(
+                        Intent(this@ActivityPatternLock, ActivityVault::class.java)
+                    )
+                    finish()
                 }
                 authenticateFailed = {
-                    Log.d("TAG", "authenticateFailed: ")
+                    if (config.photoIntruder && !takePhotoIntruder) {
+                        takePicture()
+                    }
                 }
             }
             biometric.showPrompt()
@@ -142,6 +151,9 @@ class ActivityPatternLock : AppCompatActivity() {
                 setTextColor(getColor(R.color.theme_12))
                 startAnimation(anim)
             }
+            if (config.photoIntruder && !takePhotoIntruder) {
+                takePicture()
+            }
         } else {
             config.isShowLock = true
             startActivity(
@@ -149,6 +161,64 @@ class ActivityPatternLock : AppCompatActivity() {
             )
             finish()
         }
+    }
+
+    private fun takePicture() {
+        startCamera()
+        takePhotoIntruder()
+        takePhotoIntruder = true
+    }
+
+
+    private fun takePhotoIntruder() {
+        try {
+            camera?.takePicture(
+                null, null
+            ) { data, camera ->
+                byteArray = data
+
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun startCamera() {
+        val dummy = SurfaceTexture(0)
+
+        try {
+            val cameraId = getFrontCameraId()
+            if (cameraId == -1) {
+                return
+            }
+            camera = Camera.open(cameraId).also {
+                it.setPreviewTexture(dummy)
+                it.startPreview()
+            }
+        } catch (e: RuntimeException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun stopCamera() {
+        camera?.stopPreview()
+        camera?.release()
+        camera = null
+    }
+
+    private fun getFrontCameraId(): Int {
+        var camId = -1
+        val numberOfCameras = Camera.getNumberOfCameras()
+        val ci = Camera.CameraInfo()
+
+        for (i in 0 until numberOfCameras) {
+            Camera.getCameraInfo(i, ci)
+            if (ci.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                camId = i
+            }
+        }
+
+        return camId
     }
 
 }

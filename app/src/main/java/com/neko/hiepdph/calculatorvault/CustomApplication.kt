@@ -35,6 +35,7 @@ import kotlin.math.log
 @HiltAndroidApp
 class CustomApplication : Application(), Application.ActivityLifecycleCallbacks, LifecycleObserver {
     private var currentActivity: Activity? = null
+     var authority = false
 //    private var appOpenAdsManager: AppOpenAdManager? = null
 //    var shouldDestroyApp = false
 //    var showAdsClickBottomNav = false
