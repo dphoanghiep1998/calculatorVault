@@ -528,6 +528,14 @@ class AppSharePreference(private val context: Context?) {
         saveBoolean(Constant.KEY_FAKE_PASSWORD, values)
     }
 
+    fun getDarkMode(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_DARK_MODE, defaultValues)
+    }
+
+    fun setDarkMode(values: Boolean) {
+        saveBoolean(Constant.KEY_DARK_MODE, values)
+    }
+
 
 }
 

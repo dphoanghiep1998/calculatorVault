@@ -10,17 +10,19 @@
         android:id="@+id/action_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:elevation="0dp"
+        android:outlineProvider="none"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/neutral_01"
+            android:background="@color/neutral_02"
             android:minHeight="?attr/actionBarSize"
-            android:theme="@style/Toolbar"
+            android:theme="@style/CustomToolbarStyle"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:titleTextAppearance="@style/TextViewStyleToolbar" />
+            app:titleTextAppearance="@style/titleTextAppearance" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <ImageView

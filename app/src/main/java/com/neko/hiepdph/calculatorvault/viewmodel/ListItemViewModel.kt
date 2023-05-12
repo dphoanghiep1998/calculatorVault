@@ -6,7 +6,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neko.hiepdph.calculatorvault.common.Constant
-import com.neko.hiepdph.calculatorvault.common.utils.*
+import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
+import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
+import com.neko.hiepdph.calculatorvault.common.utils.SelfCleaningLiveData
+import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -54,12 +57,23 @@ class ListItemViewModel @Inject constructor() : ViewModel() {
         context: Context,
         listFile: MutableList<File>,
         destination: File,
-        progress:(state:Int,value:Float,currentFile:File?)->Unit,
+        progress: (state: Int, value: Float, currentFile: File?) -> Unit,
         onSuccess: () -> Unit,
-        onError: (t: Throwable) -> Unit
+        onError: (t: Throwable) -> Unit,
+        encryptMode: Int = EncryptionMode.HIDDEN,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            CopyFiles.copy(context,listFile, destination,0L, progress,true, onSuccess,onError)
+            CopyFiles.copyEncrypt(
+                context,
+                listFile,
+                destination,
+                0L,
+                progress,
+                true,
+                onSuccess,
+                onError,
+                encryptionMode = encryptMode
+            )
         }
     }
 }

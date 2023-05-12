@@ -32,7 +32,7 @@
         android:paddingVertical="@dimen/_8sdp"
         android:paddingHorizontal="@dimen/_6sdp"
         android:layout_marginBottom="3dp"
-        android:textColor="@color/neutral_01"
+        android:textColor="@color/neutral_0_persistent"
         android:textSize="@dimen/_10sdp"
         app:layout_constraintBottom_toBottomOf="@id/imv_thumb"
         app:layout_constraintEnd_toEndOf="@id/imv_thumb"

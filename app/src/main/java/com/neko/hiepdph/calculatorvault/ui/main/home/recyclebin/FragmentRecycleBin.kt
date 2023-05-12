@@ -41,14 +41,18 @@ class FragmentRecycleBin : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentRecycleBinBinding.inflate(inflater, container, false)
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initView()
-        initToolBar()
+//        initToolBar()
         getData()
+        changeBackPressCallBack {
+            requireActivity().finishAffinity()
+        }
     }
 
     private fun initToolBar() {

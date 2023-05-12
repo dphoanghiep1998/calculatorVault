@@ -27,13 +27,31 @@
         <item name="drawableNavigationItemBackground">@drawable/menu_background_color_state</item>
     </style>
 
-    <style name="Toolbar" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="CustomToolbarStyle" parent="Widget.AppCompat.Toolbar">
+        <item name="titleTextAppearance">@style/CustomTitleTextAppearance</item>
+    </style>
+    <style name="CustomTitleTextAppearance">
+        <item name="android:textColor">@color/neutral_06</item>
+        <item name="android:fontFamily">@font/app_font_500</item>
+        <item name="android:textSize">@dimen/_24sdp</item>
+    </style>
+    <style name="titleTextAppearance">
+        <item name="android:fontFamily">@font/app_font_500</item>
+        <item name="android:textSize">@dimen/_24sdp</item>
+    </style>
+
+
+
 
     <style name="Widget.Custom.NavigationView" parent="Widget.Design.NavigationView">
+        <item name="background">@color/neutral_01</item>
         <item name="itemIconTint">?attr/colorNavigationItem</item>
         <item name="itemTextColor">?attr/colorNavigationItem</item>
         <item name="itemBackground">?attr/drawableNavigationItemBackground</item>
     </style>
+
+
 
     <style name="NotificationTextTitle" parent="TextAppearance.Compat.Notification.Title" />
 

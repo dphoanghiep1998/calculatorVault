@@ -215,7 +215,7 @@ class FragmentNote : Fragment() {
             }
         }
         requireActivity().addMenuProvider(
-            normalMenuProvider as MenuProvider, viewLifecycleOwner, Lifecycle.State.CREATED
+            normalMenuProvider as MenuProvider, viewLifecycleOwner, Lifecycle.State.RESUMED
         )
     }
     private fun editHome() {

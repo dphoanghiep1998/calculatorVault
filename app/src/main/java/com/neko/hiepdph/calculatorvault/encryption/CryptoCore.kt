@@ -3,7 +3,8 @@ package com.neko.hiepdph.calculatorvault.encryption
 import android.content.Context
 import android.util.Base64
 import com.neko.hiepdph.calculatorvault.common.extensions.config
-import java.nio.charset.StandardCharsets
+import java.nio.charset.StandardCharsets.UTF_8
+import java.security.MessageDigest
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
@@ -23,24 +24,19 @@ class CryptoCore(private val context: Context) {
 
     private fun generateKey(): SecretKey {
         val keyBytes = ByteArray(16)
-        val secretKeyBytes = context.config.secretKey.toByteArray(StandardCharsets.UTF_8)
+        val secretKeyBytes = context.config.secretKey.toByteArray(UTF_8)
         System.arraycopy(
-            secretKeyBytes, 0, keyBytes, 0,
-            secretKeyBytes.size.coerceAtMost(keyBytes.size)
+            secretKeyBytes, 0, keyBytes, 0, secretKeyBytes.size.coerceAtMost(keyBytes.size)
         )
         return SecretKeySpec(keyBytes, "AES")
     }
 
+    fun md5(str: String): ByteArray =
+        MessageDigest.getInstance("MD5").digest(str.toByteArray(UTF_8))
+
+    fun ByteArray.toHex() = joinToString(separator = "") { byte -> "%02x".format(byte) }
     fun encryptFileName(fileName: String): String {
-        return try {
-            val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-            cipher.init(Cipher.ENCRYPT_MODE, generateKey())
-            val cipherText = cipher.doFinal(fileName.toByteArray(StandardCharsets.UTF_8))
-            Base64.encodeToString(cipherText, Base64.DEFAULT)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            "abc"
-        }
+        return md5(fileName).toHex()
     }
 
     fun decryptFileName(encryptedFileName: String): String {
@@ -49,7 +45,7 @@ class CryptoCore(private val context: Context) {
             cipher.init(Cipher.DECRYPT_MODE, generateKey())
             val cipherText = Base64.decode(encryptedFileName, Base64.DEFAULT)
             val plainText = cipher.doFinal(cipherText)
-            String(plainText, StandardCharsets.UTF_8)
+            String(plainText, UTF_8)
         } catch (e: Exception) {
             e.printStackTrace()
             "abc"
@@ -60,7 +56,7 @@ class CryptoCore(private val context: Context) {
         return try {
             val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
             cipher.init(Cipher.ENCRYPT_MODE, generateKey())
-            val cipherText = cipher.doFinal(fileName.toByteArray(StandardCharsets.UTF_8))
+            val cipherText = cipher.doFinal(fileName.toByteArray(UTF_8))
             Base64.encodeToString(cipherText, Base64.DEFAULT)
         } catch (e: Exception) {
             e.printStackTrace()

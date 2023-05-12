@@ -2,6 +2,7 @@ package com.neko.hiepdph.calculatorvault.common
 
 
 object Constant {
+    const val KEY_DARK_MODE = "KEY_DARK_MODE"
     const val KEY_FAKE_PASSWORD = "KEY_FAKE_PASSWORD"
     const val KEY_PHOTO_INTRUDER = "KEY_PHOTO_INTRUDER"
     const val KEY_PROHIBIT_SCREENSHOT = "KEY_PROHIBIT_SCREENSHOT"

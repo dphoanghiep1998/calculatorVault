@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="neutral_01">#01355A</color>
+    <color name="neutral_02">#1F567C</color>
+    <color name="neutral_03">#507997</color>
+    <color name="neutral_04">#B6B9CD</color>
+    <color name="neutral_05">#D4DAE8</color>
+    <color name="neutral_06">#FAFAFA</color>
+    <color name="neutral_07">#FFFFFF</color>
+    <color name="neutral_08">#000</color>
+    <color name="secondary">#356182</color>
+
+
+</resources>

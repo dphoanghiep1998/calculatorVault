@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.changeicon.ChangeIconUtils
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
@@ -30,6 +31,8 @@ class FragmentDisguiseIcon : Fragment() {
         AppSharePreference.INSTANCE.registerOnSharedPreferenceChangeListener(listener)
         return binding.root
     }
+
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -77,7 +80,7 @@ class FragmentDisguiseIcon : Fragment() {
         }
 
         binding.containerChangeCalculatorIcon.root.clickWithDebounce {
-            binding.containerChangeCalculatorIcon.imvAppIcon
+//            binding.containerChangeCalculatorIcon.imvAppIcon
         }
 
         binding.containerPressButtonToUnlock.root.clickWithDebounce {

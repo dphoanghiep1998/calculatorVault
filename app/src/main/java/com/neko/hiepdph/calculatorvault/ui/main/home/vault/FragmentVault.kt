@@ -52,9 +52,6 @@ class FragmentVault : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentVaultBinding.inflate(inflater, container, false)
-//        changeBackPressCallBack {
-//            requireActivity().finishAffinity()
-//        }
         initToolBar()
         return binding.root
     }
@@ -64,6 +61,9 @@ class FragmentVault : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initView()
         observeListFile()
+        changeBackPressCallBack {
+            requireActivity().finishAffinity()
+        }
     }
     override fun onResume() {
         super.onResume()

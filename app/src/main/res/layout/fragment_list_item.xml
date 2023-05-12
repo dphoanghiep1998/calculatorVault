@@ -50,6 +50,7 @@
         android:paddingHorizontal="@dimen/_12sdp"
         android:paddingVertical="@dimen/_12sdp"
         android:text="@string/move_to_vault"
+        android:fontFamily="@font/app_font_500"
         android:textColor="@color/neutral_01"
         android:textSize="@dimen/_14sdp"
         app:drawableStartCompat="@drawable/ic_lock"

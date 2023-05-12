@@ -48,6 +48,9 @@ class FragmentBrowser : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initToolBar()
         initView()
+        changeBackPressCallBack {
+            requireActivity().finishAffinity()
+        }
         observeListBookmark()
     }
 
@@ -133,7 +136,7 @@ class FragmentBrowser : Fragment() {
                 }
 
             }
-        }, viewLifecycleOwner, Lifecycle.State.CREATED)
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
 
     }
 

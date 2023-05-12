@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.text.TextUtils
-import android.util.Log
 import com.google.common.io.Files.getNameWithoutExtension
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.copyDirectoryOneLocationToAnotherLocation
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.createNewFile
@@ -12,6 +11,8 @@ import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.deleteFile
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.getExtension
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.isWritableNormalOrSaf
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.mkdir
+import com.neko.hiepdph.calculatorvault.config.EncryptionMode
+import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
 import java.io.File
 
 private const val STATE_PREPARE = 1
@@ -43,6 +44,64 @@ object CopyFiles {
                     File(createNewFolder(context, targetFolder, itemFile.name))
                 } else {
                     File(createNewFile(context, targetFolder, itemFile.name))
+                }
+
+                copyDirectoryOneLocationToAnotherLocation(context, itemFile, targetFile,
+                    // on progress
+                    { len, file ->
+                        run {
+                            currentSize += len
+                            progress(
+                                STATE_PROCESSING, (currentSize * 100 / tSize).toFloat(), file
+                            )
+                        }
+                    },
+                    // on finish
+                    { sourceFile, targetFile ->
+                        if (isMove) {
+                            deleteFile(sourceFile, context)
+                        }
+                        addMedia(context, targetFile)
+                        onSuccess()
+                    })
+            }
+
+        } catch (e: Exception) {
+            onError(e)
+        }
+    }
+
+    fun copyEncrypt(
+        context: Context,
+        files: MutableList<File>?,
+        targetFolder: File,
+        tSize: Long,
+        progress: (state: Int, value: Float, currentFile: File?) -> Unit,
+        isMove: Boolean = false,
+        onSuccess: () -> Unit = {},
+        onError: (t: Throwable) -> Unit = {},
+        encryptionMode: Int = EncryptionMode.HIDDEN
+    ) {
+        try {
+            if (files?.isEmpty() == true) return
+            var totalSize = 0L
+            if (tSize == 0L) files?.forEach {
+                totalSize += calFolderSize(it)
+            }
+            else totalSize = tSize
+            var currentSize = 0f
+            // move file
+            files?.forEach { itemFile ->
+                val targetFile = if (itemFile.isDirectory) {
+                    File(createNewFolder(context, targetFolder, itemFile.name))
+                } else {
+                    File(
+                        createNewFile(
+                            context,
+                            targetFolder,
+                            CryptoCore.getInstance(context).encryptFileName(itemFile.name)
+                        ).toString()
+                    )
                 }
 
                 copyDirectoryOneLocationToAnotherLocation(context, itemFile, targetFile,
@@ -119,6 +178,7 @@ object CopyFiles {
             onError(e)
         }
     }
+
 
     private fun calFolderSize(it: File): Long {
         return it.length()

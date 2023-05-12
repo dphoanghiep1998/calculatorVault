@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Theme.CalculatorVault" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
@@ -12,7 +12,6 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
-
 
         <item name="android:textViewStyle">@style/TextViewStyle</item>
         <item name="android:colorBackground">@color/neutral_01</item>
@@ -28,11 +27,14 @@
     </style>
 
     <style name="Toolbar" parent="ThemeOverlay.AppCompat.Light" />
+
     <style name="Widget.Custom.NavigationView" parent="Widget.Design.NavigationView">
+        <item name="background">@color/neutral_01</item>
         <item name="itemIconTint">?attr/colorNavigationItem</item>
         <item name="itemTextColor">?attr/colorNavigationItem</item>
         <item name="itemBackground">?attr/drawableNavigationItemBackground</item>
     </style>
+
 
     <style name="NotificationTextTitle" parent="TextAppearance.Compat.Notification.Title" />
 

@@ -13,13 +13,21 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
 import android.util.Log
+import android.view.Gravity
+import android.view.View
+import android.widget.CheckBox
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
+import androidx.core.view.get
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -28,6 +36,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
+import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionS
@@ -52,10 +61,18 @@ class ActivityVault : AppCompatActivity() {
     private var mSensorManager: SensorManager? = null
     private var mAccelerometer: Sensor? = null
     private var mShakeDetector: ShakeDetector? = null
-
+    private fun setThemeMode() {
+        if (config.darkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
+    }
     override fun onResume() {
         super.onResume()
-        mSensorManager?.registerListener(mShakeDetector, mAccelerometer,	SensorManager.SENSOR_DELAY_UI)
+        mSensorManager?.registerListener(
+            mShakeDetector, mAccelerometer, SensorManager.SENSOR_DELAY_UI
+        )
         if (config.lockWhenLeavingApp == LockWhenLeavingApp.ENABLE && !config.isShowLock) {
             when (config.lockType) {
                 LockType.PATTERN -> {
@@ -77,15 +94,73 @@ class ActivityVault : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityVaultBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        initNavigationView()
         initScreenOffAction()
         setupNavigationDrawer()
         setSupportActionBar(binding.toolbar)
         setupActionBar()
         requestAllFileManage()
         initShakeDetector()
+        setThemeMode()
+    }
+
+    private fun initNavigationView(){
+        binding.itemVault.apply {
+            imvIcon.setImageResource(R.drawable.ic_vault)
+            tvContent.text = getString(R.string.vault)
+        }
+        binding.itemBrowser.apply {
+            imvIcon.setImageResource(R.drawable.ic_browser)
+            tvContent.text = getString(R.string.browser)
+        }
+        binding.itemNote.apply {
+            imvIcon.setImageResource(R.drawable.ic_note)
+            tvContent.text = getString(R.string.note)
+        }
+        binding.itemRecyclerBin.apply {
+            imvIcon.setImageResource(R.drawable.ic_delete)
+            tvContent.text = getString(R.string.recycle_bin)
+        }
+        binding.itemSetting.apply {
+            imvIcon.setImageResource(R.drawable.ic_setting)
+            tvContent.text = getString(R.string.setting)
+        }
+        binding.itemLanguage.apply {
+            imvIcon.setImageResource(R.drawable.ic_language)
+            tvContent.text = getString(R.string.language)
+        }
+        binding.itemTheme.apply {
+            binding.imvIcon.setImageResource(R.drawable.ic_dark_theme)
+            binding.tvContent.text = getString(R.string.dark_theme)
+        }
+        binding.itemRateApp.apply {
+            imvIcon.setImageResource(R.drawable.ic_rate)
+            tvContent.text = getString(R.string.rate_app)
+        }
+        binding.itemShareApp.apply {
+            imvIcon.setImageResource(R.drawable.ic_share)
+            tvContent.text = getString(R.string.share_app)
+        }
+        binding.itemAboutUs.apply {
+            imvIcon.setImageResource(R.drawable.ic_info)
+            tvContent.text = getString(R.string.about_us)
+        }
+        binding.itemPrivacy.apply {
+            imvIcon.setImageResource(R.drawable.ic_security_private)
+            tvContent.text = getString(R.string.privacy_policy)
+        }
 
     }
 
+    private fun changeThemeMode(darkMode: Boolean) {
+        config.darkMode = darkMode
+        Log.d("TAG", "changeThemeMode: "+darkMode)
+        if (darkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
+    }
 
     private fun createSecretFolderFirstTime() {
         if (!AppSharePreference.INSTANCE.getInitDone(false)) {
@@ -97,7 +172,7 @@ class ActivityVault : AppCompatActivity() {
             viewModel.createFolder(filesDir, Constant.INTRUDER_FOLDER_NAME)
             viewModel.createFolder(filesDir, Constant.RECYCLER_BIN_FOLDER_NAME)
             AppSharePreference.INSTANCE.saveInitFirstDone(true)
-            viewModel.getListFolderInVault(this,config.privacyFolder)
+            viewModel.getListFolderInVault(this, config.privacyFolder)
         }
     }
 
@@ -150,11 +225,11 @@ class ActivityVault : AppCompatActivity() {
             createSecretFolderFirstTime()
         }
 
-    private fun initShakeDetector(){
-        mSensorManager  = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    private fun initShakeDetector() {
+        mSensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mAccelerometer = mSensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         mShakeDetector = ShakeDetector(this)
-        mShakeDetector?.setOnShakeListener(object :ShakeDetector.OnShakeListener{
+        mShakeDetector?.setOnShakeListener(object : ShakeDetector.OnShakeListener {
             override fun onShake(count: Int) {
                 finishAffinity()
                 exitProcess(-1)
@@ -231,8 +306,8 @@ class ActivityVault : AppCompatActivity() {
         drawerLayout = binding.drawerLayout.apply {
             setStatusBarBackground(R.color.purple_200)
         }
-    }
 
+    }
 
 
     fun getToolbar(): Toolbar {

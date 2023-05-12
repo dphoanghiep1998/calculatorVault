@@ -211,6 +211,10 @@ class MainConfig(val context: Context) {
         get() = AppSharePreference.getInstance(context).getFakePassword(FakePassword.DISABLE)
         set(fakePassword) = AppSharePreference.getInstance(context).setFakePassword(fakePassword)
 
+    var darkMode:Boolean
+        get() = AppSharePreference.getInstance(context).getDarkMode(DarkMode.DISABLE)
+        set(darkMode) = AppSharePreference.getInstance(context).setDarkMode(darkMode)
+
 
     private fun getDefaultInternalPath(): String {
         val externalDir = context.getExternalFilesDir(null)

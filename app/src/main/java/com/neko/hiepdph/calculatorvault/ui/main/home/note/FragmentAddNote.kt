@@ -48,7 +48,7 @@ class FragmentAddNote : Fragment() {
 
                 }
             }
-        }, viewLifecycleOwner, Lifecycle.State.CREATED)
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
 

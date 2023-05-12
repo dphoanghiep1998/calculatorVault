@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
+import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentListItemBinding
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
@@ -110,7 +111,7 @@ class FragmentListItem : Fragment() {
                         checkCheckBoxAll()
                     }
                 }, onError = {
-                })
+                },requireContext().config.encryptionMode)
         }
     }
 

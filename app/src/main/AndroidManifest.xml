@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
 
+
     <uses-feature
         android:name="android.hardware.sensor.accelerometer"
         android:required="true" />
@@ -67,25 +68,30 @@
         <activity
             android:name=".ui.activities.ActivityPinLock"
             android:exported="false" />
+
         <activity
             android:name=".ui.activities.ActivityVault"
+            android:exported="false">
+
+        </activity>
+
+
+
+        <activity
+            android:name=".ui.activities.ActivityCalculator"
             android:exported="true">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
-
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.activities.ActivityCalculator"
-            android:exported="true" />
 
-<!--        <service android:name=".service.MediaPlayerService"-->
-<!--            android:exported="true">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.media.browse.MediaBrowserService" />-->
-<!--            </intent-filter>-->
-<!--        </service>-->
+        <!--        <service android:name=".service.MediaPlayerService"-->
+        <!--            android:exported="true">-->
+        <!--            <intent-filter>-->
+        <!--                <action android:name="android.media.browse.MediaBrowserService" />-->
+        <!--            </intent-filter>-->
+        <!--        </service>-->
     </application>
 
 </manifest>

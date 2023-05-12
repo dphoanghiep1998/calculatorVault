@@ -20,8 +20,9 @@
             android:title="@string/recycle_bin" />
 
     </group>
-    <group android:id="@+id/group_2">
+    <group android:id="@+id/group_2" android:checkableBehavior="single">
         <item
+
             android:id="@id/fragmentSetting"
             android:icon="@drawable/ic_setting"
             android:title="@string/setting" />
@@ -31,6 +32,7 @@
             android:icon="@drawable/ic_language"
             android:title="@string/language" />
         <item
+            android:checkable="false"
             android:id="@+id/item_theme"
             android:icon="@drawable/ic_dark_theme"
             app:actionLayout="@layout/layout_switch_menu"

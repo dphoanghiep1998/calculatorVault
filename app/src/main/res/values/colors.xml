@@ -11,9 +11,7 @@
     <color name="colorAccent">#D81B60</color>
 
     <color name="primary">#29BBCF</color>
-    <color name="primary_12">#1F29BBCF</color>
-    <color name="secondary_01">#1F29BBCF</color>
-    <color name="secondary_02">#356182</color>
+    <color name="secondary">#1F29BBCF</color>
 
     <color name="gradient_01">#26D0CE</color>
     <color name="gradient_02">#1A2980</color>
@@ -63,4 +61,7 @@
     <color name="theme_13_50">#80795549</color>
     <color name="theme_14_50">#80607D8B</color>
     <color name="theme_15_50">#80000000</color>
+
+    <color name="neutral_0_persistent">#FFFFFF</color>
+
 </resources>

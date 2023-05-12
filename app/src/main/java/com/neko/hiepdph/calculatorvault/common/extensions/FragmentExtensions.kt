@@ -4,6 +4,7 @@ package com.neko.hiepdph.calculatorvault.common.extensions
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -63,6 +64,7 @@ fun Fragment.navigateToPage(id: Int, navDirections: NavDirections) {
     }
 }
 
+
 fun Fragment.popBackStack(id: Int) {
     viewLifecycleOwner.lifecycleScope.launch {
         lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -91,15 +93,21 @@ fun Fragment.getColor(res: Int): Int {
 fun Fragment.showSnackBar(text: String, type: SnackBarType) {
     val snackBar: Snackbar = Snackbar.make(requireView(), text, Snackbar.LENGTH_SHORT)
     snackBar.setAction("Action", null)
+    val drawable :Drawable?
     when (type) {
-        SnackBarType.FAILED -> snackBar.setBackgroundTint(requireContext().getColor(R.color.theme_01))
-        SnackBarType.SUCCESS -> snackBar.setBackgroundTint(requireContext().getColor(R.color.theme_08))
+        SnackBarType.FAILED -> {
+            drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_success)
+            snackBar.setBackgroundTint(requireContext().getColor(R.color.theme_01))
+        }
+        SnackBarType.SUCCESS -> {
+            drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_fail)
+            snackBar.setBackgroundTint(requireContext().getColor(R.color.theme_08))
+        }
 
     }
     val sbView = snackBar.view
     val textView =
         sbView.findViewById<View>(com.google.android.material.R.id.snackbar_text) as TextView
-    val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
     drawable?.setTint(ContextCompat.getColor(requireContext(), R.color.white))
     textView.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
     textView.compoundDrawablePadding =
