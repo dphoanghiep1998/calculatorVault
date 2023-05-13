@@ -44,6 +44,7 @@ import com.neko.hiepdph.calculatorvault.config.LockType
 import com.neko.hiepdph.calculatorvault.config.LockWhenLeavingApp
 import com.neko.hiepdph.calculatorvault.config.ScreenOffAction
 import com.neko.hiepdph.calculatorvault.databinding.ActivityVaultBinding
+import com.neko.hiepdph.calculatorvault.databinding.LayoutItemNavigationViewBinding
 import com.neko.hiepdph.calculatorvault.shake.ShakeDetector
 import com.neko.hiepdph.calculatorvault.viewmodel.VaultViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -105,51 +106,108 @@ class ActivityVault : AppCompatActivity() {
     }
 
     private fun initNavigationView(){
+       resetBackground(binding.itemVault)
         binding.itemVault.apply {
             imvIcon.setImageResource(R.drawable.ic_vault)
             tvContent.text = getString(R.string.vault)
+            root.clickWithDebounce {
+                findNavController(R.id.nav_host_fragment).navigate(R.id.fragmentVault)
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+                resetBackground(binding.itemVault)
+            }
         }
         binding.itemBrowser.apply {
             imvIcon.setImageResource(R.drawable.ic_browser)
             tvContent.text = getString(R.string.browser)
+            root.clickWithDebounce {
+                findNavController(R.id.nav_host_fragment).navigate(R.id.fragmentBrowser)
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+                resetBackground(binding.itemBrowser)
+            }
         }
         binding.itemNote.apply {
             imvIcon.setImageResource(R.drawable.ic_note)
             tvContent.text = getString(R.string.note)
+            root.clickWithDebounce {
+                findNavController(R.id.nav_host_fragment).navigate(R.id.fragmentNote)
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+                resetBackground(binding.itemNote)
+            }
         }
         binding.itemRecyclerBin.apply {
             imvIcon.setImageResource(R.drawable.ic_delete)
             tvContent.text = getString(R.string.recycle_bin)
+            root.clickWithDebounce {
+                findNavController(R.id.nav_host_fragment).navigate(R.id.fragmentRecycleBin)
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+                resetBackground(binding.itemRecyclerBin)
+            }
         }
         binding.itemSetting.apply {
             imvIcon.setImageResource(R.drawable.ic_setting)
             tvContent.text = getString(R.string.setting)
+            root.clickWithDebounce {
+                findNavController(R.id.nav_host_fragment).navigate(R.id.fragmentSetting)
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+                resetBackground(binding.itemSetting)
+            }
         }
         binding.itemLanguage.apply {
             imvIcon.setImageResource(R.drawable.ic_language)
             tvContent.text = getString(R.string.language)
+            root.clickWithDebounce {
+                findNavController(R.id.nav_host_fragment).navigate(R.id.fragmentLanguage)
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+                resetBackground(binding.itemLanguage)
+            }
         }
         binding.itemTheme.apply {
-            binding.imvIcon.setImageResource(R.drawable.ic_dark_theme)
-            binding.tvContent.text = getString(R.string.dark_theme)
+            binding.iconTheme.setImageResource(R.drawable.ic_dark_theme)
+            binding.contentTheme.text = getString(R.string.dark_theme)
+            binding.switchMenu.isChecked = config.darkMode
+            clickWithDebounce {
+                binding.switchMenu.isChecked = !binding.switchMenu.isChecked
+                changeThemeMode(binding.switchMenu.isChecked)
+            }
+        }
+        binding.switchMenu.setOnClickListener {
+            changeThemeMode(binding.switchMenu.isChecked)
         }
         binding.itemRateApp.apply {
             imvIcon.setImageResource(R.drawable.ic_rate)
             tvContent.text = getString(R.string.rate_app)
+            root.clickWithDebounce {
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+            }
         }
         binding.itemShareApp.apply {
             imvIcon.setImageResource(R.drawable.ic_share)
             tvContent.text = getString(R.string.share_app)
+            root.clickWithDebounce {
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+            }
         }
         binding.itemAboutUs.apply {
             imvIcon.setImageResource(R.drawable.ic_info)
             tvContent.text = getString(R.string.about_us)
+            root.clickWithDebounce {
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+            }
         }
         binding.itemPrivacy.apply {
             imvIcon.setImageResource(R.drawable.ic_security_private)
             tvContent.text = getString(R.string.privacy_policy)
+            root.clickWithDebounce {
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+            }
         }
 
+    }
+
+    private fun resetBackground(item: LayoutItemNavigationViewBinding){
+        val listItem = mutableListOf(binding.itemVault,binding.itemBrowser,binding.itemNote,binding.itemRecyclerBin,binding.itemSetting,binding.itemLanguage)
+        item.root.background = ContextCompat.getDrawable(this,R.drawable.ic_navigation_menu_selected)
+        listItem.filter { it != item }.forEach { it.root.background = null }
     }
 
     private fun changeThemeMode(darkMode: Boolean) {

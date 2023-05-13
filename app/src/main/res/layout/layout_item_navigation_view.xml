@@ -5,7 +5,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:foreground="@drawable/fg_ripple_effect"
         android:paddingHorizontal="@dimen/_12sdp"
-        android:paddingVertical="@dimen/_12sdp"
+        android:paddingVertical="@dimen/_8sdp"
         app:layout_constraintTop_toBottomOf="@+id/ic_logo_menu"
         xmlns:android="http://schemas.android.com/apk/res/android">
 

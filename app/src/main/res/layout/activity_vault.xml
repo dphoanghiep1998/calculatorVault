@@ -125,10 +125,10 @@
                     android:layout_height="wrap_content"
                     android:foreground="@drawable/fg_ripple_effect"
                     android:paddingHorizontal="@dimen/_12sdp"
-                    android:paddingVertical="@dimen/_12sdp">
+                    android:paddingVertical="@dimen/_4sdp">
 
                     <ImageView
-                        android:id="@+id/imv_icon"
+                        android:id="@+id/icon_theme"
                         android:layout_width="@dimen/_20sdp"
                         android:layout_height="@dimen/_20sdp"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -136,7 +136,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/tv_content"
+                        android:id="@+id/content_theme"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/_12sdp"
@@ -144,16 +144,17 @@
                         android:textSize="@dimen/_12sdp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/switch_menu"
-                        app:layout_constraintStart_toEndOf="@+id/imv_icon"
+                        app:layout_constraintStart_toEndOf="@+id/icon_theme"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <androidx.appcompat.widget.SwitchCompat
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         android:id="@+id/switch_menu"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:text=""
                         app:layout_constraintEnd_toEndOf="parent" />
-
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
