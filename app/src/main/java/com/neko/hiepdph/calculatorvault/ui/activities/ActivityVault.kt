@@ -15,19 +15,14 @@ import android.os.Environment
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.Log
-import android.view.Gravity
-import android.view.View
-import android.widget.CheckBox
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
-import androidx.core.view.get
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -91,8 +86,6 @@ class ActivityVault : AppCompatActivity() {
                 }
             }
         }
-
-
     }
 
 
@@ -403,9 +396,21 @@ class ActivityVault : AppCompatActivity() {
                 if (intent!!.action.equals(TelephonyManager.ACTION_SECRET_CODE)) {
                     val code = intent.data?.host
                     if (code == "0101") {
-                        val launchIntent = Intent(context, ActivityVault::class.java)
-                        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        context!!.startActivity(launchIntent)
+                        if (config.unlockAfterDialing) {
+                            if (config.lockType == LockType.PIN) {
+                                val launchIntent = Intent(context, ActivityPinLock::class.java)
+                                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                context!!.startActivity(launchIntent)
+                            } else {
+                                val launchIntent = Intent(context, ActivityPatternLock::class.java)
+                                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                context!!.startActivity(launchIntent)
+                            }
+                        } else {
+                            val launchIntent = Intent(context, ActivityVault::class.java)
+                            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context!!.startActivity(launchIntent)
+                        }
                     }
                 }
             }

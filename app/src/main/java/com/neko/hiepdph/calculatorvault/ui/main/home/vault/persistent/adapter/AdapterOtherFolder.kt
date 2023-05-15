@@ -23,7 +23,9 @@ import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.utils.formatSize
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
+import com.neko.hiepdph.calculatorvault.data.model.VaultFileDirItem
 import com.neko.hiepdph.calculatorvault.databinding.*
 
 class AdapterOtherFolder(
@@ -126,7 +128,7 @@ class AdapterOtherFolder(
                         .apply(requestOptions).error(R.drawable.ic_error_audio).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
-                        showPopupWindow(itemView.context, binding.option,item,onClickItem,onDeleteItem,onOpenDetail)
+//                        showPopupWindow(itemView.context, binding.option,item,onClickItem,onDeleteItem,onOpenDetail)
                     }
                 }
 
@@ -244,10 +246,10 @@ private fun getThumbnail(path: String): Bitmap? {
 
 private fun showPopupWindow(
     context: Context, view: View,
-    item: ListItem,
-    onClickItem: (ListItem) -> Unit,
-    onDeleteItem: (ListItem) -> Unit,
-    onOpenDetail: (ListItem) -> Unit
+    item: FileVaultItem,
+    onClickItem: (FileVaultItem) -> Unit,
+    onDeleteItem: (FileVaultItem) -> Unit,
+    onOpenDetail: (FileVaultItem) -> Unit
 ) {
     val inflater: LayoutInflater =
         (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater?)!!

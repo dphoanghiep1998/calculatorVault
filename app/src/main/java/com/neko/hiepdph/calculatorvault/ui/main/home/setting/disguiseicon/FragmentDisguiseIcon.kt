@@ -1,13 +1,18 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.setting.disguiseicon
 
+import android.content.Context
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
+import android.content.res.Resources
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.PopupWindow
 import androidx.fragment.app.Fragment
+import com.neko.hiepdph.calculatorvault.BuildConfig
 import com.neko.hiepdph.calculatorvault.R
-import com.neko.hiepdph.calculatorvault.changeicon.ChangeIconUtils
+import com.neko.hiepdph.calculatorvault.changeicon.AppIconNameChanger
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
@@ -15,15 +20,18 @@ import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionQ
 import com.neko.hiepdph.calculatorvault.config.ButtonToUnlock
 import com.neko.hiepdph.calculatorvault.config.HideAppIcon
 import com.neko.hiepdph.calculatorvault.databinding.FragmentDisguiseIconBinding
+import com.neko.hiepdph.calculatorvault.databinding.LayoutListIconBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogButtonToUnlock
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
+import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class FragmentDisguiseIcon : Fragment() {
     private var _binding: FragmentDisguiseIconBinding? = null
     private val binding get() = _binding!!
+    private lateinit var popupWindow: PopupWindow
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -34,9 +42,9 @@ class FragmentDisguiseIcon : Fragment() {
     }
 
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initPopupWindow()
         initView()
     }
 
@@ -53,6 +61,9 @@ class FragmentDisguiseIcon : Fragment() {
                     ButtonToUnlock.LONG_PRESS -> getString(R.string.long_press)
                     else -> getString(R.string.none)
                 }
+        }
+        if (key == Constant.KEY_CHANGE_ICON) {
+            binding.containerChangeCalculatorIcon.imvAppIcon.setImageResource(Constant.listIcon[requireContext().config.changeCalculatorIcon])
         }
     }
 
@@ -81,7 +92,7 @@ class FragmentDisguiseIcon : Fragment() {
         }
 
         binding.containerChangeCalculatorIcon.root.clickWithDebounce {
-//            binding.containerChangeCalculatorIcon.imvAppIcon
+            popupWindow.showAsDropDown(binding.containerChangeCalculatorIcon.imvNext)
         }
 
         binding.containerPressButtonToUnlock.root.clickWithDebounce {
@@ -127,9 +138,9 @@ class FragmentDisguiseIcon : Fragment() {
     }
 
     private fun setupView() {
-        if(buildMinVersionQ()){
+        if (buildMinVersionQ()) {
             binding.containerHideAppIcon.root.show()
-        }else{
+        } else {
             binding.containerHideAppIcon.root.hide()
         }
         binding.containerHideAppIcon.apply {
@@ -151,7 +162,7 @@ class FragmentDisguiseIcon : Fragment() {
             imvIcon.setImageResource(R.drawable.ic_calculator_dark)
             tvContent.text = getString(R.string.change_calculator_icon)
             tvContent2.text = getString(R.string.change_caculator_icon_content_2)
-            imvAppIcon.setImageResource(R.drawable.ic_lock_safe)
+            imvAppIcon.setImageResource(Constant.listIcon[requireContext().config.changeCalculatorIcon])
         }
         binding.containerPressButtonToUnlock.apply {
             imvIcon.setImageResource(R.drawable.ic_unlock)
@@ -189,6 +200,52 @@ class FragmentDisguiseIcon : Fragment() {
             switchChange.show()
             switchChange.isChecked = requireContext().config.fingerprintFailure
         }
+    }
+
+    private fun initPopupWindow() {
+        val inflater: LayoutInflater =
+            (requireContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater?)!!
+        val bindingLayout = LayoutListIconBinding.inflate(inflater, null, false)
+
+
+
+        popupWindow = PopupWindow(
+            bindingLayout.root,
+            (Resources.getSystem().displayMetrics.widthPixels * 0.6).toInt(),
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            true
+        )
+
+        val listGroup = mutableListOf(
+            Pair(bindingLayout.icon1, "com.neko.hiepdph.calculatorvault.alias1"),
+            Pair(bindingLayout.icon2, "com.neko.hiepdph.calculatorvault.alias2"),
+            Pair(bindingLayout.icon3, "com.neko.hiepdph.calculatorvault.alias3"),
+            Pair(bindingLayout.icon4, "com.neko.hiepdph.calculatorvault.alias4"),
+            Pair(bindingLayout.icon5, "com.neko.hiepdph.calculatorvault.alias5"),
+            Pair(bindingLayout.icon6, "com.neko.hiepdph.calculatorvault.alias6"),
+            Pair(bindingLayout.icon7, "com.neko.hiepdph.calculatorvault.alias7"),
+            Pair(bindingLayout.icon8, "com.neko.hiepdph.calculatorvault.alias8"),
+            Pair(bindingLayout.icon9, "com.neko.hiepdph.calculatorvault.alias9"),
+            Pair(bindingLayout.icon10, "com.neko.hiepdph.calculatorvault.alias10"),
+            Pair(bindingLayout.icon11, "com.neko.hiepdph.calculatorvault.alias11"),
+            Pair(bindingLayout.icon12, "com.neko.hiepdph.calculatorvault.alias12"),
+        )
+
+        listGroup.forEachIndexed { index, item ->
+            item.first.clickWithDebounce {
+                requireContext().config.changeCalculatorIcon = index
+                val listDisableNames = listGroup.filter { it.second != item.second }.map { it.second }
+                setAppIcon(item.second,listDisableNames)
+                popupWindow.dismiss()
+
+            }
+        }
+
+    }
+
+    private fun setAppIcon(activeName: String, disableNames: List<String>) {
+        AppIconNameChanger.Builder(requireActivity() as ActivityVault).activeName(activeName)
+            .disableNames(disableNames).packageName(BuildConfig.APPLICATION_ID).build().setNow()
     }
 
     override fun onDestroy() {

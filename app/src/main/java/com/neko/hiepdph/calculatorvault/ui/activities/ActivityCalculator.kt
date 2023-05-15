@@ -99,58 +99,74 @@ class ActivityCalculator : AppCompatActivity() {
         }
     }
 
+    private fun checkResult(){
+        if (config.buttonToUnlock == ButtonToUnlock.NONE) {
+            checkSecretKey()
+        }
+    }
+
 
     private fun initCalculator() {
         binding.layoutCalculator.setCalculatorMainCallback(object : CalculatorFunction {
             override fun onPressButton0() {
                 changeLayoutToInput()
                 appendTextToInput("0")
+                checkSecretKey()
+
             }
 
             override fun onPressButton1() {
                 changeLayoutToInput()
                 appendTextToInput("1")
+                checkSecretKey()
             }
 
             override fun onPressButton2() {
                 changeLayoutToInput()
                 appendTextToInput("2")
+                checkSecretKey()
             }
 
             override fun onPressButton3() {
                 changeLayoutToInput()
                 appendTextToInput("3")
-
+                checkSecretKey()
             }
 
             override fun onPressButton4() {
                 changeLayoutToInput()
                 appendTextToInput("4")
+                checkSecretKey()
             }
 
             override fun onPressButton5() {
                 changeLayoutToInput()
                 appendTextToInput("5")
+                checkSecretKey()
             }
 
             override fun onPressButton6() {
                 changeLayoutToInput()
                 appendTextToInput("6")
+                checkSecretKey()
             }
 
             override fun onPressButton7() {
                 changeLayoutToInput()
                 appendTextToInput("7")
+                checkSecretKey()
             }
 
             override fun onPressButton8() {
                 changeLayoutToInput()
                 appendTextToInput("8")
+                checkSecretKey()
             }
 
             override fun onPressButton9() {
                 changeLayoutToInput()
                 appendTextToInput("9")
+                checkSecretKey()
             }
 
             override fun onPressButtonComma() {

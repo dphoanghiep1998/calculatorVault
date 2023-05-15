@@ -22,6 +22,7 @@ import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.openWith
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.ItemMoved
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentPersistentBinding
@@ -85,7 +86,7 @@ class FragmentPersistent : Fragment() {
         initRecyclerView()
         initButton()
         resetAllViewAndData()
-        binding.refreshLayout.setOnRefreshListener{
+        binding.refreshLayout.setOnRefreshListener {
             initData()
         }
     }
@@ -219,15 +220,28 @@ class FragmentPersistent : Fragment() {
     private fun initData() {
         getDataFile()
         viewModel.listItemListPersistent.observe(viewLifecycleOwner) {
-            it?.let {
+            it?.let { listData ->
                 if (args.type != Constant.TYPE_ADD_MORE) {
-                    adapterPersistent?.setData(it, args.type)
+                    lifecycleScope.launch {
+                        val dataItem = mutableListOf<FileVaultItem>()
+                        val listItem = viewModel.appRepo.getAllFile().toMutableList()
+                        for (path in it) {
+                            if (path in listItem.map { item -> item.path }) {
+                                dataItem.add(listItem.find { it.path == path }!!)
+                            }else{
+
+                            }
+                        }
+                        adapterPersistent?.setData(dataItem, args.type)
+                    }
+
+
                 } else {
-                    adapterOtherFolder?.setData(it)
+                    adapterOtherFolder?.setData(dataItem)
                 }
                 sizeList = it.size
                 binding.loading.hide()
-                if (it.isNotEmpty()) {
+                if (listData.isNotEmpty()) {
                     binding.tvEmpty.hide()
                 } else {
                     adapterPersistent?.changeToNormalView()

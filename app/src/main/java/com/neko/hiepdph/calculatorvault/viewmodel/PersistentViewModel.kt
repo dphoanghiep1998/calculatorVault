@@ -6,17 +6,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
 import com.neko.hiepdph.calculatorvault.common.utils.SelfCleaningLiveData
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
+import com.neko.hiepdph.calculatorvault.data.repositories.AppRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PersistentViewModel @Inject constructor() : ViewModel() {
-    private val _listItemListPersistent = SelfCleaningLiveData<MutableList<ListItem>>()
-    val listItemListPersistent: LiveData<MutableList<ListItem>> get() = _listItemListPersistent
-    fun setListItemPersistentData(list: MutableList<ListItem>) {
+class PersistentViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel() {
+    private val _listItemListPersistent = SelfCleaningLiveData<MutableList<String>>()
+    val listItemListPersistent: LiveData<MutableList<String>> get() = _listItemListPersistent
+    fun setListItemPersistentData(list: MutableList<String>) {
         _listItemListPersistent.postValue(list)
     }
 
@@ -70,6 +72,10 @@ class PersistentViewModel @Inject constructor() : ViewModel() {
             setListItemPersistentData(listFileChild)
         }
     }
+
+//    fun getVaultItem():MutableList<FileVaultItem>{
+//        return appRepo.getAllFile()
+//    }
 
 
 }

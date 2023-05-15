@@ -9,6 +9,7 @@ import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionQ
 import com.neko.hiepdph.calculatorvault.data.model.ItemMoved
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import java.io.File
+import java.util.Locale
 
 class MainConfig(val context: Context) {
     companion object {
@@ -187,6 +188,10 @@ class MainConfig(val context: Context) {
     var secretKey: String
         get() = AppSharePreference.getInstance(context).getSecretKey(Constant.SECRET_KEY)
         set(secretKey) = AppSharePreference.getInstance(context).setSecretKey(secretKey)
+
+    var language: String
+        get() = AppSharePreference.getInstance(context).getSavedLanguage(Locale.getDefault().language)
+        set(language) = AppSharePreference.getInstance(context).saveLanguage(language)
 
     var shakeGravity: Float
         get() = AppSharePreference.getInstance(context).getShakeGravity(2.0f)

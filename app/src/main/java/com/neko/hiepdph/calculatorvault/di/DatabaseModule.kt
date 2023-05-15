@@ -6,6 +6,7 @@ import androidx.room.Room
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.data.database.AppDatabase
 import com.neko.hiepdph.calculatorvault.data.database.dao.BookmarkDao
+import com.neko.hiepdph.calculatorvault.data.database.dao.FileVaultItemDao
 import com.neko.hiepdph.calculatorvault.data.database.dao.NoteDao
 import dagger.Module
 import dagger.Provides
@@ -31,6 +32,11 @@ class DatabaseModule {
     @Provides
     fun provideNoteDao(appDatabase: AppDatabase): NoteDao {
         return appDatabase.noteDao
+    }
+
+    @Provides
+    fun provideFileVaultItemDao(appDatabase: AppDatabase): FileVaultItemDao {
+        return appDatabase.fileVaultItemDao
     }
 
 

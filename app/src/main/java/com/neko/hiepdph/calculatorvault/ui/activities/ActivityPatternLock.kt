@@ -10,6 +10,7 @@ import android.view.animation.Animation.AnimationListener
 import android.view.animation.TranslateAnimation
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.biometric.BiometricConfig.Companion.biometricConfig
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
@@ -51,10 +52,19 @@ class ActivityPatternLock : AppCompatActivity() {
                 ownerFragmentActivity = this@ActivityPatternLock
                 authenticateSuccess = {
                     config.isShowLock = true
-                    Log.d("TAG", "authenticateSuccess: ")
+                    (application as CustomApplication).authority = true
+                    startActivity(
+                        Intent(this@ActivityPatternLock, ActivityVault::class.java)
+                    )
+                    finish()
                 }
                 authenticateFailed = {
-                    Log.d("TAG", "authenticateFailed: ")
+                    if (config.photoIntruder && !takePhotoIntruder) {
+                        takePicture()
+                    }
+                    if(config.fingerprintFailure){
+                        finishAffinity()
+                    }
                 }
             }
             biometric.showPrompt()

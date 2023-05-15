@@ -10,17 +10,15 @@ open class FileDirItem(
     var path: String,
     val originalPath: String,
     val name: String = "",
-    var isDirectory: Boolean = false,
-    var children: Int = 0,
     var size: Long = 0L,
     var modified: Long = 0L,
     var mediaStoreId: Long = 0L
 ) {
 
     override fun toString() =
-        "FileDirItem(path=$path,originalPath=$originalPath, name=$name, isDirectory=$isDirectory, children=$children, size=$size, modified=$modified, mediaStoreId=$mediaStoreId)"
+        "FileDirItem(path=$path,originalPath=$originalPath, name=$name,  size=$size, modified=$modified, mediaStoreId=$mediaStoreId)"
 
-    fun getExtension() = if (isDirectory) name else path.substringAfterLast(".", "")
+    fun getExtension() = path.substringAfterLast(".", "")
 
     fun getParentPath() = path.getParentPath()
 

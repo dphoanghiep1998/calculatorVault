@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,6 +27,7 @@ class FragmentIntruder : Fragment() {
     private lateinit var binding: FragmentIntruderBinding
     private var adapter: AdapterIntruder? = null
     private val viewModel by viewModels<IntruderViewModel>()
+    private var action: (() -> Unit)? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -104,15 +104,12 @@ class FragmentIntruder : Fragment() {
     }
 
     private fun checkPermission(action: () -> Unit) {
+        this.action = action
         if (requireContext().checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            Log.d("TAG", "checkPermission: ")
-
             if (ActivityCompat.shouldShowRequestPermissionRationale(
                     requireActivity(), Manifest.permission.CAMERA
                 )
             ) {
-                Log.d("TAG", "checkPermission1: ")
-
                 checkCameraActivityLauncher(
                     action, Intent(
                         Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
@@ -120,17 +117,12 @@ class FragmentIntruder : Fragment() {
                     )
                 )
             } else {
-                Log.d("TAG", "checkPermission2: ")
-//                launcher.launch(Manifest.permission.CAMERA)
-                checkCameraPermissionLauncher(action,Manifest.permission.CAMERA)
+                launcher.launch(Manifest.permission.CAMERA)
 
             }
         } else {
-            Log.d("TAG", "checkPermission24234: ")
-
             action()
         }
-
     }
 
 
@@ -142,16 +134,10 @@ class FragmentIntruder : Fragment() {
         }.launch(intent)
     }
 
-    private fun checkCameraPermissionLauncher(action: () -> Unit, permission: String) {
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) {
-            if (requireContext().checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                action()
-            }
-        }.launch(permission)
-    }
-    private val launcher =  registerForActivityResult(ActivityResultContracts.RequestPermission()) {
-        if (requireContext().checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
 
+    private val launcher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+        if (requireContext().checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            action?.invoke()
         }
     }
 }

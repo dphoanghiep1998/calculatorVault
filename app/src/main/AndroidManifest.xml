@@ -57,6 +57,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
@@ -72,30 +73,165 @@
             android:exported="false" />
 
         <activity
-            android:excludeFromRecents="false"
             android:name=".ui.activities.ActivityVault"
+            android:excludeFromRecents="false"
             android:exported="false">
 
         </activity>
 
 
-
         <activity
-            android:excludeFromRecents="false"
             android:name=".ui.activities.ActivityCalculator"
+            android:excludeFromRecents="false"
             android:exported="true">
-            <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
+            <!--            <intent-filter>-->
+            <!--                <category android:name="android.intent.category.LAUNCHER" />-->
+            <!--                <action android:name="android.intent.action.MAIN" />-->
+            <!--            </intent-filter>-->
         </activity>
 
-        <!--        <service android:name=".service.MediaPlayerService"-->
-        <!--            android:exported="true">-->
-        <!--            <intent-filter>-->
-        <!--                <action android:name="android.media.browse.MediaBrowserService" />-->
-        <!--            </intent-filter>-->
-        <!--        </service>-->
+        <activity-alias
+            android:name="com.neko.hiepdph.calculatorvault.alias1"
+            android:enabled="true"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:icon="@drawable/ic_icon_app_1"
+
+            android:targetActivity=".ui.activities.ActivityVault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name="com.neko.hiepdph.calculatorvault.alias2"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_icon_app_2"
+
+            android:targetActivity=".ui.activities.ActivityVault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name="com.neko.hiepdph.calculatorvault.alias3"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_icon_app_3"
+
+            android:targetActivity=".ui.activities.ActivityVault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name="com.neko.hiepdph.calculatorvault.alias4"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_icon_app_4"
+            android:targetActivity=".ui.activities.ActivityVault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name="com.neko.hiepdph.calculatorvault.alias5"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_icon_app_5"
+            android:targetActivity=".ui.activities.ActivityVault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name="com.neko.hiepdph.calculatorvault.alias6"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_icon_app_6"
+            android:targetActivity=".ui.activities.ActivityVault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name="com.neko.hiepdph.calculatorvault.alias7"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_icon_app_7"
+
+            android:targetActivity=".ui.activities.ActivityVault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name="com.neko.hiepdph.calculatorvault.alias8"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_icon_app_8"
+
+            android:targetActivity=".ui.activities.ActivityVault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name="com.neko.hiepdph.calculatorvault.alias9"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_icon_app_9"
+
+            android:targetActivity=".ui.activities.ActivityVault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name="com.neko.hiepdph.calculatorvault.alias10"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_icon_app_10"
+
+            android:targetActivity=".ui.activities.ActivityVault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name="com.neko.hiepdph.calculatorvault.alias11"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_icon_app_11"
+
+            android:targetActivity=".ui.activities.ActivityVault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name="com.neko.hiepdph.calculatorvault.alias12"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_icon_app_12"
+            android:targetActivity=".ui.activities.ActivityVault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
     </application>
 
 </manifest>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_neu01_corner_8"
+    android:padding="@dimen/_12sdp">
+
+    <ImageView
+        android:id="@+id/icon_1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="@dimen/_6sdp"
+        android:src="@drawable/ic_icon_app_1"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/icon_2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/icon_2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/_6sdp"
+        android:src="@drawable/ic_icon_app_2"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/icon_3"
+        app:layout_constraintStart_toEndOf="@id/icon_1"
+        app:layout_constraintTop_toTopOf="@id/icon_1" />
+
+    <ImageView
+        android:id="@+id/icon_3"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/_6sdp"
+        android:src="@drawable/ic_icon_app_3"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/icon_4"
+        app:layout_constraintStart_toEndOf="@id/icon_2"
+        app:layout_constraintTop_toTopOf="@id/icon_1" />
+
+    <ImageView
+        android:id="@+id/icon_4"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/_6sdp"
+        android:src="@drawable/ic_icon_app_4"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/icon_3"
+        app:layout_constraintTop_toTopOf="@id/icon_1" />
+
+    <ImageView
+        android:id="@+id/icon_5"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginEnd="@dimen/_6sdp"
+        android:src="@drawable/ic_icon_app_5"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/icon_6"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/icon_1" />
+
+    <ImageView
+        android:id="@+id/icon_6"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/_6sdp"
+        android:src="@drawable/ic_icon_app_6"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/icon_7"
+        app:layout_constraintStart_toEndOf="@id/icon_5"
+        app:layout_constraintTop_toTopOf="@id/icon_5" />
+
+    <ImageView
+        android:id="@+id/icon_7"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/_6sdp"
+        android:src="@drawable/ic_icon_app_7"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/icon_8"
+        app:layout_constraintStart_toEndOf="@id/icon_6"
+        app:layout_constraintTop_toTopOf="@id/icon_5" />
+
+    <ImageView
+        android:id="@+id/icon_8"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/_6sdp"
+        android:src="@drawable/ic_icon_app_8"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/icon_7"
+        app:layout_constraintTop_toTopOf="@id/icon_5" />
+
+    <ImageView
+        android:id="@+id/icon_9"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginEnd="@dimen/_6sdp"
+        android:src="@drawable/ic_icon_app_9"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/icon_10"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/icon_5" />
+
+    <ImageView
+        android:id="@+id/icon_10"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/_6sdp"
+        android:src="@drawable/ic_icon_app_10"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/icon_11"
+        app:layout_constraintStart_toEndOf="@id/icon_9"
+        app:layout_constraintTop_toTopOf="@id/icon_9" />
+
+    <ImageView
+        android:id="@+id/icon_11"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/_6sdp"
+        android:src="@drawable/ic_icon_app_11"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/icon_12"
+        app:layout_constraintStart_toEndOf="@id/icon_10"
+        app:layout_constraintTop_toTopOf="@id/icon_9" />
+
+    <ImageView
+        android:id="@+id/icon_12"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/_6sdp"
+        android:src="@drawable/ic_icon_app_12"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/icon_11"
+        app:layout_constraintTop_toTopOf="@id/icon_9" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -23,25 +23,26 @@ import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.utils.formatSize
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.*
 import com.neko.hiepdph.calculatorvault.databinding.*
 
 
 class AdapterPersistent(
-    private val onClickItem: (ListItem) -> Unit,
-    private val onLongClickItem: (List<ListItem>) -> Unit,
-    private val onEditItem: (List<ListItem>) -> Unit,
-    private val onSelectAll: (List<ListItem>) -> Unit,
+    private val onClickItem: (FileVaultItem) -> Unit,
+    private val onLongClickItem: (List<FileVaultItem>) -> Unit,
+    private val onEditItem: (List<FileVaultItem>) -> Unit,
+    private val onSelectAll: (List<FileVaultItem>) -> Unit,
     private val onUnSelect: () -> Unit,
-    private val onOpenDetail: (ListItem) -> Unit,
-    private val onDeleteItem: (ListItem) -> Unit
+    private val onOpenDetail: (FileVaultItem) -> Unit,
+    private val onDeleteItem: (FileVaultItem) -> Unit
 
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private var listItem = mutableListOf<ListItem>()
+    private var listItem = mutableListOf<FileVaultItem>()
     private var mType: String = Constant.TYPE_PICTURE
-    private var listOfItemSelected = mutableSetOf<ListItem>()
+    private var listOfItemSelected = mutableSetOf<FileVaultItem>()
 
-    fun setData(listDataItem: List<ListItem>, type: String) {
+    fun setData(listDataItem: List<FileVaultItem>, type: String) {
         mType = type
         listItem = listDataItem.toMutableList()
         notifyDataSetChanged()
@@ -144,7 +145,7 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(item.mPath)
+                    Glide.with(itemView.context).load(item.path)
                         .placeholder(R.drawable.ic_error_image).apply(requestOptions)
                         .into(binding.imvThumb)
 
@@ -195,7 +196,7 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
+                    Glide.with(itemView.context).load(item.path).apply(requestOptions)
                         .error(R.drawable.ic_error_video).into(binding.imvThumb)
 
                     binding.checkBox.isChecked = item in listOfItemSelected
@@ -205,7 +206,7 @@ class AdapterPersistent(
                     } else {
                         binding.checkBox.hide()
                     }
-                    binding.tvDuration.text = item.getDuration(itemView.context).toString()
+                    binding.tvDuration.text = item.durationLength.toString()
 
                     binding.root.setOnLongClickListener {
                         if (editMode) {
@@ -248,7 +249,7 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).asBitmap().load(item.thumb).apply(requestOptions)
+                    Glide.with(itemView.context).asBitmap().load(item.path).apply(requestOptions)
                         .error(R.drawable.ic_error_audio).into(binding.imvThumb)
                     binding.checkBox.isChecked = item in listOfItemSelected
 
@@ -259,9 +260,9 @@ class AdapterPersistent(
                         binding.option.show()
                         binding.checkBox.hide()
                     }
-                    binding.tvNameAudio.text = item.mName
+                    binding.tvNameAudio.text = item.name
                     binding.tvDurationAuthor.text =
-                        item.getDuration(itemView.context).toString() + " - " + item.getArtist(
+                        item.durationLength.toString() + " - " + item.artist(
                             itemView.context
                         )
                     binding.option.clickWithDebounce {
@@ -461,10 +462,10 @@ private fun getThumbnail(path: String): Bitmap? {
 
 private fun showPopupWindow(
     context: Context, view: View,
-    item: ListItem,
-    onClickItem: (ListItem) -> Unit,
-    onDeleteItem: (ListItem) -> Unit,
-    onOpenDetail: (ListItem) -> Unit
+    item: FileVaultItem,
+    onClickItem: (FileVaultItem) -> Unit,
+    onDeleteItem: (FileVaultItem) -> Unit,
+    onOpenDetail: (FileVaultItem) -> Unit
 ) {
     val inflater: LayoutInflater =
         (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater?)!!

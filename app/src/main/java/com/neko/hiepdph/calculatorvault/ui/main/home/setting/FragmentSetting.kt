@@ -1,15 +1,21 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.setting
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.*
@@ -24,6 +30,7 @@ class FragmentSetting : Fragment() {
 
     private var _binding: FragmentSettingBinding? = null
     private val binding get() = _binding!!
+    private var action: (() -> Unit)? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -52,7 +59,6 @@ class FragmentSetting : Fragment() {
             Pair(R.drawable.ic_retrieve_lost_file, getString(R.string.retrive_lost_files)),
             Pair(R.drawable.ic_setting_back_up, getString(R.string.backup)),
             Pair(R.drawable.ic_device_migration, getString(R.string.device_migration)),
-            Pair(R.drawable.ic_setting_language, getString(R.string.change_language)),
             Pair(R.drawable.ic_setting_clear_cache, getString(R.string.clear_cache)),
             Pair(
                 R.drawable.ic_setting_prevent_lost_file_help,
@@ -70,7 +76,7 @@ class FragmentSetting : Fragment() {
             binding.itemRetrieveLostFiles,
             binding.itemBackup,
             binding.itemDeviceMigration,
-            binding.itemLanguage,
+//            binding.itemLanguage,
             binding.itemClearCache,
             binding.itemPreventingLostFileHelp,
             binding.itemFaq,
@@ -79,7 +85,7 @@ class FragmentSetting : Fragment() {
         groupView.forEachIndexed { index, item ->
             item.imvIcon.setBackgroundResource(groupData[index].first)
             item.tvContent.text = groupData[index].second
-            if (item == binding.itemAdvanced || item == binding.itemDeviceMigration || item == binding.itemLanguage || item == binding.itemFaq) {
+            if (item == binding.itemAdvanced || item == binding.itemDeviceMigration || item == binding.itemFaq) {
                 item.line.hide()
             }
         }
@@ -111,7 +117,9 @@ class FragmentSetting : Fragment() {
         }
         binding.itemPrivateCamera.root.clickWithDebounce {
             if (buildMinVersionO()) {
-                createShortcutsCamera()
+                checkPermission(action = {
+                    createShortcutsCamera()
+                })
             }
         }
         binding.itemGeneral.root.clickWithDebounce {
@@ -129,6 +137,7 @@ class FragmentSetting : Fragment() {
         binding.itemClearCache.root.clickWithDebounce {
             clearCache()
         }
+
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -145,6 +154,44 @@ class FragmentSetting : Fragment() {
                 ).setIntent(intent).build()
 
             shortcutManager.requestPinShortcut(shortcut, null)
+        }
+    }
+
+    private fun checkPermission(action: () -> Unit) {
+        this.action = action
+        if (requireContext().checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(), Manifest.permission.CAMERA
+                )
+            ) {
+                checkCameraActivityLauncher(
+                    action, Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", requireActivity().packageName, null)
+                    )
+                )
+            } else {
+                launcher.launch(Manifest.permission.CAMERA)
+
+            }
+        } else {
+            action()
+        }
+    }
+
+
+    private fun checkCameraActivityLauncher(action: () -> Unit, intent: Intent) {
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (requireContext().checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                action()
+            }
+        }.launch(intent)
+    }
+
+
+    private val launcher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+        if (requireContext().checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            action?.invoke()
         }
     }
 

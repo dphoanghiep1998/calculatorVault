@@ -31,7 +31,7 @@ object MediaStoreUtils {
             MediaStore.Files.FileColumns.DISPLAY_NAME,
             MediaStore.Files.FileColumns.SIZE,
             MediaStore.Files.FileColumns.DATE_MODIFIED,
-            MediaStore.Files.FileColumns._ID
+            MediaStore.Files.FileColumns._ID,
         )
         val folders = mutableListOf<Pair<String, GroupItem>>()
 
@@ -123,19 +123,18 @@ object MediaStoreUtils {
                                             )
                                         )
                                     )
-                                } else
-                                    if (!folders.any { it.second?.folderPath == parentFolderPath }) {
-                                        folders.add(
-                                            Pair(
-                                                parentFolder, GroupItem(
-                                                    parentFolder,
-                                                    Constant.TYPE_VIDEOS,
-                                                    mutableListOf(),
-                                                    File(path).parentFile?.path ?: ""
-                                                )
+                                } else if (!folders.any { it.second?.folderPath == parentFolderPath }) {
+                                    folders.add(
+                                        Pair(
+                                            parentFolder, GroupItem(
+                                                parentFolder,
+                                                Constant.TYPE_VIDEOS,
+                                                mutableListOf(),
+                                                File(path).parentFile?.path ?: ""
                                             )
                                         )
-                                    }
+                                    )
+                                }
 
                                 if (path.isNotEmpty()) {
                                     folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataList?.add(
@@ -212,51 +211,35 @@ object MediaStoreUtils {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_PDF)
                                         return@queryCursor
                                     }
-                                    if (name.lowercase(Locale.ROOT)
-                                            .endsWith(Constant.TYPE_CSV)
-                                    ) {
+                                    if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_CSV)) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_CSV)
                                         return@queryCursor
                                     }
-                                    if (name.lowercase(Locale.ROOT)
-                                            .endsWith(Constant.TYPE_PPT)
-                                    ) {
+                                    if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPT)) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_PPT)
                                         return@queryCursor
                                     }
-                                    if (name.lowercase(Locale.ROOT)
-                                            .endsWith(Constant.TYPE_PPT)
-                                    ) {
+                                    if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPT)) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_PPTX)
                                         return@queryCursor
                                     }
-                                    if (name.lowercase(Locale.ROOT)
-                                            .endsWith(Constant.TYPE_TEXT)
-                                    ) {
+                                    if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_TEXT)) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_TEXT)
                                         return@queryCursor
                                     }
-                                    if (name.lowercase(Locale.ROOT)
-                                            .endsWith(Constant.TYPE_WORD)
-                                    ) {
+                                    if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORD)) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_WORD)
                                         return@queryCursor
                                     }
-                                    if (name.lowercase(Locale.ROOT)
-                                            .endsWith(Constant.TYPE_EXCEL)
-                                    ) {
+                                    if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_EXCEL)) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_EXCEL)
                                         return@queryCursor
                                     }
-                                    if (name.lowercase(Locale.ROOT)
-                                            .endsWith(Constant.TYPE_WORDX)
-                                    ) {
+                                    if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORDX)) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_WORD)
                                         return@queryCursor
                                     }
-                                    if (name.lowercase(Locale.ROOT)
-                                            .endsWith(Constant.TYPE_ZIP)
-                                    ) {
+                                    if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_ZIP)) {
                                         folders[0].second?.dataTypeList?.add(Constant.TYPE_ZIP)
                                         return@queryCursor
                                     }
@@ -323,10 +306,9 @@ object MediaStoreUtils {
                             childPath,
                             File(childPath).parentFile?.path.toString(),
                             name,
-                            false,
-                            0,
                             size,
                             modified,
+                            Calendar.getInstance().timeInMillis,
                             Constant.TYPE_PICTURE
                         )
                     )
@@ -370,11 +352,12 @@ object MediaStoreUtils {
                             childPath,
                             path,
                             name,
-                            false,
-                            0,
                             size,
                             modified,
-                            Constant.TYPE_PICTURE
+                            Calendar.getInstance().timeInMillis,
+                            getImageResolution(childPath),
+                            0,
+                            Constant.TYPE_PICTURE,
                         )
                     )
                 }
@@ -408,7 +391,6 @@ object MediaStoreUtils {
                 val modified = cursor.getLongValue(MediaStore.Video.Media.DATE_MODIFIED)
                 val name = cursor.getStringValue(MediaStore.Video.Media.DISPLAY_NAME)
 
-                Log.d("TAG", "getChildVideoFromPath: " + childPath)
                 if (childPath.isNotBlank()) {
                     listVideoChild.add(
                         ListItem(
@@ -416,10 +398,9 @@ object MediaStoreUtils {
                             childPath,
                             path,
                             name,
-                            false,
-                            0,
                             size,
                             modified,
+                            Calendar.getInstance().timeInMillis,
                             Constant.TYPE_VIDEOS
                         )
                     )
@@ -465,10 +446,11 @@ object MediaStoreUtils {
                             childPath,
                             path,
                             name,
-                            false,
-                            0,
                             size,
                             modified,
+                            Calendar.getInstance().timeInMillis,
+                            "",
+                            getDuration(context, childPath),
                             TYPE_AUDIOS,
                             thumb = thumb
                         )
@@ -518,10 +500,11 @@ object MediaStoreUtils {
                                             childPath,
                                             File(childPath).parentFile?.path ?: "",
                                             name,
-                                            false,
-                                            0,
                                             size,
                                             modified,
+                                            Calendar.getInstance().timeInMillis,
+                                            "",
+                                            0,
                                             Constant.TYPE_FILE,
                                             Constant.TYPE_PDF
                                         )
@@ -540,10 +523,11 @@ object MediaStoreUtils {
                                             childPath,
                                             File(childPath).parentFile?.path ?: "",
                                             name,
-                                            false,
-                                            0,
                                             size,
                                             modified,
+                                            Calendar.getInstance().timeInMillis,
+                                            "",
+                                            0,
                                             Constant.TYPE_FILE,
                                             Constant.TYPE_PPT
                                         )
@@ -560,12 +544,12 @@ object MediaStoreUtils {
                                             id,
                                             childPath,
                                             File(childPath).parentFile?.path ?: "",
-
                                             name,
-                                            false,
-                                            0,
                                             size,
                                             modified,
+                                            Calendar.getInstance().timeInMillis,
+                                            "",
+                                            0,
                                             Constant.TYPE_FILE,
                                             Constant.TYPE_WORD
                                         )
@@ -579,12 +563,12 @@ object MediaStoreUtils {
                                             id,
                                             childPath,
                                             File(childPath).parentFile?.path ?: "",
-
                                             name,
-                                            false,
-                                            0,
                                             size,
                                             modified,
+                                            Calendar.getInstance().timeInMillis,
+                                            "",
+                                            0,
                                             Constant.TYPE_FILE,
                                             Constant.TYPE_EXCEL
                                         )
@@ -598,12 +582,12 @@ object MediaStoreUtils {
                                             id,
                                             childPath,
                                             File(childPath).parentFile?.path ?: "",
-
                                             name,
-                                            false,
-                                            0,
                                             size,
                                             modified,
+                                            Calendar.getInstance().timeInMillis,
+                                            "",
+                                            0,
                                             Constant.TYPE_FILE,
                                             Constant.TYPE_CSV
                                         )
@@ -617,12 +601,12 @@ object MediaStoreUtils {
                                             id,
                                             childPath,
                                             File(childPath).parentFile?.path ?: "",
-
                                             name,
-                                            false,
-                                            0,
                                             size,
                                             modified,
+                                            Calendar.getInstance().timeInMillis,
+                                            "",
+                                            0,
                                             Constant.TYPE_FILE,
                                             Constant.TYPE_TEXT
                                         )
@@ -636,12 +620,12 @@ object MediaStoreUtils {
                                             id,
                                             childPath,
                                             File(childPath).parentFile?.path ?: "",
-
                                             name,
-                                            false,
-                                            0,
                                             size,
                                             modified,
+                                            Calendar.getInstance().timeInMillis,
+                                            "",
+                                            0,
                                             Constant.TYPE_FILE,
                                             Constant.TYPE_ZIP
                                         )
@@ -649,31 +633,32 @@ object MediaStoreUtils {
                                 }
                             }
                             else -> {
-                                if (!name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF) &&
-                                    !name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPTX) &&
-                                    !name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPT) &&
-                                    !name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_ZIP) &&
-                                    !name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_TEXT) &&
-                                    !name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_CSV) &&
-                                    !name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_EXCEL) &&
-                                    !name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORD) &&
-                                    !name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORDX)
-                                        ) {
+                                if (!name.lowercase(Locale.ROOT)
+                                        .endsWith(Constant.TYPE_PDF) && !name.lowercase(Locale.ROOT)
+                                        .endsWith(Constant.TYPE_PPTX) && !name.lowercase(Locale.ROOT)
+                                        .endsWith(Constant.TYPE_PPT) && !name.lowercase(Locale.ROOT)
+                                        .endsWith(Constant.TYPE_ZIP) && !name.lowercase(Locale.ROOT)
+                                        .endsWith(Constant.TYPE_TEXT) && !name.lowercase(Locale.ROOT)
+                                        .endsWith(Constant.TYPE_CSV) && !name.lowercase(Locale.ROOT)
+                                        .endsWith(Constant.TYPE_EXCEL) && !name.lowercase(Locale.ROOT)
+                                        .endsWith(Constant.TYPE_WORD) && !name.lowercase(Locale.ROOT)
+                                        .endsWith(Constant.TYPE_WORDX)
+                                ) {
                                     listFileChild.add(
                                         ListItem(
                                             id,
                                             childPath,
                                             File(childPath).parentFile?.path ?: "",
                                             name,
-                                            false,
-                                            0,
                                             size,
                                             modified,
+                                            Calendar.getInstance().timeInMillis,
+                                            "",
+                                            0,
                                             Constant.TYPE_FILE,
                                             Constant.TYPE_OTHER
                                         )
                                     )
-
                                 }
                             }
                         }
@@ -688,6 +673,11 @@ object MediaStoreUtils {
 
     }
 
+    fun getImageResolution(imagePath: String): String {
+        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(imagePath, options)
+        return "${options.outWidth}x${options.outHeight}"
+    }
 
     private fun getDuration(context: Context, path: String): Int {
         val mp = MediaPlayer.create(context, Uri.parse(path))

@@ -1,5 +1,7 @@
 package com.neko.hiepdph.calculatorvault.common
 
+import com.neko.hiepdph.calculatorvault.R
+
 
 object Constant {
     const val KEY_DARK_MODE = "KEY_DARK_MODE"
@@ -171,7 +173,36 @@ object Constant {
         "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url="
     const val SUFFIX_URL_ICON = "&size=256"
 
-    const val PRIVACY_FOLDER_NAME = ".privacy_neko_$SECRET_KEY"
+    const val PRIVACY_FOLDER_NAME = "privacy_neko_$SECRET_KEY"
+
+     val listIcon = mutableListOf(
+        R.drawable.ic_icon_app_1,
+        R.drawable.ic_icon_app_2,
+        R.drawable.ic_icon_app_3,
+        R.drawable.ic_icon_app_4,
+        R.drawable.ic_icon_app_5,
+        R.drawable.ic_icon_app_6,
+        R.drawable.ic_icon_app_7,
+        R.drawable.ic_icon_app_8,
+        R.drawable.ic_icon_app_9,
+        R.drawable.ic_icon_app_10,
+        R.drawable.ic_icon_app_11
+    )
+
+    val listGroup = mutableListOf(
+        "com.neko.hiepdph.calculatorvault.alias1",
+        "com.neko.hiepdph.calculatorvault.alias2",
+        "com.neko.hiepdph.calculatorvault.alias3",
+        "com.neko.hiepdph.calculatorvault.alias4",
+        "com.neko.hiepdph.calculatorvault.alias5",
+        "com.neko.hiepdph.calculatorvault.alias6",
+        "com.neko.hiepdph.calculatorvault.alias7",
+        "com.neko.hiepdph.calculatorvault.alias8",
+        "com.neko.hiepdph.calculatorvault.alias9",
+        "com.neko.hiepdph.calculatorvault.alias10",
+        "com.neko.hiepdph.calculatorvault.alias11",
+        "com.neko.hiepdph.calculatorvault.alias12",
+    )
 
 
 }

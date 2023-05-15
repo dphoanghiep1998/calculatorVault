@@ -1,18 +1,19 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.setting.disguiseicon.hideappicon
 
-import android.content.ComponentName
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.neko.hiepdph.calculatorvault.BuildConfig
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.common.Constant.listGroup
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.databinding.FragmentHideAppIconBinding
+import com.neko.hiepdph.calculatorvault.hideapp.HideAppIcon
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -46,9 +47,9 @@ class FragmentHideAppIcon : Fragment() {
                 !binding.containerHideAppIcon.switchChange.isChecked
             requireContext().config.hideAppIcon =
                 binding.containerHideAppIcon.switchChange.isChecked
-            if(requireActivity().config.hideAppIcon){
+            if (requireActivity().config.hideAppIcon) {
                 hideAppIcon()
-            }else{
+            } else {
                 showAppIcon()
             }
         }
@@ -56,34 +57,24 @@ class FragmentHideAppIcon : Fragment() {
         binding.containerHideAppIcon.switchChange.setOnClickListener {
             requireContext().config.hideAppIcon =
                 binding.containerHideAppIcon.switchChange.isChecked
-            if(requireActivity().config.hideAppIcon){
+            if (requireActivity().config.hideAppIcon) {
                 hideAppIcon()
-            }else{
+            } else {
                 showAppIcon()
             }
         }
     }
 
     private fun hideAppIcon() {
-        val p: PackageManager = requireActivity().packageManager
-        val componentName = ComponentName(
-            requireActivity(), ActivityVault::class.java
-        )
-        p.setComponentEnabledSetting(
-            componentName,
-            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-            PackageManager.DONT_KILL_APP
-        );
+        HideAppIcon.Builder(requireActivity() as ActivityVault)
+            .activeName(listGroup[requireContext().config.changeCalculatorIcon])
+            .packageName(BuildConfig.APPLICATION_ID).build().hideIcon()
     }
 
     private fun showAppIcon() {
-        val p: PackageManager = requireActivity().packageManager
-        val componentName = ComponentName(requireActivity(), ActivityVault::class.java)
-        p.setComponentEnabledSetting(
-            componentName,
-            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-            PackageManager.DONT_KILL_APP
-        )
+        HideAppIcon.Builder(requireActivity() as ActivityVault)
+            .activeName(listGroup[requireContext().config.changeCalculatorIcon])
+            .packageName(BuildConfig.APPLICATION_ID).build().showIcon()
     }
 
     private fun setupView() {

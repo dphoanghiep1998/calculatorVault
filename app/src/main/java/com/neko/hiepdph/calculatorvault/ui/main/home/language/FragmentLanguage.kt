@@ -1,64 +1,101 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.language
 
 import android.os.Bundle
+import android.util.Log
+import android.view.*
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import androidx.lifecycle.Lifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.changeBackPressCallBack
+import com.neko.hiepdph.calculatorvault.common.extensions.config
+import com.neko.hiepdph.calculatorvault.common.utils.supportDisplayLang
+import com.neko.hiepdph.calculatorvault.common.utils.supportedLanguages
+import com.neko.hiepdph.calculatorvault.databinding.FragmentLanguageBinding
+import java.util.*
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [FragmentLanguage.newInstance] factory method to
- * create an instance of this fragment.
- */
 class FragmentLanguage : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var binding: FragmentLanguageBinding
+    private var adapterLanguage: AdapterLanguage? = null
+    private var currentLanguage = Locale.getDefault().language
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
+
+        binding = FragmentLanguageBinding.inflate(inflater, container, false)
         changeBackPressCallBack {
             requireActivity().finishAffinity()
         }
-        return inflater.inflate(R.layout.fragment_language, container, false)
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment FragmentLanguage.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            FragmentLanguage().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initToolBar()
+        initView()
+    }
+
+    private fun initView() {
+        initRecyclerView()
+    }
+    private fun initRecyclerView() {
+        val mLanguageList: MutableList<Any> = supportedLanguages().toMutableList()
+        val mDisplayLangList: MutableList<Any> = supportDisplayLang().toMutableList()
+        handleUnSupportLang(mLanguageList)
+        mLanguageList.add(1, "adsApp")
+        mDisplayLangList.add(1, "adsApp")
+        adapterLanguage = AdapterLanguage(requireContext(), onCLickItem = {
+            currentLanguage = it.language
+        })
+        adapterLanguage?.setData(mLanguageList,mDisplayLangList)
+        binding.rcvLanguage.adapter = adapterLanguage
+        binding.rcvLanguage.layoutManager = LinearLayoutManager(requireContext())
+        adapterLanguage?.setCurrentLanguage(requireContext().config.language)
+    }
+
+    private fun initToolBar() {
+        val menuHost: MenuHost = requireActivity()
+
+        menuHost.addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
+                menuInflater.inflate(R.menu.toolbar_menu_language, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.btn_check -> {
+                        applyLanguage()
+                        true
+                    }
+                    else -> false
                 }
             }
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
+    private fun handleUnSupportLang(mLanguageList: MutableList<Any>) {
+        var support = false
+        mLanguageList.forEachIndexed { index, item ->
+            if (item is Locale) {
+                if (item.language == currentLanguage) {
+                    support = true
+                }
+            }
+        }
+        if (!support) {
+            currentLanguage = (mLanguageList[0] as Locale).language
+        }
+    }
+
+    private fun applyLanguage() {
+        requireContext().config.language = currentLanguage
+        startActivity(requireActivity().intent)
+        requireActivity().finish()
+    }
+
+
 }

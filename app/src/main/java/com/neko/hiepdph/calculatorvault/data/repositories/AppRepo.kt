@@ -2,8 +2,10 @@ package com.neko.hiepdph.calculatorvault.data.repositories
 
 import androidx.lifecycle.LiveData
 import com.neko.hiepdph.calculatorvault.data.database.model.BookmarkModel
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.NoteModel
 import com.neko.hiepdph.calculatorvault.data.services.BookmarkService
+import com.neko.hiepdph.calculatorvault.data.services.FileVaultService
 import com.neko.hiepdph.calculatorvault.data.services.NoteLocalService
 import com.neko.hiepdph.calculatorvault.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
@@ -13,6 +15,7 @@ import javax.inject.Inject
 class AppRepo @Inject constructor(
     private val noteLocalService: NoteLocalService,
     private val bookmarkService: BookmarkService,
+    private val fileVaultService: FileVaultService,
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
@@ -45,6 +48,20 @@ class AppRepo @Inject constructor(
     suspend fun deleteSelectedNote(listId: List<Int>) = withContext(dispatcher) {
         noteLocalService.noteDao.deleteNote(listId)
     }
+
+    //
+
+    suspend fun insertFileVault(fileVaultItem: FileVaultItem) = withContext(dispatcher){
+        fileVaultService.fileVaultItemDao.insertFile(fileVaultItem.toFileVaultEntity())
+    }
+
+    fun getAllFile(): List<FileVaultItem> = fileVaultService.fileVaultItemDao.getListFile()
+
+    suspend fun getFile(encryptedName:String):FileVaultItem? = withContext(dispatcher){
+        fileVaultService.fileVaultItemDao.getFileByEncryptedName(encryptedName)
+    }
+
+
 
 
 }

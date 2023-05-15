@@ -96,6 +96,7 @@ class ActivityPinLock : AppCompatActivity() {
             val biometric = BiometricConfig.biometricConfig {
                 ownerFragmentActivity = this@ActivityPinLock
                 authenticateSuccess = {
+                    config.isShowLock = true
                     (application as CustomApplication).authority = true
                     startActivity(
                         Intent(this@ActivityPinLock, ActivityVault::class.java)
@@ -105,6 +106,9 @@ class ActivityPinLock : AppCompatActivity() {
                 authenticateFailed = {
                     if (config.photoIntruder && !takePhotoIntruder) {
                         takePicture()
+                    }
+                    if(config.fingerprintFailure){
+                        finishAffinity()
                     }
                 }
             }

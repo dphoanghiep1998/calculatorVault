@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.text.TextUtils
 import com.google.common.io.Files.getNameWithoutExtension
+import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.copyDirectoryOneLocationToAnotherLocation
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.createNewFile
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.deleteFile
@@ -92,17 +93,14 @@ object CopyFiles {
             var currentSize = 0f
             // move file
             files?.forEach { itemFile ->
-                val targetFile = if (itemFile.isDirectory) {
-                    File(createNewFolder(context, targetFolder, itemFile.name))
-                } else {
-                    File(
-                        createNewFile(
-                            context,
-                            targetFolder,
-                            CryptoCore.getInstance(context).encryptFileName(itemFile.name)
-                        ).toString()
-                    )
-                }
+                val targetFile = File(
+                    createNewFile(
+                        context,
+                        targetFolder,
+                        CryptoCore.getInstance(context)
+                            .encryptString("P@ssw0rd123", itemFile.name)
+                    ).toString()
+                )
 
                 copyDirectoryOneLocationToAnotherLocation(context, itemFile, targetFile,
                     // on progress
@@ -222,7 +220,7 @@ object CopyFiles {
                     if (isMove) {
                         deleteFile(sourceFile, context)
                     }
-                    addMedia(context, targetFile)
+//                    addMedia(context, targetFile)
                     onSuccess()
                 })
 

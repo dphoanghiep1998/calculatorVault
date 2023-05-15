@@ -1,13 +1,15 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.setting.advance
 
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
+import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import com.neko.hiepdph.calculatorvault.databinding.FragmentAdvanceBinding
+
 
 class FragmentAdvance : Fragment() {
 
@@ -19,8 +21,20 @@ class FragmentAdvance : Fragment() {
         // Inflate the layout for this fragment
         binding = FragmentAdvanceBinding.inflate(inflater, container, false)
         initView()
+        AppSharePreference.INSTANCE.registerOnSharedPreferenceChangeListener(listener)
         return binding.root
     }
+
+    private val listener =
+        SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+            if (key == Constant.KEY_PROHIBIT_SCREENSHOT) {
+                if (requireContext().config.prohibitScreenShot) {
+                    blockScreenShot()
+                } else {
+                    clearFlag()
+                }
+            }
+        }
 
     private fun initView() {
         setupView()
@@ -46,12 +60,10 @@ class FragmentAdvance : Fragment() {
         binding.itemFakePassword.root.clickWithDebounce {
             binding.itemFakePassword.switchChange.isChecked =
                 !binding.itemFakePassword.switchChange.isChecked
-            requireContext().config.fakePassword =
-                binding.itemFakePassword.switchChange.isChecked
+            requireContext().config.fakePassword = binding.itemFakePassword.switchChange.isChecked
         }
         binding.itemFakePassword.switchChange.setOnClickListener {
-            requireContext().config.fakePassword =
-                binding.itemFakePassword.switchChange.isChecked
+            requireContext().config.fakePassword = binding.itemFakePassword.switchChange.isChecked
         }
 
 
@@ -89,6 +101,31 @@ class FragmentAdvance : Fragment() {
             imvNext.hide()
             tvContent2.text = getString(R.string.prohibit_screenshot_content_2)
         }
+    }
+
+    private fun blockScreenShot() {
+        requireActivity().window.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE
+        )
+        val window: Window = requireActivity().window
+        val wm = requireActivity().windowManager
+        wm.removeViewImmediate(window.decorView)
+        wm.addView(window.decorView, window.attributes)
+    }
+
+    private fun clearFlag() {
+        requireActivity().window.clearFlags(
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
+        val window: Window = requireActivity().window
+        val wm = requireActivity().windowManager
+        wm.removeViewImmediate(window.decorView)
+        wm.addView(window.decorView, window.attributes)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        AppSharePreference.INSTANCE.unregisterListener(listener)
     }
 
 

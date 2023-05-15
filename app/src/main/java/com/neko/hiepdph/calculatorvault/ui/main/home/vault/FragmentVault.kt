@@ -26,7 +26,6 @@ import com.neko.hiepdph.calculatorvault.databinding.FragmentVaultBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutMenuOptionBinding
 import com.neko.hiepdph.calculatorvault.dialog.*
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityCalculator
-import com.neko.hiepdph.calculatorvault.ui.main.home.language.adapter.AdapterFolder
 import com.neko.hiepdph.calculatorvault.viewmodel.VaultViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -39,8 +38,9 @@ class FragmentVault : Fragment() {
     private var _binding: FragmentVaultBinding? = null
     private val binding get() = _binding!!
     private lateinit var popupWindow: PopupWindow
-    private  var adapter: AdapterFolder ?= null
+    private  var adapter: AdapterFolder?= null
     private val viewModel by activityViewModels<VaultViewModel>()
+
 
     companion object {
         var sortType: Sort = Sort.NAME
@@ -52,6 +52,7 @@ class FragmentVault : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentVaultBinding.inflate(inflater, container, false)
+        setStatusColor(R.color.neutral_02)
         initToolBar()
         return binding.root
     }

@@ -90,9 +90,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_12sdp"
         android:layout_marginTop="@dimen/_4sdp"
-        android:fontFamily="@font/app_font_400"
+        android:fontFamily="@font/app_font_800"
         android:text="@string/launcher_number"
-        android:textColor="@color/neutral_03"
+        android:textColor="@color/neutral_06"
         android:textSize="@dimen/_12sdp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_dialer_third_step" />

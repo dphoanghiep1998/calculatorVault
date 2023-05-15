@@ -76,6 +76,11 @@ class ActivityImageDetail : AppCompatActivity() {
             name = currentItem?.mName
             size = currentItem?.mSize
             path = currentItem?.mPath
+            originalPath = currentItem?.mOriginalPath
+            resolution = currentItem?.mImageSize
+            time = currentItem?.mModified
+            timeLock = currentItem?.mTimeLock
+
         }
         dialogDetail.show(supportFragmentManager, dialogDetail.tag)
     }

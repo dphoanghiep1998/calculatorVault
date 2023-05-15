@@ -17,6 +17,7 @@ import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentListItemBinding
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
@@ -39,6 +40,7 @@ class FragmentListItem : Fragment() {
     private val args: FragmentListItemArgs by navArgs()
     private var listItemSelected = mutableListOf<ListItem>()
     private var sizeList = 0
+    private var currentEncryptionMode = EncryptionMode.HIDDEN
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -88,21 +90,30 @@ class FragmentListItem : Fragment() {
 
     private fun initButton() {
         binding.btnMoveToVault.clickWithDebounce {
-            viewModel.copyMoveFile(requireContext(),
+            viewModel.copyMoveFile(
+                requireContext(),
                 listItemSelected.map { File(it.mPath) }.toMutableList(),
                 File(args.vaultPath),
                 progress = { state: Int, value: Float, currentFile: File? ->
+                    listItemSelected.forEach {
+                        val item = FileVaultItem(
+                            -1,
+                            args.vaultPath + "/${it.mName}",
+                            it.originalPath,
+                            it.mName,
+                            currentFile?.name.toString(),
+                            currentFile?.length() ?: 0L,
+                            it.mModified,
+                            it.mTimeLock,
+                            it.mImageSize,
+                            "",
+                            it.mediaDuration,
+                            currentEncryptionMode
+                        )
+                        viewModel.insertFileToRoom(item)
+                    }
                 },
                 onSuccess = {
-                    val newList = listItemSelected.toMutableList()
-                    newList.forEach {
-                        Log.d("TAG", "initButton: "+it.mOriginalPath)
-                        it.path = args.vaultPath + "/${it.mName}"
-                    }
-                    val listItemVault = requireContext().config.listItemVault?.toMutableList()
-                        ?: mutableListOf()
-                    listItemVault.addAll(newList)
-                    requireContext().config.listItemVault = listItemVault
                     CoroutineScope(Dispatchers.Main).launch {
                         observeData()
                         adapterListItem?.unSelectAll()
@@ -110,8 +121,12 @@ class FragmentListItem : Fragment() {
                         checkListPath()
                         checkCheckBoxAll()
                     }
-                }, onError = {
-                },requireContext().config.encryptionMode)
+                },
+                onError = {
+                    it.printStackTrace()
+                },
+                requireContext().config.encryptionMode
+            )
         }
     }
 

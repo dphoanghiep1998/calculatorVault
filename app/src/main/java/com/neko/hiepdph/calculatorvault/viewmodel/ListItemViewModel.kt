@@ -10,7 +10,9 @@ import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
 import com.neko.hiepdph.calculatorvault.common.utils.SelfCleaningLiveData
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.ListItem
+import com.neko.hiepdph.calculatorvault.data.repositories.AppRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,7 +20,7 @@ import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
-class ListItemViewModel @Inject constructor() : ViewModel() {
+class ListItemViewModel @Inject constructor(val repo: AppRepo) : ViewModel() {
 
     private val _listItemList = SelfCleaningLiveData<MutableList<ListItem>>()
     val listItemList: LiveData<MutableList<ListItem>> get() = _listItemList
@@ -50,6 +52,12 @@ class ListItemViewModel @Inject constructor() : ViewModel() {
                 }
             }
 
+        }
+    }
+
+    fun insertFileToRoom(fileVaultItem: FileVaultItem){
+        viewModelScope.launch {
+            repo.insertFileVault(fileVaultItem)
         }
     }
 
