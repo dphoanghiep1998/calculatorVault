@@ -30,6 +30,7 @@ interface CalculatorFunction {
     fun onPressButtonTimes()
     fun onPressButtonDivide()
     fun onPressButtonEqual()
+    fun onLongPressButtonEqual()
     fun onPressButtonE()
     fun onPressButtonSwitch()
     fun onPressButtonReset()
@@ -134,6 +135,10 @@ class CalculatorMain @JvmOverloads constructor(
         }
         binding.btnEqual.setOnClickListener {
             callback?.onPressButtonEqual()
+        }
+        binding.btnEqual.setOnLongClickListener {
+            callback?.onLongPressButtonEqual()
+            return@setOnLongClickListener true
         }
         binding.btnE.setOnClickListener {
             callback?.onPressButtonE()

@@ -15,6 +15,7 @@ import com.neko.hiepdph.calculatorvault.common.utils.DIVIDE_SYMBOL
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.common.utils.PI_SYMBOL
 import com.neko.hiepdph.calculatorvault.common.utils.SQRT_SYMBOL
+import com.neko.hiepdph.calculatorvault.config.ButtonToUnlock
 import com.neko.hiepdph.calculatorvault.databinding.ActivityCaculatorBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogChangeTheme
 import org.mariuszgromada.math.mxparser.Expression
@@ -31,6 +32,7 @@ class ActivityCalculator : AppCompatActivity() {
         setThemeMode()
 
     }
+
     private fun setThemeMode() {
         if (config.darkMode) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
@@ -91,11 +93,11 @@ class ActivityCalculator : AppCompatActivity() {
 //        }
 //    }
 
-//    private fun checkSecretKey() {
-//        if (binding.tvInput.text == "1234%") {
-//            navigateToPage(R.id.fragmentCalculator, R.id.action_fragmentCalculator_to_fragmentHome)
-//        }
-//    }
+    private fun checkSecretKey() {
+        if (binding.tvInput.text == config.secretPin) {
+            startActivity(Intent(this, ActivityVault::class.java))
+        }
+    }
 
 
     private fun initCalculator() {
@@ -177,7 +179,16 @@ class ActivityCalculator : AppCompatActivity() {
             }
 
             override fun onPressButtonEqual() {
+                if (config.buttonToUnlock == ButtonToUnlock.SHORT_PRESS) {
+                    checkSecretKey()
+                }
                 showResult()
+            }
+
+            override fun onLongPressButtonEqual() {
+                if (config.buttonToUnlock == ButtonToUnlock.LONG_PRESS) {
+                    checkSecretKey()
+                }
             }
 
             override fun onPressButtonE() {
@@ -298,31 +309,40 @@ class ActivityCalculator : AppCompatActivity() {
                 binding.tvInput.text.endsWith("sin(") -> {
                     binding.tvInput.text = binding.tvInput.text.toString().replace("sin(", "")
                 }
+
                 binding.tvInput.text.endsWith("cos(") -> {
                     binding.tvInput.text = binding.tvInput.text.toString().replace("cos(", "")
                 }
+
                 binding.tvInput.text.endsWith("arcsin(") -> {
                     binding.tvInput.text = binding.tvInput.text.toString().replace("arcsin(", "")
                 }
+
                 binding.tvInput.text.endsWith("arccos(") -> {
                     binding.tvInput.text = binding.tvInput.text.toString().replace("arccos(", "")
                 }
+
                 binding.tvInput.text.endsWith("arctan(") -> {
                     binding.tvInput.text = binding.tvInput.text.toString().replace("arctan(", "")
                 }
+
                 binding.tvInput.text.endsWith("tan(") -> {
                     binding.tvInput.text = binding.tvInput.text.toString().replace("tan(", "")
                 }
+
                 binding.tvInput.text.endsWith("lg(") -> {
                     binding.tvInput.text = binding.tvInput.text.toString().replace("lg(", "")
                 }
+
                 binding.tvInput.text.endsWith("ln(") -> {
                     binding.tvInput.text = binding.tvInput.text.toString().replace("ln(", "")
                 }
+
                 binding.tvInput.text.endsWith("${SQRT_SYMBOL}(") -> {
                     binding.tvInput.text =
                         binding.tvInput.text.toString().replace("${SQRT_SYMBOL}(", "")
                 }
+
                 else -> {
                     binding.tvInput.text = binding.tvInput.text.subSequence(
                         0, binding.tvInput.text.toString().length - 1

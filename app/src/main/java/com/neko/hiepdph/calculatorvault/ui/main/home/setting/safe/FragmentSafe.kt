@@ -53,13 +53,30 @@ class FragmentSafe : Fragment() {
         binding.containerScreenOffAction.root.clickWithDebounce {
             findNavController().navigate(R.id.dialogChangeScreenOffAction)
         }
+
+        binding.containerFingerprintUnlock.root.clickWithDebounce {
+            binding.containerFingerprintUnlock.switchChange.isChecked = !binding.containerFingerprintUnlock.switchChange.isChecked
+            requireContext().config.fingerPrintUnlock =
+                binding.containerFingerprintUnlock.switchChange.isChecked
+        }
         binding.containerFingerprintUnlock.switchChange.setOnClickListener {
             requireContext().config.fingerPrintUnlock =
                 binding.containerFingerprintUnlock.switchChange.isChecked
         }
+        binding.containerFingerprintLockDisplay.root.clickWithDebounce {
+            binding.containerFingerprintLockDisplay.switchChange.isChecked = !binding.containerFingerprintLockDisplay.switchChange.isChecked
+            requireContext().config.fingerPrintLockDisplay =
+                binding.containerFingerprintLockDisplay.switchChange.isChecked
+        }
         binding.containerFingerprintLockDisplay.switchChange.setOnClickListener {
             requireContext().config.fingerPrintLockDisplay =
                 binding.containerFingerprintLockDisplay.switchChange.isChecked
+        }
+
+        binding.containerLockWhenLeaving.root.clickWithDebounce {
+            binding.containerLockWhenLeaving.switchChange.isChecked = !binding.containerLockWhenLeaving.switchChange.isChecked
+            requireContext().config.lockWhenLeavingApp =
+                binding.containerLockWhenLeaving.switchChange.isChecked
         }
         binding.containerLockWhenLeaving.switchChange.setOnClickListener {
             requireContext().config.lockWhenLeavingApp =

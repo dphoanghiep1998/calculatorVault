@@ -9,12 +9,15 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
 
-
     <uses-feature
         android:name="android.hardware.sensor.accelerometer"
         android:required="true" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <application
+
         android:name=".CustomApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -54,7 +57,6 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
@@ -70,6 +72,7 @@
             android:exported="false" />
 
         <activity
+            android:excludeFromRecents="false"
             android:name=".ui.activities.ActivityVault"
             android:exported="false">
 
@@ -78,6 +81,7 @@
 
 
         <activity
+            android:excludeFromRecents="false"
             android:name=".ui.activities.ActivityCalculator"
             android:exported="true">
             <intent-filter>

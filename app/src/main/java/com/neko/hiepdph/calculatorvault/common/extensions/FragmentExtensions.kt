@@ -95,13 +95,13 @@ fun Fragment.showSnackBar(text: String, type: SnackBarType) {
     snackBar.setAction("Action", null)
     val drawable :Drawable?
     when (type) {
-        SnackBarType.FAILED -> {
-            drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_success)
-            snackBar.setBackgroundTint(requireContext().getColor(R.color.theme_01))
-        }
         SnackBarType.SUCCESS -> {
-            drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_fail)
+            drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_success)
             snackBar.setBackgroundTint(requireContext().getColor(R.color.theme_08))
+        }
+        SnackBarType.FAILED -> {
+            drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_fail)
+            snackBar.setBackgroundTint(requireContext().getColor(R.color.theme_01))
         }
 
     }

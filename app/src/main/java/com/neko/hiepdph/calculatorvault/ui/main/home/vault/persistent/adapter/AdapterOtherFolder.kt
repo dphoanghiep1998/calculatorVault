@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -273,7 +274,25 @@ private fun showPopupWindow(
         onOpenDetail(item)
         popupWindow.dismiss()
     }
-    popupWindow.showAsDropDown(view)
+    val values = IntArray(2)
+    view.getLocationInWindow(values)
+    val positionOfIcon = values[1]
+    val displayMetrics: DisplayMetrics = view.context.resources.displayMetrics
+    val height = displayMetrics.heightPixels * 2 / 3
+
+    if (positionOfIcon < height) {
+        popupWindow.showAsDropDown(
+            view,
+            0,
+            -view.height + popupWindow.height
+        )
+    }else{
+        popupWindow.showAsDropDown(
+            view,
+            0,
+            -400
+        )
+    }
 }
 
 private fun showPopupWindowFile(
@@ -310,7 +329,25 @@ private fun showPopupWindowFile(
         onOpenDetail(item)
         popupWindow.dismiss()
     }
-    popupWindow.showAsDropDown(view)
+    val values = IntArray(2)
+    view.getLocationInWindow(values)
+    val positionOfIcon = values[1]
+    val displayMetrics: DisplayMetrics = view.context.resources.displayMetrics
+    val height = displayMetrics.heightPixels * 2 / 3
+
+    if (positionOfIcon < height) {
+        popupWindow.showAsDropDown(
+            view,
+            0,
+            -view.height + popupWindow.height
+        )
+    }else{
+        popupWindow.showAsDropDown(
+            view,
+            0,
+            -400
+        )
+    }
 
 }
 

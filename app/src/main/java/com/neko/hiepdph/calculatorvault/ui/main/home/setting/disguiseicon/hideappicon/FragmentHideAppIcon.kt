@@ -1,5 +1,7 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.setting.disguiseicon.hideappicon
 
+import android.content.ComponentName
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +13,9 @@ import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.databinding.FragmentHideAppIconBinding
+import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import dagger.hilt.android.AndroidEntryPoint
+
 
 @AndroidEntryPoint
 class FragmentHideAppIcon : Fragment() {
@@ -42,12 +46,44 @@ class FragmentHideAppIcon : Fragment() {
                 !binding.containerHideAppIcon.switchChange.isChecked
             requireContext().config.hideAppIcon =
                 binding.containerHideAppIcon.switchChange.isChecked
+            if(requireActivity().config.hideAppIcon){
+                hideAppIcon()
+            }else{
+                showAppIcon()
+            }
         }
 
         binding.containerHideAppIcon.switchChange.setOnClickListener {
             requireContext().config.hideAppIcon =
                 binding.containerHideAppIcon.switchChange.isChecked
+            if(requireActivity().config.hideAppIcon){
+                hideAppIcon()
+            }else{
+                showAppIcon()
+            }
         }
+    }
+
+    private fun hideAppIcon() {
+        val p: PackageManager = requireActivity().packageManager
+        val componentName = ComponentName(
+            requireActivity(), ActivityVault::class.java
+        )
+        p.setComponentEnabledSetting(
+            componentName,
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+            PackageManager.DONT_KILL_APP
+        );
+    }
+
+    private fun showAppIcon() {
+        val p: PackageManager = requireActivity().packageManager
+        val componentName = ComponentName(requireActivity(), ActivityVault::class.java)
+        p.setComponentEnabledSetting(
+            componentName,
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+            PackageManager.DONT_KILL_APP
+        )
     }
 
     private fun setupView() {

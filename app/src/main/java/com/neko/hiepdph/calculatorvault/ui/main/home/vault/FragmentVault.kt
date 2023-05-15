@@ -64,18 +64,16 @@ class FragmentVault : Fragment() {
         changeBackPressCallBack {
             requireActivity().finishAffinity()
         }
-    }
-    override fun onResume() {
-        super.onResume()
         viewModel.getListFolderInVault(
             requireContext(), requireContext().config.privacyFolder
         )
     }
 
+
     private fun observeListFile() {
         viewModel.listFolderInVault.observe(viewLifecycleOwner) {
             adapter?.setData(sortList(it))
-            binding?.swipeLayout?.isRefreshing = false
+            binding.swipeLayout.isRefreshing = false
         }
     }
 
@@ -238,7 +236,7 @@ class FragmentVault : Fragment() {
 
     private fun showOptionDialog(menuItemView: View) {
         Log.d("TAG", "showOptionDialog: ")
-        popupWindow.showAsDropDown(menuItemView, 0, 0)
+        popupWindow.showAsDropDown(menuItemView)
     }
 
     private fun showAddFolderDialog() {

@@ -1,6 +1,7 @@
 package com.neko.hiepdph.calculatorvault.ui.activities
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -12,6 +13,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.Gravity
 import android.view.View
@@ -20,6 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -69,6 +72,7 @@ class ActivityVault : AppCompatActivity() {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
     }
+
     override fun onResume() {
         super.onResume()
         mSensorManager?.registerListener(
@@ -80,6 +84,7 @@ class ActivityVault : AppCompatActivity() {
                     startActivity(Intent(this@ActivityVault, ActivityPatternLock::class.java))
                     finish()
                 }
+
                 LockType.PIN -> {
                     startActivity(Intent(this@ActivityVault, ActivityPinLock::class.java))
                     finish()
@@ -103,10 +108,11 @@ class ActivityVault : AppCompatActivity() {
         requestAllFileManage()
         initShakeDetector()
         setThemeMode()
+        registerBroadcastHideApp()
     }
 
-    private fun initNavigationView(){
-       resetBackground(binding.itemVault)
+    private fun initNavigationView() {
+        resetBackground(binding.itemVault)
         binding.itemVault.apply {
             imvIcon.setImageResource(R.drawable.ic_vault)
             tvContent.text = getString(R.string.vault)
@@ -204,15 +210,33 @@ class ActivityVault : AppCompatActivity() {
 
     }
 
-    private fun resetBackground(item: LayoutItemNavigationViewBinding){
-        val listItem = mutableListOf(binding.itemVault,binding.itemBrowser,binding.itemNote,binding.itemRecyclerBin,binding.itemSetting,binding.itemLanguage)
-        item.root.background = ContextCompat.getDrawable(this,R.drawable.ic_navigation_menu_selected)
-        listItem.filter { it != item }.forEach { it.root.background = null }
+    private fun resetBackground(item: LayoutItemNavigationViewBinding) {
+        val listItem = mutableListOf(
+            binding.itemVault,
+            binding.itemBrowser,
+            binding.itemNote,
+            binding.itemRecyclerBin,
+            binding.itemSetting,
+            binding.itemLanguage
+        )
+        item.root.background =
+            ContextCompat.getDrawable(this, R.drawable.bg_navigation_item_seleted)
+        item.root.backgroundTintList = AppCompatResources.getColorStateList(this, R.color.secondary)
+        item.imvIcon.imageTintList = AppCompatResources.getColorStateList(this, R.color.primary)
+        item.tvContent.setTextColor(getColor(R.color.primary))
+        listItem.filter { it != item }.forEach { it1 ->
+            it1.root.background = null
+            it1.root.backgroundTintList =
+                AppCompatResources.getColorStateList(this, R.color.neutral_06)
+            it1.imvIcon.imageTintList =
+                AppCompatResources.getColorStateList(this, R.color.neutral_06)
+            it1.tvContent.setTextColor(getColor(R.color.neutral_06))
+        }
     }
 
     private fun changeThemeMode(darkMode: Boolean) {
         config.darkMode = darkMode
-        Log.d("TAG", "changeThemeMode: "+darkMode)
+        Log.d("TAG", "changeThemeMode: " + darkMode)
         if (darkMode) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         } else {
@@ -323,6 +347,7 @@ class ActivityVault : AppCompatActivity() {
                             startActivity(intent)
                             finish()
                         }
+
                         ScreenOffAction.LOCKAGAIN -> {
                             when (config.lockType) {
                                 LockType.PIN -> {
@@ -331,17 +356,20 @@ class ActivityVault : AppCompatActivity() {
                                     startActivity(intent)
                                     finish()
                                 }
+
                                 LockType.PATTERN -> {
                                     val intent =
                                         Intent(this@ActivityVault, ActivityPatternLock::class.java)
                                     startActivity(intent)
                                     finish()
                                 }
+
                                 else -> {
                                     //do nothing
                                 }
                             }
                         }
+
                         ScreenOffAction.NOACTION -> {
                             //do nothing
                         }
@@ -365,6 +393,29 @@ class ActivityVault : AppCompatActivity() {
             setStatusBarBackground(R.color.purple_200)
         }
 
+    }
+
+    @SuppressLint("InlinedApi")
+    private fun registerBroadcastHideApp() {
+        val hideAppReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                Log.d("TAG", "onReceive: ")
+                if (intent!!.action.equals(TelephonyManager.ACTION_SECRET_CODE)) {
+                    val code = intent.data?.host
+                    if (code == "0101") {
+                        val launchIntent = Intent(context, ActivityVault::class.java)
+                        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        context!!.startActivity(launchIntent)
+                    }
+                }
+            }
+
+        }
+        val intentFilter = IntentFilter().apply {
+            addDataScheme("android_secret_code")
+            addAction(TelephonyManager.ACTION_SECRET_CODE)
+        }
+        registerReceiver(hideAppReceiver, intentFilter)
     }
 
 

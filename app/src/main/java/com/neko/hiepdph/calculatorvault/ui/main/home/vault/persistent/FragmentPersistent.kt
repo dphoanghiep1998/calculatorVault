@@ -64,14 +64,13 @@ class FragmentPersistent : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initView()
+        initData()
     }
 
     override fun onResume() {
         super.onResume()
-        initData()
         resetAllViewAndData()
         (requireActivity() as ActivityVault).setupActionBar()
-
     }
 
     private fun resetAllViewAndData() {
@@ -85,8 +84,10 @@ class FragmentPersistent : Fragment() {
     private fun initView() {
         initRecyclerView()
         initButton()
-        initData()
         resetAllViewAndData()
+        binding.refreshLayout.setOnRefreshListener{
+            initData()
+        }
     }
 
     private fun checkAllItem(status: Boolean) {
@@ -237,6 +238,7 @@ class FragmentPersistent : Fragment() {
                     binding.tvEmpty.show()
                 }
             }
+            binding.refreshLayout.isRefreshing = false
         }
     }
 

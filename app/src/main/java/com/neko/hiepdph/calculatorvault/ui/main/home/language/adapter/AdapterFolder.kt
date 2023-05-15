@@ -1,6 +1,8 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.language.adapter
 
 import android.content.Context
+import android.util.DisplayMetrics
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -82,13 +84,14 @@ class AdapterFolder(
                     binding.tvCount.text =
                         customFolder.mChildren.toString() + " " + itemView.context.getString(R.string.item)
                     binding.imvOption.clickWithDebounce {
-                        showOption(binding.imvOption, customFolder)
+                        showOption(binding.imvOption, customFolder, position)
                     }
                     binding.root.clickWithDebounce {
                         onItemPress.invoke(customFolder)
                     }
                 }
             }
+
             GRID_ITEM -> {
                 with(holder as FolderViewHolderGrid) {
                     binding.imvLogo.setImageResource(getImageLogo(customFolder.type))
@@ -97,7 +100,7 @@ class AdapterFolder(
                         if (customFolder.type == Constant.TYPE_ADD_MORE) View.VISIBLE else View.GONE
                     binding.tvCount.text = customFolder.mChildren.toString()
                     binding.imvOption.clickWithDebounce {
-                        showOption(binding.imvOption, customFolder)
+                        showOption(binding.imvOption, customFolder,position)
                     }
                     binding.root.clickWithDebounce {
                         onItemPress.invoke(customFolder)
@@ -139,7 +142,7 @@ class AdapterFolder(
         )
     }
 
-    private fun showOption(view: View, customFolder: VaultFileDirItem) {
+    private fun showOption(view: View, customFolder: VaultFileDirItem, position: Int) {
         bindingLayout?.root?.clickWithDebounce {
             popupWindow?.dismiss()
         }
@@ -151,6 +154,25 @@ class AdapterFolder(
             onRenamePress.invoke(customFolder)
             popupWindow?.dismiss()
         }
-        popupWindow?.showAsDropDown(view)
+        val values = IntArray(2)
+        view.getLocationInWindow(values)
+        val positionOfIcon = values[1]
+        val displayMetrics: DisplayMetrics = view.context.resources.displayMetrics
+        val height = displayMetrics.heightPixels * 2 / 3
+        Log.d("TAG", "showOption: "+positionOfIcon)
+        Log.d("TAG", "showOption: "+height)
+        if (positionOfIcon < height) {
+            popupWindow?.showAsDropDown(
+                view,
+                0,
+                -view.height + popupWindow!!.height
+            )
+        }else{
+            popupWindow?.showAsDropDown(
+                view,
+                0,
+                -400
+            )
+        }
     }
 }

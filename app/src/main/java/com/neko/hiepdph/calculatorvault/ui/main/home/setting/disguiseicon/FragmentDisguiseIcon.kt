@@ -11,6 +11,7 @@ import com.neko.hiepdph.calculatorvault.changeicon.ChangeIconUtils
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
+import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionQ
 import com.neko.hiepdph.calculatorvault.config.ButtonToUnlock
 import com.neko.hiepdph.calculatorvault.config.HideAppIcon
 import com.neko.hiepdph.calculatorvault.databinding.FragmentDisguiseIconBinding
@@ -126,6 +127,11 @@ class FragmentDisguiseIcon : Fragment() {
     }
 
     private fun setupView() {
+        if(buildMinVersionQ()){
+            binding.containerHideAppIcon.root.show()
+        }else{
+            binding.containerHideAppIcon.root.hide()
+        }
         binding.containerHideAppIcon.apply {
             imvIcon.setImageResource(R.drawable.ic_hide_app)
             tvContent.text = getString(R.string.hide_app_icon)
