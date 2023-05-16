@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
-import com.neko.hiepdph.calculatorvault.common.utils.SelfCleaningLiveData
-import com.neko.hiepdph.calculatorvault.data.model.ListItem
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
+import com.neko.hiepdph.calculatorvault.data.repositories.AppRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -15,12 +15,8 @@ import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
-class RecyclerBinViewModel @Inject constructor() : ViewModel() {
-    private val _listItemListRecyclerBin = SelfCleaningLiveData<MutableList<ListItem>>()
-    val listItemListRecyclerBin: LiveData<MutableList<ListItem>> get() = _listItemListRecyclerBin
-    fun setListItemRecyclerBinData(list: MutableList<ListItem>) {
-        _listItemListRecyclerBin.postValue(list)
-    }
+class RecyclerBinViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel() {
+
 
     fun deleteFolder(path: String, onSuccess: () -> Unit, onError: (e: String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -37,11 +33,9 @@ class RecyclerBinViewModel @Inject constructor() : ViewModel() {
     }
 
 
-    fun getAllFileChildFromFolder(path: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val listFileChild = FileUtils.getFileInDirectory(path).toMutableList()
-            setListItemRecyclerBinData(listFileChild)
-        }
+    fun getAllFileChildFromFolder(path: String): LiveData<List<FileVaultItem>> {
+        return appRepo.getAllFileInEnCryptFolder(path)
+
     }
 
     fun deleteAllRecyclerBin(path: String, onSuccess: () -> Unit, onError: (e: String) -> Unit) {
@@ -69,7 +63,9 @@ class RecyclerBinViewModel @Inject constructor() : ViewModel() {
         onError: (t: Throwable) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            CopyFiles.copy(context,files,targetFolder,tSize,progress,isMove,onSuccess,onError)
+            CopyFiles.copy(
+                context, files, targetFolder, tSize, progress, isMove, onSuccess, onError
+            )
         }
     }
 

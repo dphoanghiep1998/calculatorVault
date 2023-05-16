@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
-import com.neko.hiepdph.calculatorvault.data.model.ListItem
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentRecycleBinBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
@@ -35,7 +35,7 @@ class FragmentRecycleBin : Fragment() {
     private val viewModel by viewModels<RecyclerBinViewModel>()
 
     private var adapterRecycleBin: AdapterRecyclerBin? = null
-    private var listItemSelected: MutableList<ListItem> = mutableListOf()
+    private var listItemSelected: MutableList<FileVaultItem> = mutableListOf()
     private var sizeList = 0
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -121,10 +121,8 @@ class FragmentRecycleBin : Fragment() {
     }
 
     private fun getData() {
-        viewModel.getAllFileChildFromFolder(
-            requireContext().config.recyclerBinFolder.path
-        )
-        viewModel.listItemListRecyclerBin.observe(viewLifecycleOwner) {
+
+        viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path).observe(viewLifecycleOwner) {
             it?.let {
                 adapterRecycleBin?.setData(it)
                 sizeList = it.size
@@ -200,10 +198,10 @@ class FragmentRecycleBin : Fragment() {
         }
     }
 
-    private fun handleClickItem(it: ListItem) {
-        when (it.type) {
+    private fun handleClickItem(it: FileVaultItem) {
+        when (it.fileType) {
             Constant.TYPE_PICTURE -> {
-                val list = mutableListOf<ListItem>()
+                val list = mutableListOf<FileVaultItem>()
                 list.add(it)
                 ShareData.getInstance().setListItemImage(list)
                 val intent = Intent(requireContext(), ActivityImageDetail::class.java)
@@ -224,18 +222,13 @@ class FragmentRecycleBin : Fragment() {
         }
         val listToRestore = mutableListOf<File>()
         listItemSelected.forEach {
-            val item = requireContext().config.listPathRecyclerBin?.find { item ->
-                it.path == item.recyclerBinPath
-            }
-            if (item != null) {
-                listToRestore.add(File(item.vaultPath))
-            }
+            listToRestore.add(File(it.encryptedPath))
         }
 
         val dialogConfirm = DialogConfirm(onPositiveClicked = {
 
             viewModel.restoreFile(requireContext(),
-                listItemSelected.map { File(it.path) }.toMutableList(),
+                listItemSelected.map { File(it.encryptedPath) }.toMutableList(),
                 listToRestore,
                 0L,
                 progress = { _: Int, _: Float, _: File? -> },
@@ -258,12 +251,12 @@ class FragmentRecycleBin : Fragment() {
             return
         }
         val dialogConfirm = DialogConfirm(onPositiveClicked = {
-            viewModel.deleteSelectedFile(listItemSelected.map { it.path }, onSuccess = {
+            viewModel.deleteSelectedFile(listItemSelected.map { it.recyclerPath }, onSuccess = {
                 showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
-                viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
+                viewModel.getAllFileChildFromFolder(requireContext().filesDir.path)
             }, onError = {
                 showSnackBar(getString(R.string.delete_failed), SnackBarType.FAILED)
-                viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
+                viewModel.getAllFileChildFromFolder(requireContext().filesDir.path)
             })
         }, DialogConfirmType.DELETE, getString(R.string.selected_file))
 
@@ -276,14 +269,14 @@ class FragmentRecycleBin : Fragment() {
             return
         }
         val dialogConfirm = DialogConfirm(onPositiveClicked = {
-            viewModel.deleteAllRecyclerBin(requireContext().config.recyclerBinFolder.path,
+            viewModel.deleteAllRecyclerBin(requireContext().filesDir.path,
                 onSuccess = {
                     showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
-                    viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
+                    viewModel.getAllFileChildFromFolder(requireContext().filesDir.path)
                 },
                 onError = {
                     showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
-                    viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
+                    viewModel.getAllFileChildFromFolder(requireContext().filesDir.path)
                 })
         }, DialogConfirmType.EMPTY_BIN, null)
 

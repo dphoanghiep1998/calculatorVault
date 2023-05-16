@@ -229,7 +229,6 @@ class ActivityVault : AppCompatActivity() {
 
     private fun changeThemeMode(darkMode: Boolean) {
         config.darkMode = darkMode
-        Log.d("TAG", "changeThemeMode: " + darkMode)
         if (darkMode) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         } else {
@@ -240,14 +239,16 @@ class ActivityVault : AppCompatActivity() {
     private fun createSecretFolderFirstTime() {
         if (!AppSharePreference.INSTANCE.getInitDone(false)) {
 
-            viewModel.createFolder(config.privacyFolder, Constant.PICTURE_FOLDER_NAME)
-            viewModel.createFolder(config.privacyFolder, Constant.VIDEOS_FOLDER_NAME)
-            viewModel.createFolder(config.privacyFolder, Constant.AUDIOS_FOLDER_NAME)
-            viewModel.createFolder(config.privacyFolder, Constant.FILES_FOLDER_NAME)
+            viewModel.createFolder(filesDir, Constant.PICTURE_FOLDER_NAME)
+            viewModel.createFolder(filesDir, Constant.VIDEOS_FOLDER_NAME)
+            viewModel.createFolder(filesDir, Constant.AUDIOS_FOLDER_NAME)
+            viewModel.createFolder(filesDir, Constant.FILES_FOLDER_NAME)
+            viewModel.createFolder(filesDir, Constant.DECRYPT_FOLDER_NAME)
             viewModel.createFolder(filesDir, Constant.INTRUDER_FOLDER_NAME)
             viewModel.createFolder(filesDir, Constant.RECYCLER_BIN_FOLDER_NAME)
+
             AppSharePreference.INSTANCE.saveInitFirstDone(true)
-            viewModel.getListFolderInVault(this, config.privacyFolder)
+            viewModel.getListFolderInVault(this, filesDir)
         }
     }
 
@@ -260,7 +261,7 @@ class ActivityVault : AppCompatActivity() {
             } else {
                 val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
                 intent.addCategory("android.intent.category.DEFAULT")
-                intent.data = Uri.parse("package:" + packageName)
+                intent.data = Uri.parse("package:$packageName")
                 launcher.launch(intent)
             }
         } else {

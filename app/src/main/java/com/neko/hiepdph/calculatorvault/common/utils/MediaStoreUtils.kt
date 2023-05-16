@@ -10,15 +10,29 @@ import android.provider.MediaStore
 import android.util.Log
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.Constant.PRIVACY_FOLDER_NAME
+import com.neko.hiepdph.calculatorvault.common.Constant.SECRET_KEY
 import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_AUDIOS
+import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_CSV
+import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_EXCEL
+import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_FILE
+import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_OTHER
+import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_PDF
+import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_PICTURE
+import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_PPT
+import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_TEXT
+import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_VIDEOS
+import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_WORD
+import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_ZIP
 import com.neko.hiepdph.calculatorvault.common.Constant.archiveMimeTypes
 import com.neko.hiepdph.calculatorvault.common.Constant.extraAudioMimeTypes
 import com.neko.hiepdph.calculatorvault.common.Constant.extraDocumentMimeTypes
 import com.neko.hiepdph.calculatorvault.common.extensions.getLongValue
 import com.neko.hiepdph.calculatorvault.common.extensions.getStringValue
 import com.neko.hiepdph.calculatorvault.common.extensions.queryCursor
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.GroupItem
-import com.neko.hiepdph.calculatorvault.data.model.ListItem
+import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.*
 
@@ -44,25 +58,22 @@ object MediaStoreUtils {
                     }
                     val fullMimetype = cursor.getStringValue(MediaStore.Files.FileColumns.MIME_TYPE)
                         ?.lowercase(Locale.getDefault()) ?: return@queryCursor
-                    val id = cursor.getLongValue(MediaStore.Files.FileColumns._ID)
                     val size = cursor.getLongValue(MediaStore.Files.FileColumns.SIZE)
                     if (size == 0L) {
                         return@queryCursor
                     }
 
                     val path = cursor.getStringValue(MediaStore.Files.FileColumns.DATA)
-                    val lastModified =
-                        cursor.getLongValue(MediaStore.Files.FileColumns.DATE_MODIFIED) * 1000
 
                     val mimetype = fullMimetype.substringBefore("/")
 
                     when (type) {
-                        Constant.TYPE_PICTURE -> {
+                        TYPE_PICTURE -> {
                             if (mimetype == "image") {
                                 val parentFolderPath = File(path).parentFile?.path
                                 val parentFolder = File(path).parentFile?.name ?: "No_name"
                                 if (parentFolder.startsWith(".") || parentFolderPath?.contains(
-                                        Constant.PRIVACY_FOLDER_NAME
+                                        PRIVACY_FOLDER_NAME
                                     ) == true
                                 ) {
                                     return@queryCursor
@@ -72,19 +83,19 @@ object MediaStoreUtils {
                                         Pair(
                                             parentFolder, GroupItem(
                                                 parentFolder,
-                                                Constant.TYPE_PICTURE,
+                                                TYPE_PICTURE,
                                                 mutableListOf(),
                                                 parentFolderPath.toString()
                                             )
                                         )
                                     )
                                 } else {
-                                    if (!folders.any { it.second?.folderPath == parentFolderPath }) {
+                                    if (!folders.any { it.second.folderPath == parentFolderPath }) {
                                         folders.add(
                                             Pair(
                                                 parentFolder, GroupItem(
                                                     parentFolder,
-                                                    Constant.TYPE_PICTURE,
+                                                    TYPE_PICTURE,
                                                     mutableListOf(),
                                                     parentFolderPath.toString()
                                                 )
@@ -95,19 +106,19 @@ object MediaStoreUtils {
 
                                 if (path.isNotEmpty()) {
 
-                                    folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataList?.add(
+                                    folders.find { it.second.folderPath == parentFolderPath }?.second?.dataList?.add(
                                         path
                                     )
                                 }
                             }
                         }
-                        Constant.TYPE_VIDEOS -> {
+                        TYPE_VIDEOS -> {
                             if (mimetype == "video") {
 
                                 val parentFolderPath = File(path).parentFile?.path
                                 val parentFolder = File(path).parentFile?.name ?: "No_name"
                                 if (parentFolder.startsWith(".") || parentFolderPath?.contains(
-                                        Constant.PRIVACY_FOLDER_NAME
+                                        PRIVACY_FOLDER_NAME
                                     ) == true
                                 ) {
                                     return@queryCursor
@@ -117,18 +128,18 @@ object MediaStoreUtils {
                                         Pair(
                                             parentFolder, GroupItem(
                                                 parentFolder,
-                                                Constant.TYPE_VIDEOS,
+                                                TYPE_VIDEOS,
                                                 mutableListOf(),
                                                 File(path).parentFile?.path ?: ""
                                             )
                                         )
                                     )
-                                } else if (!folders.any { it.second?.folderPath == parentFolderPath }) {
+                                } else if (!folders.any { it.second.folderPath == parentFolderPath }) {
                                     folders.add(
                                         Pair(
                                             parentFolder, GroupItem(
                                                 parentFolder,
-                                                Constant.TYPE_VIDEOS,
+                                                TYPE_VIDEOS,
                                                 mutableListOf(),
                                                 File(path).parentFile?.path ?: ""
                                             )
@@ -137,7 +148,7 @@ object MediaStoreUtils {
                                 }
 
                                 if (path.isNotEmpty()) {
-                                    folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataList?.add(
+                                    folders.find { it.second.folderPath == parentFolderPath }?.second?.dataList?.add(
                                         path
                                     )
                                 }
@@ -149,7 +160,7 @@ object MediaStoreUtils {
                                 val parentFolderPath = File(path).parentFile?.path
                                 val parentFolder = File(path).parentFile?.name ?: "No_name"
                                 if (parentFolder.startsWith(".") || parentFolderPath?.contains(
-                                        Constant.PRIVACY_FOLDER_NAME
+                                        PRIVACY_FOLDER_NAME
                                     ) == true
                                 ) {
                                     return@queryCursor
@@ -166,7 +177,7 @@ object MediaStoreUtils {
                                         )
                                     )
                                 } else {
-                                    if (!folders.any { it.second?.folderPath == parentFolderPath }) {
+                                    if (!folders.any { it.second.folderPath == parentFolderPath }) {
                                         folders.add(
                                             Pair(
                                                 parentFolder, GroupItem(
@@ -181,13 +192,13 @@ object MediaStoreUtils {
                                 }
 
                                 if (path.isNotEmpty()) {
-                                    folders.find { it.second?.folderPath == parentFolderPath }?.second?.dataList?.add(
+                                    folders.find { it.second.folderPath == parentFolderPath }?.second?.dataList?.add(
                                         path
                                     )
                                 }
                             }
                         }
-                        Constant.TYPE_FILE -> {
+                        TYPE_FILE -> {
                             if (mimetype == "text" || extraDocumentMimeTypes.contains(fullMimetype) || archiveMimeTypes.contains(
                                     fullMimetype
                                 )
@@ -198,7 +209,7 @@ object MediaStoreUtils {
                                         Pair(
                                             parentFolder, GroupItem(
                                                 parentFolder,
-                                                Constant.TYPE_FILE,
+                                                TYPE_FILE,
                                                 mutableListOf(),
                                                 File(path).parentFile?.path ?: "",
                                                 mutableSetOf()
@@ -207,44 +218,43 @@ object MediaStoreUtils {
                                     )
                                 }
                                 if (path.isNotEmpty() && !path.contains(PRIVACY_FOLDER_NAME)) {
-                                    if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF)) {
-                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_PDF)
+                                    if (name.lowercase(Locale.ROOT).endsWith(TYPE_PDF)) {
+                                        folders[0].second.dataTypeList?.add(TYPE_PDF)
                                         return@queryCursor
                                     }
-                                    if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_CSV)) {
-                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_CSV)
+                                    if (name.lowercase(Locale.ROOT).endsWith(TYPE_CSV)) {
+                                        folders[0].second.dataTypeList?.add(TYPE_CSV)
                                         return@queryCursor
                                     }
-                                    if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPT)) {
-                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_PPT)
+                                    if (name.lowercase(Locale.ROOT).endsWith(TYPE_PPT)) {
+                                        folders[0].second.dataTypeList?.add(TYPE_PPT)
                                         return@queryCursor
                                     }
-                                    if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PPT)) {
-                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_PPTX)
+                                    if (name.lowercase(Locale.ROOT).endsWith(TYPE_PPT)) {
+                                        folders[0].second.dataTypeList?.add(Constant.TYPE_PPTX)
                                         return@queryCursor
                                     }
-                                    if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_TEXT)) {
-                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_TEXT)
+                                    if (name.lowercase(Locale.ROOT).endsWith(TYPE_TEXT)) {
+                                        folders[0].second.dataTypeList?.add(TYPE_TEXT)
                                         return@queryCursor
                                     }
-                                    if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORD)) {
-                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_WORD)
+                                    if (name.lowercase(Locale.ROOT).endsWith(TYPE_WORD)) {
+                                        folders[0].second.dataTypeList?.add(TYPE_WORD)
                                         return@queryCursor
                                     }
-                                    if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_EXCEL)) {
-                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_EXCEL)
+                                    if (name.lowercase(Locale.ROOT).endsWith(TYPE_EXCEL)) {
+                                        folders[0].second.dataTypeList?.add(TYPE_EXCEL)
                                         return@queryCursor
                                     }
                                     if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_WORDX)) {
-                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_WORD)
+                                        folders[0].second.dataTypeList?.add(TYPE_WORD)
                                         return@queryCursor
                                     }
-                                    if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_ZIP)) {
-                                        folders[0].second?.dataTypeList?.add(Constant.TYPE_ZIP)
+                                    if (name.lowercase(Locale.ROOT).endsWith(TYPE_ZIP)) {
+                                        folders[0].second.dataTypeList?.add(TYPE_ZIP)
                                         return@queryCursor
                                     }
-                                    Log.d("TAG", "getListGroupItem: " + path)
-                                    folders[0].second?.dataTypeList?.add(Constant.TYPE_OTHER)
+                                    folders[0].second.dataTypeList?.add(TYPE_OTHER)
 
                                 }
 
@@ -277,9 +287,9 @@ object MediaStoreUtils {
         }
     }
 
-    fun getAllImage(context: Context): List<ListItem> {
+    fun getAllImage(context: Context): List<FileVaultItem> {
         try {
-            val listImageChild = mutableListOf<ListItem>()
+            val listImageChild = mutableListOf<FileVaultItem>()
             val uri = MediaStore.Images.Media.getContentUri("external")
             val projection = arrayOf(
                 MediaStore.Images.Media.DATA,
@@ -301,15 +311,21 @@ object MediaStoreUtils {
 
                 if (childPath.isNotBlank()) {
                     listImageChild.add(
-                        ListItem(
-                            id,
+                        FileVaultItem(
+                            0,
                             childPath,
-                            File(childPath).parentFile?.path.toString(),
+                            "",
+                            "",
                             name,
                             size,
                             modified,
-                            Calendar.getInstance().timeInMillis,
-                            Constant.TYPE_PICTURE
+                            0L,
+                            id,
+                            getImageResolution(childPath),
+                            "",
+                            0,
+                            1,
+                            TYPE_PICTURE,
                         )
                     )
                 }
@@ -321,9 +337,9 @@ object MediaStoreUtils {
         }
     }
 
-    fun getChildImageFromPath(context: Context, path: String): List<ListItem> {
+    fun getChildImageFromPath(context: Context, path: String): List<FileVaultItem> {
         try {
-            val listImageChild = mutableListOf<ListItem>()
+            val listImageChild = mutableListOf<FileVaultItem>()
             val uri = MediaStore.Images.Media.getContentUri("external")
             val projection = arrayOf(
                 MediaStore.Images.Media.DATA,
@@ -332,7 +348,6 @@ object MediaStoreUtils {
                 MediaStore.Images.Media.DATE_MODIFIED,
                 MediaStore.Images.Media._ID
             )
-            Log.d("TAG", "getChildImageFromPath: " + path)
             val selection =
                 MediaStore.Images.Media.DATA + " LIKE ? AND " + MediaStore.Images.Media.DATA + " NOT LIKE ?"
             val selectionArgs = arrayOf("$path/%", "$path/%/%")
@@ -347,17 +362,21 @@ object MediaStoreUtils {
 
                 if (childPath.isNotBlank() && childPath != path) {
                     listImageChild.add(
-                        ListItem(
-                            id,
+                        FileVaultItem(
+                            0,
                             childPath,
-                            path,
+                            "",
+                            "",
                             name,
                             size,
                             modified,
-                            Calendar.getInstance().timeInMillis,
+                            0L,
+                            id,
                             getImageResolution(childPath),
+                            "",
                             0,
-                            Constant.TYPE_PICTURE,
+                            1,
+                            TYPE_PICTURE,
                         )
                     )
                 }
@@ -370,9 +389,9 @@ object MediaStoreUtils {
 
     }
 
-    fun getChildVideoFromPath(context: Context, path: String): List<ListItem> {
+    fun getChildVideoFromPath(context: Context, path: String): List<FileVaultItem> {
 
-        val listVideoChild = mutableListOf<ListItem>()
+        val listVideoChild = mutableListOf<FileVaultItem>()
         try {
             val uri = MediaStore.Video.Media.getContentUri("external")
             val projection = arrayOf(
@@ -380,7 +399,8 @@ object MediaStoreUtils {
                 MediaStore.Video.Media.DISPLAY_NAME,
                 MediaStore.Video.Media.SIZE,
                 MediaStore.Video.Media.DATE_MODIFIED,
-                MediaStore.Video.Media._ID
+                MediaStore.Video.Media._ID,
+                MediaStore.Video.Media.ARTIST
             )
             val selection = MediaStore.Video.Media.DATA + " LIKE ?"
             val selectionArgs = arrayOf("$path/%")
@@ -390,18 +410,25 @@ object MediaStoreUtils {
                 val size = cursor.getLongValue(MediaStore.Video.Media.SIZE)
                 val modified = cursor.getLongValue(MediaStore.Video.Media.DATE_MODIFIED)
                 val name = cursor.getStringValue(MediaStore.Video.Media.DISPLAY_NAME)
+                val artist = cursor.getStringValue(MediaStore.Video.Media.ARTIST)
 
                 if (childPath.isNotBlank()) {
                     listVideoChild.add(
-                        ListItem(
-                            id,
+                        FileVaultItem(
+                            0,
                             childPath,
-                            path,
+                            "",
+                            "",
                             name,
                             size,
                             modified,
-                            Calendar.getInstance().timeInMillis,
-                            Constant.TYPE_VIDEOS
+                            0L,
+                            id,
+                            getImageResolution(childPath),
+                            "",
+                            0,
+                            1,
+                            TYPE_VIDEOS,
                         )
                     )
                 }
@@ -415,8 +442,8 @@ object MediaStoreUtils {
 
     fun getChildAudioFromPath(
         context: Context, path: String
-    ): List<ListItem> {
-        val listAudioChild = mutableListOf<ListItem>()
+    ): List<FileVaultItem> {
+        val listAudioChild = mutableListOf<FileVaultItem>()
 
         try {
 
@@ -426,7 +453,8 @@ object MediaStoreUtils {
                 MediaStore.Audio.Media.DISPLAY_NAME,
                 MediaStore.Audio.Media.SIZE,
                 MediaStore.Audio.Media.DATE_MODIFIED,
-                MediaStore.Audio.Media._ID
+                MediaStore.Audio.Media._ID,
+                MediaStore.Audio.Media.ARTIST
             )
             val selection = MediaStore.Audio.Media.DATA + " LIKE ?"
 
@@ -437,22 +465,27 @@ object MediaStoreUtils {
                 val size = cursor.getLongValue(MediaStore.Audio.Media.SIZE)
                 val modified = cursor.getLongValue(MediaStore.Audio.Media.DATE_MODIFIED)
                 val name = cursor.getStringValue(MediaStore.Audio.Media.DISPLAY_NAME)
+                val artist = cursor.getStringValue(MediaStore.Audio.Media.ARTIST)
 
                 if (childPath.isNotBlank()) {
-                    val thumb = getThumbnail(childPath)
                     listAudioChild.add(
-                        ListItem(
-                            id,
+                        FileVaultItem(
+                            0,
                             childPath,
-                            path,
+                            "",
+                            "",
                             name,
                             size,
                             modified,
-                            Calendar.getInstance().timeInMillis,
+                            0L,
+                            id,
+                            getImageResolution(childPath),
                             "",
-                            getDuration(context, childPath),
+                            0,
+                            1,
                             TYPE_AUDIOS,
-                            thumb = thumb
+                            null,
+                            encodeToByteArray(getThumbnail(childPath))
                         )
                     )
                 }
@@ -463,8 +496,8 @@ object MediaStoreUtils {
         return listAudioChild
     }
 
-    fun getChildFileFromPath(context: Context, path: String, type: String): List<ListItem> {
-        val listFileChild = mutableListOf<ListItem>()
+    fun getChildFileFromPath(context: Context, path: String, type: String): List<FileVaultItem> {
+        val listFileChild = mutableListOf<FileVaultItem>()
         try {
             val uri = MediaStore.Files.getContentUri("external")
             val projection = arrayOf(
@@ -492,171 +525,203 @@ object MediaStoreUtils {
                 ) {
                     if (path.isNotEmpty() && !childPath.contains(PRIVACY_FOLDER_NAME)) {
                         when (type) {
-                            Constant.TYPE_PDF -> {
-                                if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_PDF)) {
+                            TYPE_PDF -> {
+                                if (name.lowercase(Locale.ROOT).endsWith(TYPE_PDF)) {
                                     listFileChild.add(
-                                        ListItem(
-                                            id,
+                                        FileVaultItem(
+                                            0,
                                             childPath,
-                                            File(childPath).parentFile?.path ?: "",
+                                            "",
+                                            "",
                                             name,
                                             size,
                                             modified,
-                                            Calendar.getInstance().timeInMillis,
+                                            0L,
+                                            id,
+                                            getImageResolution(childPath),
                                             "",
                                             0,
-                                            Constant.TYPE_FILE,
-                                            Constant.TYPE_PDF
+                                            1,
+                                            TYPE_FILE,
+                                            TYPE_PDF,
                                         )
                                     )
 
                                 }
                             }
-                            Constant.TYPE_PPT, Constant.TYPE_PPTX -> {
+                            TYPE_PPT, Constant.TYPE_PPTX -> {
                                 if (name.lowercase(Locale.ROOT)
                                         .endsWith(Constant.TYPE_PPTX) || (name.lowercase(Locale.ROOT)
-                                        .endsWith(Constant.TYPE_PPT))
+                                        .endsWith(TYPE_PPT))
                                 ) {
                                     listFileChild.add(
-                                        ListItem(
-                                            id,
+                                        FileVaultItem(
+                                            0,
                                             childPath,
-                                            File(childPath).parentFile?.path ?: "",
+                                            "",
+                                            "",
                                             name,
                                             size,
                                             modified,
-                                            Calendar.getInstance().timeInMillis,
+                                            0L,
+                                            id,
+                                            getImageResolution(childPath),
                                             "",
                                             0,
-                                            Constant.TYPE_FILE,
-                                            Constant.TYPE_PPT
+                                            1,
+                                            TYPE_FILE,
+                                            TYPE_PPT,
                                         )
                                     )
                                 }
                             }
-                            Constant.TYPE_WORDX, Constant.TYPE_WORD -> {
+                            Constant.TYPE_WORDX, TYPE_WORD -> {
                                 if (name.lowercase(Locale.ROOT)
-                                        .endsWith(Constant.TYPE_WORD) || name.lowercase(Locale.ROOT)
+                                        .endsWith(TYPE_WORD) || name.lowercase(Locale.ROOT)
                                         .endsWith(Constant.TYPE_WORDX)
                                 ) {
                                     listFileChild.add(
-                                        ListItem(
-                                            id,
+                                        FileVaultItem(
+                                            0,
                                             childPath,
-                                            File(childPath).parentFile?.path ?: "",
+                                            "",
+                                            "",
                                             name,
                                             size,
                                             modified,
-                                            Calendar.getInstance().timeInMillis,
+                                            0L,
+                                            id,
+                                            getImageResolution(childPath),
                                             "",
                                             0,
-                                            Constant.TYPE_FILE,
-                                            Constant.TYPE_WORD
+                                            1,
+                                            TYPE_FILE,
+                                            TYPE_WORD,
                                         )
                                     )
                                 }
                             }
-                            Constant.TYPE_EXCEL -> {
-                                if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_EXCEL)) {
+                            TYPE_EXCEL -> {
+                                if (name.lowercase(Locale.ROOT).endsWith(TYPE_EXCEL)) {
                                     listFileChild.add(
-                                        ListItem(
-                                            id,
+                                        FileVaultItem(
+                                            0,
                                             childPath,
-                                            File(childPath).parentFile?.path ?: "",
+                                            "",
+                                            "",
                                             name,
                                             size,
                                             modified,
-                                            Calendar.getInstance().timeInMillis,
+                                            0L,
+                                            id,
+                                            getImageResolution(childPath),
                                             "",
                                             0,
-                                            Constant.TYPE_FILE,
-                                            Constant.TYPE_EXCEL
+                                            1,
+                                            TYPE_FILE,
+                                            TYPE_EXCEL,
                                         )
                                     )
                                 }
                             }
-                            Constant.TYPE_CSV -> {
-                                if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_CSV)) {
+                            TYPE_CSV -> {
+                                if (name.lowercase(Locale.ROOT).endsWith(TYPE_CSV)) {
                                     listFileChild.add(
-                                        ListItem(
-                                            id,
+                                        FileVaultItem(
+                                            0,
                                             childPath,
-                                            File(childPath).parentFile?.path ?: "",
+                                            "",
+                                            "",
                                             name,
                                             size,
                                             modified,
-                                            Calendar.getInstance().timeInMillis,
+                                            0L,
+                                            id,
+                                            getImageResolution(childPath),
                                             "",
                                             0,
-                                            Constant.TYPE_FILE,
-                                            Constant.TYPE_CSV
+                                            1,
+                                            TYPE_FILE,
+                                            TYPE_CSV,
                                         )
                                     )
                                 }
                             }
-                            Constant.TYPE_TEXT -> {
-                                if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_TEXT)) {
+                            TYPE_TEXT -> {
+                                if (name.lowercase(Locale.ROOT).endsWith(TYPE_TEXT)) {
                                     listFileChild.add(
-                                        ListItem(
-                                            id,
+                                        FileVaultItem(
+                                            0,
                                             childPath,
-                                            File(childPath).parentFile?.path ?: "",
+                                            "",
+                                            "",
                                             name,
                                             size,
                                             modified,
-                                            Calendar.getInstance().timeInMillis,
+                                            0L,
+                                            id,
+                                            getImageResolution(childPath),
                                             "",
                                             0,
-                                            Constant.TYPE_FILE,
-                                            Constant.TYPE_TEXT
+                                            1,
+                                            TYPE_FILE,
+                                            TYPE_TEXT,
                                         )
                                     )
                                 }
                             }
-                            Constant.TYPE_ZIP -> {
-                                if (name.lowercase(Locale.ROOT).endsWith(Constant.TYPE_ZIP)) {
+                            TYPE_ZIP -> {
+                                if (name.lowercase(Locale.ROOT).endsWith(TYPE_ZIP)) {
                                     listFileChild.add(
-                                        ListItem(
-                                            id,
+                                        FileVaultItem(
+                                            0,
                                             childPath,
-                                            File(childPath).parentFile?.path ?: "",
+                                            "",
+                                            "",
                                             name,
                                             size,
                                             modified,
-                                            Calendar.getInstance().timeInMillis,
+                                            0L,
+                                            id,
+                                            getImageResolution(childPath),
                                             "",
                                             0,
-                                            Constant.TYPE_FILE,
-                                            Constant.TYPE_ZIP
+                                            1,
+                                            TYPE_FILE,
+                                            TYPE_ZIP,
                                         )
                                     )
                                 }
                             }
                             else -> {
                                 if (!name.lowercase(Locale.ROOT)
-                                        .endsWith(Constant.TYPE_PDF) && !name.lowercase(Locale.ROOT)
+                                        .endsWith(TYPE_PDF) && !name.lowercase(Locale.ROOT)
                                         .endsWith(Constant.TYPE_PPTX) && !name.lowercase(Locale.ROOT)
-                                        .endsWith(Constant.TYPE_PPT) && !name.lowercase(Locale.ROOT)
-                                        .endsWith(Constant.TYPE_ZIP) && !name.lowercase(Locale.ROOT)
-                                        .endsWith(Constant.TYPE_TEXT) && !name.lowercase(Locale.ROOT)
-                                        .endsWith(Constant.TYPE_CSV) && !name.lowercase(Locale.ROOT)
-                                        .endsWith(Constant.TYPE_EXCEL) && !name.lowercase(Locale.ROOT)
-                                        .endsWith(Constant.TYPE_WORD) && !name.lowercase(Locale.ROOT)
+                                        .endsWith(TYPE_PPT) && !name.lowercase(Locale.ROOT)
+                                        .endsWith(TYPE_ZIP) && !name.lowercase(Locale.ROOT)
+                                        .endsWith(TYPE_TEXT) && !name.lowercase(Locale.ROOT)
+                                        .endsWith(TYPE_CSV) && !name.lowercase(Locale.ROOT)
+                                        .endsWith(TYPE_EXCEL) && !name.lowercase(Locale.ROOT)
+                                        .endsWith(TYPE_WORD) && !name.lowercase(Locale.ROOT)
                                         .endsWith(Constant.TYPE_WORDX)
                                 ) {
                                     listFileChild.add(
-                                        ListItem(
-                                            id,
+                                        FileVaultItem(
+                                            0,
                                             childPath,
-                                            File(childPath).parentFile?.path ?: "",
+                                            "",
+                                            "",
                                             name,
                                             size,
                                             modified,
-                                            Calendar.getInstance().timeInMillis,
+                                            0L,
+                                            id,
+                                            getImageResolution(childPath),
                                             "",
                                             0,
-                                            Constant.TYPE_FILE,
-                                            Constant.TYPE_OTHER
+                                            1,
+                                            TYPE_FILE,
+                                            TYPE_OTHER,
                                         )
                                     )
                                 }
@@ -682,5 +747,14 @@ object MediaStoreUtils {
     private fun getDuration(context: Context, path: String): Int {
         val mp = MediaPlayer.create(context, Uri.parse(path))
         return mp.duration
+    }
+    fun encodeToByteArray(image: Bitmap?): ByteArray {
+        val outputStream = ByteArrayOutputStream()
+        image?.compress(Bitmap.CompressFormat.PNG, 0, outputStream)
+        return outputStream.toByteArray()
+    }
+
+    fun decodeToBitmap(input: ByteArray): Bitmap? {
+        return BitmapFactory.decodeByteArray(input, 0, input.size)
     }
 }

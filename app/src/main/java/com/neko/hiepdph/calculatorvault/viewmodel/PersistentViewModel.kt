@@ -1,13 +1,11 @@
 package com.neko.hiepdph.calculatorvault.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
 import com.neko.hiepdph.calculatorvault.common.utils.SelfCleaningLiveData
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
-import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.data.repositories.AppRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -16,11 +14,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PersistentViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel() {
-    private val _listItemListPersistent = SelfCleaningLiveData<MutableList<String>>()
-    val listItemListPersistent: LiveData<MutableList<String>> get() = _listItemListPersistent
-    fun setListItemPersistentData(list: MutableList<String>) {
-        _listItemListPersistent.postValue(list)
-    }
 
     fun deleteFolder(path: String, onSuccess: () -> Unit, onError: (e: String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -37,41 +30,16 @@ class PersistentViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel(
     }
 
 
-    fun getImageChildFromFolder(path: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val listImageChild = FileUtils.getFileInDirectory(path).toMutableList()
-            setListItemPersistentData(listImageChild)
+    fun getAllFileFromFolderEncrypted(folderPath: String): LiveData<List<FileVaultItem>> {
+        return appRepo.getAllFileInEnCryptFolder(folderPath)
+    }
+
+    fun updateFileVault(fileVaultItem: FileVaultItem){
+        viewModelScope.launch {
+            appRepo.updateFileVault(fileVaultItem)
         }
     }
 
-    fun getAudioChildFromFolder(path: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val listAudioChild = FileUtils.getFileInDirectory(path).toMutableList()
-            setListItemPersistentData(listAudioChild)
-        }
-    }
-
-    fun getVideoChildFromFolder(path: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val listVideoChild = FileUtils.getFileInDirectory(path).toMutableList()
-            setListItemPersistentData(listVideoChild)
-
-        }
-    }
-
-    fun getFileChildFromFolder(path: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val listFileChild = FileUtils.getFileInDirectory(path).toMutableList()
-            setListItemPersistentData(listFileChild)
-        }
-    }
-
-    fun getAllFileChildFromFolder(path: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val listFileChild = FileUtils.getFileInDirectory(path).toMutableList()
-            setListItemPersistentData(listFileChild)
-        }
-    }
 
 //    fun getVaultItem():MutableList<FileVaultItem>{
 //        return appRepo.getAllFile()

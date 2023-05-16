@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,25 +23,23 @@ import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.utils.formatSize
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
-import com.neko.hiepdph.calculatorvault.data.model.ListItem
-import com.neko.hiepdph.calculatorvault.data.model.VaultFileDirItem
 import com.neko.hiepdph.calculatorvault.databinding.*
 
 class AdapterOtherFolder(
-    private val onClickItem: (ListItem) -> Unit,
-    private val onLongClickItem: (List<ListItem>) -> Unit,
-    private val onEditItem: (List<ListItem>) -> Unit,
-    private val onSelectAll: (List<ListItem>) -> Unit,
+    private val onClickItem: (FileVaultItem) -> Unit,
+    private val onLongClickItem: (List<FileVaultItem>) -> Unit,
+    private val onEditItem: (List<FileVaultItem>) -> Unit,
+    private val onSelectAll: (List<FileVaultItem>) -> Unit,
     private val onUnSelect: () -> Unit,
-    private val onOpenDetail: (ListItem) -> Unit,
-    private val onDeleteItem: (ListItem) -> Unit
+    private val onOpenDetail: (FileVaultItem) -> Unit,
+    private val onDeleteItem: (FileVaultItem) -> Unit
 
     ) : RecyclerView.Adapter<AdapterOtherFolder.ItemFileViewHolder>() {
-    private var listItem = mutableListOf<ListItem>()
-    private var listOfItemSelected = mutableSetOf<ListItem>()
+    private var listItem = mutableListOf<FileVaultItem>()
+    private var listOfItemSelected = mutableSetOf<FileVaultItem>()
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setData(listDataItem: List<ListItem>) {
+    fun setData(listDataItem: List<FileVaultItem>) {
         listItem = listDataItem.toMutableList()
         notifyDataSetChanged()
     }
@@ -89,7 +86,7 @@ class AdapterOtherFolder(
     }
 
 
-    override fun getItemViewType(position: Int): Int = when (listItem[position].type) {
+    override fun getItemViewType(position: Int): Int = when (listItem[position].fileType) {
         Constant.TYPE_PICTURE -> 0
         Constant.TYPE_VIDEOS -> 1
         Constant.TYPE_AUDIOS -> 2
@@ -109,11 +106,11 @@ class AdapterOtherFolder(
 
             binding.tvNameDocument.isSelected = true
 
-            when (item.type) {
+            when (item.fileType) {
                 Constant.TYPE_PICTURE -> {
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
+                    Glide.with(itemView.context).load(item.encryptedPath).apply(requestOptions)
                         .error(R.drawable.ic_error_image).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
@@ -124,7 +121,7 @@ class AdapterOtherFolder(
                 Constant.TYPE_AUDIOS -> {
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).asBitmap().load(getThumbnail(item.mPath))
+                    Glide.with(itemView.context).asBitmap().load(item.thumb)
                         .apply(requestOptions).error(R.drawable.ic_error_audio).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
@@ -135,7 +132,7 @@ class AdapterOtherFolder(
                 Constant.TYPE_VIDEOS -> {
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(item.mPath).apply(requestOptions)
+                    Glide.with(itemView.context).load(item.encryptedPath).apply(requestOptions)
                         .error(R.drawable.ic_error_video).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
@@ -168,9 +165,9 @@ class AdapterOtherFolder(
                 binding.option.show()
             }
 
-            binding.tvNameDocument.text = item.mName
+            binding.tvNameDocument.text = item.name
 
-            binding.tvSize.text = item.mSize.formatSize()
+            binding.tvSize.text = item.size.formatSize()
 
 
             binding.root.setOnLongClickListener {
@@ -216,8 +213,8 @@ class AdapterOtherFolder(
 }
 
 
-private fun getImageForItemFile(item: ListItem): Int {
-    return when (item.realType) {
+private fun getImageForItemFile(item: FileVaultItem): Int {
+    return when (item.fileRealType) {
         Constant.TYPE_WORDX -> R.drawable.ic_docx
         Constant.TYPE_WORD -> R.drawable.ic_doc
         Constant.TYPE_CSV -> R.drawable.ic_csv
@@ -300,10 +297,10 @@ private fun showPopupWindow(
 private fun showPopupWindowFile(
     context: Context,
     view: View,
-    item: ListItem,
-    onClickItem: (ListItem) -> Unit,
-    onDeleteItem: (ListItem) -> Unit,
-    onOpenDetail: (ListItem) -> Unit
+    item: FileVaultItem,
+    onClickItem: (FileVaultItem) -> Unit,
+    onDeleteItem: (FileVaultItem) -> Unit,
+    onOpenDetail: (FileVaultItem) -> Unit
 ) {
     val inflater: LayoutInflater =
         (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater?)!!

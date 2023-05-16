@@ -264,7 +264,7 @@ class ActivityAudioPlayer : AppCompatActivity() {
         ShareData.getInstance().listItemAudio.observe(this) {
             if (it.isNotEmpty()) {
                 setupPlayer(it.map { item ->
-                    item.mPath
+                    item.encryptedPath
                 })
             }
             initPlayer()

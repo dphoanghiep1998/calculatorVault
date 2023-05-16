@@ -1,15 +1,12 @@
 package com.neko.hiepdph.calculatorvault.viewmodel
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
-import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
-import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
-import com.neko.hiepdph.calculatorvault.common.utils.SelfCleaningLiveData
-import com.neko.hiepdph.calculatorvault.data.model.ListItem
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
+import com.neko.hiepdph.calculatorvault.data.repositories.AppRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,21 +14,12 @@ import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
-class IntruderViewModel @Inject constructor() : ViewModel() {
-
-    private val _listItemList = SelfCleaningLiveData<MutableList<ListItem>>()
-    val listItemList: LiveData<MutableList<ListItem>> get() = _listItemList
-    fun setListItemData(list: List<ListItem>) {
-        Log.d("TAG", "setListItemData: " + list.size)
-        _listItemList.postValue(list.toMutableList())
-    }
+class IntruderViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel() {
 
     fun getItemListFromFolder(
-       folderPath: String
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            setListItemData(FileUtils.getFileInDirectory(folderPath))
-        }
+        folderPath: String
+    ): LiveData<List<FileVaultItem>> {
+        return appRepo.getAllFileInEnCryptFolder(folderPath)
     }
 
     fun copyMoveFile(

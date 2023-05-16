@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.text.TextUtils
 import com.google.common.io.Files.getNameWithoutExtension
-import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.copyDirectoryOneLocationToAnotherLocation
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.createNewFile
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.deleteFile
@@ -13,7 +12,6 @@ import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.getExtension
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.isWritableNormalOrSaf
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.mkdir
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
-import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
 import java.io.File
 
 private const val STATE_PREPARE = 1
@@ -76,6 +74,7 @@ object CopyFiles {
         context: Context,
         files: MutableList<File>?,
         targetFolder: File,
+        targetName:MutableList<String>,
         tSize: Long,
         progress: (state: Int, value: Float, currentFile: File?) -> Unit,
         isMove: Boolean = false,
@@ -92,13 +91,12 @@ object CopyFiles {
             else totalSize = tSize
             var currentSize = 0f
             // move file
-            files?.forEach { itemFile ->
+            files?.forEachIndexed { index, itemFile ->
                 val targetFile = File(
                     createNewFile(
                         context,
                         targetFolder,
-                        CryptoCore.getInstance(context)
-                            .encryptString("P@ssw0rd123", itemFile.name)
+                        targetName[index],
                     ).toString()
                 )
 

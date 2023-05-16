@@ -2,8 +2,7 @@ package com.neko.hiepdph.calculatorvault.encryption
 
 import android.content.Context
 import android.util.Base64
-import com.neko.hiepdph.calculatorvault.config.EncryptionMode
-import com.neko.hiepdph.calculatorvault.dialog.DialogEncryptionMode
+import android.util.Log
 import java.io.*
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -26,7 +25,13 @@ class CryptoCore(private val context: Context) {
     }
 
     // Mã hóa file và lưu kết quả vào file khác
-    fun encodeFile(inputFile: File, outputFile: File) {
+    fun encodeFile(
+        inputFile: File,
+        outputFile: File,
+        onProgress: () -> Unit,
+        onSuccess: () -> Unit,
+        onError: (e: Exception) -> Unit
+    ) {
         val inputStream: InputStream = BufferedInputStream(FileInputStream(inputFile))
         val outputStream: OutputStream = BufferedOutputStream(FileOutputStream(outputFile))
 
@@ -34,9 +39,14 @@ class CryptoCore(private val context: Context) {
             val buffer = ByteArray(1024)
             var bytesRead: Int
             while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                val base64 = Base64.encodeToString(buffer.sliceArray(0 until bytesRead), Base64.DEFAULT)
+                val base64 =
+                    Base64.encodeToString(buffer.sliceArray(0 until bytesRead), Base64.DEFAULT)
                 outputStream.write(base64.toByteArray(Charsets.UTF_8))
+                onProgress()
             }
+            onSuccess()
+        } catch (e: Exception) {
+            onError(e)
         } finally {
             inputStream.close()
             outputStream.close()
@@ -44,7 +54,13 @@ class CryptoCore(private val context: Context) {
     }
 
     // Giải mã file và lưu kết quả vào file khác
-    fun decodeFile(inputFile: File, outputFile: File) {
+    fun decodeFile(
+        inputFile: File,
+        outputFile: File,
+        onProgress: () -> Unit,
+        onSuccess: () -> Unit,
+        onError: (e: Exception) -> Unit
+    ) {
         val inputStream: InputStream = BufferedInputStream(FileInputStream(inputFile))
         val outputStream: OutputStream = BufferedOutputStream(FileOutputStream(outputFile))
 
@@ -54,7 +70,11 @@ class CryptoCore(private val context: Context) {
             while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                 val decoded = Base64.decode(buffer.sliceArray(0 until bytesRead), Base64.DEFAULT)
                 outputStream.write(decoded)
+                onProgress()
             }
+            onSuccess()
+        } catch (e: Exception) {
+            onError(e)
         } finally {
             inputStream.close()
             outputStream.close()

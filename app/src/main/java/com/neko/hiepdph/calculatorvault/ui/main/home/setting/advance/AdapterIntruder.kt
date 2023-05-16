@@ -7,15 +7,15 @@ import com.bumptech.glide.Glide
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
-import com.neko.hiepdph.calculatorvault.data.model.ListItem
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.LayoutItemPersistentPictureBinding
 
-class AdapterIntruder(private val onClickItem: (ListItem) -> Unit) :
+class AdapterIntruder(private val onClickItem: (FileVaultItem) -> Unit) :
     RecyclerView.Adapter<AdapterIntruder.IntruderViewHolder>() {
-    private var imageData = mutableListOf<ListItem>()
+    private var imageData = mutableListOf<FileVaultItem>()
 
 
-    fun setData(data:List<ListItem>){
+    fun setData(data:List<FileVaultItem>){
         imageData.clear()
         imageData.addAll(data)
         notifyDataSetChanged()
@@ -41,7 +41,7 @@ class AdapterIntruder(private val onClickItem: (ListItem) -> Unit) :
         with(holder) {
             val item = imageData[absoluteAdapterPosition]
             binding.checkBox.hide()
-            Glide.with(itemView.context).load(item.mPath).error(R.drawable.ic_error_image)
+            Glide.with(itemView.context).load(item.encryptedPath).error(R.drawable.ic_error_image)
                 .into(binding.imvThumb)
             binding.root.clickWithDebounce {
                 onClickItem(item)

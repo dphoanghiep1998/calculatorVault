@@ -4,6 +4,7 @@ import com.neko.hiepdph.calculatorvault.R
 
 
 object Constant {
+    const val DECRYPT_FOLDER_NAME = "DECRYPT"
     const val KEY_DARK_MODE = "KEY_DARK_MODE"
     const val KEY_FAKE_PASSWORD = "KEY_FAKE_PASSWORD"
     const val KEY_PHOTO_INTRUDER = "KEY_PHOTO_INTRUDER"
@@ -175,7 +176,7 @@ object Constant {
 
     const val PRIVACY_FOLDER_NAME = "privacy_neko_$SECRET_KEY"
 
-     val listIcon = mutableListOf(
+    val listIcon = mutableListOf(
         R.drawable.ic_icon_app_1,
         R.drawable.ic_icon_app_2,
         R.drawable.ic_icon_app_3,

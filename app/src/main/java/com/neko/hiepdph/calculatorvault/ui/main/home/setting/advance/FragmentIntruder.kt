@@ -31,9 +31,6 @@ class FragmentIntruder : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        viewModel.getItemListFromFolder(
-            requireContext().config.intruderFolder.path
-        )
         binding = FragmentIntruderBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -45,7 +42,7 @@ class FragmentIntruder : Fragment() {
     }
 
     private fun observeData() {
-        viewModel.listItemList.observe(viewLifecycleOwner) {
+        viewModel.getItemListFromFolder(requireContext().config.intruderFolder.path).observe(viewLifecycleOwner) {
             it?.let {
                 adapter?.setData(it)
             }

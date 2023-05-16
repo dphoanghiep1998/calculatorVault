@@ -25,7 +25,7 @@ class DialogDetail(
     private var timeLock: Long? = null,
     private var path: String? = null,
     private var originalPath: String? = null,
-    private var encryptionMode: String? = null,
+    private var encryptionMode: Int? = null,
 ) : DialogFragment() {
     private lateinit var binding: DialogDetailBinding
 
@@ -54,7 +54,7 @@ class DialogDetail(
         var timeLock: Long? = null
         var path: String? = null
         var originalPath: String? = null
-        var encryptionMode: String? = null
+        var encryptionMode: Int? = null
 
         fun build() = DialogDetail(this)
 
@@ -116,7 +116,7 @@ class DialogDetail(
             binding.tvResolution.hide()
             binding.tvResolutionValue.hide()
         } else {
-            binding.tvResolutionValue.text = "12x12"
+            binding.tvResolutionValue.text = resolution
         }
 
         if (timeLock == null) {
@@ -133,13 +133,19 @@ class DialogDetail(
             binding.tvPathValue.text = path
         }
 
+        if (originalPath == null) {
+            binding.tvOriginPath.hide()
+            binding.tvOriginPathValue.hide()
+        } else {
+            binding.tvOriginPathValue.text = originalPath
+        }
+
 
 
         initButton()
     }
 
     private fun initButton() {
-
 
         binding.btnConfirm.clickWithDebounce {
             dismiss()

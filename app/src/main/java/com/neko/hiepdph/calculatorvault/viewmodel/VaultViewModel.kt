@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.utils.*
-import com.neko.hiepdph.calculatorvault.data.model.VaultFileDirItem
+import com.neko.hiepdph.calculatorvault.data.model.VaultDir
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,9 +21,9 @@ class VaultViewModel @Inject constructor() : ViewModel() {
     private val _dataLoading = MutableLiveData<Boolean>()
     val dataLoading: LiveData<Boolean> = _dataLoading
 
-    private val _listFolderInVault = MutableLiveData<MutableList<VaultFileDirItem>>()
-    val listFolderInVault: LiveData<MutableList<VaultFileDirItem>> = _listFolderInVault
-    fun setDataToListFolderVault(data: MutableList<VaultFileDirItem>) {
+    private val _listFolderInVault = MutableLiveData<MutableList<VaultDir>>()
+    val listFolderInVault: LiveData<MutableList<VaultDir>> = _listFolderInVault
+    fun setDataToListFolderVault(data: MutableList<VaultDir>) {
         _listFolderInVault.postValue(data)
     }
 
@@ -34,8 +34,7 @@ class VaultViewModel @Inject constructor() : ViewModel() {
 
     fun getListFolderInVault(context: Context, parentDir: File) {
         viewModelScope.launch(Dispatchers.IO) {
-            val listVaultFolder = mutableListOf<VaultFileDirItem>()
-            Log.d("TAG", "getListFolderInVault: "+parentDir.path)
+            val listVaultFolder = mutableListOf<VaultDir>()
             val listFile = FileUtils.getFoldersInDirectory(parentDir.path)
             var type: String
             for (file in listFile) {
@@ -57,6 +56,8 @@ class VaultViewModel @Inject constructor() : ViewModel() {
                         context.getString(R.string.files)
                     }
                     Constant.RECYCLER_BIN_FOLDER_NAME -> continue
+                    Constant.INTRUDER_FOLDER_NAME -> continue
+                    Constant.DECRYPT_FOLDER_NAME -> continue
 
                     else -> {
                         type = Constant.TYPE_ADD_MORE
@@ -65,8 +66,9 @@ class VaultViewModel @Inject constructor() : ViewModel() {
                 }
                 val count = file.listFiles()?.size ?: 0
 
+                Log.d("TAG", "getListFolderInVault: " +file.absolutePath)
                 listVaultFolder.add(
-                    VaultFileDirItem(
+                    VaultDir(
                         file.absolutePath,
                         name,
                         type,

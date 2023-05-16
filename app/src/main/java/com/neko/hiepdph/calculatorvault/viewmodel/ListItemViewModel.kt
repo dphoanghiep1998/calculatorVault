@@ -11,7 +11,6 @@ import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
 import com.neko.hiepdph.calculatorvault.common.utils.SelfCleaningLiveData
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
-import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.data.repositories.AppRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -22,9 +21,9 @@ import javax.inject.Inject
 @HiltViewModel
 class ListItemViewModel @Inject constructor(val repo: AppRepo) : ViewModel() {
 
-    private val _listItemList = SelfCleaningLiveData<MutableList<ListItem>>()
-    val listItemList: LiveData<MutableList<ListItem>> get() = _listItemList
-    fun setListItemData(list: List<ListItem>) {
+    private val _listItemList = SelfCleaningLiveData<MutableList<FileVaultItem>>()
+    val listItemList: LiveData<MutableList<FileVaultItem>> get() = _listItemList
+    fun setListItemData(list: List<FileVaultItem>) {
         Log.d("TAG", "setListItemData: " + list.size)
         _listItemList.postValue(list.toMutableList())
     }
@@ -65,6 +64,7 @@ class ListItemViewModel @Inject constructor(val repo: AppRepo) : ViewModel() {
         context: Context,
         listFile: MutableList<File>,
         destination: File,
+        targetName:MutableList<String>,
         progress: (state: Int, value: Float, currentFile: File?) -> Unit,
         onSuccess: () -> Unit,
         onError: (t: Throwable) -> Unit,
@@ -75,6 +75,7 @@ class ListItemViewModel @Inject constructor(val repo: AppRepo) : ViewModel() {
                 context,
                 listFile,
                 destination,
+                targetName,
                 0L,
                 progress,
                 true,

@@ -5,21 +5,27 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
-import com.neko.hiepdph.calculatorvault.data.model.ListItem
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityCameraBinding
+import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
+import com.neko.hiepdph.calculatorvault.viewmodel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.*
 
 @AndroidEntryPoint
 class ActivityCamera : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
-    private var listImagePrevious = mutableListOf<ListItem>()
+    private var listImagePrevious = mutableListOf<FileVaultItem>()
+    private val viewModel by viewModels<AppViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCameraBinding.inflate(layoutInflater)
@@ -43,7 +49,7 @@ class ActivityCamera : AppCompatActivity() {
             if (it.resultCode == RESULT_CANCELED) {
                 lifecycleScope.launch {
                     val newImage = MediaStoreUtils.getAllImage(this@ActivityCamera)
-                    val listItemDiff = mutableListOf<ListItem>()
+                    val listItemDiff = mutableListOf<FileVaultItem>()
 
                     for (i in newImage.indices) {
                         if (listImagePrevious.isNotEmpty()) {
@@ -60,27 +66,39 @@ class ActivityCamera : AppCompatActivity() {
                     if (listItemDiff.isNotEmpty()) {
                         val newList = listItemDiff.toMutableList()
                         newList.forEach { item ->
-                            item.path = config.picturePrivacyFolder.path + "/${item.mName}"
+                            item.apply {
+                                timeLock = Calendar.getInstance().timeInMillis
+                                encryptionType = 1
+                                encryptedPath = "${config.picturePrivacyFolder.path}/${
+                                    CryptoCore.getInstance(this@ActivityCamera)
+                                        .encryptString(Constant.SECRET_KEY, name)
+                                }"
+                            }
+                            viewModel.insertVaultItem(item)
                         }
-                        val listItemVault = config.listItemVault?.toMutableList() ?: mutableListOf()
-                        listItemVault.addAll(newList)
-                        config.listItemVault = listItemVault
-
-                        CopyFiles.copy(
+                        val listEncryptedString = mutableListOf<String>()
+                        listEncryptedString.addAll(listItemDiff.map { item ->
+                            CryptoCore.getInstance(
+                                this@ActivityCamera
+                            ).encryptString(Constant.SECRET_KEY, item.name)
+                        })
+                        CopyFiles.copyEncrypt(
                             this@ActivityCamera,
-                            listItemDiff.map { item -> File(item.path) }.toMutableList(),
+                            listItemDiff.map { item -> File(item.originalPath) }.toMutableList(),
                             config.picturePrivacyFolder,
+                            listEncryptedString,
                             0L,
                             progress = { state: Int, value: Float, currentFile: File? ->
 
                             },
-                            false,
+                            true,
                             onError = {
                                 finish()
                             },
                             onSuccess = {
                                 finish()
-                            }
+                            },
+                            encryptionMode = 1
                         )
 
                     } else {

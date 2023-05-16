@@ -1,6 +1,5 @@
 package com.neko.hiepdph.calculatorvault.common.adapter
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
@@ -9,14 +8,14 @@ import androidx.viewpager.widget.PagerAdapter
 import com.bumptech.glide.Glide
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.customview.CustomPhotoView
-import com.neko.hiepdph.calculatorvault.data.model.ListItem
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 
 
 interface TapViewListener {
     fun onTap()
 }
 
-class ImagePagerAdapter(val context: Context,private val listImage: MutableList<ListItem>) : PagerAdapter() {
+class ImagePagerAdapter(val context: Context,private val listImage: MutableList<FileVaultItem>) : PagerAdapter() {
     private var listPhotoView: MutableList<CustomPhotoView> = mutableListOf()
     private var mListener: TapViewListener? = null
 
@@ -33,7 +32,7 @@ class ImagePagerAdapter(val context: Context,private val listImage: MutableList<
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val photoView = CustomPhotoView(container.context)
-        Glide.with(context).load(listImage[position].path).centerInside().into(photoView)
+        Glide.with(context).load(listImage[position].encryptedPath).centerInside().into(photoView)
         container.addView(
             photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
         )

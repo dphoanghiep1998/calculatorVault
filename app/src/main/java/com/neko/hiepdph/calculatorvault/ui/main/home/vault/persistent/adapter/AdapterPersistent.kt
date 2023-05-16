@@ -145,7 +145,7 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(item.path)
+                    Glide.with(itemView.context).load(item.encryptedPath)
                         .placeholder(R.drawable.ic_error_image).apply(requestOptions)
                         .into(binding.imvThumb)
 
@@ -196,7 +196,7 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(item.path).apply(requestOptions)
+                    Glide.with(itemView.context).load(item.encryptedPath).apply(requestOptions)
                         .error(R.drawable.ic_error_video).into(binding.imvThumb)
 
                     binding.checkBox.isChecked = item in listOfItemSelected
@@ -249,7 +249,7 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).asBitmap().load(item.path).apply(requestOptions)
+                    Glide.with(itemView.context).asBitmap().load(item.encryptedPath).apply(requestOptions)
                         .error(R.drawable.ic_error_audio).into(binding.imvThumb)
                     binding.checkBox.isChecked = item in listOfItemSelected
 
@@ -262,9 +262,7 @@ class AdapterPersistent(
                     }
                     binding.tvNameAudio.text = item.name
                     binding.tvDurationAuthor.text =
-                        item.durationLength.toString() + " - " + item.artist(
-                            itemView.context
-                        )
+                        item.durationLength.toString() + " - " + item.artist
                     binding.option.clickWithDebounce {
                         showPopupWindow(
                             itemView.context,
@@ -328,8 +326,8 @@ class AdapterPersistent(
                         binding.checkBox.hide()
                         binding.option.show()
                     }
-                    binding.tvNameDocument.text = item.mName
-                    binding.tvSize.text = item.mSize.formatSize()
+                    binding.tvNameDocument.text = item.name
+                    binding.tvSize.text = item.size.formatSize()
                     binding.option.clickWithDebounce {
                         showPopupWindowFile(
                             itemView.context,
@@ -432,8 +430,8 @@ class AdapterPersistent(
 }
 
 
-private fun getImageForItemFile(item: ListItem): Int {
-    return when (item.realType) {
+private fun getImageForItemFile(item: FileVaultItem): Int {
+    return when (item.fileRealType) {
         Constant.TYPE_WORDX -> R.drawable.ic_docx
         Constant.TYPE_WORD -> R.drawable.ic_doc
         Constant.TYPE_CSV -> R.drawable.ic_csv
@@ -516,10 +514,10 @@ private fun showPopupWindow(
 private fun showPopupWindowFile(
     context: Context,
     view: View,
-    item: ListItem,
-    onClickItem: (ListItem) -> Unit,
-    onDeleteItem: (ListItem) -> Unit,
-    onOpenDetail: (ListItem) -> Unit
+    item: FileVaultItem,
+    onClickItem: (FileVaultItem) -> Unit,
+    onDeleteItem: (FileVaultItem) -> Unit,
+    onOpenDetail: (FileVaultItem) -> Unit
 ) {
     val inflater: LayoutInflater =
         (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater?)!!

@@ -18,8 +18,9 @@ import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
-import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentListItemBinding
+import com.neko.hiepdph.calculatorvault.dialog.DialogAskEncryptionMode
+import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item.adapter.AdapterListItem
 import com.neko.hiepdph.calculatorvault.viewmodel.ListItemViewModel
@@ -28,6 +29,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.*
 
 @AndroidEntryPoint
 class FragmentListItem : Fragment() {
@@ -38,7 +40,7 @@ class FragmentListItem : Fragment() {
     private val viewModel by viewModels<ListItemViewModel>()
     private var adapterListItem: AdapterListItem? = null
     private val args: FragmentListItemArgs by navArgs()
-    private var listItemSelected = mutableListOf<ListItem>()
+    private var listItemSelected = mutableListOf<FileVaultItem>()
     private var sizeList = 0
     private var currentEncryptionMode = EncryptionMode.HIDDEN
 
@@ -89,44 +91,93 @@ class FragmentListItem : Fragment() {
     }
 
     private fun initButton() {
+
         binding.btnMoveToVault.clickWithDebounce {
-            viewModel.copyMoveFile(
-                requireContext(),
-                listItemSelected.map { File(it.mPath) }.toMutableList(),
-                File(args.vaultPath),
-                progress = { state: Int, value: Float, currentFile: File? ->
-                    listItemSelected.forEach {
-                        val item = FileVaultItem(
-                            -1,
-                            args.vaultPath + "/${it.mName}",
-                            it.originalPath,
-                            it.mName,
-                            currentFile?.name.toString(),
-                            currentFile?.length() ?: 0L,
-                            it.mModified,
-                            it.mTimeLock,
-                            it.mImageSize,
-                            "",
-                            it.mediaDuration,
-                            currentEncryptionMode
-                        )
-                        viewModel.insertFileToRoom(item)
-                    }
-                },
-                onSuccess = {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        observeData()
-                        adapterListItem?.unSelectAll()
-                        listItemSelected.clear()
-                        checkListPath()
-                        checkCheckBoxAll()
-                    }
-                },
-                onError = {
-                    it.printStackTrace()
-                },
-                requireContext().config.encryptionMode
-            )
+            val listOfEncryptedString = mutableListOf<String>()
+            listOfEncryptedString.addAll(listItemSelected.map {
+                CryptoCore.getInstance(requireContext()).encryptString(Constant.SECRET_KEY, it.name)
+            })
+            Log.d("TAG", "initButton: " + listOfEncryptedString.size)
+
+
+            if (requireContext().config.encryptionMode != EncryptionMode.ALWAYS_ASK) {
+                viewModel.copyMoveFile(
+                    requireContext(),
+                    listItemSelected.map { File(it.originalPath) }.toMutableList(),
+                    File(args.vaultPath),
+                    listOfEncryptedString,
+                    progress = { state: Int, value: Float, currentFile: File? ->
+
+                    },
+                    onSuccess = {
+                        CoroutineScope(Dispatchers.Main).launch {
+                            listItemSelected.forEachIndexed { index, item ->
+                                item.apply {
+                                    recyclerPath = "${requireContext().filesDir.path}/${
+                                        listOfEncryptedString[index]
+                                    }"
+                                    timeLock = Calendar.getInstance().timeInMillis
+                                    encryptionType = currentEncryptionMode
+                                    encryptedPath = "${args.vaultPath}/${
+                                        listOfEncryptedString[index]
+                                    }"
+                                }
+                                viewModel.insertFileToRoom(item)
+                            }
+                            observeData()
+                            adapterListItem?.unSelectAll()
+                            listItemSelected.clear()
+                            checkListPath()
+                            checkCheckBoxAll()
+                        }
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    },
+                    requireContext().config.encryptionMode
+                )
+            } else {
+                val dialogAskEncryptionMode = DialogAskEncryptionMode(onPressPositive = { enMode ->
+                    currentEncryptionMode = enMode
+                    viewModel.copyMoveFile(
+                        requireContext(),
+                        listItemSelected.map { File(it.originalPath) }.toMutableList(),
+                        File(args.vaultPath),
+                        listOfEncryptedString,
+                        progress = { state: Int, value: Float, currentFile: File? ->
+
+                        },
+                        onSuccess = {
+                            CoroutineScope(Dispatchers.Main).launch {
+                                listItemSelected.forEachIndexed { index, item ->
+                                    item.apply {
+                                        recyclerPath = "${requireContext().filesDir.path}/${
+                                            listOfEncryptedString[index]
+                                        }"
+                                        timeLock = Calendar.getInstance().timeInMillis
+                                        encryptionType = currentEncryptionMode
+                                        encryptedPath = "${args.vaultPath}/${
+                                            listOfEncryptedString[index]
+                                        }"
+                                    }
+                                    viewModel.insertFileToRoom(item)
+                                }
+                                observeData()
+                                adapterListItem?.unSelectAll()
+                                listItemSelected.clear()
+                                checkListPath()
+                                checkCheckBoxAll()
+                            }
+                        },
+                        onError = {
+                            it.printStackTrace()
+                        },
+                        currentEncryptionMode
+                    )
+                })
+                dialogAskEncryptionMode.show(childFragmentManager, dialogAskEncryptionMode.tag)
+            }
+
         }
     }
 

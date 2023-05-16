@@ -6,23 +6,23 @@ import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionQ
-import com.neko.hiepdph.calculatorvault.data.model.ItemMoved
-import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import java.io.File
-import java.util.Locale
+import java.util.*
 
 class MainConfig(val context: Context) {
     companion object {
         fun newInstance(context: Context) = MainConfig(context)
     }
 
-    var privacyFolder = File(externalStoragePath + "/${Constant.PRIVACY_FOLDER_NAME}")
-    var recyclerBinFolder = File(context.filesDir.path + "/${Constant.RECYCLER_BIN_FOLDER_NAME}")
-    var intruderFolder = File(context.filesDir.path + "/${Constant.INTRUDER_FOLDER_NAME}")
-    var picturePrivacyFolder = File(privacyFolder, Constant.PICTURE_FOLDER_NAME)
-    var filePrivacyFolder = File(privacyFolder, Constant.VIDEOS_FOLDER_NAME)
-    var audioPrivacyFolder = File(privacyFolder, Constant.AUDIOS_FOLDER_NAME)
-    var videoPrivacyFolder = File(privacyFolder, Constant.FILES_FOLDER_NAME)
+    var privacyFolder = File(externalStoragePath, Constant.PRIVACY_FOLDER_NAME)
+    var recyclerBinFolder = File(context.filesDir, Constant.RECYCLER_BIN_FOLDER_NAME)
+    var intruderFolder = File(context.filesDir, Constant.INTRUDER_FOLDER_NAME)
+
+    var decryptFolder = File(context.filesDir, Constant.DECRYPT_FOLDER_NAME)
+    var picturePrivacyFolder = File(context.filesDir, Constant.PICTURE_FOLDER_NAME)
+    var filePrivacyFolder = File(context.filesDir, Constant.VIDEOS_FOLDER_NAME)
+    var audioPrivacyFolder = File(context.filesDir, Constant.AUDIOS_FOLDER_NAME)
+    var videoPrivacyFolder = File(context.filesDir, Constant.FILES_FOLDER_NAME)
 
     var isShouldShowHidden: Boolean
         get() = AppSharePreference.getInstance(context).getIsShouldShowHidden(false)
@@ -133,17 +133,7 @@ class MainConfig(val context: Context) {
         set(externalStoragePath) = AppSharePreference.getInstance(context)
             .setExternalStoragePath(externalStoragePath)
 
-    var listItemVault: List<ListItem>?
-        get() = AppSharePreference.getInstance(context)
-            .getObjectFromSharePreference<List<ListItem>>(Constant.KEY_LIST_ITEM_VAULT)
-        set(listItemVault) = AppSharePreference.getInstance(context)
-            .saveObjectToSharePreference(Constant.KEY_LIST_ITEM_VAULT, listItemVault)
 
-    var listPathRecyclerBin: List<ItemMoved>?
-        get() = AppSharePreference.getInstance(context)
-            .getObjectFromSharePreference<List<ItemMoved>>(Constant.KEY_LIST_RECYCLER_BIN)
-        set(listPathRecyclerBin) = AppSharePreference.getInstance(context)
-            .saveObjectToSharePreference(Constant.KEY_LIST_RECYCLER_BIN, listPathRecyclerBin)
 
     var hideAppIcon: Boolean
         get() = AppSharePreference.getInstance(context).getHideAppIcon(HideAppIcon.OFF)
@@ -190,7 +180,8 @@ class MainConfig(val context: Context) {
         set(secretKey) = AppSharePreference.getInstance(context).setSecretKey(secretKey)
 
     var language: String
-        get() = AppSharePreference.getInstance(context).getSavedLanguage(Locale.getDefault().language)
+        get() = AppSharePreference.getInstance(context)
+            .getSavedLanguage(Locale.getDefault().language)
         set(language) = AppSharePreference.getInstance(context).saveLanguage(language)
 
     var shakeGravity: Float
@@ -216,7 +207,7 @@ class MainConfig(val context: Context) {
         get() = AppSharePreference.getInstance(context).getFakePassword(FakePassword.DISABLE)
         set(fakePassword) = AppSharePreference.getInstance(context).setFakePassword(fakePassword)
 
-    var darkMode:Boolean
+    var darkMode: Boolean
         get() = AppSharePreference.getInstance(context).getDarkMode(DarkMode.DISABLE)
         set(darkMode) = AppSharePreference.getInstance(context).setDarkMode(darkMode)
 

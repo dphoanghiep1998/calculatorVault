@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neko.hiepdph.calculatorvault.common.utils.CreateFile
 import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.repositories.AppRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +23,12 @@ class AppViewModel @Inject constructor(
     fun createFolder(parentDir: File, fileName: String,onSuccess:()->Unit,onError:(e:String)->Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             CreateFile.createFileDirectory(parentDir, fileName,onSuccess,onError)
+        }
+    }
+
+    fun insertVaultItem(item:FileVaultItem){
+        viewModelScope.launch {
+            appRepo.insertFileVault(item)
         }
     }
 

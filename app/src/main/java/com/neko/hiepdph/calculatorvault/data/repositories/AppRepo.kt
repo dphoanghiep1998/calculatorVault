@@ -55,10 +55,15 @@ class AppRepo @Inject constructor(
         fileVaultService.fileVaultItemDao.insertFile(fileVaultItem.toFileVaultEntity())
     }
 
-    fun getAllFile(): List<FileVaultItem> = fileVaultService.fileVaultItemDao.getListFile()
+    suspend fun updateFileVault(fileVaultItem: FileVaultItem) = withContext(dispatcher){
+        fileVaultService.fileVaultItemDao.updateFile(fileVaultItem.toFileVaultEntity())
+    }
 
-    suspend fun getFile(encryptedName:String):FileVaultItem? = withContext(dispatcher){
-        fileVaultService.fileVaultItemDao.getFileByEncryptedName(encryptedName)
+    fun getAllFile(): List<FileVaultItem> = fileVaultService.fileVaultItemDao.getListFile()
+    fun getAllFileInEnCryptFolder(folderPath:String): LiveData<List<FileVaultItem>> = fileVaultService.fileVaultItemDao.getListFileEncrypted(folderPath)
+
+    suspend fun getFile(encryptedPath:String):FileVaultItem? = withContext(dispatcher){
+        fileVaultService.fileVaultItemDao.getFileByEncryptedName(encryptedPath)
     }
 
 

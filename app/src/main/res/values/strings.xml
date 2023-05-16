@@ -290,4 +290,5 @@
     <string name="prohibit_screenshot_content_2">Block screenshots of all the interfaces in the app</string>
     <string name="fake_password">Fake Password</string>
     <string name="fake_password_content_2">Unlocking Sgallery with the fake password will show fake content</string>
+    <string name="origin_path_detail">OriginPath:</string>
 </resources>

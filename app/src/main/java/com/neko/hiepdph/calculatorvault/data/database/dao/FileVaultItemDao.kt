@@ -16,7 +16,7 @@ interface FileVaultItemDao {
     fun updateFile(fileVaultItem: FileVaultItemEntity)
 
 
-    @Query("SELECT * FROM file_vault WHERE encryptedName = :name")
+    @Query("SELECT * FROM file_vault WHERE encryptedPath = :name")
     fun getFileByEncryptedName(name: String): FileVaultItem?
 
     @Query("delete from file_vault where id=:id")
@@ -25,9 +25,11 @@ interface FileVaultItemDao {
     @Query("delete from file_vault")
     fun deleteAllFile()
 
-
     @Query("select * from file_vault")
     fun getListFile(): List<FileVaultItem>
+
+    @Query("select * from file_vault where encryptedPath like :folderPath || '%'")
+    fun getListFileEncrypted(folderPath:String): LiveData<List<FileVaultItem>>
 
     @Query("delete from file_vault where id in (:listId) ")
     fun deleteFile(listId:List<Int>)

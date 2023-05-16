@@ -4,7 +4,6 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -15,7 +14,6 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.SimpleExoPlayer
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
@@ -23,8 +21,7 @@ import com.neko.hiepdph.calculatorvault.common.extensions.shareFile
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
-import com.neko.hiepdph.calculatorvault.data.model.ItemMoved
-import com.neko.hiepdph.calculatorvault.data.model.ListItem
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityVideoPlayerBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
@@ -37,8 +34,8 @@ import java.io.File
 @AndroidEntryPoint
 class ActivityVideoPlayer : AppCompatActivity() {
     private lateinit var binding: ActivityVideoPlayerBinding
-    private var listItem = mutableListOf<ListItem>()
-    private var currentItem: ListItem? = null
+    private var listItem = mutableListOf<FileVaultItem>()
+    private var currentItem: FileVaultItem? = null
     private var mPlayer: Player? = null
     private var flag = false
 
@@ -60,18 +57,18 @@ class ActivityVideoPlayer : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.info -> {
-                openImageInformationDialog()
+                openInformationDialog()
                 true
             }
             else -> false
         }
     }
 
-    private fun openImageInformationDialog() {
+    private fun openInformationDialog() {
         val dialogDetail = DialogDetail.dialogDetailConfig {
-            name = currentItem?.mName
-            size = currentItem?.mSize
-            path = currentItem?.mPath
+            name = currentItem?.name
+            size = currentItem?.size
+            path = currentItem?.encryptedPath
         }
         dialogDetail.show(supportFragmentManager, dialogDetail.tag)
     }
@@ -95,7 +92,7 @@ class ActivityVideoPlayer : AppCompatActivity() {
                 currentItem = listItem[0]
                 supportActionBar?.title = currentItem?.name
                 setupPlayer(it.map { item ->
-                    item.mPath
+                    item.encryptedPath
                 })
             }
         }
@@ -133,29 +130,19 @@ class ActivityVideoPlayer : AppCompatActivity() {
             }
         }
 
-        findViewById<TextView>(R.id.tv_unlock).clickWithDebounce{
+        findViewById<TextView>(R.id.tv_unlock).clickWithDebounce {
             showDialogUnlock()
         }
-        findViewById<TextView>(R.id.tv_share).clickWithDebounce{
+        findViewById<TextView>(R.id.tv_share).clickWithDebounce {
             val listPath = mutableListOf<String>()
-            listPath.add(currentItem!!.mPath)
+            listPath.add(currentItem!!.encryptedPath)
             shareFile(listPath)
         }
-        findViewById<TextView>(R.id.tv_delete).clickWithDebounce{
+        findViewById<TextView>(R.id.tv_delete).clickWithDebounce {
             val confirmDialog = DialogConfirm(onPositiveClicked = {
                 if (config.moveToRecyclerBin) {
-                    val listPathRecyclerBin = config.listPathRecyclerBin?.toMutableList()
-
-                    listPathRecyclerBin?.add(
-                        ItemMoved(
-                            File(currentItem?.path.toString()).parentFile?.path.toString(),
-                            config.recyclerBinFolder.path + "/${currentItem?.name}"
-                        )
-                    )
-                    config.listPathRecyclerBin = listPathRecyclerBin
-
                     CopyFiles.copy(this,
-                        File(currentItem?.path.toString()),
+                        File(currentItem?.encryptionType.toString()),
                         config.recyclerBinFolder,
                         0L,
                         progress = { _: Int, _: Float, _: File? -> },
@@ -171,7 +158,7 @@ class ActivityVideoPlayer : AppCompatActivity() {
                         },
 
                         onError = {})
-                } else FileUtils.deleteFolderInDirectory(currentItem?.path.toString(), onSuccess = {
+                } else FileUtils.deleteFolderInDirectory(currentItem?.encryptedPath.toString(), onSuccess = {
                     listItem.remove(currentItem)
                     if (listItem.isEmpty()) {
                         ShareData.getInstance().setListItemImage(mutableListOf())
@@ -180,12 +167,13 @@ class ActivityVideoPlayer : AppCompatActivity() {
                         ShareData.getInstance().setListItemImage(listItem)
                     }
                 }, onError = {})
-            }, DialogConfirmType.DELETE, currentItem?.mName)
+            }, DialogConfirmType.DELETE, currentItem?.name)
 
             confirmDialog.show(supportFragmentManager, confirmDialog.tag)
 
         }
     }
+
     private fun showDialogUnlock() {
         val name = getString(R.string.pictures)
         val confirmDialog = DialogConfirm(onPositiveClicked = {
@@ -194,15 +182,13 @@ class ActivityVideoPlayer : AppCompatActivity() {
 
         confirmDialog.show(supportFragmentManager, confirmDialog.tag)
     }
+
     private fun unLockVideo() {
         lifecycleScope.launch {
 
-            val item = config.listItemVault?.firstOrNull {
-                it.path == currentItem?.path
-            }
             CopyFiles.copy(this@ActivityVideoPlayer,
-                File(currentItem?.path.toString()),
-                File(item?.originalPath.toString()),
+                File(currentItem?.encryptedPath.toString()),
+                File(currentItem?.originalPath.toString()),
                 0L,
                 progress = { _: Int, _: Float, _: File? -> },
                 true,

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neko.hiepdph.calculatorvault.common.utils.*
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -14,17 +15,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor() : ViewModel() {
-    var listFolder = MutableLiveData(mutableListOf<FileDirItem>())
+    var listFolder = MutableLiveData(mutableListOf<FileVaultItem>())
 
-    var listGroupImageData = SelfCleaningLiveData<MutableList<FileDirItem>>()
-    var listGroupVideoData = SelfCleaningLiveData<MutableList<FileDirItem>>()
-    var listGroupAudioData = SelfCleaningLiveData<MutableList<FileDirItem>>()
-    var listGroupFileData = SelfCleaningLiveData<MutableList<FileDirItem>>()
+    var listGroupImageData = SelfCleaningLiveData<MutableList<FileVaultItem>>()
+    var listGroupVideoData = SelfCleaningLiveData<MutableList<FileVaultItem>>()
+    var listGroupAudioData = SelfCleaningLiveData<MutableList<FileVaultItem>>()
+    var listGroupFileData = SelfCleaningLiveData<MutableList<FileVaultItem>>()
 
-    var listImageItem = SelfCleaningLiveData<MutableList<FileDirItem>>()
-    var listAudioItem = SelfCleaningLiveData<MutableList<FileDirItem>>()
-    var listVideoItem = SelfCleaningLiveData<MutableList<FileDirItem>>()
-    var listFileItem = SelfCleaningLiveData<MutableList<FileDirItem>>()
+    var listImageItem = SelfCleaningLiveData<MutableList<FileVaultItem>>()
+    var listAudioItem = SelfCleaningLiveData<MutableList<FileVaultItem>>()
+    var listVideoItem = SelfCleaningLiveData<MutableList<FileVaultItem>>()
+    var listFileItem = SelfCleaningLiveData<MutableList<FileVaultItem>>()
 
 
     fun createFolder(

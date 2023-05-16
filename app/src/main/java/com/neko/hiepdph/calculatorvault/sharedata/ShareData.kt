@@ -1,10 +1,8 @@
 package com.neko.hiepdph.calculatorvault.sharedata
 
-import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.neko.hiepdph.calculatorvault.common.utils.SelfCleaningLiveData
-import com.neko.hiepdph.calculatorvault.data.model.ListItem
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 
 class ShareData() {
     companion object {
@@ -17,21 +15,21 @@ class ShareData() {
         }
     }
 
-    private val _listItemImage = MutableLiveData<MutableList<ListItem>>()
-    val listItemImage: LiveData<MutableList<ListItem>> get() = _listItemImage
-    fun setListItemImage(list: MutableList<ListItem>) {
+    private val _listItemImage = MutableLiveData<MutableList<FileVaultItem>>()
+    val listItemImage: LiveData<MutableList<FileVaultItem>> get() = _listItemImage
+    fun setListItemImage(list: MutableList<FileVaultItem>) {
         _listItemImage.postValue(list)
     }
 
-    private val _listItemVideo = MutableLiveData<MutableList<ListItem>>()
-    val listItemVideo: LiveData<MutableList<ListItem>> get() = _listItemVideo
-    fun setListItemVideo(list: MutableList<ListItem>) {
+    private val _listItemVideo = MutableLiveData<MutableList<FileVaultItem>>()
+    val listItemVideo: LiveData<MutableList<FileVaultItem>> get() = _listItemVideo
+    fun setListItemVideo(list: MutableList<FileVaultItem>) {
         _listItemVideo.postValue(list)
     }
 
-    private val _listItemAudio = MutableLiveData<MutableList<ListItem>>()
-    val listItemAudio: LiveData<MutableList<ListItem>> get() = _listItemAudio
-    fun setListItemAudio(list: MutableList<ListItem>) {
+    private val _listItemAudio = MutableLiveData<MutableList<FileVaultItem>>()
+    val listItemAudio: LiveData<MutableList<FileVaultItem>> get() = _listItemAudio
+    fun setListItemAudio(list: MutableList<FileVaultItem>) {
         _listItemAudio.postValue(list)
     }
 

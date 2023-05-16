@@ -16,8 +16,7 @@ import com.neko.hiepdph.calculatorvault.common.transformer.*
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
-import com.neko.hiepdph.calculatorvault.data.model.ItemMoved
-import com.neko.hiepdph.calculatorvault.data.model.ListItem
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityImageDetailBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
@@ -37,8 +36,8 @@ import java.lang.reflect.Field
 class ActivityImageDetail : AppCompatActivity() {
     private lateinit var binding: ActivityImageDetailBinding
     private var viewPagerAdapter: ImagePagerAdapter? = null
-    private var listItem: MutableList<ListItem> = mutableListOf()
-    private var currentItem: ListItem? = null
+    private var listItem: MutableList<FileVaultItem> = mutableListOf()
+    private var currentItem: FileVaultItem? = null
     private var currentPage = 0
     private var jobSlide: Job? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,13 +72,13 @@ class ActivityImageDetail : AppCompatActivity() {
 
     private fun openImageInformationDialog() {
         val dialogDetail = DialogDetail.dialogDetailConfig {
-            name = currentItem?.mName
-            size = currentItem?.mSize
-            path = currentItem?.mPath
-            originalPath = currentItem?.mOriginalPath
-            resolution = currentItem?.mImageSize
-            time = currentItem?.mModified
-            timeLock = currentItem?.mTimeLock
+            name = currentItem?.name
+            size = currentItem?.size
+            path = currentItem?.encryptedPath
+            originalPath = currentItem?.originalPath
+            resolution = currentItem?.ratioPicture
+            time = currentItem?.modified
+            timeLock = currentItem?.timeLock
 
         }
         dialogDetail.show(supportFragmentManager, dialogDetail.tag)
@@ -142,18 +141,10 @@ class ActivityImageDetail : AppCompatActivity() {
         binding.tvDelete.clickWithDebounce {
             val confirmDialog = DialogConfirm(onPositiveClicked = {
                 if (config.moveToRecyclerBin) {
-                    val listPathRecyclerBin = config.listPathRecyclerBin?.toMutableList()
 
-                    listPathRecyclerBin?.add(
-                        ItemMoved(
-                           File(currentItem?.path.toString()).parentFile?.path.toString(),
-                            config.recyclerBinFolder.path + "/${currentItem?.name}"
-                        )
-                    )
-                    config.listPathRecyclerBin = listPathRecyclerBin
 
                     CopyFiles.copy(this,
-                        File(currentItem?.path.toString()),
+                        File(currentItem?.encryptedPath.toString()),
                         config.recyclerBinFolder,
                         0L,
                         progress = { _: Int, _: Float, _: File? -> },
@@ -169,7 +160,7 @@ class ActivityImageDetail : AppCompatActivity() {
                         },
 
                         onError = {})
-                } else FileUtils.deleteFolderInDirectory(currentItem?.path.toString(), onSuccess = {
+                } else FileUtils.deleteFolderInDirectory(currentItem?.encryptedPath.toString(), onSuccess = {
                     listItem.remove(currentItem)
                     if (listItem.isEmpty()) {
                         ShareData.getInstance().setListItemImage(mutableListOf())
@@ -186,7 +177,7 @@ class ActivityImageDetail : AppCompatActivity() {
 
         binding.tvShare.clickWithDebounce {
             val listPath = mutableListOf<String>()
-            listPath.add(currentItem!!.mPath)
+            listPath.add(currentItem!!.encryptedPath)
             shareFile(listPath)
         }
 
@@ -265,13 +256,9 @@ class ActivityImageDetail : AppCompatActivity() {
 
     private fun unLockPicture() {
         lifecycleScope.launch {
-
-            val item = config.listItemVault?.firstOrNull {
-                it.path == currentItem?.path
-            }
             CopyFiles.copy(this@ActivityImageDetail,
-                File(currentItem?.path.toString()),
-                File(item?.originalPath.toString()),
+                File(currentItem?.encryptedPath.toString()),
+                File(currentItem?.originalPath.toString()),
                 0L,
                 progress = { _: Int, _: Float, _: File? -> },
                 true,

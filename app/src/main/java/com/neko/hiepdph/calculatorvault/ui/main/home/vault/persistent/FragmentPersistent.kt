@@ -23,8 +23,6 @@ import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.openWith
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
-import com.neko.hiepdph.calculatorvault.data.model.ItemMoved
-import com.neko.hiepdph.calculatorvault.data.model.ListItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentPersistentBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogAddFile
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
@@ -49,7 +47,7 @@ class FragmentPersistent : Fragment() {
     private val viewModel by viewModels<PersistentViewModel>()
     private var adapterPersistent: AdapterPersistent? = null
     private var adapterOtherFolder: AdapterOtherFolder? = null
-    private var listItemSelected = mutableListOf<ListItem>()
+    private var listItemSelected = mutableListOf<FileVaultItem>()
     private var sizeList = 0
 
 
@@ -153,8 +151,6 @@ class FragmentPersistent : Fragment() {
     private fun getDataFile() {
         when (args.type) {
             Constant.TYPE_PICTURE -> {
-                viewModel.getImageChildFromFolder(args.vaultPath)
-
                 binding.tvEmpty.text = String.format(
                     getString(R.string.empty_text),
                     getString(R.string.picture),
@@ -164,10 +160,9 @@ class FragmentPersistent : Fragment() {
                     0, R.drawable.ic_empty_picture, 0, 0
                 )
                 binding.tvSlideshow.show()
+
             }
             Constant.TYPE_AUDIOS -> {
-                viewModel.getAudioChildFromFolder(args.vaultPath)
-
                 binding.tvEmpty.text = String.format(
                     getString(R.string.empty_text),
                     getString(R.string.audio),
@@ -180,7 +175,6 @@ class FragmentPersistent : Fragment() {
 
             }
             Constant.TYPE_VIDEOS -> {
-                viewModel.getVideoChildFromFolder(args.vaultPath)
                 binding.tvEmpty.text = String.format(
                     getString(R.string.empty_text),
                     getString(R.string.video),
@@ -192,7 +186,6 @@ class FragmentPersistent : Fragment() {
                 binding.tvSlideshow.hide()
             }
             Constant.TYPE_FILE -> {
-                viewModel.getFileChildFromFolder(args.vaultPath)
                 binding.tvEmpty.text = String.format(
                     getString(R.string.empty_text),
                     getString(R.string.file),
@@ -204,7 +197,6 @@ class FragmentPersistent : Fragment() {
                 binding.tvSlideshow.hide()
             }
             else -> {
-                viewModel.getFileChildFromFolder(args.vaultPath)
                 binding.tvEmpty.text = String.format(
                     getString(R.string.empty_text),
                     getString(R.string.file),
@@ -215,33 +207,16 @@ class FragmentPersistent : Fragment() {
                 )
             }
         }
-    }
-
-    private fun initData() {
-        getDataFile()
-        viewModel.listItemListPersistent.observe(viewLifecycleOwner) {
-            it?.let { listData ->
+        viewModel.getAllFileFromFolderEncrypted(args.vaultPath).observe(viewLifecycleOwner) {
+            it?.let {
                 if (args.type != Constant.TYPE_ADD_MORE) {
-                    lifecycleScope.launch {
-                        val dataItem = mutableListOf<FileVaultItem>()
-                        val listItem = viewModel.appRepo.getAllFile().toMutableList()
-                        for (path in it) {
-                            if (path in listItem.map { item -> item.path }) {
-                                dataItem.add(listItem.find { it.path == path }!!)
-                            }else{
-
-                            }
-                        }
-                        adapterPersistent?.setData(dataItem, args.type)
-                    }
-
-
+                    adapterPersistent?.setData(it, args.type)
                 } else {
-                    adapterOtherFolder?.setData(dataItem)
+                    adapterOtherFolder?.setData(it)
                 }
                 sizeList = it.size
                 binding.loading.hide()
-                if (listData.isNotEmpty()) {
+                if (it.isNotEmpty()) {
                     binding.tvEmpty.hide()
                 } else {
                     adapterPersistent?.changeToNormalView()
@@ -254,6 +229,12 @@ class FragmentPersistent : Fragment() {
             }
             binding.refreshLayout.isRefreshing = false
         }
+    }
+
+
+    private fun initData() {
+        getDataFile()
+
     }
 
     private fun initButton() {
@@ -320,23 +301,13 @@ class FragmentPersistent : Fragment() {
 
     }
 
-    private fun showDialogDelete(item: ListItem) {
+    private fun showDialogDelete(item: FileVaultItem) {
         val confirmDialog = DialogConfirm(onPositiveClicked = {
 
             if (requireContext().config.moveToRecyclerBin) {
-                val listPathRecyclerBin =
-                    requireContext().config.listPathRecyclerBin?.toMutableList() ?: mutableListOf()
-
-                listPathRecyclerBin.addAll(listItemSelected.map {
-                    ItemMoved(
-                        args.vaultPath,
-                        requireContext().config.recyclerBinFolder.path + "/${it.name}"
-                    )
-                })
-                requireContext().config.listPathRecyclerBin = listPathRecyclerBin
 
                 CopyFiles.copy(requireContext(),
-                    File(item.path),
+                    File(item.encryptedPath),
                     requireContext().config.recyclerBinFolder,
                     0L,
                     progress = { _: Int, _: Float, _: File? -> },
@@ -350,14 +321,14 @@ class FragmentPersistent : Fragment() {
 
                     onError = {})
             } else {
-                viewModel.deleteFolder(item.mPath, onSuccess = {
+                viewModel.deleteFolder(item.encryptedPath, onSuccess = {
                     getDataFile()
                     showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
                 }, onError = {
                     showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
                 })
             }
-        }, DialogConfirmType.DELETE, item.mName)
+        }, DialogConfirmType.DELETE, item.name)
 
         confirmDialog.show(childFragmentManager, confirmDialog.tag)
     }
@@ -379,19 +350,9 @@ class FragmentPersistent : Fragment() {
         val confirmDialog = DialogConfirm(onPositiveClicked = {
 
             if (requireContext().config.moveToRecyclerBin) {
-                val listPathRecyclerBin =
-                    requireContext().config.listPathRecyclerBin?.toMutableList() ?: mutableListOf()
-
-                listPathRecyclerBin.addAll(listItemSelected.map {
-                    ItemMoved(
-                        args.vaultPath,
-                        requireContext().config.recyclerBinFolder.path + "/${it.name}"
-                    )
-                })
-                requireContext().config.listPathRecyclerBin = listPathRecyclerBin
 
                 CopyFiles.copy(requireContext(),
-                    listItemSelected.map { File(it.mPath) }.toMutableList(),
+                    listItemSelected.map { File(it.encryptedPath) }.toMutableList(),
                     requireContext().config.recyclerBinFolder,
                     0L,
                     progress = { _: Int, _: Float, _: File? -> },
@@ -405,7 +366,7 @@ class FragmentPersistent : Fragment() {
 
                     onError = {})
             } else {
-                viewModel.deleteMultipleFolder(listItemSelected.map { it.mPath }, onSuccess = {
+                viewModel.deleteMultipleFolder(listItemSelected.map { it.encryptedPath }, onSuccess = {
                     getDataFile()
                     listItemSelected.clear()
                     showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
@@ -419,7 +380,7 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun share() {
-        requireContext().shareFile(listItemSelected.map { it.mPath })
+        requireContext().shareFile(listItemSelected.map { it.encryptedPath })
     }
 
     private fun slideShow() {
@@ -450,17 +411,10 @@ class FragmentPersistent : Fragment() {
 
     private fun unLockFile() {
         lifecycleScope.launch {
-            val listFilterItem = requireContext().config.listItemVault?.filter {
-                it.path in listItemSelected.map { item -> item.path }
-            } ?: mutableListOf()
 
-            Log.d("TAG", "unLockFile: " + listFilterItem)
-            Log.d(
-                "TAG", "unLockFile: " + listFilterItem.map { File(it.originalPath) }.toMutableList()
-            )
             CopyFiles.copy(requireContext(),
-                listItemSelected.map { File(it.path) }.toMutableList(),
-                listFilterItem.map { File(it.originalPath) }.toMutableList(),
+                listItemSelected.map { File(it.encryptedPath) }.toMutableList(),
+                listItemSelected.map { File(it.originalPath) }.toMutableList(),
                 0L,
                 progress = { _: Int, _: Float, _: File? -> },
                 true,
@@ -555,8 +509,8 @@ class FragmentPersistent : Fragment() {
         }
     }
 
-    private fun handleClickItem(item: ListItem) {
-        val list = mutableListOf<ListItem>()
+    private fun handleClickItem(item: FileVaultItem) {
+        val list = mutableListOf<FileVaultItem>()
         list.add(item)
         when (args.type) {
             Constant.TYPE_PICTURE -> {
@@ -575,7 +529,7 @@ class FragmentPersistent : Fragment() {
                 startActivity(intent)
             }
             else -> {
-                item.path.openWith(requireContext())
+                item.encryptedPath.openWith(requireContext())
             }
         }
     }
@@ -593,15 +547,16 @@ class FragmentPersistent : Fragment() {
         binding.containerController.show()
     }
 
-    private fun openInformationDialog(item: ListItem) {
+    private fun openInformationDialog(item: FileVaultItem) {
         val dialogDetail = DialogDetail.dialogDetailConfig {
-            name = item.mName
-            size = item.mSize
-            time = item.mModified
-            timeLock = item.mModified
-            path = item.mPath
-            originalPath = item.mOriginalPath
-            encryptionMode = "Hidden"
+            name = item.name
+            size = item.size
+            time = item.modified
+            timeLock = item.timeLock
+            resolution = item.ratioPicture
+            path = item.encryptedPath
+            originalPath = item.originalPath
+            encryptionMode = 1
 
         }
         dialogDetail.show(childFragmentManager, dialogDetail.tag)

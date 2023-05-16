@@ -20,8 +20,8 @@ import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.enums.Order
 import com.neko.hiepdph.calculatorvault.common.enums.Sort
 import com.neko.hiepdph.calculatorvault.common.extensions.*
+import com.neko.hiepdph.calculatorvault.data.model.VaultDir
 
-import com.neko.hiepdph.calculatorvault.data.model.VaultFileDirItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentVaultBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutMenuOptionBinding
 import com.neko.hiepdph.calculatorvault.dialog.*
@@ -66,7 +66,7 @@ class FragmentVault : Fragment() {
             requireActivity().finishAffinity()
         }
         viewModel.getListFolderInVault(
-            requireContext(), requireContext().config.privacyFolder
+            requireContext(), requireContext().filesDir
         )
     }
 
@@ -134,40 +134,40 @@ class FragmentVault : Fragment() {
             when (it.type) {
                 Constant.TYPE_PICTURE -> {
                     val action = FragmentVaultDirections.actionFragmentVaultToFragmentPersistent(
-                        it.type, getString(R.string.pictures), it.path
+                        it.type, getString(R.string.pictures), it.mPath
                     )
                     navigateToPage(R.id.fragmentVault, action)
                 }
                 Constant.TYPE_VIDEOS -> {
                     val action = FragmentVaultDirections.actionFragmentVaultToFragmentPersistent(
-                        it.type, getString(R.string.videos), it.path
+                        it.type, getString(R.string.videos), it.mPath
                     )
                     navigateToPage(R.id.fragmentVault, action)
                 }
                 Constant.TYPE_AUDIOS -> {
                     val action = FragmentVaultDirections.actionFragmentVaultToFragmentPersistent(
-                        it.type, getString(R.string.audios), it.path
+                        it.type, getString(R.string.audios), it.mPath
                     )
                     navigateToPage(R.id.fragmentVault, action)
                 }
                 Constant.TYPE_FILE -> {
                     val action = FragmentVaultDirections.actionFragmentVaultToFragmentPersistent(
-                        it.type, getString(R.string.files), it.path
+                        it.type, getString(R.string.files), it.mPath
                     )
                     navigateToPage(R.id.fragmentVault, action)
                 }
                 else -> {
                     val action = FragmentVaultDirections.actionFragmentVaultToFragmentPersistent(
-                        it.type, it.name, it.path
+                        it.type, it.mName, it.mPath
                     )
                     navigateToPage(R.id.fragmentVault, action)
                 }
             }
         }, onDeletePress = {
             val dialogConfirm = DialogConfirm(onPositiveClicked = {
-                viewModel.deleteFolder(it.path, onSuccess = {
+                viewModel.deleteFolder(it.mPath, onSuccess = {
                     viewModel.getListFolderInVault(
-                        requireContext(), requireContext().config.privacyFolder
+                        requireContext(), requireContext().filesDir
                     )
                     lifecycleScope.launch(Dispatchers.Main) {
                         showSnackBar(
@@ -179,7 +179,7 @@ class FragmentVault : Fragment() {
                         getString(R.string.delete_failed), SnackBarType.FAILED
                     )
                 })
-            }, DialogConfirmType.DELETE, it.name)
+            }, DialogConfirmType.DELETE, it.mName)
 
             dialogConfirm.show(parentFragmentManager, dialogConfirm.tag)
 
@@ -211,7 +211,7 @@ class FragmentVault : Fragment() {
                         name,
                         onSuccess = {
                             viewModel.getListFolderInVault(
-                                requireContext(), requireContext().config.privacyFolder
+                                requireContext(), requireContext().filesDir
                             )
                             showSnackBar(getString(R.string.rename_successfully), SnackBarType.SUCCESS)
                         },
@@ -243,14 +243,14 @@ class FragmentVault : Fragment() {
     private fun showAddFolderDialog() {
         val dialogAddNewFolder = DialogAddNewFolder(object : AddNewFolderDialogCallBack {
             override fun onPositiveClicked(name: String) {
-                viewModel.createFolder(requireContext().config.privacyFolder, name, onSuccess = {
+                viewModel.createFolder(requireContext().filesDir, name, onSuccess = {
                     lifecycleScope.launch(Dispatchers.Main) {
                         showSnackBar(
                             getString(R.string.create_success), SnackBarType.SUCCESS
                         )
                     }
                     viewModel.getListFolderInVault(
-                        requireContext(), requireContext().config.privacyFolder
+                        requireContext(), requireContext().filesDir
                     )
                 }, onError = {
                     lifecycleScope.launch(Dispatchers.Main) {
@@ -338,7 +338,7 @@ class FragmentVault : Fragment() {
         }
     }
 
-    private fun sortList(mList: MutableList<VaultFileDirItem>): MutableList<VaultFileDirItem> {
+    private fun sortList(mList: MutableList<VaultDir>): MutableList<VaultDir> {
         when (order) {
             Order.ASC -> {
                 when (sortType) {
@@ -346,7 +346,7 @@ class FragmentVault : Fragment() {
                         mList.shuffle()
                     }
                     Sort.NAME -> {
-                        mList.sortBy { it.name }
+                        mList.sortBy { it.mName }
                     }
                     Sort.SIZE -> {
                         mList.sortBy { it.mChildren }
@@ -359,7 +359,7 @@ class FragmentVault : Fragment() {
                         mList.shuffle()
                     }
                     Sort.NAME -> {
-                        mList.sortByDescending { it.name }
+                        mList.sortByDescending { it.mName }
                     }
                     Sort.SIZE -> {
                         mList.sortByDescending { it.mChildren }

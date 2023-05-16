@@ -153,6 +153,32 @@
             app:layout_constraintTop_toBottomOf="@id/tv_resolution_value" />
 
         <TextView
+            android:id="@+id/tv_originPath"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:fontFamily="@font/app_font_500"
+            android:text="@string/origin_path_detail"
+            android:textColor="@color/neutral_06"
+            android:textSize="@dimen/_14sdp"
+            app:layout_constraintBottom_toBottomOf="@id/tv_originPath_value"
+            app:layout_constraintStart_toStartOf="@id/tv_name"
+            app:layout_constraintTop_toTopOf="@id/tv_originPath_value" />
+
+        <TextView
+            android:id="@+id/tv_originPath_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginTop="@dimen/_12sdp"
+            android:fontFamily="@font/app_font_400"
+            android:text="@string/name_detail"
+            android:textColor="@color/neutral_06"
+            android:textSize="@dimen/_14sdp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tv_originPath"
+            app:layout_constraintTop_toBottomOf="@id/tv_path" />
+
+        <TextView
             android:id="@+id/tv_time"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
@@ -175,7 +201,7 @@
             android:textColor="@color/neutral_06"
             android:textSize="@dimen/_14sdp"
             app:layout_constraintStart_toEndOf="@id/tv_time"
-            app:layout_constraintTop_toBottomOf="@id/tv_path_value" />
+            app:layout_constraintTop_toBottomOf="@id/tv_originPath_value" />
 
         <TextView
             android:id="@+id/tv_time_lock"
