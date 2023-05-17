@@ -22,12 +22,14 @@ import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.openWith
+import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentPersistentBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogAddFile
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.dialog.DialogDetail
+import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityAudioPlayer
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityImageDetail
@@ -84,9 +86,6 @@ class FragmentPersistent : Fragment() {
         initRecyclerView()
         initButton()
         resetAllViewAndData()
-        binding.refreshLayout.setOnRefreshListener {
-            initData()
-        }
     }
 
     private fun checkAllItem(status: Boolean) {
@@ -144,8 +143,6 @@ class FragmentPersistent : Fragment() {
                 R.id.checkbox
             )
         checkbox?.isChecked = listItemSelected.size == sizeList && sizeList > 0
-
-
     }
 
     private fun getDataFile() {
@@ -227,7 +224,6 @@ class FragmentPersistent : Fragment() {
                     binding.tvEmpty.show()
                 }
             }
-            binding.refreshLayout.isRefreshing = false
         }
     }
 
@@ -313,6 +309,8 @@ class FragmentPersistent : Fragment() {
                     progress = { _: Int, _: Float, _: File? -> },
                     true,
                     onSuccess = {
+                        item.isDeleted = true
+                        viewModel.updateFileVault(item)
                         getDataFile()
                         showSnackBar(
                             getString(R.string.move_to_recycler_bin), SnackBarType.SUCCESS
@@ -322,6 +320,8 @@ class FragmentPersistent : Fragment() {
                     onError = {})
             } else {
                 viewModel.deleteFolder(item.encryptedPath, onSuccess = {
+                    item.isDeleted = true
+                    viewModel.updateFileVault(item)
                     getDataFile()
                     showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
                 }, onError = {
@@ -352,27 +352,35 @@ class FragmentPersistent : Fragment() {
             if (requireContext().config.moveToRecyclerBin) {
 
                 CopyFiles.copy(requireContext(),
-                    listItemSelected.map { File(it.encryptedPath) }.toMutableList(),
+                    listItemSelected.map { File(it.encryptedPath) },
                     requireContext().config.recyclerBinFolder,
                     0L,
                     progress = { _: Int, _: Float, _: File? -> },
                     true,
                     onSuccess = {
+                        listItemSelected.forEach {
+                            val item = it
+                            item.isDeleted = true
+                            viewModel.updateFileVault(item)
+                        }
                         getDataFile()
+                        listItemSelected.clear()
                         showSnackBar(
                             getString(R.string.move_to_recycler_bin), SnackBarType.SUCCESS
                         )
                     },
-
                     onError = {})
             } else {
-                viewModel.deleteMultipleFolder(listItemSelected.map { it.encryptedPath }, onSuccess = {
-                    getDataFile()
-                    listItemSelected.clear()
-                    showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
-                }, onError = {
-                    showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
-                })
+                viewModel.deleteMultipleFolder(listItemSelected.map { it.encryptedPath },
+                    onSuccess = {
+                        viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
+                        getDataFile()
+                        listItemSelected.clear()
+                        showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
+                    },
+                    onError = {
+                        showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
+                    })
             }
         }, DialogConfirmType.DELETE, name)
 
@@ -411,14 +419,14 @@ class FragmentPersistent : Fragment() {
 
     private fun unLockFile() {
         lifecycleScope.launch {
-
             CopyFiles.copy(requireContext(),
-                listItemSelected.map { File(it.encryptedPath) }.toMutableList(),
-                listItemSelected.map { File(it.originalPath) }.toMutableList(),
+                listItemSelected.map { File(it.encryptedPath) },
+                listItemSelected.map { File(it.originalPath) },
                 0L,
                 progress = { _: Int, _: Float, _: File? -> },
                 true,
                 onSuccess = {
+                    viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
                     listItemSelected.clear()
                     adapterPersistent?.unSelectAll()
                     adapterOtherFolder?.unSelectAll()
@@ -512,26 +520,42 @@ class FragmentPersistent : Fragment() {
     private fun handleClickItem(item: FileVaultItem) {
         val list = mutableListOf<FileVaultItem>()
         list.add(item)
-        when (args.type) {
-            Constant.TYPE_PICTURE -> {
-                ShareData.getInstance().setListItemImage(list)
-                val intent = Intent(requireContext(), ActivityImageDetail::class.java)
-                startActivity(intent)
+        if (item.encryptionType == EncryptionMode.HIDDEN) {
+            when (args.type) {
+                Constant.TYPE_PICTURE -> {
+                    ShareData.getInstance().setListItemImage(list)
+                    val intent = Intent(requireContext(), ActivityImageDetail::class.java)
+                    startActivity(intent)
+                }
+                Constant.TYPE_AUDIOS -> {
+                    ShareData.getInstance().setListItemAudio(list)
+                    val intent = Intent(requireContext(), ActivityAudioPlayer::class.java)
+                    startActivity(intent)
+                }
+                Constant.TYPE_VIDEOS -> {
+                    ShareData.getInstance().setListItemVideo(list)
+                    val intent = Intent(requireContext(), ActivityVideoPlayer::class.java)
+                    startActivity(intent)
+                }
+                else -> {
+                    item.encryptedPath.openWith(requireContext())
+                }
             }
-            Constant.TYPE_AUDIOS -> {
-                ShareData.getInstance().setListItemAudio(list)
-                val intent = Intent(requireContext(), ActivityAudioPlayer::class.java)
-                startActivity(intent)
-            }
-            Constant.TYPE_VIDEOS -> {
-                ShareData.getInstance().setListItemVideo(list)
-                val intent = Intent(requireContext(), ActivityVideoPlayer::class.java)
-                startActivity(intent)
-            }
-            else -> {
-                item.encryptedPath.openWith(requireContext())
+        } else {
+            if (!File(requireContext().config.decryptFolder, item.name).exists()) {
+                CryptoCore.getInstance(requireContext()).decodeFile(File(item.encryptedPath),
+                    File(requireContext().config.decryptFolder, item.name),
+                    onSuccess = {
+                        ShareData.getInstance().setListItemImage(list)
+                        val intent = Intent(requireContext(), ActivityImageDetail::class.java)
+                        startActivity(intent)
+                    },
+                    onProgress = {},
+                    onError = {})
+
             }
         }
+
     }
 
     private fun showController() {
@@ -548,17 +572,7 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun openInformationDialog(item: FileVaultItem) {
-        val dialogDetail = DialogDetail.dialogDetailConfig {
-            name = item.name
-            size = item.size
-            time = item.modified
-            timeLock = item.timeLock
-            resolution = item.ratioPicture
-            path = item.encryptedPath
-            originalPath = item.originalPath
-            encryptionMode = 1
-
-        }
+        val dialogDetail = DialogDetail(item)
         dialogDetail.show(childFragmentManager, dialogDetail.tag)
     }
 

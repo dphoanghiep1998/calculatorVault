@@ -71,17 +71,8 @@ class ActivityImageDetail : AppCompatActivity() {
     }
 
     private fun openImageInformationDialog() {
-        val dialogDetail = DialogDetail.dialogDetailConfig {
-            name = currentItem?.name
-            size = currentItem?.size
-            path = currentItem?.encryptedPath
-            originalPath = currentItem?.originalPath
-            resolution = currentItem?.ratioPicture
-            time = currentItem?.modified
-            timeLock = currentItem?.timeLock
-
-        }
-        dialogDetail.show(supportFragmentManager, dialogDetail.tag)
+        val dialogDetail = currentItem?.let { DialogDetail(it) }
+        dialogDetail?.show(supportFragmentManager, dialogDetail.tag)
     }
 
     private fun getData() {

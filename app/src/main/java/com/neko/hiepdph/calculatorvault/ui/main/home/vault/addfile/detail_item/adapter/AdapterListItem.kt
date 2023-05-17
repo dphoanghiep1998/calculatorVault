@@ -1,5 +1,8 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item.adapter
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -9,6 +12,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
+import com.neko.hiepdph.calculatorvault.common.extensions.getFormattedDuration
 import com.neko.hiepdph.calculatorvault.common.utils.formatSize
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.LayoutItemAudiosBinding
@@ -26,6 +30,7 @@ class AdapterListItem(private val onClickItem: (MutableSet<FileVaultItem>) -> Un
     fun setData(listDataItem: List<FileVaultItem>, type: String) {
         mType = type
         listItem = listDataItem.toMutableList()
+        listItemSelected.clear()
         notifyDataSetChanged()
     }
 
@@ -137,7 +142,7 @@ class AdapterListItem(private val onClickItem: (MutableSet<FileVaultItem>) -> Un
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
                     Glide.with(itemView.context).load(item.originalPath).apply(requestOptions)
                         .error(R.drawable.ic_error_video).into(binding.imvThumb)
-                    binding.tvDuration.text = item.durationLength.toString()
+                    binding.tvDuration.text = item.durationLength?.getFormattedDuration()
                     binding.checkBox.isChecked = item in listItemSelected
 
                     binding.root.setOnClickListener {
@@ -164,14 +169,16 @@ class AdapterListItem(private val onClickItem: (MutableSet<FileVaultItem>) -> Un
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).asBitmap().load(item.thumb)
-                        .apply(requestOptions).error(R.drawable.ic_error_audio).into(binding.imvThumb)
+                    Glide.with(itemView.context).load(loadThumbnail(item.originalPath))
+                        .apply(requestOptions).error(R.drawable.ic_error_audio)
+                        .into(binding.imvThumb)
 
                     binding.tvNameAudio.isSelected = true
 
                     binding.tvNameAudio.text = item.name
                     binding.checkbox.isChecked = item in listItemSelected
-                    binding.tvDurationAuthor.text = item.durationLength.toString()
+                    binding.tvDurationAuthor.text =
+                        item.durationLength?.getFormattedDuration() + "-" + item.artist
                     binding.root.setOnClickListener {
                         binding.checkbox.isChecked = !binding.checkbox.isChecked
                         if (binding.checkbox.isChecked) {
@@ -237,6 +244,25 @@ class AdapterListItem(private val onClickItem: (MutableSet<FileVaultItem>) -> Un
             Constant.TYPE_EXCEL -> R.drawable.ic_excel
             Constant.TYPE_PDF -> R.drawable.ic_pdf
             else -> 0
+        }
+    }
+
+    private fun loadThumbnail(path:String): Bitmap? {
+
+        return try {
+            val mr = MediaMetadataRetriever()
+            mr.setDataSource(path)
+            val byte1 = mr.embeddedPicture
+            mr.release()
+
+            if (byte1 != null) {
+                val options = BitmapFactory.Options()
+                options.inJustDecodeBounds = false
+                val b = BitmapFactory.decodeByteArray(byte1, 0, byte1.size, options)
+                b
+            } else null
+        } catch (e: java.lang.Exception) {
+            null
         }
     }
 }

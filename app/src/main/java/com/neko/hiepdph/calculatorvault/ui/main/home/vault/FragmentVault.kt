@@ -73,6 +73,7 @@ class FragmentVault : Fragment() {
 
     private fun observeListFile() {
         viewModel.listFolderInVault.observe(viewLifecycleOwner) {
+            Log.d("TAG", "observeListFile: " + it.size)
             adapter?.setData(sortList(it))
             binding.swipeLayout.isRefreshing = false
         }

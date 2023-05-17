@@ -4,13 +4,9 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
-import android.media.MediaPlayer
-import android.net.Uri
 import android.provider.MediaStore
-import android.util.Log
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.Constant.PRIVACY_FOLDER_NAME
-import com.neko.hiepdph.calculatorvault.common.Constant.SECRET_KEY
 import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_AUDIOS
 import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_CSV
 import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_EXCEL
@@ -26,13 +22,9 @@ import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_ZIP
 import com.neko.hiepdph.calculatorvault.common.Constant.archiveMimeTypes
 import com.neko.hiepdph.calculatorvault.common.Constant.extraAudioMimeTypes
 import com.neko.hiepdph.calculatorvault.common.Constant.extraDocumentMimeTypes
-import com.neko.hiepdph.calculatorvault.common.extensions.getLongValue
-import com.neko.hiepdph.calculatorvault.common.extensions.getStringValue
-import com.neko.hiepdph.calculatorvault.common.extensions.queryCursor
+import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.GroupItem
-import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.*
 
@@ -316,6 +308,7 @@ object MediaStoreUtils {
                             childPath,
                             "",
                             "",
+                            "",
                             name,
                             size,
                             modified,
@@ -367,6 +360,7 @@ object MediaStoreUtils {
                             childPath,
                             "",
                             "",
+                            "",
                             name,
                             size,
                             modified,
@@ -400,7 +394,6 @@ object MediaStoreUtils {
                 MediaStore.Video.Media.SIZE,
                 MediaStore.Video.Media.DATE_MODIFIED,
                 MediaStore.Video.Media._ID,
-                MediaStore.Video.Media.ARTIST
             )
             val selection = MediaStore.Video.Media.DATA + " LIKE ?"
             val selectionArgs = arrayOf("$path/%")
@@ -410,7 +403,6 @@ object MediaStoreUtils {
                 val size = cursor.getLongValue(MediaStore.Video.Media.SIZE)
                 val modified = cursor.getLongValue(MediaStore.Video.Media.DATE_MODIFIED)
                 val name = cursor.getStringValue(MediaStore.Video.Media.DISPLAY_NAME)
-                val artist = cursor.getStringValue(MediaStore.Video.Media.ARTIST)
 
                 if (childPath.isNotBlank()) {
                     listVideoChild.add(
@@ -419,14 +411,15 @@ object MediaStoreUtils {
                             childPath,
                             "",
                             "",
+                            "",
                             name,
                             size,
                             modified,
                             0L,
                             id,
-                            getImageResolution(childPath),
-                            "",
-                            0,
+                            null,
+                            context.getArtist(childPath).toString(),
+                            context.getDuration(childPath) ?: 0,
                             1,
                             TYPE_VIDEOS,
                         )
@@ -454,7 +447,6 @@ object MediaStoreUtils {
                 MediaStore.Audio.Media.SIZE,
                 MediaStore.Audio.Media.DATE_MODIFIED,
                 MediaStore.Audio.Media._ID,
-                MediaStore.Audio.Media.ARTIST
             )
             val selection = MediaStore.Audio.Media.DATA + " LIKE ?"
 
@@ -465,7 +457,6 @@ object MediaStoreUtils {
                 val size = cursor.getLongValue(MediaStore.Audio.Media.SIZE)
                 val modified = cursor.getLongValue(MediaStore.Audio.Media.DATE_MODIFIED)
                 val name = cursor.getStringValue(MediaStore.Audio.Media.DISPLAY_NAME)
-                val artist = cursor.getStringValue(MediaStore.Audio.Media.ARTIST)
 
                 if (childPath.isNotBlank()) {
                     listAudioChild.add(
@@ -474,18 +465,18 @@ object MediaStoreUtils {
                             childPath,
                             "",
                             "",
+                            "",
                             name,
                             size,
                             modified,
                             0L,
                             id,
-                            getImageResolution(childPath),
-                            "",
-                            0,
+                            null,
+                            context.getArtist(childPath).toString(),
+                            context.getDuration(childPath) ?: 0,
                             1,
                             TYPE_AUDIOS,
                             null,
-                            encodeToByteArray(getThumbnail(childPath))
                         )
                     )
                 }
@@ -533,14 +524,15 @@ object MediaStoreUtils {
                                             childPath,
                                             "",
                                             "",
+                                            "",
                                             name,
                                             size,
                                             modified,
                                             0L,
                                             id,
-                                            getImageResolution(childPath),
-                                            "",
-                                            0,
+                                            null,
+                                            null,
+                                            null,
                                             1,
                                             TYPE_FILE,
                                             TYPE_PDF,
@@ -560,14 +552,15 @@ object MediaStoreUtils {
                                             childPath,
                                             "",
                                             "",
+                                            "",
                                             name,
                                             size,
                                             modified,
                                             0L,
                                             id,
-                                            getImageResolution(childPath),
-                                            "",
-                                            0,
+                                            null,
+                                            null,
+                                            null,
                                             1,
                                             TYPE_FILE,
                                             TYPE_PPT,
@@ -586,14 +579,15 @@ object MediaStoreUtils {
                                             childPath,
                                             "",
                                             "",
+                                            "",
                                             name,
                                             size,
                                             modified,
                                             0L,
                                             id,
                                             getImageResolution(childPath),
-                                            "",
-                                            0,
+                                            null,
+                                            null,
                                             1,
                                             TYPE_FILE,
                                             TYPE_WORD,
@@ -609,14 +603,15 @@ object MediaStoreUtils {
                                             childPath,
                                             "",
                                             "",
+                                            "",
                                             name,
                                             size,
                                             modified,
                                             0L,
                                             id,
                                             getImageResolution(childPath),
-                                            "",
-                                            0,
+                                            null,
+                                            null,
                                             1,
                                             TYPE_FILE,
                                             TYPE_EXCEL,
@@ -632,14 +627,15 @@ object MediaStoreUtils {
                                             childPath,
                                             "",
                                             "",
+                                            "",
                                             name,
                                             size,
                                             modified,
                                             0L,
                                             id,
-                                            getImageResolution(childPath),
-                                            "",
-                                            0,
+                                            null,
+                                            null,
+                                            null,
                                             1,
                                             TYPE_FILE,
                                             TYPE_CSV,
@@ -655,14 +651,15 @@ object MediaStoreUtils {
                                             childPath,
                                             "",
                                             "",
+                                            "",
                                             name,
                                             size,
                                             modified,
                                             0L,
                                             id,
-                                            getImageResolution(childPath),
-                                            "",
-                                            0,
+                                            null,
+                                            null,
+                                            null,
                                             1,
                                             TYPE_FILE,
                                             TYPE_TEXT,
@@ -678,14 +675,15 @@ object MediaStoreUtils {
                                             childPath,
                                             "",
                                             "",
+                                            "",
                                             name,
                                             size,
                                             modified,
                                             0L,
                                             id,
-                                            getImageResolution(childPath),
-                                            "",
-                                            0,
+                                            null,
+                                            null,
+                                            null,
                                             1,
                                             TYPE_FILE,
                                             TYPE_ZIP,
@@ -711,14 +709,15 @@ object MediaStoreUtils {
                                             childPath,
                                             "",
                                             "",
+                                            "",
                                             name,
                                             size,
                                             modified,
                                             0L,
                                             id,
-                                            getImageResolution(childPath),
-                                            "",
-                                            0,
+                                            null,
+                                            null,
+                                            null,
                                             1,
                                             TYPE_FILE,
                                             TYPE_OTHER,
@@ -738,23 +737,10 @@ object MediaStoreUtils {
 
     }
 
-    fun getImageResolution(imagePath: String): String {
+    private fun getImageResolution(imagePath: String): String {
         val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(imagePath, options)
         return "${options.outWidth}x${options.outHeight}"
     }
 
-    private fun getDuration(context: Context, path: String): Int {
-        val mp = MediaPlayer.create(context, Uri.parse(path))
-        return mp.duration
-    }
-    fun encodeToByteArray(image: Bitmap?): ByteArray {
-        val outputStream = ByteArrayOutputStream()
-        image?.compress(Bitmap.CompressFormat.PNG, 0, outputStream)
-        return outputStream.toByteArray()
-    }
-
-    fun decodeToBitmap(input: ByteArray): Bitmap? {
-        return BitmapFactory.decodeByteArray(input, 0, input.size)
-    }
 }

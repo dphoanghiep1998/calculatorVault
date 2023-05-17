@@ -8,10 +8,12 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.text.TextUtils
+import android.util.Base64
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.documentfile.provider.DocumentFile
 import com.google.common.io.Files.getNameWithoutExtension
+import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import java.io.*
 import java.util.*
 
@@ -35,47 +37,38 @@ object FileNameUtils {
         targetLocation: File,
         progress: (value: Int, currentFile: File) -> Unit,
         finish: (currentFile: File, targetFile: File) -> Unit,
+        encryptionMode: Int = EncryptionMode.HIDDEN
     ) {
-//        if (sourceLocation.isDirectory) {
-//            if (!targetLocation.exists()) {
-//
-//                mkdir(context, targetLocation)
-//
-//            }
-//            val children = sourceLocation.list()
-//
-//            if (children == null || children.isEmpty()) finish(sourceLocation, sourceLocation)
-//            else for (i in sourceLocation.listFiles().indices) {
-//                copyDirectoryOneLocationToAnotherLocation(
-//                    context,
-//                    File(sourceLocation, children[i]),
-//                    File(targetLocation, children[i]),
-//                    progress,
-//                    finish
-//                )
-//            }
-//        } else {
+        val `in`: InputStream = FileInputStream(sourceLocation)
+        val targetFile = if (!targetLocation.exists()) targetLocation
+        else if (targetLocation.isFile) targetLocation
+        else File(
+            targetLocation, sourceLocation.name
+        )
+        val out: OutputStream? = getOutputStream(targetFile, context)
 
-            val `in`: InputStream = FileInputStream(sourceLocation)
-            val targetFile = if (!targetLocation.exists()) targetLocation
-            else if (targetLocation.isFile) targetLocation
-            else File(
-                targetLocation, sourceLocation.name
-            )
-            val out: OutputStream? = getOutputStream(targetFile, context)
-
-            // Copy the bits from instream to outstream
-            val buf = ByteArray(1024)
-            var len: Int = 0
+        // Copy the bits from instream to outstream
+        val buf = ByteArray(1024)
+        var len: Int = 0
+        if(encryptionMode == EncryptionMode.HIDDEN){
             while (`in`.read(buf).also { len = it } > 0) {
                 out?.write(buf, 0, len)
 
                 progress(len, sourceLocation)
             }
-            `in`.close()
-            out?.close()
+        }else{
+            while (`in`.read(buf).also { len = it } > 0) {
+                val base64 = Base64.encodeToString(buf.sliceArray(0 until len), Base64.DEFAULT)
+                out?.write(base64.toByteArray(Charsets.UTF_8))
 
-            finish(sourceLocation, targetFile)
+                progress(len, sourceLocation)
+            }
+        }
+
+        `in`.close()
+        out?.close()
+
+        finish(sourceLocation, targetFile)
 //        }
     }
 

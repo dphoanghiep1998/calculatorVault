@@ -121,7 +121,7 @@ class AdapterOtherFolder(
                 Constant.TYPE_AUDIOS -> {
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).asBitmap().load(item.thumb)
+                    Glide.with(itemView.context).asBitmap().load(getThumbnail(item.encryptedPath))
                         .apply(requestOptions).error(R.drawable.ic_error_audio).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {

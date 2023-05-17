@@ -21,7 +21,7 @@ private const val STATE_DONE = 3
 object CopyFiles {
     fun copy(
         context: Context,
-        files: MutableList<File>?,
+        files: List<File>?,
         targetFolder: File,
         tSize: Long,
         progress: (state: Int, value: Float, currentFile: File?) -> Unit,
@@ -34,8 +34,7 @@ object CopyFiles {
             var totalSize = 0L
             if (tSize == 0L) files?.forEach {
                 totalSize += calFolderSize(it)
-            }
-            else totalSize = tSize
+            } else totalSize = tSize
             var currentSize = 0f
             // move file
             files?.forEach { itemFile ->
@@ -50,8 +49,9 @@ object CopyFiles {
                     { len, file ->
                         run {
                             currentSize += len
+
                             progress(
-                                STATE_PROCESSING, (currentSize * 100 / tSize).toFloat(), file
+                                STATE_PROCESSING, (currentSize * 100 / totalSize), file
                             )
                         }
                     },
@@ -61,9 +61,10 @@ object CopyFiles {
                             deleteFile(sourceFile, context)
                         }
                         addMedia(context, targetFile)
-                        onSuccess()
                     })
             }
+            onSuccess()
+
 
         } catch (e: Exception) {
             onError(e)
@@ -74,7 +75,7 @@ object CopyFiles {
         context: Context,
         files: MutableList<File>?,
         targetFolder: File,
-        targetName:MutableList<String>,
+        targetName: MutableList<String>,
         tSize: Long,
         progress: (state: Int, value: Float, currentFile: File?) -> Unit,
         isMove: Boolean = false,
@@ -100,13 +101,14 @@ object CopyFiles {
                     ).toString()
                 )
 
-                copyDirectoryOneLocationToAnotherLocation(context, itemFile, targetFile,
+                copyDirectoryOneLocationToAnotherLocation(
+                    context, itemFile, targetFile,
                     // on progress
                     { len, file ->
                         run {
                             currentSize += len
                             progress(
-                                STATE_PROCESSING, (currentSize * 100 / tSize).toFloat(), file
+                                STATE_PROCESSING, (currentSize * 100 / totalSize), file
                             )
                         }
                     },
@@ -116,9 +118,12 @@ object CopyFiles {
                             deleteFile(sourceFile, context)
                         }
                         addMedia(context, targetFile)
-                        onSuccess()
-                    })
+                    }, encryptionMode
+                )
+
             }
+            onSuccess()
+
 
         } catch (e: Exception) {
             onError(e)
@@ -127,8 +132,8 @@ object CopyFiles {
 
     fun copy(
         context: Context,
-        files: MutableList<File>?,
-        targetFolder: MutableList<File>,
+        files: List<File>?,
+        targetFolder: List<File>,
         tSize: Long,
         progress: (state: Int, value: Float, currentFile: File?) -> Unit,
         isMove: Boolean = false,
@@ -166,9 +171,10 @@ object CopyFiles {
                             deleteFile(sourceFile, context)
                         }
                         addMedia(context, targetFile)
-                        onSuccess()
                     })
             }
+            onSuccess()
+
 
         } catch (e: Exception) {
             onError(e)

@@ -1,6 +1,5 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item
 
-//import com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item.adapter.AdapterListItem
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -9,6 +8,7 @@ import androidx.core.view.MenuProvider
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,12 +20,12 @@ import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentListItemBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogAskEncryptionMode
+import com.neko.hiepdph.calculatorvault.dialog.DialogProgress
 import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item.adapter.AdapterListItem
 import com.neko.hiepdph.calculatorvault.viewmodel.ListItemViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
@@ -35,7 +35,7 @@ import java.util.*
 class FragmentListItem : Fragment() {
     private var _binding: FragmentListItemBinding? = null
     private val binding get() = _binding!!
-
+    private var dialogProgress: DialogProgress? = null
 
     private val viewModel by viewModels<ListItemViewModel>()
     private var adapterListItem: AdapterListItem? = null
@@ -57,6 +57,7 @@ class FragmentListItem : Fragment() {
         initView()
         observeData()
         setupTitle()
+        getData()
     }
 
     private fun setupTitle() {
@@ -85,7 +86,7 @@ class FragmentListItem : Fragment() {
     }
 
     private fun initView() {
-        initToolBar()
+        dialogProgress = DialogProgress()
         initRecycleView()
         initButton()
     }
@@ -93,43 +94,40 @@ class FragmentListItem : Fragment() {
     private fun initButton() {
 
         binding.btnMoveToVault.clickWithDebounce {
+
             val listOfEncryptedString = mutableListOf<String>()
             listOfEncryptedString.addAll(listItemSelected.map {
                 CryptoCore.getInstance(requireContext()).encryptString(Constant.SECRET_KEY, it.name)
             })
-            Log.d("TAG", "initButton: " + listOfEncryptedString.size)
-
-
+            dialogProgress?.show(childFragmentManager, dialogProgress?.tag)
             if (requireContext().config.encryptionMode != EncryptionMode.ALWAYS_ASK) {
+                dialogProgress?.setData("Encrypt File", "Encrypting ${listItemSelected.size} files ...")
                 viewModel.copyMoveFile(
                     requireContext(),
                     listItemSelected.map { File(it.originalPath) }.toMutableList(),
                     File(args.vaultPath),
                     listOfEncryptedString,
                     progress = { state: Int, value: Float, currentFile: File? ->
-
+                        dialogProgress?.setProgressValue(value.toInt())
                     },
                     onSuccess = {
-                        CoroutineScope(Dispatchers.Main).launch {
-                            listItemSelected.forEachIndexed { index, item ->
-                                item.apply {
-                                    recyclerPath = "${requireContext().filesDir.path}/${
-                                        listOfEncryptedString[index]
-                                    }"
-                                    timeLock = Calendar.getInstance().timeInMillis
-                                    encryptionType = currentEncryptionMode
-                                    encryptedPath = "${args.vaultPath}/${
-                                        listOfEncryptedString[index]
-                                    }"
-                                }
-                                viewModel.insertFileToRoom(item)
+                        dialogProgress?.showButton()
+                        dialogProgress?.statusSuccess()
+                        dialogProgress?.setData("Encrypt File","Encrypted successfully ${listItemSelected.size} file")
+                        listItemSelected.forEachIndexed { index, item ->
+                            item.apply {
+                                recyclerPath = "${requireContext().config.recyclerBinFolder.path}/${ listOfEncryptedString[index]}"
+                                timeLock = Calendar.getInstance().timeInMillis
+                                encryptionType = currentEncryptionMode
+                                encryptedPath = "${args.vaultPath}/${
+                                    listOfEncryptedString[index]
+                                }"
                             }
-                            observeData()
-                            adapterListItem?.unSelectAll()
-                            listItemSelected.clear()
-                            checkListPath()
-                            checkCheckBoxAll()
+                            viewModel.insertFileToRoom(item)
                         }
+                        getData()
+                        checkListPath()
+                        checkCheckBoxAll()
                     },
                     onError = {
                         it.printStackTrace()
@@ -138,6 +136,7 @@ class FragmentListItem : Fragment() {
                 )
             } else {
                 val dialogAskEncryptionMode = DialogAskEncryptionMode(onPressPositive = { enMode ->
+                    dialogProgress?.setData("Encrypt File", "Encrypting ${listItemSelected.size} files ...")
                     currentEncryptionMode = enMode
                     viewModel.copyMoveFile(
                         requireContext(),
@@ -145,50 +144,57 @@ class FragmentListItem : Fragment() {
                         File(args.vaultPath),
                         listOfEncryptedString,
                         progress = { state: Int, value: Float, currentFile: File? ->
-
+                            dialogProgress?.setProgressValue(value.toInt())
                         },
                         onSuccess = {
-                            CoroutineScope(Dispatchers.Main).launch {
-                                listItemSelected.forEachIndexed { index, item ->
-                                    item.apply {
-                                        recyclerPath = "${requireContext().filesDir.path}/${
-                                            listOfEncryptedString[index]
-                                        }"
-                                        timeLock = Calendar.getInstance().timeInMillis
-                                        encryptionType = currentEncryptionMode
-                                        encryptedPath = "${args.vaultPath}/${
-                                            listOfEncryptedString[index]
-                                        }"
-                                    }
-                                    viewModel.insertFileToRoom(item)
-                                }
-                                observeData()
-                                adapterListItem?.unSelectAll()
-                                listItemSelected.clear()
-                                checkListPath()
-                                checkCheckBoxAll()
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                dialogProgress?.showButton()
+                                dialogProgress?.statusSuccess()
+                                dialogProgress?.setData("Encrypt File","Encrypted successfully ${listItemSelected.size} file")
                             }
+
+                            listItemSelected.forEachIndexed { index, item ->
+                                item.apply {
+                                    recyclerPath = "${requireContext().config.recyclerBinFolder.path}/${listOfEncryptedString[index]}"
+                                    timeLock = Calendar.getInstance().timeInMillis
+                                    encryptionType = currentEncryptionMode
+                                    encryptedPath = "${args.vaultPath}/${
+                                        listOfEncryptedString[index]
+                                    }"
+                                }
+                                viewModel.insertFileToRoom(item)
+                            }
+                            getData()
+                            checkListPath()
+                            checkCheckBoxAll()
                         },
                         onError = {
+                            dialogProgress?.showButton()
+                            dialogProgress?.statusFailed()
                             it.printStackTrace()
+                            getData()
+                            checkListPath()
+                            checkCheckBoxAll()
                         },
                         currentEncryptionMode
                     )
                 })
                 dialogAskEncryptionMode.show(childFragmentManager, dialogAskEncryptionMode.tag)
             }
-
         }
     }
 
-    private fun initToolBar() {
+    private fun initToolBar(size:Int?) {
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
-                menuInflater.inflate(R.menu.toolbar_menu_pick, menu)
-                menu[0].actionView?.findViewById<View>(R.id.checkbox)?.setOnClickListener {
-                    checkAllItem(menu[0].actionView?.findViewById<CheckBox>(R.id.checkbox)?.isChecked == true)
+                if(size != null && size>0){
+                    menuInflater.inflate(R.menu.toolbar_menu_pick, menu)
+                    menu[0].actionView?.findViewById<View>(R.id.checkbox)?.setOnClickListener {
+                        checkAllItem(menu[0].actionView?.findViewById<CheckBox>(R.id.checkbox)?.isChecked == true)
+                    }
                 }
+
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -219,7 +225,7 @@ class FragmentListItem : Fragment() {
         }
     }
 
-    private fun observeData() {
+    private fun getData() {
         if (args.groupItem.type != Constant.TYPE_FILE) {
             viewModel.getItemListFromFolder(
                 requireContext(), args.groupItem.folderPath, args.groupItem.type
@@ -229,6 +235,10 @@ class FragmentListItem : Fragment() {
                 requireContext(), args.groupItem.folderPath, args.groupItem.type, args.fileType
             )
         }
+        listItemSelected.clear()
+    }
+
+    private fun observeData() {
         viewModel.listItemList.observe(viewLifecycleOwner) {
             it?.let {
                 adapterListItem?.setData(it, args.groupItem.type)
@@ -240,8 +250,8 @@ class FragmentListItem : Fragment() {
                     binding.tvEmpty.show()
 //                    popBackStack(R.id.fragmentListItem)
                 }
-
             }
+            initToolBar(it?.size)
         }
     }
 

@@ -3,7 +3,9 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.setting.advance
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.*
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
@@ -21,9 +23,11 @@ class FragmentAdvance : Fragment() {
         // Inflate the layout for this fragment
         binding = FragmentAdvanceBinding.inflate(inflater, container, false)
         initView()
+        initToolBar()
         AppSharePreference.INSTANCE.registerOnSharedPreferenceChangeListener(listener)
         return binding.root
     }
+
 
     private val listener =
         SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
@@ -36,11 +40,22 @@ class FragmentAdvance : Fragment() {
             }
         }
 
+
     private fun initView() {
         setupView()
         initAction()
     }
+    private fun initToolBar() {
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
+            }
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return false
+            }
 
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
     private fun initAction() {
         binding.itemIntruderSelfie.root.clickWithDebounce {
             navigateToPage(R.id.fragmentAdvance, R.id.fragmentIntruder)

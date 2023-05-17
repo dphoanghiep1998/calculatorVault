@@ -238,7 +238,7 @@ class ActivityVault : AppCompatActivity() {
 
     private fun createSecretFolderFirstTime() {
         if (!AppSharePreference.INSTANCE.getInitDone(false)) {
-
+            Log.d("TAG", "createSecretFolderFirstTime: ")
             viewModel.createFolder(filesDir, Constant.PICTURE_FOLDER_NAME)
             viewModel.createFolder(filesDir, Constant.VIDEOS_FOLDER_NAME)
             viewModel.createFolder(filesDir, Constant.AUDIOS_FOLDER_NAME)

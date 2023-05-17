@@ -19,14 +19,17 @@ class AppRepo @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
-    fun getAllBookmark(): LiveData<List<BookmarkModel>> = bookmarkService.bookmarkDao.getListBookmark()
+    fun getAllBookmark(): LiveData<List<BookmarkModel>> =
+        bookmarkService.bookmarkDao.getListBookmark()
 
-    suspend fun deleteBookmark(id:Int) = withContext(dispatcher){
+    suspend fun deleteBookmark(id: Int) = withContext(dispatcher) {
         bookmarkService.bookmarkDao.deleteBookmark(id)
     }
-    suspend fun insertBookmark(bookmarkModel: BookmarkModel) = withContext(dispatcher){
+
+    suspend fun insertBookmark(bookmarkModel: BookmarkModel) = withContext(dispatcher) {
         bookmarkService.bookmarkDao.insertBookmark(bookmarkModel.toBookmarkEntity())
     }
+
     fun getAllNote(): LiveData<List<NoteModel>> = noteLocalService.noteDao.getListNote()
 
     suspend fun insertNoteModel(model: NoteModel) = withContext(dispatcher) {
@@ -51,22 +54,24 @@ class AppRepo @Inject constructor(
 
     //
 
-    suspend fun insertFileVault(fileVaultItem: FileVaultItem) = withContext(dispatcher){
+    suspend fun insertFileVault(fileVaultItem: FileVaultItem) = withContext(dispatcher) {
         fileVaultService.fileVaultItemDao.insertFile(fileVaultItem.toFileVaultEntity())
     }
 
-    suspend fun updateFileVault(fileVaultItem: FileVaultItem) = withContext(dispatcher){
+    suspend fun updateFileVault(fileVaultItem: FileVaultItem) = withContext(dispatcher) {
         fileVaultService.fileVaultItemDao.updateFile(fileVaultItem.toFileVaultEntity())
     }
 
     fun getAllFile(): List<FileVaultItem> = fileVaultService.fileVaultItemDao.getListFile()
-    fun getAllFileInEnCryptFolder(folderPath:String): LiveData<List<FileVaultItem>> = fileVaultService.fileVaultItemDao.getListFileEncrypted(folderPath)
+    fun getAllFileInEnCryptFolder(folderPath: String): LiveData<List<FileVaultItem>> =
+        fileVaultService.fileVaultItemDao.getListFileEncrypted(folderPath)
 
-    suspend fun getFile(encryptedPath:String):FileVaultItem? = withContext(dispatcher){
-        fileVaultService.fileVaultItemDao.getFileByEncryptedName(encryptedPath)
+    fun getAllFileDeleted(folderPath: String): LiveData<List<FileVaultItem>> =
+        fileVaultService.fileVaultItemDao.getListFileDeleted(folderPath)
+
+    suspend fun deleteFile(listId: List<Int>) = withContext(dispatcher) {
+        fileVaultService.fileVaultItemDao.deleteFile(listId)
     }
-
-
 
 
 }

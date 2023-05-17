@@ -10,16 +10,18 @@ class FileVaultItemEntity(
     var originalPath: String,
     var encryptedPath: String = "",
     var recyclerPath: String,
+    var decodePath: String,
     var name: String = "",
     var size: Long = 0L,
     var modified: Long = 0L,
     var timeLock: Long = 0L,
     var mediaStoreId: Long = 0L,
     var ratioPicture: String? = null,
-    var artist: String = "",
-    var durationLength: Int = 0,
+    var artist: String ?= "",
+    var durationLength: Int ?= 0,
     var encryptionType: Int = 1,
     var fileType: String = "",
     var fileRealType: String? = null,
-    var thumb: ByteArray? = null
+    var isDeleted :Boolean = false
+
 ) {}

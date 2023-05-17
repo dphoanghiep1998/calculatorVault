@@ -11,13 +11,13 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.DialogFragment
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
-import com.neko.hiepdph.calculatorvault.config.EncryptionMode
-import com.neko.hiepdph.calculatorvault.databinding.DialogAskEncryptionModeBinding
+import com.neko.hiepdph.calculatorvault.common.extensions.hide
+import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.databinding.DialogProgressBinding
 
 
-class DialogAskEncryptionMode(private val onPressPositive:(selectedEncryption:Int)->Unit) : DialogFragment() {
-    private lateinit var binding: DialogAskEncryptionModeBinding
-    private var selectedEncryption = 1
+class DialogProgress() : DialogFragment() {
+    private lateinit var binding: DialogProgressBinding
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val root = ConstraintLayout(requireContext())
@@ -27,6 +27,7 @@ class DialogAskEncryptionMode(private val onPressPositive:(selectedEncryption:In
         val dialog = DialogCallBack(requireContext(), callback)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(root)
+        dialog.setCancelable(false)
         dialog.window!!.setBackgroundDrawable(ColorDrawable(requireContext().getColor(R.color.blur)))
         dialog.window!!.setLayout(
             (requireContext().resources.displayMetrics.widthPixels),
@@ -38,7 +39,7 @@ class DialogAskEncryptionMode(private val onPressPositive:(selectedEncryption:In
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        binding = DialogAskEncryptionModeBinding.inflate(inflater, container, false)
+        binding = DialogProgressBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -50,26 +51,51 @@ class DialogAskEncryptionMode(private val onPressPositive:(selectedEncryption:In
 
     private fun initView() {
         initButton()
-        binding.checkboxHidden.isChecked = true
+    }
+
+    fun setData(title: String, status: String) {
+        binding.tvTitle.text = title
+        binding.tvStatus.text = status
+    }
+
+    fun setProgressValue(value: Int) {
+        binding.progressLoading.progress = value
+        binding.tvProgress.text = "$value %"
+    }
+
+    fun hideButton(){
+        binding.btnOk.hide()
+        binding.btnCancel.hide()
+        binding.btnTips.hide()
+    }
+    fun statusSuccess(){
+        binding.progressLoading.hide()
+        binding.tvProgress.hide()
+        binding.imvSuccess.show()
+    }
+    fun statusFailed(){
+        binding.progressLoading.hide()
+        binding.tvProgress.hide()
+        binding.imvFailed.show()
+    }
+
+    fun showButton(){
+        binding.btnOk.show()
+        binding.btnCancel.show()
+        binding.btnTips.show()
     }
 
     private fun initButton() {
-        binding.btnConfirm.clickWithDebounce {
-            onPressPositive.invoke(selectedEncryption)
+        binding.btnOk.clickWithDebounce {
             dismiss()
         }
-        binding.root.clickWithDebounce {
+
+        binding.btnCancel.clickWithDebounce {
             dismiss()
         }
-        binding.containerMain.setOnClickListener { }
-
-        binding.checkboxEncryption.setOnClickListener {
-            selectedEncryption = EncryptionMode.ENCRYPTION
+        binding.btnTips.clickWithDebounce {
+            openTips()
         }
-        binding.checkboxHidden.setOnClickListener {
-            selectedEncryption = EncryptionMode.HIDDEN
-        }
-
 
 
     }
@@ -80,7 +106,7 @@ class DialogAskEncryptionMode(private val onPressPositive:(selectedEncryption:In
 
     private val callback = object : BackPressDialogCallBack {
         override fun shouldInterceptBackPress(): Boolean {
-            return true
+            return false
         }
 
         override fun onBackPressIntercepted() {

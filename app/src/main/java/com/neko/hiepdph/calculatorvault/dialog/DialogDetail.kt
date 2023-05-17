@@ -14,51 +14,15 @@ import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.utils.DateTimeUtils
 import com.neko.hiepdph.calculatorvault.common.utils.formatSize
+import com.neko.hiepdph.calculatorvault.config.EncryptionMode
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.DialogDetailBinding
 
 
 class DialogDetail(
-    private var name: String? = null,
-    private var size: Long? = null,
-    private var resolution: String? = null,
-    private var time: Long? = null,
-    private var timeLock: Long? = null,
-    private var path: String? = null,
-    private var originalPath: String? = null,
-    private var encryptionMode: Int? = null,
+   private val fileVaultItem: FileVaultItem
 ) : DialogFragment() {
     private lateinit var binding: DialogDetailBinding
-
-
-    private constructor(builder: Builder) : this(
-        builder.name,
-        builder.size,
-        builder.resolution,
-        builder.time,
-        builder.timeLock,
-        builder.path,
-        builder.originalPath,
-        builder.encryptionMode
-
-    )
-
-    companion object {
-        inline fun dialogDetailConfig(block: Builder.() -> Unit) = Builder().apply(block).build()
-    }
-
-    class Builder {
-        var name: String? = null
-        var size: Long? = null
-        var resolution: String? = null
-        var time: Long? = null
-        var timeLock: Long? = null
-        var path: String? = null
-        var originalPath: String? = null
-        var encryptionMode: Int? = null
-
-        fun build() = DialogDetail(this)
-
-    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val root = ConstraintLayout(requireContext())
@@ -91,57 +55,27 @@ class DialogDetail(
     }
 
     private fun initView() {
-        if (time == null) {
-            binding.tvTime.hide()
-            binding.tvTimeValue.hide()
-        } else {
-            binding.tvTimeValue.text = DateTimeUtils.getDateConverted(time!!)
-        }
+        binding.tvTimeValue.text = DateTimeUtils.getDateConverted(fileVaultItem.modified)
 
-        if (name == null) {
-            binding.tvName.hide()
-            binding.tvNameValue.hide()
-        } else {
-            binding.tvNameValue.text = name
-        }
+        binding.tvNameValue.text = fileVaultItem.name
 
-        if (size == null) {
-            binding.tvSize.hide()
-            binding.tvSizeValue.hide()
-        } else {
-            binding.tvSizeValue.text = size!!.formatSize()
-        }
+        binding.tvSizeValue.text = fileVaultItem.size.formatSize()
 
-        if (resolution == null) {
+        if (fileVaultItem.ratioPicture == null) {
             binding.tvResolution.hide()
             binding.tvResolutionValue.hide()
         } else {
-            binding.tvResolutionValue.text = resolution
+            binding.tvResolutionValue.text = fileVaultItem.ratioPicture
         }
 
-        if (timeLock == null) {
-            binding.tvTimeLock.hide()
-            binding.tvTimeLockValue.hide()
+        binding.tvTimeLockValue.text = DateTimeUtils.getDateConverted(fileVaultItem.timeLock)
+        binding.tvPathValue.text = fileVaultItem.encryptedPath
+        binding.tvOriginPathValue.text = fileVaultItem.originalPath
+        if (fileVaultItem.encryptionType == EncryptionMode.HIDDEN) {
+            binding.tvEncryptionModeValue.text = getString(R.string.hidden)
         } else {
-            binding.tvTimeLockValue.text = DateTimeUtils.getDateConverted(timeLock!!)
+            binding.tvEncryptionModeValue.text = getString(R.string.encryption)
         }
-
-        if (path == null) {
-            binding.tvPath.hide()
-            binding.tvPathValue.hide()
-        } else {
-            binding.tvPathValue.text = path
-        }
-
-        if (originalPath == null) {
-            binding.tvOriginPath.hide()
-            binding.tvOriginPathValue.hide()
-        } else {
-            binding.tvOriginPathValue.text = originalPath
-        }
-
-
-
         initButton()
     }
 

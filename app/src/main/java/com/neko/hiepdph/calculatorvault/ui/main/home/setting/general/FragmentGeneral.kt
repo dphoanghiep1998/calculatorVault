@@ -2,12 +2,12 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.setting.general
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
@@ -37,12 +37,24 @@ class FragmentGeneral : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initToolBar()
         initView()
     }
 
     private fun initView() {
         setupView()
         initAction()
+    }
+    private fun initToolBar() {
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
+            }
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return false
+            }
+
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
     private val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
@@ -154,18 +166,17 @@ class FragmentGeneral : Fragment() {
         //init seekbar
         binding.containerShakeClose.sensitiveSeekbar.setOnSeekBarChangeListener(object :
             OnSeekBarChangeListener {
-            var progressValue = 0
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                progressValue = p1
+                binding.containerShakeClose.sensitiveSeekbar.progress = p1
+                binding.containerShakeClose.tvStatus.text = p1.toString()
+                requireContext().config.shakeGravity = p1.toFloat()
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {
             }
 
             override fun onStopTrackingTouch(p0: SeekBar?) {
-                binding.containerShakeClose.sensitiveSeekbar.progress = progressValue
-                binding.containerShakeClose.tvStatus.text = progressValue.toString()
-                requireContext().config.shakeGravity = progressValue.toFloat()
+
             }
 
         })

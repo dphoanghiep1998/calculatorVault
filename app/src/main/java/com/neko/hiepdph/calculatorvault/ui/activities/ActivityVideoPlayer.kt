@@ -65,12 +65,8 @@ class ActivityVideoPlayer : AppCompatActivity() {
     }
 
     private fun openInformationDialog() {
-        val dialogDetail = DialogDetail.dialogDetailConfig {
-            name = currentItem?.name
-            size = currentItem?.size
-            path = currentItem?.encryptedPath
-        }
-        dialogDetail.show(supportFragmentManager, dialogDetail.tag)
+        val dialogDetail = currentItem?.let { DialogDetail(it) }
+        dialogDetail?.show(supportFragmentManager, dialogDetail.tag)
     }
 
 

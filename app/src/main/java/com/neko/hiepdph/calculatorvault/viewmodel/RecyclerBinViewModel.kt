@@ -34,13 +34,23 @@ class RecyclerBinViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel
 
 
     fun getAllFileChildFromFolder(path: String): LiveData<List<FileVaultItem>> {
-        return appRepo.getAllFileInEnCryptFolder(path)
+        return appRepo.getAllFileDeleted(path)
 
     }
 
     fun deleteAllRecyclerBin(path: String, onSuccess: () -> Unit, onError: (e: String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             FileUtils.deleteAllChildInDirectory(path, onSuccess, onError)
+        }
+    }
+    fun deleteFileVault(listId:List<Int>){
+        viewModelScope.launch {
+            appRepo.deleteFile(listId)
+        }
+    }
+    fun updateFileVault(fileVaultItem: FileVaultItem){
+        viewModelScope.launch {
+            appRepo.updateFileVault(fileVaultItem)
         }
     }
 
@@ -54,8 +64,8 @@ class RecyclerBinViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel
 
     fun restoreFile(
         context: Context,
-        files: MutableList<File>?,
-        targetFolder: MutableList<File>,
+        files: List<File>?,
+        targetFolder: List<File>,
         tSize: Long,
         progress: (state: Int, value: Float, currentFile: File?) -> Unit,
         isMove: Boolean = false,

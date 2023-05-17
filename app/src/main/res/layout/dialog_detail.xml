@@ -229,6 +229,32 @@
             app:layout_constraintStart_toEndOf="@id/tv_time_lock"
             app:layout_constraintTop_toBottomOf="@id/tv_time_value" />
 
+        <TextView
+            android:id="@+id/tv_encryption_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:fontFamily="@font/app_font_500"
+            android:text="@string/encryption"
+            android:textColor="@color/neutral_06"
+            android:textSize="@dimen/_14sdp"
+            app:layout_constraintBottom_toBottomOf="@id/tv_encryption_mode_value"
+            app:layout_constraintStart_toStartOf="@id/tv_name"
+            app:layout_constraintTop_toTopOf="@id/tv_encryption_mode_value" />
+
+        <TextView
+            android:id="@+id/tv_encryption_mode_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginTop="@dimen/_12sdp"
+            android:fontFamily="@font/app_font_400"
+            android:text="@string/name_detail"
+            android:textColor="@color/neutral_06"
+            android:textSize="@dimen/_14sdp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tv_encryption_mode"
+            app:layout_constraintTop_toBottomOf="@id/tv_time_lock_value" />
+
 
         <TextView
             android:id="@+id/btn_confirm"
@@ -245,7 +271,7 @@
             android:textSize="@dimen/_16sdp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_time_lock" />
+            app:layout_constraintTop_toBottomOf="@id/tv_encryption_mode_value" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -15,6 +15,7 @@ import android.provider.MediaStore
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionN
 import com.neko.hiepdph.calculatorvault.config.MainConfig
 import java.io.File
 
@@ -258,11 +259,6 @@ fun Context.getTitle(path: String): String? {
 fun Context.getImageResolution(path: String): Point? {
     val options = BitmapFactory.Options()
     options.inJustDecodeBounds = true
-//    if (isRestrictedSAFOnlyRoot(path)) {
-//        BitmapFactory.decodeStream(contentResolver.openInputStream(getAndroidSAFUri(path)), null, options)
-//    } else {
-//        BitmapFactory.decodeFile(path, options)
-//    }
     BitmapFactory.decodeFile(path, options)
 
     val width = options.outWidth
@@ -271,6 +267,16 @@ fun Context.getImageResolution(path: String): Point? {
         Point(options.outWidth, options.outHeight)
     } else {
         null
+    }
+}
+
+fun Context.getLastModified(path:String): Long {
+    return when {
+
+        buildMinVersionN() && path.startsWith("content://") -> this.getMediaStoreLastModified(
+            path
+        )
+        else -> File(path).lastModified()
     }
 }
 

@@ -40,6 +40,12 @@ class PersistentViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel(
         }
     }
 
+    fun deleteFileVault(listId:MutableList<Int>){
+        viewModelScope.launch {
+            appRepo.deleteFile(listId)
+        }
+    }
+
 
 //    fun getVaultItem():MutableList<FileVaultItem>{
 //        return appRepo.getAllFile()

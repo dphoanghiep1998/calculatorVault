@@ -38,6 +38,7 @@ class VaultViewModel @Inject constructor() : ViewModel() {
             val listFile = FileUtils.getFoldersInDirectory(parentDir.path)
             var type: String
             for (file in listFile) {
+                Log.d("TAG", "getListFolderInVault: " + file.name)
                 val name = when (file.name) {
                     Constant.PICTURE_FOLDER_NAME -> {
                         type = Constant.TYPE_PICTURE

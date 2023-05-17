@@ -1,10 +1,10 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.setting.disguiseicon.hideappicon
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import com.neko.hiepdph.calculatorvault.BuildConfig
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant.listGroup
@@ -30,9 +30,20 @@ class FragmentHideAppIcon : Fragment() {
         _binding = FragmentHideAppIconBinding.inflate(inflater, container, false)
         return binding.root
     }
+    private fun initToolBar() {
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
+            }
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return false
+            }
 
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initToolBar()
         initView()
     }
 

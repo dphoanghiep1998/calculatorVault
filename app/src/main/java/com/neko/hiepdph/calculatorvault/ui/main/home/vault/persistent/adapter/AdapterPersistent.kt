@@ -20,9 +20,11 @@ import com.bumptech.glide.request.RequestOptions
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.getFormattedDuration
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.utils.formatSize
+import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.*
 import com.neko.hiepdph.calculatorvault.databinding.*
@@ -145,9 +147,16 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(item.encryptedPath)
-                        .placeholder(R.drawable.ic_error_image).apply(requestOptions)
-                        .into(binding.imvThumb)
+                    if(item.encryptionType == EncryptionMode.HIDDEN){
+                        Glide.with(itemView.context).load(item.encryptedPath)
+                            .placeholder(R.drawable.ic_error_image).apply(requestOptions)
+                            .into(binding.imvThumb)
+                    }else{
+                        Glide.with(itemView.context).load(item.encryptedPath)
+                            .placeholder(R.drawable.ic_error_image).apply(requestOptions)
+                            .into(binding.imvThumb)
+                    }
+
 
                     if (editMode) {
                         binding.checkBox.show()
@@ -206,7 +215,7 @@ class AdapterPersistent(
                     } else {
                         binding.checkBox.hide()
                     }
-                    binding.tvDuration.text = item.durationLength.toString()
+                    binding.tvDuration.text = item.durationLength?.getFormattedDuration()
 
                     binding.root.setOnLongClickListener {
                         if (editMode) {
@@ -249,7 +258,7 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).asBitmap().load(item.encryptedPath).apply(requestOptions)
+                    Glide.with(itemView.context).load(getThumbnail(item.encryptedPath)).apply(requestOptions)
                         .error(R.drawable.ic_error_audio).into(binding.imvThumb)
                     binding.checkBox.isChecked = item in listOfItemSelected
 
@@ -262,7 +271,7 @@ class AdapterPersistent(
                     }
                     binding.tvNameAudio.text = item.name
                     binding.tvDurationAuthor.text =
-                        item.durationLength.toString() + " - " + item.artist
+                        item.durationLength?.getFormattedDuration().toString() + "-" + item.artist
                     binding.option.clickWithDebounce {
                         showPopupWindow(
                             itemView.context,
@@ -427,6 +436,7 @@ class AdapterPersistent(
             }
         }
     }
+
 }
 
 
