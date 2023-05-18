@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,7 +23,6 @@ import com.neko.hiepdph.calculatorvault.common.extensions.getFormattedDuration
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.utils.formatSize
-import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.*
 import com.neko.hiepdph.calculatorvault.databinding.*
@@ -147,15 +145,15 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    if(item.encryptionType == EncryptionMode.HIDDEN){
-                        Glide.with(itemView.context).load(item.encryptedPath)
-                            .placeholder(R.drawable.ic_error_image).apply(requestOptions)
-                            .into(binding.imvThumb)
-                    }else{
-                        Glide.with(itemView.context).load(item.encryptedPath)
-                            .placeholder(R.drawable.ic_error_image).apply(requestOptions)
-                            .into(binding.imvThumb)
-                    }
+//                    if(item.encryptionType == EncryptionMode.HIDDEN){
+                    Glide.with(itemView.context).load(item.encryptedPath)
+                        .placeholder(R.drawable.ic_error_image).apply(requestOptions)
+                        .into(binding.imvThumb)
+//                    }else{
+//                        Glide.with(itemView.context).load(item.encryptedPath)
+//                            .placeholder(R.drawable.ic_error_image).apply(requestOptions)
+//                            .into(binding.imvThumb)
+//                    }
 
 
                     if (editMode) {
@@ -258,7 +256,8 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(getThumbnail(item.encryptedPath)).apply(requestOptions)
+                    Glide.with(itemView.context).load(getThumbnail(item.encryptedPath))
+                        .apply(requestOptions)
                         .error(R.drawable.ic_error_audio).into(binding.imvThumb)
                     binding.checkBox.isChecked = item in listOfItemSelected
 
@@ -448,6 +447,7 @@ private fun getImageForItemFile(item: FileVaultItem): Int {
         Constant.TYPE_PPT -> R.drawable.ic_ppt
         Constant.TYPE_TEXT -> R.drawable.ic_txt
         Constant.TYPE_ZIP -> R.drawable.ic_zip
+        Constant.TYPE_RAR -> R.drawable.ic_rar
         Constant.TYPE_PPTX -> R.drawable.ic_pptx
         Constant.TYPE_EXCEL -> R.drawable.ic_excel
         Constant.TYPE_PDF -> R.drawable.ic_pdf
@@ -512,7 +512,7 @@ private fun showPopupWindow(
             0,
             -view.height + popupWindow.height
         )
-    }else{
+    } else {
         popupWindow.showAsDropDown(
             view,
             0,
@@ -567,7 +567,7 @@ private fun showPopupWindowFile(
             0,
             -view.height + popupWindow.height
         )
-    }else{
+    } else {
         popupWindow.showAsDropDown(
             view,
             0,

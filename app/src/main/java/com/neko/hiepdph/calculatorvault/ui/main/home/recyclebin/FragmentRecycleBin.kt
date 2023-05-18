@@ -288,12 +288,9 @@ class FragmentRecycleBin : Fragment() {
         val dialogConfirm = DialogConfirm(onPositiveClicked = {
             viewModel.deleteSelectedFile(list, onSuccess = {
                 viewModel.deleteFileVault(mutableListOf(item.id))
-                viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
                 showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
-                viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
             }, onError = {
                 showSnackBar(getString(R.string.delete_failed), SnackBarType.FAILED)
-                viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
             })
         }, DialogConfirmType.DELETE, getString(R.string.selected_file))
 
@@ -308,12 +305,9 @@ class FragmentRecycleBin : Fragment() {
         val dialogConfirm = DialogConfirm(onPositiveClicked = {
             viewModel.deleteSelectedFile(listItemSelected.map { it.recyclerPath }, onSuccess = {
                 viewModel.deleteFileVault(listItemSelected.map { it.id })
-                viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
                 showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
-                viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
             }, onError = {
                 showSnackBar(getString(R.string.delete_failed), SnackBarType.FAILED)
-                viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
             })
         }, DialogConfirmType.DELETE, getString(R.string.selected_file))
 
@@ -322,7 +316,7 @@ class FragmentRecycleBin : Fragment() {
 
     private fun deleteAll() {
         if (sizeList == 0) {
-            toast(getString(R.string.require_size_more_than_1))
+            toast(getString(R.string.nothing_to_delete))
             return
         }
         val dialogConfirm = DialogConfirm(onPositiveClicked = {
@@ -330,11 +324,10 @@ class FragmentRecycleBin : Fragment() {
                 onSuccess = {
                     viewModel.deleteFileVault(listOfITem.map { it.id })
                     showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
-                    viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
                 },
                 onError = {
-                    showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
-                    viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
+                    Log.d("TAG", "deleteAll: "+it)
+                    showSnackBar(getString(R.string.delete_failed), SnackBarType.FAILED)
                 })
         }, DialogConfirmType.EMPTY_BIN, null)
 

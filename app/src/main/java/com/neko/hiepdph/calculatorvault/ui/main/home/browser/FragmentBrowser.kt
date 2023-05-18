@@ -22,6 +22,7 @@ import com.neko.hiepdph.calculatorvault.databinding.FragmentBrowserBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutMenuBrowserOptionBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
+import com.neko.hiepdph.calculatorvault.sharedata.ShareData
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityBrowser
 import com.neko.hiepdph.calculatorvault.viewmodel.BrowserViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -165,7 +166,7 @@ class FragmentBrowser : Fragment() {
     }
 
     private fun clearCache() {
-
+        ShareData.getInstance().setBrowserClear(true)
     }
 
 

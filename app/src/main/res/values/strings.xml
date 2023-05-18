@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">CalculatorVault</string>
+    <string name="app_name">Calculator Vault</string>
 
     <array name="stringLang" translatable="false">
         <item>English</item>
@@ -167,6 +167,7 @@
     <string name="enter_original_password">Enter original password</string>
     <string name="setup_a_new_password">Set up a new password</string>
     <string name="confirm_your_password">Confirm your password</string>
+    <string name="confirm_password">Confirm password</string>
     <string name="password_must_be_4_characters">Password must be 4 characters</string>
     <string name="current_password_is_not_correct">Current password is not correct</string>
     <string name="password_does_not_match">Password does not match</string>
@@ -291,4 +292,30 @@
     <string name="fake_password">Fake Password</string>
     <string name="fake_password_content_2">Unlocking Sgallery with the fake password will show fake content</string>
     <string name="origin_path_detail">OriginPath:</string>
+    <string name="tips_sync_content">Some mobile phones have a system built-in cloud synchronization services such as Huawei, Xiaomi and so on. When you add a photo or video to Vault, the source file will be automatically deleted by the Vault. However, when cloud services are turned on and allow automatic synchronization, they are automatically recovered from the phone cloud. After adding photos or videos to the Vault, go to the system album and wait a few seconds, when the files are restored, manually delete them. Or turn off cloud sync.</string>
+    <string name="tips_encryption_content">Encryption: Encrypts all bits of a file and is suitable for small, high-security files.\n\nHidden: Handles only file names and is suitable for large, low-security files.\n\n(We do not recommend that you put too many files in one folder.For more than 1000 files, we recommend that you put them in a different folder.)</string>
+    <string name="got_it">Got it</string>
+    <string name="please_rate">Please rate!</string>
+    <string name="expressive_bad">We’re sorry you had a bad experience. Please leave us some feedback.</string>
+    <string name="expressive_bad_a_little">We understand you are not happy with the service you received. Please leave us some feedback.</string>
+    <string name="expressive_normal">We would like the opportunity to investigate your feedback further.</string>
+    <string name="expressive_good">Thank you so much for the wonderful review.</string>
+    <string name="expressive_best">Thank you so much for taking the time to leave us your review.</string>
+    <string name="oh_no">Oh No!</string>
+    <string name="so_amazing">So Amazing!</string>
+    <string name="we_like_you_too">We like you too!</string>
+    <string name="rate_us_button">Rate Us</string>
+    <string name="rate_on_google_play">Rate On Google Play</string>
+    <string name="the_best_we_can_get">The best we can get ;)</string>
+    <string name="maybe_later">Maybe Later</string>
+    <string name="ask_for_rate">We are working hard for a better user experience. We’d greatly appreciate if you can rate us.</string>
+    <string name="rate_success">Rate successfully!</string>
+    <string name="this_action_will_come_soon">These action will be ready in the next version.</string>
+    <string name="permission_instruction">Calculator - Vault needs file permission, this permission will be used for hidden features: Videos, Pictures, Music, Files...</string>
+    <string name="not_allowed">Not Allowed</string>
+    <string name="why">Why ?</string>
+    <string name="this_is_image_of_intruder">This is image of intruder</string>
+    <string name="set_app_password">Set App Password</string>
+    <string name="setup_pass_instruction">Please set a 4 digit password and press = button to confirm.</string>
+    <string name="confirm_password_instruction">Re-enter password and press = to confirm.</string>
 </resources>

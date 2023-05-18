@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_host_calculator"
+    app:startDestination="@id/fragmentCalculator">
+
+    <fragment
+        android:id="@+id/fragmentCalculator"
+        android:name="com.neko.hiepdph.calculatorvault.ui.calculator.FragmentCalculator"
+        android:label="FragmentCalculator" />
+    <fragment
+        android:id="@+id/fragmentSetupLock"
+        android:name="com.neko.hiepdph.calculatorvault.ui.calculator.FragmentSetupLock"
+        android:label="fragment_setup_lock"
+        tools:layout="@layout/fragment_setup_lock" />
+</navigation>

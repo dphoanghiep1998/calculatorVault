@@ -2,11 +2,11 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.setting.safe.lock.changepi
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.customview.PinFunction
 import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
@@ -28,6 +28,7 @@ class FragmentChangePin : Fragment() {
     ): View? {
         _binding = FragmentChangePinBinding.inflate(inflater, container, false)
         initView()
+        initToolBar()
         observeState()
         return binding.root
     }
@@ -39,6 +40,17 @@ class FragmentChangePin : Fragment() {
             }
 
         }
+    }
+    private fun initToolBar() {
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
+            }
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return false
+            }
+
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
     private fun changeViewByState(state: Int) {

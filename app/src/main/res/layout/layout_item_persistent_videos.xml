@@ -30,7 +30,7 @@
         android:fontFamily="@font/app_font_400"
         android:paddingHorizontal="@dimen/_4sdp"
         android:paddingVertical="@dimen/_2sdp"
-        android:textColor="@color/neutral_01"
+        android:textColor="@color/white"
         android:textSize="@dimen/_8sdp"
         app:drawableStartCompat="@drawable/ic_video_duration"
         app:layout_constraintBottom_toBottomOf="@id/imv_thumb"

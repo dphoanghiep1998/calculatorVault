@@ -1,4 +1,4 @@
-package com.neko.hiepdph.calculatorvault.ui.setuplock
+package com.neko.hiepdph.calculatorvault.ui.calculator
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,32 +7,31 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.common.extensions.changeBackPressCallBack
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.popBackStack
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.databinding.FragmentSetupLockBinding
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class FragmentSetupLock : Fragment() {
-    private var _binding: FragmentSetupLockBinding? = null
-    private val binding get() = _binding!!
 
+    private lateinit var binding: FragmentSetupLockBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentSetupLockBinding.inflate(inflater, container, false)
-
+    ): View? {
+        binding = FragmentSetupLockBinding.inflate(inflater, container, false)
         return binding.root
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initView()
+        changeBackPressCallBack {  }
     }
+
 
     private fun initView() {
         initDropdown()
@@ -66,15 +65,12 @@ class FragmentSetupLock : Fragment() {
         binding.btnConfim.clickWithDebounce {
             requireContext().config.securityQuestion = binding.question.text.toString()
             requireContext().config.securityAnswer = binding.edtAnswer.text.toString()
+            requireContext().config.isSetupPasswordDone = true
             popBackStack(R.id.fragmentSetupLock)
         }
     }
 
 
-    override fun onDestroy() {
-        _binding = null
-        super.onDestroy()
-    }
 
 
 }

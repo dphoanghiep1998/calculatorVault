@@ -107,7 +107,13 @@ class ActivityPinLock : AppCompatActivity() {
                     if (config.photoIntruder && !takePhotoIntruder) {
                         takePicture()
                     }
-                    if(config.fingerprintFailure){
+                    if (config.fakePassword) {
+                        (application as CustomApplication).authority = false
+                        startActivity(
+                            Intent(this@ActivityPinLock, ActivityVault::class.java)
+                        )
+                        finish()
+                    } else if (config.fingerprintFailure) {
                         finishAffinity()
                     }
                 }
@@ -140,22 +146,7 @@ class ActivityPinLock : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        stopCamera()
-        if (!(application as CustomApplication).authority) {
-            if (!config.intruderFolder.exists()) {
-                config.intruderFolder.mkdirs()
-            }
-            val file = File(
-                config.intruderFolder,
-                "lmao_intruder_${config.intruderFolder.listFiles().size}.jpeg"
-            )
-            val fos = FileOutputStream(file)
-            fos.write(byteArray)
-            fos.close()
-        }
-    }
+
 
     private fun showDialogConfirmSecurityQuestion() {
         val dialogPassword = DialogPassword(callBack = object : SetupPassWordCallBack {
@@ -268,5 +259,23 @@ class ActivityPinLock : AppCompatActivity() {
         }
 
         return camId
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopCamera()
+        if (!(application as CustomApplication).authority) {
+            config.caughtIntruder = true
+            if (!config.intruderFolder.exists()) {
+                config.intruderFolder.mkdirs()
+            }
+            val file = File(
+                config.intruderFolder,
+                "lmao_intruder_${config.intruderFolder.listFiles().size}.jpeg"
+            )
+            val fos = FileOutputStream(file)
+            fos.write(byteArray)
+            fos.close()
+        }
     }
 }

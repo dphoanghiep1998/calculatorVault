@@ -4,9 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.setuplock.FragmentSetupLock">
+    tools:context=".ui.main.home.setting.safe.setuplock.FragmentQuestionLock">
 
-
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_12sdp"
+        android:fontFamily="@font/app_font_500"
+        android:text="@string/security_question"
+        android:textColor="@color/neutral_06"
+        android:textSize="@dimen/_20sdp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
     <TextView
         android:id="@+id/tv_question"
         android:layout_width="wrap_content"
@@ -18,7 +28,7 @@
         android:textColor="@color/neutral_06"
         android:textSize="@dimen/_16sdp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/container_question"

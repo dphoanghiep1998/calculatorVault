@@ -29,8 +29,12 @@ class MainConfig(val context: Context) {
         set(isShouldShowHidden) = AppSharePreference.getInstance(context)
             .setShouldShowHidden(isShouldShowHidden)
 
+    var isSetupPasswordDone: Boolean
+        get() = AppSharePreference.getInstance(context).getSetupPasswordDone(false)
+        set(isSetupPasswordDone) = AppSharePreference.getInstance(context).setSetupPasswordDone(isSetupPasswordDone)
+
     var lockType: Int
-        get() = AppSharePreference.getInstance(context).getLockType(LockType.NONE)
+        get() = AppSharePreference.getInstance(context).getLockType(LockType.PIN)
         set(lockType) = AppSharePreference.getInstance(context).saveLockType(lockType)
 
     var lockPressType: Int
@@ -206,6 +210,11 @@ class MainConfig(val context: Context) {
     var fakePassword: Boolean
         get() = AppSharePreference.getInstance(context).getFakePassword(FakePassword.DISABLE)
         set(fakePassword) = AppSharePreference.getInstance(context).setFakePassword(fakePassword)
+
+    var caughtIntruder: Boolean
+        get() = AppSharePreference.getInstance(context).getCaughtIntruder(false)
+        set(caughtIntruder) = AppSharePreference.getInstance(context).setCaughtIntruder(caughtIntruder)
+
 
     var darkMode: Boolean
         get() = AppSharePreference.getInstance(context).getDarkMode(DarkMode.DISABLE)

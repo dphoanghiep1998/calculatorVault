@@ -184,7 +184,7 @@ class DialogChangeTheme : DialogFragment() {
                         it.isChecked
                     }.forEach { it.isChecked = false }
                     item.isChecked = true
-                    AppSharePreference.INSTANCE.setThemeColor(groupColor[index])
+                    currentColor = groupColor[index]
                 } else {
                     item.isChecked = true
                 }

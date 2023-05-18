@@ -118,34 +118,21 @@
             app:barrierDirection="bottom"
             app:constraint_referenced_ids="tv_status,progress_loading" />
 
-        <TextView
-            android:id="@+id/btn_tips"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_12sdp"
-            android:fontFamily="@font/app_font_500"
-            android:paddingHorizontal="@dimen/_10sdp"
-            android:paddingVertical="@dimen/_10sdp"
-            android:text="@string/tips"
-            android:textColor="@color/neutral_06"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/barrier" />
+<!--        <TextView-->
+<!--            android:id="@+id/btn_tips"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginTop="@dimen/_12sdp"-->
+<!--            android:fontFamily="@font/app_font_500"-->
+<!--            android:paddingHorizontal="@dimen/_10sdp"-->
+<!--            android:paddingVertical="@dimen/_10sdp"-->
+<!--            android:text="@string/tips"-->
+<!--            android:textColor="@color/neutral_06"-->
+<!--            android:visibility="gone"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/barrier" />-->
 
-        <TextView
-            android:id="@+id/btn_cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_12sdp"
-            android:fontFamily="@font/app_font_500"
-            android:paddingHorizontal="@dimen/_10sdp"
-            android:paddingVertical="@dimen/_10sdp"
-            android:text="@string/cancel"
-            android:textColor="@color/neutral_06"
-            android:visibility="gone"
-            app:layout_constraintEnd_toStartOf="@id/btn_ok"
-            app:layout_constraintStart_toEndOf="@id/btn_tips"
-            app:layout_constraintTop_toBottomOf="@id/barrier" />
+
 
         <TextView
             android:id="@+id/btn_ok"

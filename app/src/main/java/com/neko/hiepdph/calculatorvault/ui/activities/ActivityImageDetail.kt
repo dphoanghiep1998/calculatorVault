@@ -249,7 +249,7 @@ class ActivityImageDetail : AppCompatActivity() {
         lifecycleScope.launch {
             CopyFiles.copy(this@ActivityImageDetail,
                 File(currentItem?.encryptedPath.toString()),
-                File(currentItem?.originalPath.toString()),
+                File(currentItem?.originalPath).parentFile,
                 0L,
                 progress = { _: Int, _: Float, _: File? -> },
                 true,

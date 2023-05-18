@@ -96,7 +96,7 @@ object FileUtils {
                         count++
                     }
                 }
-                if (count == size - 1) {
+                if (count == size) {
                     onSuccess()
                 } else {
                     onError("Can not delete file/folder")

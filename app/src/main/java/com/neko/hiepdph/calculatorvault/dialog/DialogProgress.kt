@@ -65,8 +65,7 @@ class DialogProgress() : DialogFragment() {
 
     fun hideButton(){
         binding.btnOk.hide()
-        binding.btnCancel.hide()
-        binding.btnTips.hide()
+//        binding.btnTips.hide()
     }
     fun statusSuccess(){
         binding.progressLoading.hide()
@@ -81,8 +80,7 @@ class DialogProgress() : DialogFragment() {
 
     fun showButton(){
         binding.btnOk.show()
-        binding.btnCancel.show()
-        binding.btnTips.show()
+//        binding.btnTips.show()
     }
 
     private fun initButton() {
@@ -90,12 +88,9 @@ class DialogProgress() : DialogFragment() {
             dismiss()
         }
 
-        binding.btnCancel.clickWithDebounce {
-            dismiss()
-        }
-        binding.btnTips.clickWithDebounce {
-            openTips()
-        }
+//        binding.btnTips.clickWithDebounce {
+//            openTips()
+//        }
 
 
     }
@@ -106,7 +101,7 @@ class DialogProgress() : DialogFragment() {
 
     private val callback = object : BackPressDialogCallBack {
         override fun shouldInterceptBackPress(): Boolean {
-            return false
+            return true
         }
 
         override fun onBackPressIntercepted() {

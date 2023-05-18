@@ -115,6 +115,31 @@ fun Fragment.showSnackBar(text: String, type: SnackBarType) {
     snackBar.show()
 }
 
+fun Activity.showSnackBar(text: String, type: SnackBarType) {
+    val snackBar: Snackbar = Snackbar.make(window.decorView, text, Snackbar.LENGTH_SHORT)
+    snackBar.setAction("Action", null)
+    val drawable :Drawable?
+    when (type) {
+        SnackBarType.SUCCESS -> {
+            drawable = ContextCompat.getDrawable(this, R.drawable.ic_success)
+            snackBar.setBackgroundTint(this.getColor(R.color.theme_08))
+        }
+        SnackBarType.FAILED -> {
+            drawable = ContextCompat.getDrawable(this, R.drawable.ic_fail)
+            snackBar.setBackgroundTint(this.getColor(R.color.theme_01))
+        }
+
+    }
+    val sbView = snackBar.view
+    val textView =
+        sbView.findViewById<View>(com.google.android.material.R.id.snackbar_text) as TextView
+    drawable?.setTint(ContextCompat.getColor(this, R.color.white))
+    textView.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
+    textView.compoundDrawablePadding =
+        this.resources.getDimensionPixelOffset(R.dimen.snackbar_icon_padding)
+    snackBar.show()
+}
+
 fun Fragment.openLink(strUri: String?) {
     try {
         val uri = Uri.parse(strUri)

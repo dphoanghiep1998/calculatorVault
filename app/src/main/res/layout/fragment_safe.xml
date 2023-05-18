@@ -55,12 +55,12 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/container_screen_off_action" />
 
-        <include
-            android:layout_marginHorizontal="@dimen/_12sdp"
-            android:id="@+id/container_temporary_file_deletion_time"
-            layout="@layout/layout_item_custom_double"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/container_lock_when_leaving" />
+<!--        <include-->
+<!--            android:layout_marginHorizontal="@dimen/_12sdp"-->
+<!--            android:id="@+id/container_temporary_file_deletion_time"-->
+<!--            layout="@layout/layout_item_custom_double"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/container_lock_when_leaving" />-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

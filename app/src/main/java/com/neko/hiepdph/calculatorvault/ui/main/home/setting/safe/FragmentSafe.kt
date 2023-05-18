@@ -95,7 +95,7 @@ class FragmentSafe : Fragment() {
                 binding.containerLockWhenLeaving.switchChange.isChecked
         }
         binding.containerPasswordRecoveryQuestion.root.clickWithDebounce {
-            findNavController().navigate(R.id.fragmentSetupLock)
+            findNavController().navigate(R.id.fragmentQuestionLock)
         }
     }
 
@@ -140,11 +140,11 @@ class FragmentSafe : Fragment() {
             switchChange.show()
             switchChange.isChecked = requireContext().config.lockWhenLeavingApp
         }
-        binding.containerTemporaryFileDeletionTime.apply {
-            imvIcon.setImageResource(R.drawable.ic_delete_temporary)
-            tvContent.text = getString(R.string.temporary_file_deletion_time)
-            tvContent2.text = getString(R.string.content_2_temporary_file_deletion_time)
-        }
+//        binding.containerTemporaryFileDeletionTime.apply {
+//            imvIcon.setImageResource(R.drawable.ic_delete_temporary)
+//            tvContent.text = getString(R.string.temporary_file_deletion_time)
+//            tvContent2.text = getString(R.string.content_2_temporary_file_deletion_time)
+//        }
     }
 
     private fun getScreenOffAction(values: Int): String {

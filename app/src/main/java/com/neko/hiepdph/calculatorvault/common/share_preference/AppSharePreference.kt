@@ -528,12 +528,38 @@ class AppSharePreference(private val context: Context?) {
         saveBoolean(Constant.KEY_FAKE_PASSWORD, values)
     }
 
+    fun getCaughtIntruder(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_CAUGHT_INTRUDER, defaultValues)
+    }
+
+    fun setCaughtIntruder(values: Boolean) {
+        saveBoolean(Constant.KEY_CAUGHT_INTRUDER, values)
+    }
+
+    fun getLoginAsIntruder(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_LOGIN_AS_INTRUDER, defaultValues)
+    }
+
+    fun setLoginAsIntruder(values: Boolean) {
+        saveBoolean(Constant.KEY_LOGIN_AS_INTRUDER, values)
+    }
+
     fun getDarkMode(defaultValues: Boolean): Boolean {
         return getBoolean(Constant.KEY_DARK_MODE, defaultValues)
     }
 
     fun setDarkMode(values: Boolean) {
         saveBoolean(Constant.KEY_DARK_MODE, values)
+    }
+
+    fun getSetupPasswordDone(defaultValues: Boolean): Boolean {
+        return getBoolean(Constant.KEY_SETUP_PASSWORD, defaultValues)
+
+    }
+
+    fun setSetupPasswordDone(values: Boolean) {
+        saveBoolean(Constant.KEY_SETUP_PASSWORD, values)
+
     }
 
 

@@ -3,11 +3,12 @@ package com.neko.hiepdph.calculatorvault.common.utils
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.core.content.FileProvider
+import com.neko.hiepdph.calculatorvault.common.Constant
 import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.text.DecimalFormat
 import java.util.*
 import kotlin.math.roundToInt
 
@@ -45,83 +46,53 @@ fun roundOffDecimal(number: Double): Double {
     val number2digits: Double = (number3digits * 100.0).roundToInt() / 100.0
     return (number2digits * 10.0).roundToInt() / 10.0
 }
-fun String.openWith(context: Context) {
+
+fun String.openWith(context: Context, type: String, realType: String?) {
+    Log.d("TAG", "openWith: "+type)
     val file = File(this)
     val uri: Uri = Uri.fromFile(file)
-    val fileName: String = file.name
     val intent = Intent(Intent.ACTION_VIEW)
-    val contentUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
-    context.grantUriPermission(context.packageName, contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    val contentUri =
+        FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+    context.grantUriPermission(
+        context.packageName, contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+    )
+    when (type) {
+        Constant.TYPE_FILE -> {
+            when (realType) {
+                // Word document
+                Constant.TYPE_WORD, Constant.TYPE_WORDX -> intent.setDataAndType(
+                    uri, "application/msword"
+                )
 
-    when {
-        fileName.endsWith(".doc") || fileName.endsWith(".docx") -> {
-            // Word document
-            intent.setDataAndType(uri, "application/msword")
+                Constant.TYPE_PDF -> intent.setDataAndType(uri, "application/pdf")
+                Constant.TYPE_PPT, Constant.TYPE_PPTX -> intent.setDataAndType(
+                    uri, "application/vnd.ms-powerpoint"
+                )
+                Constant.TYPE_EXCEL, Constant.TYPE_CSV -> intent.setDataAndType(
+                    uri, "application/vnd.ms-excel"
+                )
+                Constant.TYPE_ZIP -> intent.setDataAndType(
+                    uri, "application/zip"
+                )
+                Constant.TYPE_RAR -> intent.setDataAndType(
+                    uri, "application/rar"
+                )
+                Constant.TYPE_TEXT -> intent.setDataAndType(uri, "text/plain")
+            }
         }
-
-        fileName.endsWith(".pdf") -> {
-            // PDF file
-            intent.setDataAndType(uri, "application/pdf")
-        }
-
-        fileName.endsWith(".ppt") || fileName.endsWith(".pptx") -> {
-            // Powerpoint file
-            intent.setDataAndType(uri, "application/vnd.ms-powerpoint")
-        }
-
-        fileName.endsWith(".xls") || fileName.endsWith(".xlsx") -> {
-            // Excel file
-            intent.setDataAndType(uri, "application/vnd.ms-excel")
-        }
-
-        fileName.endsWith(".zip") || fileName.endsWith(".rar") -> {
-            // WAV audio file
-            intent.setDataAndType(uri, "application/x-wav")
-        }
-
-        fileName.endsWith(".rtf") -> {
-            // RTF file
-            intent.setDataAndType(uri, "application/rtf")
-        }
-
-        fileName.endsWith(".wav") || fileName.endsWith(".mp3") -> {
-            // WAV audio file
-            intent.setDataAndType(uri, "audio/x-wav")
-        }
-
-        fileName.endsWith(".gif") -> {
-            // GIF file
-            intent.setDataAndType(uri, "image/gif")
-        }
-
-        fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png") -> {
-            // JPG file
-            intent.setDataAndType(uri, "image/jpeg")
-        }
-
-        fileName.endsWith(".txt") -> {
-            // Text file
-            intent.setDataAndType(uri, "text/plain")
-        }
-
-        fileName.endsWith(".3gp") || fileName.endsWith(".mpg") || fileName.endsWith(".mpeg") || fileName.endsWith(
-            ".mpe"
+        Constant.TYPE_AUDIOS -> intent.setDataAndType(
+            uri, "audio/*"
         )
-                || fileName.endsWith(".mp4") || fileName.endsWith(".avi") -> {
-            // Video files
-            intent.setDataAndType(uri, "video/*")
-        }
-
-        fileName.endsWith(".apk") -> {
-            // APK file
-            intent.setDataAndType(uri, "application/vnd.android.package-archive")
-        }
-
+        Constant.TYPE_VIDEOS -> intent.setDataAndType(
+            uri, "video/*"
+        )
         else -> {
             // Use default type for unknown extensions
             intent.setDataAndType(uri, "*/*")
         }
     }
+
     intent.data = contentUri
     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     context.startActivity(Intent.createChooser(intent, "Complete action using"))

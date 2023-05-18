@@ -242,7 +242,7 @@ class FragmentGeneral : Fragment() {
                 tvStatus.hide()
                 sensitiveSeekbar.hide()
             }
-            tvStatus.text = requireContext().config.shakeGravity.toString()
+            tvStatus.text = requireContext().config.shakeGravity.toInt().toString()
             imvIcon.setImageResource(R.drawable.ic_shake_close)
             sensitiveSeekbar.max = 20
             sensitiveSeekbar.progress = requireContext().config.shakeGravity.toInt()

@@ -7,8 +7,8 @@ import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 class ShareData() {
     companion object {
         private var shareDataInstance: ShareData? = null
-        fun getInstance():ShareData {
-            if(shareDataInstance == null){
+        fun getInstance(): ShareData {
+            if (shareDataInstance == null) {
                 shareDataInstance = ShareData()
             }
             return shareDataInstance!!
@@ -33,7 +33,11 @@ class ShareData() {
         _listItemAudio.postValue(list)
     }
 
-
+    private val _clearBrowser = MutableLiveData(false)
+    val clearBrowser: LiveData<Boolean> get() = _clearBrowser
+    fun setBrowserClear(status: Boolean) {
+        _clearBrowser.postValue(status)
+    }
 
 
 }

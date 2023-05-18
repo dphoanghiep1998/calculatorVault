@@ -20,10 +20,15 @@ import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.config.FingerPrintLockDisplay
 import com.neko.hiepdph.calculatorvault.config.FingerPrintUnlock
 import com.neko.hiepdph.calculatorvault.databinding.ActivityPatternLockBinding
-import com.neko.hiepdph.calculatorvault.dialog.*
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
+import com.neko.hiepdph.calculatorvault.dialog.DialogPassword
+import com.neko.hiepdph.calculatorvault.dialog.SetupPassWordCallBack
 import com.takwolf.android.lock9.Lock9View
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 
 class ActivityPatternLock : AppCompatActivity() {
     private lateinit var binding: ActivityPatternLockBinding
@@ -51,8 +56,9 @@ class ActivityPatternLock : AppCompatActivity() {
             val biometric = biometricConfig {
                 ownerFragmentActivity = this@ActivityPatternLock
                 authenticateSuccess = {
-                    config.isShowLock = true
                     (application as CustomApplication).authority = true
+
+                    config.isShowLock = true
                     startActivity(
                         Intent(this@ActivityPatternLock, ActivityVault::class.java)
                     )
@@ -62,7 +68,14 @@ class ActivityPatternLock : AppCompatActivity() {
                     if (config.photoIntruder && !takePhotoIntruder) {
                         takePicture()
                     }
-                    if(config.fingerprintFailure){
+                    if (config.fakePassword) {
+                        (application as CustomApplication).authority = false
+
+                        startActivity(
+                            Intent(this@ActivityPatternLock, ActivityVault::class.java)
+                        )
+                        finish()
+                    } else if (config.fingerprintFailure) {
                         finishAffinity()
                     }
                 }
@@ -75,8 +88,8 @@ class ActivityPatternLock : AppCompatActivity() {
         }
 
         binding.tvForgotPassword.clickWithDebounce {
-            val confirmDialog = DialogConfirm(onPositiveClicked= {
-                    showDialogConfirmSecurityQuestion()
+            val confirmDialog = DialogConfirm(onPositiveClicked = {
+                showDialogConfirmSecurityQuestion()
             }, DialogConfirmType.FORGOT_PASSWORD, null)
             confirmDialog.show(supportFragmentManager, confirmDialog.tag)
         }
@@ -85,6 +98,7 @@ class ActivityPatternLock : AppCompatActivity() {
             val biometric = biometricConfig {
                 ownerFragmentActivity = this@ActivityPatternLock
                 authenticateSuccess = {
+                    (application as CustomApplication).authority = true
                     config.isShowLock = true
                     startActivity(
                         Intent(this@ActivityPatternLock, ActivityVault::class.java)
@@ -92,8 +106,16 @@ class ActivityPatternLock : AppCompatActivity() {
                     finish()
                 }
                 authenticateFailed = {
+                    (application as CustomApplication).authority = false
+
                     if (config.photoIntruder && !takePhotoIntruder) {
                         takePicture()
+                    }
+                    if (config.fakePassword) {
+                        startActivity(
+                            Intent(this@ActivityPatternLock, ActivityVault::class.java)
+                        )
+                        finish()
                     }
                 }
             }
@@ -164,6 +186,12 @@ class ActivityPatternLock : AppCompatActivity() {
             if (config.photoIntruder && !takePhotoIntruder) {
                 takePicture()
             }
+            if(config.fakePassword){
+                startActivity(
+                    Intent(this@ActivityPatternLock, ActivityVault::class.java)
+                )
+                finish()
+            }
         } else {
             config.isShowLock = true
             startActivity(
@@ -229,6 +257,24 @@ class ActivityPatternLock : AppCompatActivity() {
         }
 
         return camId
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopCamera()
+        if (!(application as CustomApplication).authority) {
+            config.caughtIntruder = true
+            if (!config.intruderFolder.exists()) {
+                config.intruderFolder.mkdirs()
+            }
+            val file = File(
+                config.intruderFolder,
+                "lmao_intruder_${config.intruderFolder.listFiles().size}.jpeg"
+            )
+            val fos = FileOutputStream(file)
+            fos.write(byteArray)
+            fos.close()
+        }
     }
 
 }

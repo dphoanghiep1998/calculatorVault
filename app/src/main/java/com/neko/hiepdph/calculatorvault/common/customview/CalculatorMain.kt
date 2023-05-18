@@ -198,6 +198,7 @@ class CalculatorMain @JvmOverloads constructor(
         }
         binding.btnFlexDeg.setOnClickListener {
             isFlexDegEnabled = !isFlexDegEnabled
+            changeFlexDeg()
             if (!isFlexDegEnabled) {
                 callback?.onPressButtonDeg()
             } else {
@@ -233,6 +234,18 @@ class CalculatorMain @JvmOverloads constructor(
 
     fun setCalculatorMainCallback(callback: CalculatorFunction) {
         this.callback = callback
+    }
+
+    fun setColorButton(color: Int) {
+        binding.btnReset.changeTextColor(color)
+        binding.btnDelete.changeTextColor(color)
+        binding.btnPercent.changeTextColor(color)
+        binding.btnDivide.changeTextColor(color)
+        binding.btnTimes.changeTextColor(color)
+        binding.btnSubtract.changeTextColor(color)
+        binding.btnPlus.changeTextColor(color)
+        binding.btnEqual.changeBackgroundTint(color)
+        binding.btnFlexDeg.changeBackgroundTint(color)
     }
 
     private fun switchToNormalLayout() {

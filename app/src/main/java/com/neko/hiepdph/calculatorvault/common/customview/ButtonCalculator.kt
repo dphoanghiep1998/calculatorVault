@@ -1,9 +1,11 @@
 package com.neko.hiepdph.calculatorvault.common.customview
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
@@ -41,6 +43,13 @@ class ButtonCalculator @JvmOverloads constructor(
 
     fun changeTextColor(color: Int) {
         binding.tvButton.setTextColor(color)
+        binding.imvButton.setColorFilter(color)
+    }
+
+    fun changeBackgroundTint(color: Int){
+        DrawableCompat.setTint(
+            binding.root.background, color
+        )
     }
 
     fun setTint(color: Int) {

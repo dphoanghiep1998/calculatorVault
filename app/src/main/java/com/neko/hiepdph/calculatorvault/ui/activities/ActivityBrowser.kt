@@ -16,6 +16,7 @@ import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.data.database.model.BookmarkModel
 import com.neko.hiepdph.calculatorvault.databinding.ActivityBrowserBinding
+import com.neko.hiepdph.calculatorvault.sharedata.ShareData
 import com.neko.hiepdph.calculatorvault.viewmodel.BrowserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -34,6 +35,10 @@ class ActivityBrowser : AppCompatActivity() {
         setContentView(binding.root)
         initView()
         observeListBookmark()
+        ShareData.getInstance().clearBrowser.observe(this){
+            binding.webView.clearCache(true)
+            ShareData.getInstance().setBrowserClear(false)
+        }
     }
 
     private fun initView() {

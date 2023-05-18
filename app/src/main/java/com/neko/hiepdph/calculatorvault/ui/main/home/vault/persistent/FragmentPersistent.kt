@@ -31,7 +31,6 @@ import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.dialog.DialogDetail
 import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
-import com.neko.hiepdph.calculatorvault.ui.activities.ActivityAudioPlayer
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityImageDetail
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVideoPlayer
@@ -79,6 +78,7 @@ class FragmentPersistent : Fragment() {
         adapterPersistent?.changeToNormalView()
         adapterOtherFolder?.changeToNormalView()
         initToolBar()
+        binding.containerController.hide()
     }
 
 
@@ -421,7 +421,7 @@ class FragmentPersistent : Fragment() {
         lifecycleScope.launch {
             CopyFiles.copy(requireContext(),
                 listItemSelected.map { File(it.encryptedPath) },
-                listItemSelected.map { File(it.originalPath) },
+                listItemSelected.map { File(it.originalPath).parentFile },
                 0L,
                 progress = { _: Int, _: Float, _: File? -> },
                 true,
@@ -521,24 +521,32 @@ class FragmentPersistent : Fragment() {
         val list = mutableListOf<FileVaultItem>()
         list.add(item)
         if (item.encryptionType == EncryptionMode.HIDDEN) {
-            when (args.type) {
+            when (item.fileType) {
                 Constant.TYPE_PICTURE -> {
                     ShareData.getInstance().setListItemImage(list)
                     val intent = Intent(requireContext(), ActivityImageDetail::class.java)
                     startActivity(intent)
                 }
                 Constant.TYPE_AUDIOS -> {
-                    ShareData.getInstance().setListItemAudio(list)
-                    val intent = Intent(requireContext(), ActivityAudioPlayer::class.java)
-                    startActivity(intent)
+//                    ShareData.getInstance().setListItemAudio(list)
+//                    val intent = Intent(requireContext(), ActivityAudioPlayer::class.java)
+//                    startActivity(intent)
+                    item.encryptedPath.openWith(requireContext(), Constant.TYPE_AUDIOS, null)
+
                 }
                 Constant.TYPE_VIDEOS -> {
-                    ShareData.getInstance().setListItemVideo(list)
-                    val intent = Intent(requireContext(), ActivityVideoPlayer::class.java)
-                    startActivity(intent)
+                    if (requireContext().config.playVideoMode) {
+                        ShareData.getInstance().setListItemVideo(list)
+                        val intent = Intent(requireContext(), ActivityVideoPlayer::class.java)
+                        startActivity(intent)
+                    } else {
+                        item.encryptedPath.openWith(requireContext(),Constant.TYPE_VIDEOS, null)
+                    }
+
                 }
+
                 else -> {
-                    item.encryptedPath.openWith(requireContext())
+                    item.encryptedPath.openWith(requireContext(),Constant.TYPE_FILE,null)
                 }
             }
         } else {

@@ -50,20 +50,20 @@ object FileNameUtils {
         // Copy the bits from instream to outstream
         val buf = ByteArray(1024)
         var len: Int = 0
-        if(encryptionMode == EncryptionMode.HIDDEN){
+//        if(encryptionMode == EncryptionMode.HIDDEN){
             while (`in`.read(buf).also { len = it } > 0) {
                 out?.write(buf, 0, len)
 
                 progress(len, sourceLocation)
             }
-        }else{
-            while (`in`.read(buf).also { len = it } > 0) {
-                val base64 = Base64.encodeToString(buf.sliceArray(0 until len), Base64.DEFAULT)
-                out?.write(base64.toByteArray(Charsets.UTF_8))
-
-                progress(len, sourceLocation)
-            }
-        }
+//        }else{
+//            while (`in`.read(buf).also { len = it } > 0) {
+//                val base64 = Base64.encodeToString(buf.sliceArray(0 until len), Base64.DEFAULT)
+//                out?.write(base64.toByteArray(Charsets.UTF_8))
+//
+//                progress(len, sourceLocation)
+//            }
+//        }
 
         `in`.close()
         out?.close()

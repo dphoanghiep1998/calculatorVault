@@ -1,12 +1,19 @@
 package com.neko.hiepdph.calculatorvault.common
 
+import com.neko.hiepdph.calculatorvault.BuildConfig
 import com.neko.hiepdph.calculatorvault.R
 
 
 object Constant {
+
+    const val KEY_SETUP_PASSWORD = "KEY_SETUP_PASSWORD"
+    const val KEY_CAUGHT_INTRUDER = "KEY_CAUGHT_INTRUDER"
+    const val URL_APP =
+        "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
     const val DECRYPT_FOLDER_NAME = "DECRYPT"
     const val KEY_DARK_MODE = "KEY_DARK_MODE"
     const val KEY_FAKE_PASSWORD = "KEY_FAKE_PASSWORD"
+    const val KEY_LOGIN_AS_INTRUDER = "KEY_LOGIN_AS_INTRUDER"
     const val KEY_PHOTO_INTRUDER = "KEY_PHOTO_INTRUDER"
     const val KEY_PROHIBIT_SCREENSHOT = "KEY_PROHIBIT_SCREENSHOT"
     const val KEY_REPEAT = "KEY_REPEAT"
@@ -96,6 +103,7 @@ object Constant {
     const val VIDEOS_FOLDER_NAME = "Videos"
     const val RECYCLER_BIN_FOLDER_NAME = "Bin"
     const val INTRUDER_FOLDER_NAME = "Intruder"
+    const val TYPE_RAR = "TYPE_RAR"
 
     const val TYPE_PICTURE = "TYPE_PICTURE"
     const val TYPE_RECYCLER_BIN = "TYPE_RECYCLER_BIN"

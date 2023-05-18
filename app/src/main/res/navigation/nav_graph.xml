@@ -120,8 +120,8 @@
             android:id="@+id/action_fragmentSafe_to_dialogChangeScreenOffAction"
             app:destination="@id/dialogChangeScreenOffAction" />
         <action
-            android:id="@+id/action_fragmentSafe_to_fragmentSetupLock"
-            app:destination="@id/fragmentSetupLock" />
+            android:id="@+id/action_fragmentSafe_to_fragmentQuestionLock"
+            app:destination="@id/fragmentQuestionLock" />
     </fragment>
     <fragment
         android:id="@+id/fragmentLock"
@@ -147,8 +147,8 @@
         android:name="com.neko.hiepdph.calculatorvault.dialog.DialogChangeScreenOffAction"
         android:label="DialogChangeScreenOffAction" />
     <fragment
-        android:id="@+id/fragmentSetupLock"
-        android:name="com.neko.hiepdph.calculatorvault.ui.setuplock.FragmentSetupLock"
+        android:id="@+id/fragmentQuestionLock"
+        android:name="com.neko.hiepdph.calculatorvault.ui.main.home.setting.safe.setuplock.FragmentQuestionLock"
         android:label="@string/security_question"
         tools:layout="@layout/fragment_setup_lock" />
     <fragment

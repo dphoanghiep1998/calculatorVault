@@ -22,7 +22,9 @@ import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.databinding.FragmentIntruderBinding
 import com.neko.hiepdph.calculatorvault.viewmodel.IntruderViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class FragmentIntruder : Fragment() {
     private lateinit var binding: FragmentIntruderBinding
     private var adapter: AdapterIntruder? = null

@@ -73,11 +73,11 @@ class FragmentSetting : Fragment() {
             Pair(R.drawable.ic_setting_back_up, getString(R.string.backup)),
             Pair(R.drawable.ic_device_migration, getString(R.string.device_migration)),
             Pair(R.drawable.ic_setting_clear_cache, getString(R.string.clear_cache)),
-            Pair(
-                R.drawable.ic_setting_prevent_lost_file_help,
-                getString(R.string.preventing_lost_files_help)
-            ),
-            Pair(R.drawable.ic_setting_faq, getString(R.string.FAQ)),
+//            Pair(
+//                R.drawable.ic_setting_prevent_lost_file_help,
+//                getString(R.string.preventing_lost_files_help)
+//            ),
+//            Pair(R.drawable.ic_setting_faq, getString(R.string.FAQ)),
         )
 
         val groupView = mutableListOf(
@@ -91,15 +91,23 @@ class FragmentSetting : Fragment() {
             binding.itemDeviceMigration,
 //            binding.itemLanguage,
             binding.itemClearCache,
-            binding.itemPreventingLostFileHelp,
-            binding.itemFaq,
+//            binding.itemPreventingLostFileHelp,
+//            binding.itemFaq,
         )
 
         groupView.forEachIndexed { index, item ->
             item.imvIcon.setBackgroundResource(groupData[index].first)
             item.tvContent.text = groupData[index].second
-            if (item == binding.itemAdvanced || item == binding.itemDeviceMigration || item == binding.itemFaq) {
+            if (item == binding.itemAdvanced
+                || item == binding.itemDeviceMigration
+                || item == binding.itemClearCache
+//                || item == binding.itemFaq
+              ) {
                 item.line.hide()
+            }
+            if(item == binding.itemRetrieveLostFiles || item == binding.itemBackup || item == binding.itemDeviceMigration ){
+                item.tvContent.setTextColor(getColor(R.color.neutral_10))
+                item.imvNext.setColorFilter(getColor(R.color.neutral_10))
             }
         }
         initButton()

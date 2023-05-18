@@ -1,5 +1,6 @@
 package com.neko.hiepdph.calculatorvault.viewmodel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,6 +33,8 @@ class AppViewModel @Inject constructor(
         }
     }
 
-
+    fun getAllFileFromFolderEncrypted(folderPath: String): LiveData<List<FileVaultItem>> {
+        return appRepo.getAllFileInEnCryptFolder(folderPath)
+    }
 
 }

@@ -7,14 +7,14 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.neko.hiepdph.calculatorvault.R
@@ -42,8 +42,19 @@ class FragmentLock : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initView()
+        initToolBar()
     }
+    private fun initToolBar() {
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
+            }
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return false
+            }
 
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
     private fun initView() {
         lifecycleScope.launchWhenResumed {
             setupView()

@@ -26,6 +26,7 @@
         android:layout_marginEnd="@dimen/_2sdp"
         app:buttonText="deg"
         app:expand="true"
+        android:background="@drawable/infor_language_selected"
         android:visibility="gone"
         app:layout_constraintDimensionRatio="1:0.8"
         app:layout_constraintEnd_toStartOf="@id/btn_flex_sin"

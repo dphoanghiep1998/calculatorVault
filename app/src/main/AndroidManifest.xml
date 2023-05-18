@@ -41,7 +41,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.provider"
+            android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -84,20 +84,19 @@
             android:name=".ui.activities.ActivityCalculator"
             android:excludeFromRecents="false"
             android:exported="true">
-            <!--            <intent-filter>-->
-            <!--                <category android:name="android.intent.category.LAUNCHER" />-->
-            <!--                <action android:name="android.intent.action.MAIN" />-->
-            <!--            </intent-filter>-->
+<!--            <intent-filter>-->
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+<!--            </intent-filter>-->
         </activity>
 
         <activity-alias
             android:name="com.neko.hiepdph.calculatorvault.alias1"
             android:enabled="true"
             android:exported="true"
-            android:label="@string/app_name"
             android:icon="@drawable/ic_icon_app_1"
-
-            android:targetActivity=".ui.activities.ActivityVault">
+            android:label="@string/app_name"
+            android:targetActivity=".ui.activities.ActivityCalculator">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -110,7 +109,7 @@
             android:exported="true"
             android:icon="@drawable/ic_icon_app_2"
 
-            android:targetActivity=".ui.activities.ActivityVault">
+            android:targetActivity=".ui.activities.ActivityCalculator">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -122,7 +121,7 @@
             android:exported="true"
             android:icon="@drawable/ic_icon_app_3"
 
-            android:targetActivity=".ui.activities.ActivityVault">
+            android:targetActivity=".ui.activities.ActivityCalculator">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -133,18 +132,18 @@
             android:enabled="false"
             android:exported="true"
             android:icon="@drawable/ic_icon_app_4"
-            android:targetActivity=".ui.activities.ActivityVault">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:targetActivity=".ui.activities.ActivityCalculator">
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
         </activity-alias>
         <activity-alias
             android:name="com.neko.hiepdph.calculatorvault.alias5"
             android:enabled="false"
             android:exported="true"
             android:icon="@drawable/ic_icon_app_5"
-            android:targetActivity=".ui.activities.ActivityVault">
+            android:targetActivity=".ui.activities.ActivityCalculator">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -155,7 +154,7 @@
             android:enabled="false"
             android:exported="true"
             android:icon="@drawable/ic_icon_app_6"
-            android:targetActivity=".ui.activities.ActivityVault">
+            android:targetActivity=".ui.activities.ActivityCalculator">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -167,7 +166,7 @@
             android:exported="true"
             android:icon="@drawable/ic_icon_app_7"
 
-            android:targetActivity=".ui.activities.ActivityVault">
+            android:targetActivity=".ui.activities.ActivityCalculator">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -179,7 +178,7 @@
             android:exported="true"
             android:icon="@drawable/ic_icon_app_8"
 
-            android:targetActivity=".ui.activities.ActivityVault">
+            android:targetActivity=".ui.activities.ActivityCalculator">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -191,7 +190,7 @@
             android:exported="true"
             android:icon="@drawable/ic_icon_app_9"
 
-            android:targetActivity=".ui.activities.ActivityVault">
+            android:targetActivity=".ui.activities.ActivityCalculator">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -203,7 +202,7 @@
             android:exported="true"
             android:icon="@drawable/ic_icon_app_10"
 
-            android:targetActivity=".ui.activities.ActivityVault">
+            android:targetActivity=".ui.activities.ActivityCalculator">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -215,7 +214,7 @@
             android:exported="true"
             android:icon="@drawable/ic_icon_app_11"
 
-            android:targetActivity=".ui.activities.ActivityVault">
+            android:targetActivity=".ui.activities.ActivityCalculator">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -226,7 +225,7 @@
             android:enabled="false"
             android:exported="true"
             android:icon="@drawable/ic_icon_app_12"
-            android:targetActivity=".ui.activities.ActivityVault">
+            android:targetActivity=".ui.activities.ActivityCalculator">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -15,6 +15,7 @@ import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_OTHER
 import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_PDF
 import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_PICTURE
 import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_PPT
+import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_RAR
 import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_TEXT
 import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_VIDEOS
 import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_WORD
@@ -668,7 +669,8 @@ object MediaStoreUtils {
                                 }
                             }
                             TYPE_ZIP -> {
-                                if (name.lowercase(Locale.ROOT).endsWith(TYPE_ZIP)) {
+                                if (name.lowercase(Locale.ROOT).endsWith(TYPE_ZIP) || name.lowercase(Locale.ROOT).endsWith(
+                                        TYPE_RAR)) {
                                     listFileChild.add(
                                         FileVaultItem(
                                             0,
