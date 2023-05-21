@@ -51,6 +51,7 @@ import com.neko.hiepdph.calculatorvault.dialog.RateCallBack
 import com.neko.hiepdph.calculatorvault.shake.ShakeDetector
 import com.neko.hiepdph.calculatorvault.viewmodel.VaultViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
 import kotlin.system.exitProcess
 
 
@@ -370,7 +371,7 @@ class ActivityVault : AppCompatActivity() {
             viewModel.createFolder(filesDir, Constant.VIDEOS_FOLDER_NAME)
             viewModel.createFolder(filesDir, Constant.AUDIOS_FOLDER_NAME)
             viewModel.createFolder(filesDir, Constant.FILES_FOLDER_NAME)
-            viewModel.createFolder(filesDir, Constant.DECRYPT_FOLDER_NAME)
+            viewModel.createFolder(File(config.externalStoragePath), Constant.DECRYPT_FOLDER_NAME)
             viewModel.createFolder(filesDir, Constant.INTRUDER_FOLDER_NAME)
             viewModel.createFolder(filesDir, Constant.RECYCLER_BIN_FOLDER_NAME)
 

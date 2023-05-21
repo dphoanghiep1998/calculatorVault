@@ -38,6 +38,7 @@ import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.Ad
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterPersistent
 import com.neko.hiepdph.calculatorvault.viewmodel.PersistentViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -127,6 +128,7 @@ class FragmentPersistent : Fragment() {
                             initToolBar()
                             true
                         }
+
                         else -> false
                     }
                 } else {
@@ -159,6 +161,7 @@ class FragmentPersistent : Fragment() {
                 binding.tvSlideshow.show()
 
             }
+
             Constant.TYPE_AUDIOS -> {
                 binding.tvEmpty.text = String.format(
                     getString(R.string.empty_text),
@@ -171,6 +174,7 @@ class FragmentPersistent : Fragment() {
                 binding.tvSlideshow.hide()
 
             }
+
             Constant.TYPE_VIDEOS -> {
                 binding.tvEmpty.text = String.format(
                     getString(R.string.empty_text),
@@ -182,6 +186,7 @@ class FragmentPersistent : Fragment() {
                 )
                 binding.tvSlideshow.hide()
             }
+
             Constant.TYPE_FILE -> {
                 binding.tvEmpty.text = String.format(
                     getString(R.string.empty_text),
@@ -193,6 +198,7 @@ class FragmentPersistent : Fragment() {
                 )
                 binding.tvSlideshow.hide()
             }
+
             else -> {
                 binding.tvEmpty.text = String.format(
                     getString(R.string.empty_text),
@@ -483,6 +489,7 @@ class FragmentPersistent : Fragment() {
                 Constant.TYPE_AUDIOS, Constant.TYPE_FILE -> LinearLayoutManager(
                     requireContext(), RecyclerView.VERTICAL, false
                 )
+
                 else -> LinearLayoutManager(
                     requireContext(), RecyclerView.VERTICAL, false
                 )
@@ -527,6 +534,7 @@ class FragmentPersistent : Fragment() {
                     val intent = Intent(requireContext(), ActivityImageDetail::class.java)
                     startActivity(intent)
                 }
+
                 Constant.TYPE_AUDIOS -> {
 //                    ShareData.getInstance().setListItemAudio(list)
 //                    val intent = Intent(requireContext(), ActivityAudioPlayer::class.java)
@@ -534,33 +542,58 @@ class FragmentPersistent : Fragment() {
                     item.encryptedPath.openWith(requireContext(), Constant.TYPE_AUDIOS, null)
 
                 }
+
                 Constant.TYPE_VIDEOS -> {
                     if (requireContext().config.playVideoMode) {
                         ShareData.getInstance().setListItemVideo(list)
                         val intent = Intent(requireContext(), ActivityVideoPlayer::class.java)
                         startActivity(intent)
                     } else {
-                        item.encryptedPath.openWith(requireContext(),Constant.TYPE_VIDEOS, null)
+                        item.encryptedPath.openWith(requireContext(), Constant.TYPE_VIDEOS, null)
                     }
 
                 }
 
                 else -> {
-                    item.encryptedPath.openWith(requireContext(),Constant.TYPE_FILE,null)
+                    item.encryptedPath.openWith(requireContext(), Constant.TYPE_FILE, null)
                 }
             }
         } else {
             if (!File(requireContext().config.decryptFolder, item.name).exists()) {
-                CryptoCore.getInstance(requireContext()).decodeFile(File(item.encryptedPath),
-                    File(requireContext().config.decryptFolder, item.name),
-                    onSuccess = {
-                        ShareData.getInstance().setListItemImage(list)
-                        val intent = Intent(requireContext(), ActivityImageDetail::class.java)
-                        startActivity(intent)
-                    },
-                    onProgress = {},
-                    onError = {})
+//                CryptoCore.getInstance(requireContext()).decodeFile(File(item.encryptedPath),
+//                    File(requireContext().config.decryptFolder, item.name),
+//                    onSuccess = {
+//                        ShareData.getInstance().setListItemImage(list)
+//                        val intent = Intent(requireContext(), ActivityImageDetail::class.java)
+//                        startActivity(intent)
+//                    },
+//                    onProgress = {},
+//                    onError = {})
 
+                viewModel.decryptFile(
+                    requireContext(),
+                    mutableListOf(File(item.encryptedPath)),
+                    requireContext().config.decryptFolder,
+                    mutableListOf(item.name),
+                    progress = { state: Int, value: Float, currentFile: File? -> },
+                    onSuccess = {
+                        Log.d("TAG", "handleClickItem: ")
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            ShareData.getInstance().setListItemImage(list)
+                            val intent = Intent(requireContext(), ActivityImageDetail::class.java)
+                            startActivity(intent)
+                        }
+
+                    },
+                    onError = {},
+                    item.encryptionType,
+                    false
+                )
+
+            }else{
+                ShareData.getInstance().setListItemImage(list)
+                val intent = Intent(requireContext(), ActivityImageDetail::class.java)
+                startActivity(intent)
             }
         }
 
@@ -572,6 +605,7 @@ class FragmentPersistent : Fragment() {
                 binding.tvSlideshow.show()
 
             }
+
             Constant.TYPE_VIDEOS -> {
                 binding.tvSlideshow.hide()
             }

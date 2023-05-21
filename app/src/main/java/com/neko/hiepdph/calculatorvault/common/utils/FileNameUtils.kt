@@ -13,8 +13,11 @@ import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.documentfile.provider.DocumentFile
 import com.google.common.io.Files.getNameWithoutExtension
+import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
+import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
 import java.io.*
+import java.nio.file.Files
 import java.util.*
 
 
@@ -31,13 +34,15 @@ object FileNameUtils {
         return fileName
     }
 
+    // encrypt == true -> encrypt or decrypt
     fun copyDirectoryOneLocationToAnotherLocation(
         context: Context,
         sourceLocation: File,
         targetLocation: File,
         progress: (value: Int, currentFile: File) -> Unit,
         finish: (currentFile: File, targetFile: File) -> Unit,
-        encryptionMode: Int = EncryptionMode.HIDDEN
+        encryptionMode: Int = EncryptionMode.HIDDEN,
+        encrypt: Boolean = true
     ) {
         val `in`: InputStream = FileInputStream(sourceLocation)
         val targetFile = if (!targetLocation.exists()) targetLocation
@@ -50,24 +55,39 @@ object FileNameUtils {
         // Copy the bits from instream to outstream
         val buf = ByteArray(1024)
         var len: Int = 0
-//        if(encryptionMode == EncryptionMode.HIDDEN){
-            while (`in`.read(buf).also { len = it } > 0) {
-                out?.write(buf, 0, len)
+        if (encrypt) {
+            if (encryptionMode == EncryptionMode.HIDDEN) {
+                while (`in`.read(buf).also { len = it } > 0) {
+                    out?.write(buf, 0, len)
 
+                    progress(len, sourceLocation)
+                }
+                `in`.close()
+            } else {
+                val filePath = sourceLocation.path
+                val fileData = CryptoCore.getInstance(context).readFile(filePath)
+                val secretKey =
+                    CryptoCore.getInstance(context).getSecretKey(context.config.secretKey)
+                val encodedData = CryptoCore.getInstance(context).encrypt(secretKey, fileData)
+                val byteInputStream = ByteArrayInputStream(encodedData)
+                while (byteInputStream.read(buf).also { len = it } > 0) {
+                    out?.write(buf, 0, len)
+                    progress(len, sourceLocation)
+                }
+                byteInputStream.close()
+            }
+        } else {
+            val filePath = sourceLocation.path
+            val fileData = CryptoCore.getInstance(context).readFile(filePath)
+            val secretKey = CryptoCore.getInstance(context).getSecretKey(context.config.secretKey)
+            val decodedData = CryptoCore.getInstance(context).decrypt(secretKey, fileData)
+            val byteInputStream = ByteArrayInputStream(decodedData)
+            while (byteInputStream.read(buf).also { len = it } > 0) {
+                out?.write(buf, 0, len)
                 progress(len, sourceLocation)
             }
-//        }else{
-//            while (`in`.read(buf).also { len = it } > 0) {
-//                val base64 = Base64.encodeToString(buf.sliceArray(0 until len), Base64.DEFAULT)
-//                out?.write(base64.toByteArray(Charsets.UTF_8))
-//
-//                progress(len, sourceLocation)
-//            }
-//        }
-
-        `in`.close()
+        }
         out?.close()
-
         finish(sourceLocation, targetFile)
 //        }
     }

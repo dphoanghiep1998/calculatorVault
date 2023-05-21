@@ -8,6 +8,7 @@ import androidx.viewpager.widget.PagerAdapter
 import com.bumptech.glide.Glide
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.customview.CustomPhotoView
+import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 
@@ -39,7 +40,7 @@ class ImagePagerAdapter(val context: Context,private val listImage: MutableList<
                 photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
             )
         }else{
-            Glide.with(context).load(listImage[position].encryptedPath).centerInside().into(photoView)
+            Glide.with(context).load(context.config.decryptFolder.path + "/${listImage[position].name}").centerInside().into(photoView)
             container.addView(
                 photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
             )

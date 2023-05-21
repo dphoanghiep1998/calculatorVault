@@ -81,7 +81,8 @@ object CopyFiles {
         isMove: Boolean = false,
         onSuccess: () -> Unit = {},
         onError: (t: Throwable) -> Unit = {},
-        encryptionMode: Int = EncryptionMode.HIDDEN
+        encryptionMode: Int = EncryptionMode.HIDDEN,
+        encrypt:Boolean = true
     ) {
         try {
             if (files?.isEmpty() == true) return
@@ -118,7 +119,7 @@ object CopyFiles {
                             deleteFile(sourceFile, context)
                         }
                         addMedia(context, targetFile)
-                    }, encryptionMode
+                    }, encryptionMode,encrypt
                 )
 
             }

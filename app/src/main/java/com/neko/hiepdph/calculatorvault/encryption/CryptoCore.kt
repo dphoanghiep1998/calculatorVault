@@ -2,12 +2,12 @@ package com.neko.hiepdph.calculatorvault.encryption
 
 import android.content.Context
 import android.util.Base64
-import android.util.Log
 import java.io.*
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.SecureRandom
 import javax.crypto.Cipher
+import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
@@ -24,63 +24,54 @@ class CryptoCore(private val context: Context) {
         }
     }
 
-    // Mã hóa file và lưu kết quả vào file khác
-    fun encodeFile(
-        inputFile: File,
-        outputFile: File,
-        onProgress: () -> Unit,
-        onSuccess: () -> Unit,
-        onError: (e: Exception) -> Unit
-    ) {
-        val inputStream: InputStream = BufferedInputStream(FileInputStream(inputFile))
-        val outputStream: OutputStream = BufferedOutputStream(FileOutputStream(outputFile))
+    fun getSecretKey(key: String): SecretKey {
 
-        try {
-            val buffer = ByteArray(1024)
-            var bytesRead: Int
-            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                val base64 =
-                    Base64.encodeToString(buffer.sliceArray(0 until bytesRead), Base64.DEFAULT)
-                outputStream.write(base64.toByteArray(Charsets.UTF_8))
-                onProgress()
-            }
-            onSuccess()
-        } catch (e: Exception) {
-            onError(e)
-        } finally {
-            inputStream.close()
-            outputStream.close()
+        val decodedKey = Base64.decode(key, Base64.NO_WRAP)
+
+        if(decodedKey.size > 16){
+            return SecretKeySpec( decodedKey.copyOf(16), "AES")
+
         }
+        if(decodedKey.size < 16){
+            val padded = ByteArray(16)
+            System.arraycopy(decodedKey, 0, padded, 0, decodedKey.size)
+            return SecretKeySpec(padded, "AES")
+        }
+
+        return SecretKeySpec(decodedKey, "AES")
     }
 
-    // Giải mã file và lưu kết quả vào file khác
-    fun decodeFile(
-        inputFile: File,
-        outputFile: File,
-        onProgress: () -> Unit,
-        onSuccess: () -> Unit,
-        onError: (e: Exception) -> Unit
-    ) {
-        val inputStream: InputStream = BufferedInputStream(FileInputStream(inputFile))
-        val outputStream: OutputStream = BufferedOutputStream(FileOutputStream(outputFile))
-
-        try {
-            val buffer = ByteArray(1024)
-            var bytesRead: Int
-            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                val decoded = Base64.decode(buffer.sliceArray(0 until bytesRead), Base64.DEFAULT)
-                outputStream.write(decoded)
-                onProgress()
-            }
-            onSuccess()
-        } catch (e: Exception) {
-            onError(e)
-        } finally {
-            inputStream.close()
-            outputStream.close()
-        }
+    @Throws(Exception::class)
+    fun decrypt(yourKey: SecretKey, fileData: ByteArray): ByteArray {
+        val decrypted: ByteArray
+        val cipher = Cipher.getInstance("AES", "BC")
+        cipher.init(Cipher.DECRYPT_MODE, yourKey, IvParameterSpec(ByteArray(cipher.blockSize)))
+        decrypted = cipher.doFinal(fileData)
+        return decrypted
     }
 
+    @Throws(Exception::class)
+    fun encrypt(yourKey: SecretKey, fileData: ByteArray): ByteArray {
+        val data = yourKey.encoded
+        val skeySpec = SecretKeySpec(data, 0, data.size, "AES")
+        val cipher = Cipher.getInstance("AES", "BC")
+        cipher.init(Cipher.ENCRYPT_MODE, skeySpec, IvParameterSpec(ByteArray(cipher.getBlockSize())))
+        return cipher.doFinal(fileData)
+    }
+
+    @Throws(Exception::class)
+    fun readFile(filePath: String): ByteArray {
+        val file = File(filePath)
+        val fileContents = file.readBytes()
+        val inputBuffer = BufferedInputStream(
+            FileInputStream(file)
+        )
+
+        inputBuffer.read(fileContents)
+        inputBuffer.close()
+
+        return fileContents
+    }
 
     fun encryptString(password: String, plainText: String): String {
         val ivBytes = ByteArray(16)

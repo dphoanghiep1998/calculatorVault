@@ -36,12 +36,15 @@ class ListItemViewModel @Inject constructor(val repo: AppRepo) : ViewModel() {
                 Constant.TYPE_PICTURE -> {
                     setListItemData(MediaStoreUtils.getChildImageFromPath(context, folderPath))
                 }
+
                 Constant.TYPE_AUDIOS -> {
                     setListItemData(MediaStoreUtils.getChildAudioFromPath(context, folderPath))
                 }
+
                 Constant.TYPE_VIDEOS -> {
                     setListItemData(MediaStoreUtils.getChildVideoFromPath(context, folderPath))
                 }
+
                 Constant.TYPE_FILE -> {
                     setListItemData(
                         MediaStoreUtils.getChildFileFromPath(
@@ -54,7 +57,7 @@ class ListItemViewModel @Inject constructor(val repo: AppRepo) : ViewModel() {
         }
     }
 
-    fun insertFileToRoom(fileVaultItem: FileVaultItem){
+    fun insertFileToRoom(fileVaultItem: FileVaultItem) {
         viewModelScope.launch {
             repo.insertFileVault(fileVaultItem)
         }
@@ -64,7 +67,7 @@ class ListItemViewModel @Inject constructor(val repo: AppRepo) : ViewModel() {
         context: Context,
         listFile: MutableList<File>,
         destination: File,
-        targetName:MutableList<String>,
+        targetName: MutableList<String>,
         progress: (state: Int, value: Float, currentFile: File?) -> Unit,
         onSuccess: () -> Unit,
         onError: (t: Throwable) -> Unit,
@@ -81,7 +84,8 @@ class ListItemViewModel @Inject constructor(val repo: AppRepo) : ViewModel() {
                 true,
                 onSuccess,
                 onError,
-                encryptionMode = encryptMode
+                encryptionMode = encryptMode,
+                true
             )
         }
     }
