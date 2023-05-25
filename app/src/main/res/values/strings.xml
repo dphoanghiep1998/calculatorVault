@@ -182,7 +182,7 @@
     <string name="password">Password</string>
     <string name="forgot_password">Forgot password</string>
     <string name="release_your_finger_when_done">Release your finger when done</string>
-    <string name="confirm_your_question">Confirm password question</string>
+    <string name="confirm_your_question">Confirm security question</string>
     <string name="enter_security_answer">Enter security answer</string>
     <string name="security_answer_invalid">Security answer is not valid!</string>
     <string name="verify_successfully">Verify successfully</string>
@@ -318,4 +318,6 @@
     <string name="set_app_password">Set App Password</string>
     <string name="setup_pass_instruction">Please set a 4 digit password and press = button to confirm.</string>
     <string name="confirm_password_instruction">Re-enter password and press = to confirm.</string>
+    <string name="instruction_title">Long press the title to open Vault</string>
+    <string name="require_answer">Answer must not be empty ?</string>
 </resources>

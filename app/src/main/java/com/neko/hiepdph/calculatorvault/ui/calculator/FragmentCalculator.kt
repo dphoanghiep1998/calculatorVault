@@ -4,19 +4,14 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.customview.CalculatorFunction
-import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
-import com.neko.hiepdph.calculatorvault.common.extensions.config
-import com.neko.hiepdph.calculatorvault.common.extensions.getColor
+import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import com.neko.hiepdph.calculatorvault.common.utils.DIVIDE_SYMBOL
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
@@ -25,7 +20,6 @@ import com.neko.hiepdph.calculatorvault.common.utils.SQRT_SYMBOL
 import com.neko.hiepdph.calculatorvault.config.ButtonToUnlock
 import com.neko.hiepdph.calculatorvault.databinding.FragmentCalculatorBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogChangeTheme
-import com.neko.hiepdph.calculatorvault.dialog.DialogSetupPassword
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import dagger.hilt.android.AndroidEntryPoint
 import org.mariuszgromada.math.mxparser.Expression
@@ -35,9 +29,7 @@ import java.text.DecimalFormat
 class FragmentCalculator : Fragment() {
     private var _binding: FragmentCalculatorBinding? = null
     private val binding get() = _binding!!
-    private var firstStepPass = false
-    private var secondStepPass = false
-    private var currentPassword = ""
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -52,60 +44,20 @@ class FragmentCalculator : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initView()
-        checkFirstInit()
-
     }
 
-    private fun checkFirstInit() {
-        if (!requireContext().config.isSetupPasswordDone) {
-            val dialogSetupPassword = DialogSetupPassword(onPositiveClicked = {
-                firstStepPass = true
-            })
-            dialogSetupPassword.show(childFragmentManager, dialogSetupPassword.tag)
-        }
-    }
-
-    private fun setupFirstPassword() {
-        if (binding.tvInput.text.length != 4) {
-            Toast.makeText(
-                requireContext(),
-                getString(R.string.password_must_be_4_characters),
-                Toast.LENGTH_SHORT
-            ).show()
-        } else {
-            currentPassword = binding.tvInput.text.toString()
-            val dialogConfirm = DialogSetupPassword(onPositiveClicked = {
-                secondStepPass = true
-                binding.tvInput.text = ""
-            }, true)
-            dialogConfirm.show(childFragmentManager, dialogConfirm.tag)
-        }
-    }
-
-    private fun setupSecondPassword() {
-        if (binding.tvInput.text.length != 4) {
-            Toast.makeText(
-                requireContext(),
-                getString(R.string.password_must_be_4_characters),
-                Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
-        if (binding.tvInput.text.toString() != currentPassword) {
-            Toast.makeText(
-                requireContext(), getString(R.string.password_does_not_match), Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
-        requireContext().config.secretPin = currentPassword
-        findNavController().navigate(R.id.fragmentSetupLock)
-    }
 
     private fun initView() {
         initInputText()
         initCalculator()
         initResultView()
         initButton()
+
+        if (requireContext().config.isSetupPasswordDone) {
+            binding.containerInstruction.hide()
+        } else {
+            binding.containerInstruction.show()
+        }
     }
 
 
@@ -131,13 +83,15 @@ class FragmentCalculator : Fragment() {
             dialogChangeTheme.show(childFragmentManager, dialogChangeTheme.tag)
         }
         binding.tvCalculator.setOnLongClickListener {
-            if(requireContext().config.isSetupPasswordDone){
-                startActivity(Intent(requireContext(), ActivityVault::class.java))
-                requireActivity().finish()
-                return@setOnLongClickListener true
-            }
-            return@setOnLongClickListener false
+            startActivity(Intent(requireContext(), ActivityVault::class.java))
+            requireActivity().finish()
+            return@setOnLongClickListener true
+        }
 
+        binding.tvCalculatorHighlight.setOnLongClickListener {
+            startActivity(Intent(requireContext(), ActivityVault::class.java))
+            requireActivity().finish()
+            return@setOnLongClickListener true
         }
     }
 
@@ -170,62 +124,52 @@ class FragmentCalculator : Fragment() {
             override fun onPressButton0() {
                 changeLayoutToInput()
                 appendTextToInput("0")
-                checkResult()
 
             }
 
             override fun onPressButton1() {
                 changeLayoutToInput()
                 appendTextToInput("1")
-                checkResult()
             }
 
             override fun onPressButton2() {
                 changeLayoutToInput()
                 appendTextToInput("2")
-                checkResult()
             }
 
             override fun onPressButton3() {
                 changeLayoutToInput()
                 appendTextToInput("3")
-                checkResult()
             }
 
             override fun onPressButton4() {
                 changeLayoutToInput()
                 appendTextToInput("4")
-                checkResult()
             }
 
             override fun onPressButton5() {
                 changeLayoutToInput()
                 appendTextToInput("5")
-                checkResult()
             }
 
             override fun onPressButton6() {
                 changeLayoutToInput()
                 appendTextToInput("6")
-                checkResult()
             }
 
             override fun onPressButton7() {
                 changeLayoutToInput()
                 appendTextToInput("7")
-                checkResult()
             }
 
             override fun onPressButton8() {
                 changeLayoutToInput()
                 appendTextToInput("8")
-                checkResult()
             }
 
             override fun onPressButton9() {
                 changeLayoutToInput()
                 appendTextToInput("9")
-                checkResult()
             }
 
             override fun onPressButtonComma() {
@@ -254,16 +198,6 @@ class FragmentCalculator : Fragment() {
             }
 
             override fun onPressButtonEqual() {
-                if (firstStepPass && !secondStepPass && !requireContext().config.isSetupPasswordDone) {
-                    setupFirstPassword()
-                    return
-                }
-
-                if (secondStepPass && !requireContext().config.isSetupPasswordDone) {
-                    setupSecondPassword()
-                    return
-                }
-
                 showResult()
                 if (requireContext().config.buttonToUnlock == ButtonToUnlock.SHORT_PRESS) {
                     checkSecretKey()

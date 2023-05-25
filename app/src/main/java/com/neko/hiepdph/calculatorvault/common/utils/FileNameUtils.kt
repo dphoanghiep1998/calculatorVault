@@ -165,7 +165,15 @@ object FileNameUtils {
         // First try the normal deletion.
         val fileDelete: Boolean = rmdir(file, context)
         if (file.delete() || fileDelete) return true
-        return false
+        // Try with Storage Access Framework.
+        if (isOnExtSdCard(file, context)
+        ) {
+            val document: DocumentFile? =
+                getDocumentFile(file, false, context)
+            return document?.delete() ?: false
+        }
+
+        return !file.exists()
     }
 
     private fun isOnExtSdCard(file: File, c: Context): Boolean {
@@ -263,10 +271,11 @@ object FileNameUtils {
      * @return The DocumentFile
      */
     fun getDocumentFile(
-        file: File, isDirectory: Boolean, context: Context?
+        file: File, isDirectory: Boolean, context: Context
     ): DocumentFile? {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) return DocumentFile.fromFile(file)
-        val baseFolder: String? = getExtSdCardFolder(file, context)
+        val baseFolder: String? =
+            getExtSdCardFolder(file, context)
         var originalDirectory = false
         if (baseFolder == null) {
             return null

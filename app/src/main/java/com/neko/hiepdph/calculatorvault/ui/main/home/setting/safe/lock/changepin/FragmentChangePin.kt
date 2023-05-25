@@ -9,11 +9,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.customview.PinFunction
-import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
-import com.neko.hiepdph.calculatorvault.common.extensions.config
-import com.neko.hiepdph.calculatorvault.common.extensions.popBackStack
-import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
+import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.databinding.FragmentChangePinBinding
+import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.viewmodel.ChangePinViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -30,6 +28,11 @@ class FragmentChangePin : Fragment() {
         initView()
         initToolBar()
         observeState()
+        if(!requireContext().config.isSetupPasswordDone){
+            viewModel.setState(1)
+            (requireActivity() as ActivityVault).getToolbar().hide()
+            changeBackPressCallBack {  }
+        }
         return binding.root
     }
 
@@ -50,7 +53,7 @@ class FragmentChangePin : Fragment() {
                 return false
             }
 
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }, viewLifecycleOwner, Lifecycle.State.CREATED)
     }
 
     private fun changeViewByState(state: Int) {
@@ -176,7 +179,11 @@ class FragmentChangePin : Fragment() {
                     showSnackBar(
                         getString(R.string.change_pin_success), SnackBarType.SUCCESS
                     )
-                    popBackStack(R.id.fragmentChangePin)
+                    if(!requireContext().config.isSetupPasswordDone){
+                        navigateToPage(R.id.fragmentChangePin,R.id.fragmentQuestionLock)
+                    }else{
+                        popBackStack(R.id.fragmentChangePin)
+                    }
                 }
             }
         }

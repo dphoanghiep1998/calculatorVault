@@ -8,6 +8,18 @@
 
 
     <TextView
+        android:id="@+id/tv_tile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_12sdp"
+        android:fontFamily="@font/app_font_500"
+        android:text="@string/security_question"
+        android:textColor="@color/neutral_06"
+        android:textSize="@dimen/_20sdp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
         android:id="@+id/tv_question"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -18,7 +30,7 @@
         android:textColor="@color/neutral_06"
         android:textSize="@dimen/_16sdp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/tv_tile" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/container_question"
@@ -69,16 +81,16 @@
     <EditText
         android:id="@+id/edt_answer"
         android:layout_width="0dp"
-        android:hint="@string/hint_lock_instruction"
-        android:textColorHint="@color/neutral_04"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_neutral03_corner_border"
         android:fontFamily="@font/app_font_400"
-        android:minHeight="@dimen/_36sdp"
+        android:hint="@string/hint_lock_instruction"
         android:maxLength="50"
+        android:minHeight="@dimen/_36sdp"
         android:paddingHorizontal="@dimen/_12sdp"
         android:paddingVertical="@dimen/_6sdp"
         android:textColor="@color/neutral_06"
+        android:textColorHint="@color/neutral_04"
         android:textSize="@dimen/_14sdp"
         app:layout_constraintBottom_toBottomOf="@id/tv_answer"
         app:layout_constraintEnd_toEndOf="@id/container_question"
@@ -101,6 +113,8 @@
         android:id="@+id/btn_confim"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginEnd="@dimen/_12sdp"
         android:background="@drawable/bg_item_calculator_special"
         android:foreground="@drawable/fg_ripple_effect"
         android:paddingHorizontal="@dimen/_30sdp"
@@ -109,8 +123,6 @@
         android:textColor="@color/neutral_01"
         android:textSize="@dimen/_16sdp"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginEnd="@dimen/_12sdp"
-        android:layout_marginTop="@dimen/_12sdp"
         app:layout_constraintTop_toBottomOf="@id/tv_instruction_setup_lock" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

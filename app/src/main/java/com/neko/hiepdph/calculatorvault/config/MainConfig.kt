@@ -91,10 +91,10 @@ class MainConfig(val context: Context) {
     var patternLock: List<Int>
         get() = AppSharePreference.getInstance(context).getPatternLock(arrayListOf())
         set(patternLock) = AppSharePreference.getInstance(context).setPatternLock(patternLock)
-
-    var isShowLock: Boolean
-        get() = AppSharePreference.getInstance(context).getShowLock(false)
-        set(isShowLock) = AppSharePreference.getInstance(context).setShowLock(isShowLock)
+//
+//    var isShowLock: Boolean
+//        get() = AppSharePreference.getInstance(context).getShowLock(false)
+//        set(isShowLock) = AppSharePreference.getInstance(context).setShowLock(isShowLock)
 
     var slideShowInterval: Int
         get() = AppSharePreference.getInstance(context).getSlideShowInterval(3)
@@ -118,7 +118,7 @@ class MainConfig(val context: Context) {
             .setSlideRandomPlay(slideRandomPlay)
 
     var shakeClose: Boolean
-        get() = AppSharePreference.getInstance(context).getShakeClose(ShakeClose.ENABLE)
+        get() = AppSharePreference.getInstance(context).getShakeClose(ShakeClose.DISABLE)
         set(shakeClose) = AppSharePreference.getInstance(context).setClose(shakeClose)
 
     var playVideoMode: Boolean
@@ -157,7 +157,7 @@ class MainConfig(val context: Context) {
 
     var buttonToUnlock: Int
         get() = AppSharePreference.getInstance(context)
-            .getButtonToUnlock(ButtonToUnlock.SHORT_PRESS)
+            .getButtonToUnlock(ButtonToUnlock.NONE)
         set(buttonToUnlock) = AppSharePreference.getInstance(context)
             .setButtonToUnlock(buttonToUnlock)
 

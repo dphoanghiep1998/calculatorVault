@@ -65,7 +65,6 @@ class DialogProgress() : DialogFragment() {
 
     fun hideButton(){
         binding.btnOk.hide()
-//        binding.btnTips.hide()
     }
     fun statusSuccess(){
         binding.progressLoading.hide()
@@ -78,6 +77,18 @@ class DialogProgress() : DialogFragment() {
         binding.imvFailed.show()
     }
 
+    fun enableCancelable(){
+        binding.root.setOnClickListener {
+            dismiss()
+        }
+
+    }
+    fun disableCancelable(){
+        binding.root.setOnClickListener {
+
+        }
+    }
+
     fun showButton(){
         binding.btnOk.show()
 //        binding.btnTips.show()
@@ -87,12 +98,9 @@ class DialogProgress() : DialogFragment() {
         binding.btnOk.clickWithDebounce {
             dismiss()
         }
+        binding.containerMain.setOnClickListener {
 
-//        binding.btnTips.clickWithDebounce {
-//            openTips()
-//        }
-
-
+        }
     }
 
     private fun openTips() {

@@ -1,11 +1,12 @@
 package com.neko.hiepdph.calculatorvault.ui.activities
 
-import android.content.Intent
 import android.graphics.SurfaceTexture
 import android.hardware.Camera
 import android.os.Bundle
+import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
@@ -15,23 +16,35 @@ import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityPinLockBinding
 import com.neko.hiepdph.calculatorvault.dialog.*
+import com.neko.hiepdph.calculatorvault.viewmodel.ListItemViewModel
+import com.neko.hiepdph.calculatorvault.viewmodel.PinLockViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 
+@AndroidEntryPoint
 class ActivityPinLock : AppCompatActivity() {
     private lateinit var binding: ActivityPinLockBinding
     private var currentPassword = ""
     private var byteArray: ByteArray? = null
     private var takePhotoIntruder = false
     private var camera: Camera? = null
+    private val viewModel by viewModels<PinLockViewModel>()
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPinLockBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initView()
     }
+
 
     private fun appendToPassword(key: String) {
         binding.tvStatus.text = String.EMPTY
@@ -96,23 +109,22 @@ class ActivityPinLock : AppCompatActivity() {
             val biometric = BiometricConfig.biometricConfig {
                 ownerFragmentActivity = this@ActivityPinLock
                 authenticateSuccess = {
-                    config.isShowLock = true
                     (application as CustomApplication).authority = true
-                    startActivity(
-                        Intent(this@ActivityPinLock, ActivityVault::class.java)
-                    )
+                    (application as CustomApplication).isLockShowed = true
                     finish()
                 }
                 authenticateFailed = {
-                    if (config.photoIntruder && !takePhotoIntruder) {
-                        takePicture()
-                    }
                     if (config.fakePassword) {
                         (application as CustomApplication).authority = false
-                        startActivity(
-                            Intent(this@ActivityPinLock, ActivityVault::class.java)
-                        )
-                        finish()
+                        (application as CustomApplication).isLockShowed = true
+                        if (config.photoIntruder && !takePhotoIntruder) {
+                            takePicture(action = {
+                                finish()
+                            })
+                        }else {
+                            takePicture(action = {
+                            })
+                        }
                     } else if (config.fingerprintFailure) {
                         finishAffinity()
                     }
@@ -133,19 +145,20 @@ class ActivityPinLock : AppCompatActivity() {
         }
     }
 
-    private fun takePhotoIntruder() {
+    private fun takePhotoIntruder(action: (() -> Unit)? = null) {
         try {
             camera?.takePicture(
                 null, null
             ) { data, camera ->
+                Log.d("TAG", "takePhotoIntruder: " + data)
                 byteArray = data
+                action?.invoke()
 
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
-
 
 
     private fun showDialogConfirmSecurityQuestion() {
@@ -176,6 +189,17 @@ class ActivityPinLock : AppCompatActivity() {
             }
             return
         }
+
+        if (config.secretPin != currentPassword && config.fakePassword) {
+            (application as CustomApplication).authority = false
+            (application as CustomApplication).isLockShowed = true
+            if (config.photoIntruder && !takePhotoIntruder) {
+                takePicture(action = {
+                    finish()
+                })
+            }
+            return
+        }
         if (currentPassword != config.secretPin) {
             binding.tvStatus.text = getString(R.string.current_password_is_not_correct)
             binding.tvStatus.setTextColor(getColor(R.color.theme_12))
@@ -183,18 +207,17 @@ class ActivityPinLock : AppCompatActivity() {
             anim.duration = 100 // set animation duration to 500 milliseconds
             anim.repeatMode = Animation.REVERSE // repeat animation in reverse mode
             anim.repeatCount = 2 // repeat animation 2 times
+
             binding.tvStatus.startAnimation(anim)
             if (config.photoIntruder && !takePhotoIntruder) {
                 takePicture()
             }
             return
         }
+
         if (config.secretPin == currentPassword) {
             (application as CustomApplication).authority = true
-            config.isShowLock = true
-            startActivity(
-                Intent(this@ActivityPinLock, ActivityVault::class.java)
-            )
+            (application as CustomApplication).isLockShowed = true
             finish()
         }
     }
@@ -217,9 +240,9 @@ class ActivityPinLock : AppCompatActivity() {
         }
     }
 
-    private fun takePicture() {
+    private fun takePicture(action: (() -> Unit)? = null) {
         startCamera()
-        takePhotoIntruder()
+        takePhotoIntruder(action)
         takePhotoIntruder = true
     }
 
@@ -263,19 +286,28 @@ class ActivityPinLock : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        stopCamera()
         if (!(application as CustomApplication).authority) {
             config.caughtIntruder = true
-            if (!config.intruderFolder.exists()) {
-                config.intruderFolder.mkdirs()
+            CoroutineScope(Dispatchers.IO).launch {
+                if (!config.intruderFolder.exists()) {
+                    config.intruderFolder.mkdirs()
+                }
+                val name = "lmao_intruder_${config.intruderFolder.listFiles().size}.jpeg"
+                val file = File(
+                    config.intruderFolder, name
+                )
+                val fos = FileOutputStream(file)
+                fos.write(byteArray)
+                fos.close()
+                viewModel.insertFileToRoom(
+                    FileVaultItem(
+                        0, "${config.intruderFolder.path}/" + name,"${config.intruderFolder.path}/" + name, name = name
+                    )
+                )
             }
-            val file = File(
-                config.intruderFolder,
-                "lmao_intruder_${config.intruderFolder.listFiles().size}.jpeg"
-            )
-            val fos = FileOutputStream(file)
-            fos.write(byteArray)
-            fos.close()
+
         }
+        stopCamera()
+
     }
 }

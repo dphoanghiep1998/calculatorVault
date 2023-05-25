@@ -109,7 +109,7 @@ class FragmentRecycleBin : Fragment() {
                 }
             }
 
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }, viewLifecycleOwner, Lifecycle.State.CREATED)
     }
 
     private fun changeToEditView() {

@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -40,7 +41,6 @@ import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreferen
 import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionS
 import com.neko.hiepdph.calculatorvault.common.utils.openLink
 import com.neko.hiepdph.calculatorvault.config.LockType
-import com.neko.hiepdph.calculatorvault.config.LockWhenLeavingApp
 import com.neko.hiepdph.calculatorvault.config.ScreenOffAction
 import com.neko.hiepdph.calculatorvault.databinding.ActivityVaultBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutItemNavigationViewBinding
@@ -74,23 +74,39 @@ class ActivityVault : AppCompatActivity() {
         }
     }
 
+
     override fun onResume() {
         super.onResume()
+        if (config.isSetupPasswordDone) {
+            getToolbar().show()
+        } else {
+            getToolbar().hide()
+        }
+        initNavigationView()
+        checkIntruderByPass()
         mSensorManager?.registerListener(
             mShakeDetector, mAccelerometer, SensorManager.SENSOR_DELAY_UI
         )
-        if (!config.isShowLock) {
+
+        if (config.isSetupPasswordDone && (!((application as CustomApplication).authority) && !config.fakePassword || !(application as CustomApplication).isLockShowed)) {
             when (config.lockType) {
                 LockType.PATTERN -> {
                     startActivity(Intent(this@ActivityVault, ActivityPatternLock::class.java))
-                    finish()
                 }
-
                 LockType.PIN -> {
                     startActivity(Intent(this@ActivityVault, ActivityPinLock::class.java))
-                    finish()
                 }
             }
+        }
+    }
+
+    private fun checkPasswordSetDone() {
+        Log.d("TAG", "checkPasswordSetDone: "+config.isSetupPasswordDone)
+        if (!config.isSetupPasswordDone) {
+            val navHostFragment =
+                supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+            val navController = navHostFragment.navController
+            navController.navigate(R.id.fragmentChangePin)
         }
     }
 
@@ -99,13 +115,11 @@ class ActivityVault : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityVaultBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        initNavigationView()
         initScreenOffAction()
         setupNavigationDrawer()
         setSupportActionBar(binding.toolbar)
         setupActionBar()
         checkPermissionAllFileManage()
-        checkIntruderByPass()
         initShakeDetector()
         setThemeMode()
         registerBroadcastHideApp()
@@ -123,6 +137,7 @@ class ActivityVault : AppCompatActivity() {
         if (buildMinVersionS()) {
             val hasManageExternalStoragePermission = Environment.isExternalStorageManager()
             if (hasManageExternalStoragePermission) {
+                checkPasswordSetDone()
                 createSecretFolderFirstTime()
             } else {
                 dialogRequestPermission = DialogRequestPermission(onClickPositive = {
@@ -141,19 +156,43 @@ class ActivityVault : AppCompatActivity() {
                     this, Manifest.permission.WRITE_EXTERNAL_STORAGE
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
+                checkPasswordSetDone()
                 createSecretFolderFirstTime()
             } else {
-                dialogRequestPermission = DialogRequestPermission(onClickPositive = {
-                    permissionLauncher.launch(
-                        arrayOf(
-                            Manifest.permission.READ_EXTERNAL_STORAGE,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE
-                        )
-                    )
-                })
-                dialogRequestPermission?.show(supportFragmentManager, dialogRequestPermission?.tag)
 
+                dialogRequestPermission = DialogRequestPermission(onClickPositive = {
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(
+                            this, arrayOf(
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            )[0]
+                        ) || ActivityCompat.shouldShowRequestPermissionRationale(
+                            this, arrayOf(
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            )[1]
+                        )
+                    ) {
+                        val intent = Intent(
+                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                            Uri.fromParts("package", packageName, null)
+                        )
+                        launcher.launch(intent)
+                    } else {
+                        permissionLauncher.launch(
+                            arrayOf(
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            )
+                        )
+                    }
+                })
+                dialogRequestPermission?.show(
+                    supportFragmentManager, dialogRequestPermission?.tag
+                )
             }
+
+
         }
     }
 
@@ -164,6 +203,7 @@ class ActivityVault : AppCompatActivity() {
                 binding.itemRecyclerBin.root.hide()
                 binding.itemSetting.root.hide()
                 binding.itemPrivacy.root.hide()
+                (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController.navigate(R.id.fragmentBrowser)
             } else {
                 binding.itemVault.root.show()
                 binding.itemRecyclerBin.root.show()
@@ -230,9 +270,12 @@ class ActivityVault : AppCompatActivity() {
             binding.switchMenu.isChecked = config.darkMode
             clickWithDebounce {
                 binding.switchMenu.isChecked = !binding.switchMenu.isChecked
+                config.darkMode = binding.switchMenu.isChecked
+                changeThemeMode(binding.switchMenu.isChecked)
             }
         }
         binding.switchMenu.setOnClickListener {
+            config.darkMode = binding.switchMenu.isChecked
             changeThemeMode(binding.switchMenu.isChecked)
         }
         binding.itemRateApp.apply {
@@ -387,7 +430,20 @@ class ActivityVault : AppCompatActivity() {
                 val hasManageExternalStoragePermission = Environment.isExternalStorageManager()
 
                 if (hasManageExternalStoragePermission) {
+                    checkPasswordSetDone()
                     createSecretFolderFirstTime()
+                    dialogRequestPermission?.dismiss()
+                }
+            } else {
+                if (ContextCompat.checkSelfPermission(
+                        this, Manifest.permission.READ_EXTERNAL_STORAGE
+                    ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+                        this, Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    createSecretFolderFirstTime()
+                    checkPasswordSetDone()
+                    dialogRequestPermission?.dismiss()
                 }
             }
 
@@ -395,9 +451,18 @@ class ActivityVault : AppCompatActivity() {
 
     private val permissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-            dialogRequestPermission?.dismiss()
-            createSecretFolderFirstTime()
+            if (ContextCompat.checkSelfPermission(
+                    this, Manifest.permission.READ_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+                    this, Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                dialogRequestPermission?.dismiss()
+                checkPasswordSetDone()
+                createSecretFolderFirstTime()
+            }
         }
+
 
     private fun initShakeDetector() {
         mSensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -405,8 +470,11 @@ class ActivityVault : AppCompatActivity() {
         mShakeDetector = ShakeDetector(this)
         mShakeDetector?.setOnShakeListener(object : ShakeDetector.OnShakeListener {
             override fun onShake(count: Int) {
-                finishAffinity()
-                exitProcess(-1)
+                if(config.shakeClose){
+                    finishAffinity()
+                    exitProcess(-1)
+                }
+
             }
 
         })
@@ -491,7 +559,6 @@ class ActivityVault : AppCompatActivity() {
     private fun registerBroadcastHideApp() {
         val hideAppReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                Log.d("TAG", "onReceive: ")
                 if (intent!!.action.equals(TelephonyManager.ACTION_SECRET_CODE)) {
                     val code = intent.data?.host
                     if (code == "0101") {

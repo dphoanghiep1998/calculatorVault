@@ -60,7 +60,7 @@ enum class DialogConfirmType(
     FORGOT_PASSWORD(
         R.string.forgot_password,
         R.string.confirm_your_question,
-        R.drawable.ic_unlock,
+        R.drawable.ic_forgot_password,
         R.string.cancel,
         R.string.custom_ok
     ),

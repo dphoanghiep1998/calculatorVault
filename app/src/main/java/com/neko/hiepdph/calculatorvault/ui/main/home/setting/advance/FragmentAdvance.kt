@@ -54,7 +54,7 @@ class FragmentAdvance : Fragment() {
                 return false
             }
 
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }, viewLifecycleOwner, Lifecycle.State.CREATED)
     }
     private fun initAction() {
         binding.itemIntruderSelfie.root.clickWithDebounce {

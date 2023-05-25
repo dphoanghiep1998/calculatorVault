@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.Animation.AnimationListener
 import android.view.animation.TranslateAnimation
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.neko.hiepdph.calculatorvault.CustomApplication
@@ -24,6 +25,7 @@ import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.dialog.DialogPassword
 import com.neko.hiepdph.calculatorvault.dialog.SetupPassWordCallBack
+import com.neko.hiepdph.calculatorvault.viewmodel.PinLockViewModel
 import com.takwolf.android.lock9.Lock9View
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -35,6 +37,7 @@ class ActivityPatternLock : AppCompatActivity() {
     private var byteArray: ByteArray? = null
     private var takePhotoIntruder = false
     private var camera: Camera? = null
+    private val viewModel by viewModels<PinLockViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,24 +60,17 @@ class ActivityPatternLock : AppCompatActivity() {
                 ownerFragmentActivity = this@ActivityPatternLock
                 authenticateSuccess = {
                     (application as CustomApplication).authority = true
-
-                    config.isShowLock = true
-                    startActivity(
-                        Intent(this@ActivityPatternLock, ActivityVault::class.java)
-                    )
+                    (application as CustomApplication).isLockShowed = true
                     finish()
                 }
                 authenticateFailed = {
+                    (application as CustomApplication).authority = false
+                    (application as CustomApplication).isLockShowed = true
                     if (config.photoIntruder && !takePhotoIntruder) {
-                        takePicture()
-                    }
-                    if (config.fakePassword) {
-                        (application as CustomApplication).authority = false
+                        takePicture(action = {
+                            finish()
+                        })
 
-                        startActivity(
-                            Intent(this@ActivityPatternLock, ActivityVault::class.java)
-                        )
-                        finish()
                     } else if (config.fingerprintFailure) {
                         finishAffinity()
                     }
@@ -99,7 +95,6 @@ class ActivityPatternLock : AppCompatActivity() {
                 ownerFragmentActivity = this@ActivityPatternLock
                 authenticateSuccess = {
                     (application as CustomApplication).authority = true
-                    config.isShowLock = true
                     startActivity(
                         Intent(this@ActivityPatternLock, ActivityVault::class.java)
                     )
@@ -154,6 +149,8 @@ class ActivityPatternLock : AppCompatActivity() {
 
     private fun checkPattern(numbers: IntArray) {
         if (!(numbers contentEquals config.patternLock.toIntArray())) {
+            (application as CustomApplication).authority = false
+            (application as CustomApplication).isLockShowed = true
             val anim = TranslateAnimation(0f, -50f, 0f, 0f) // move view to left
             anim.duration = 100 // set animation duration to 500 milliseconds
             anim.repeatMode = Animation.REVERSE // repeat animation in reverse mode
@@ -183,37 +180,39 @@ class ActivityPatternLock : AppCompatActivity() {
                 setTextColor(getColor(R.color.theme_12))
                 startAnimation(anim)
             }
-            if (config.photoIntruder && !takePhotoIntruder) {
-                takePicture()
-            }
-            if(config.fakePassword){
-                startActivity(
-                    Intent(this@ActivityPatternLock, ActivityVault::class.java)
-                )
-                finish()
+
+            if (config.fakePassword) {
+                if (config.photoIntruder && !takePhotoIntruder) {
+                    takePicture(action = {
+                        finish()
+                    })
+                } else {
+                    if (config.photoIntruder && !takePhotoIntruder) {
+                        takePicture(action = {})
+                    }
+                }
             }
         } else {
-            config.isShowLock = true
-            startActivity(
-                Intent(this@ActivityPatternLock, ActivityVault::class.java)
-            )
+
             finish()
         }
     }
 
-    private fun takePicture() {
+    private fun takePicture(action: (() -> Unit)? = null) {
         startCamera()
-        takePhotoIntruder()
+        takePhotoIntruder(action)
         takePhotoIntruder = true
     }
 
 
-    private fun takePhotoIntruder() {
+    private fun takePhotoIntruder(action: (() -> Unit)? = null) {
         try {
             camera?.takePicture(
                 null, null
             ) { data, camera ->
+                Log.d("TAG", "takePhotoIntruder: " + data)
                 byteArray = data
+                action?.invoke()
 
             }
         } catch (e: Exception) {

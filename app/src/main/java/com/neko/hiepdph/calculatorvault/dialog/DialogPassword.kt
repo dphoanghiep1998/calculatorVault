@@ -10,6 +10,7 @@ import android.view.Window
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
@@ -61,8 +62,10 @@ class DialogPassword(
     }
 
     private fun initButton() {
-        binding.tvTitle.text = getString(R.string.confirm_your_question)
-        binding.tvSecurityQuestion.text = requireContext().config.securityQuestion
+        binding.question.dismissDropDown()
+
+        binding.question.setText(requireContext().config.securityQuestion)
+
 
         binding.btnConfirm.clickWithDebounce {
             if (binding.tvContent.text.toString() == requireContext().config.securityAnswer) {
@@ -75,6 +78,9 @@ class DialogPassword(
                     Toast.LENGTH_SHORT
                 ).show()
             }
+        }
+        binding.btnCancel.clickWithDebounce {
+            dismiss()
         }
         binding.root.clickWithDebounce {
             dismiss()

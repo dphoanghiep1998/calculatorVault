@@ -136,7 +136,7 @@ class FragmentPersistent : Fragment() {
                 }
             }
 
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }, viewLifecycleOwner, Lifecycle.State.CREATED)
     }
 
     private fun checkItem() {

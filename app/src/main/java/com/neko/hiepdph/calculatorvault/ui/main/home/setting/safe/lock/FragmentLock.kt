@@ -1,17 +1,11 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.setting.safe.lock
 
-import android.content.Intent
+
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
-
-
 import android.os.Bundle
-import android.provider.Settings
+import android.os.Handler
 import android.util.Log
 import android.view.*
-import android.widget.Toast
-import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricPrompt
-import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -36,6 +30,7 @@ class FragmentLock : Fragment() {
     ): View? {
         _binding = FragmentLockBinding.inflate(inflater, container, false)
         AppSharePreference.INSTANCE.registerOnSharedPreferenceChangeListener(listener)
+        handlePatternNotSet()
         return binding.root
     }
 
@@ -44,17 +39,31 @@ class FragmentLock : Fragment() {
         initView()
         initToolBar()
     }
+
+    private fun handlePatternNotSet() {
+        if (requireContext().config.patternLock.isEmpty()) {
+            requireContext().config.lockType = LockType.PIN
+            binding.containerLockType.tvStatus.text = getPattern(requireContext().config.lockType)
+            binding.containerChangeUnlock.tvContent.text =
+                getTitleChangeUnlock(requireContext().config.lockType)
+            setupChangeView(requireContext().config.lockType)
+        }
+
+    }
+
     private fun initToolBar() {
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
             }
+
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return false
             }
 
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }, viewLifecycleOwner, Lifecycle.State.CREATED)
     }
+
     private fun initView() {
         lifecycleScope.launchWhenResumed {
             setupView()
@@ -62,8 +71,6 @@ class FragmentLock : Fragment() {
         setupChangeView(requireContext().config.lockType)
         initButton()
     }
-
-
 
 
     private fun initButton() {
@@ -81,7 +88,9 @@ class FragmentLock : Fragment() {
         binding.containerChangeUnlock.root.clickWithDebounce {
             when (requireContext().config.lockType) {
                 LockType.PATTERN -> {
-                    navigateToPage(R.id.fragmentLock,R.id.action_fragmentLock_to_fragmentChangePattern)
+                    navigateToPage(
+                        R.id.fragmentLock, R.id.action_fragmentLock_to_fragmentChangePattern
+                    )
                 }
                 LockType.PIN -> {
                     navigateToPage(R.id.fragmentLock, R.id.action_fragmentLock_to_fragmentChangePin)
@@ -170,6 +179,15 @@ class FragmentLock : Fragment() {
 
     private val listener = OnSharedPreferenceChangeListener { sharedPreferences, key ->
         if (key == Constant.KEY_LOCK_TYPE) {
+            if (requireContext().config.lockType == LockType.PATTERN && requireContext().config.patternLock.isEmpty()) {
+                Log.d("TAG", "qweqweqwe: ")
+                Handler().postDelayed({
+                    navigateToPage(
+                        R.id.fragmentLock, R.id.action_fragmentLock_to_fragmentChangePattern
+                    )
+                }, 400)
+                return@OnSharedPreferenceChangeListener
+            }
             binding.containerLockType.tvStatus.text = getPattern(requireContext().config.lockType)
             binding.containerChangeUnlock.tvContent.text =
                 getTitleChangeUnlock(requireContext().config.lockType)

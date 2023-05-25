@@ -7,8 +7,8 @@ class FileVaultItem(
     var id: Int,
     var originalPath: String,
     var encryptedPath: String = "",
-    var recyclerPath: String,
-    var decodePath: String,
+    var recyclerPath: String = "",
+    var decodePath: String = "",
     var name: String = "",
     var size: Long = 0L,
     var modified: Long = 0L,
@@ -20,7 +20,8 @@ class FileVaultItem(
     var encryptionType: Int = 1,
     var fileType: String = "",
     var fileRealType: String? = null,
-    var isDeleted: Boolean = false
+    var isDeleted: Boolean = false,
+    var thumb: ByteArray? = null
 ) {
     fun toFileVaultEntity(): FileVaultItemEntity {
         val fileId = if (id == -1) 0 else id
@@ -41,7 +42,8 @@ class FileVaultItem(
             encryptionType,
             fileType,
             fileRealType,
-            isDeleted
+            isDeleted,
+            thumb
         )
     }
 
@@ -63,7 +65,8 @@ class FileVaultItem(
             encryptionType,
             fileType,
             fileRealType,
-            isDeleted
+            isDeleted,
+            thumb
         )
     }
 }

@@ -48,7 +48,7 @@ class FragmentSafe : Fragment() {
                 return false
             }
 
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }, viewLifecycleOwner, Lifecycle.State.CREATED)
     }
 
     private fun initView() {

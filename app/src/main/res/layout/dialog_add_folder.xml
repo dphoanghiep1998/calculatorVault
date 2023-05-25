@@ -54,7 +54,7 @@
             android:hint="@string/enter_name"
             android:paddingHorizontal="@dimen/_12sdp"
             android:paddingVertical="@dimen/_12sdp"
-            android:maxLength="20"
+            android:maxLength="128"
             android:textColor="@color/neutral_06"
             android:textColorHint="@color/neutral_04"
             android:textSize="@dimen/_12sdp"

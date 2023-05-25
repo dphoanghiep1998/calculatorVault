@@ -26,6 +26,7 @@ import com.neko.hiepdph.calculatorvault.databinding.FragmentVaultBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutMenuOptionBinding
 import com.neko.hiepdph.calculatorvault.dialog.*
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityCalculator
+import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.viewmodel.VaultViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -47,6 +48,14 @@ class FragmentVault : Fragment() {
         var order: Order = Order.ASC
     }
 
+    override fun onResume() {
+        super.onResume()
+        if(!requireContext().config.isSetupPasswordDone){
+            (requireActivity() as ActivityVault).getToolbar().hide()
+        }else{
+            (requireActivity() as ActivityVault).getToolbar().show()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -73,7 +82,6 @@ class FragmentVault : Fragment() {
 
     private fun observeListFile() {
         viewModel.listFolderInVault.observe(viewLifecycleOwner) {
-            Log.d("TAG", "observeListFile: " + it.size)
             adapter?.setData(sortList(it))
             binding.swipeLayout.isRefreshing = false
         }
@@ -120,7 +128,7 @@ class FragmentVault : Fragment() {
                     else -> false
                 }
             }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }, viewLifecycleOwner, Lifecycle.State.CREATED)
     }
 
 

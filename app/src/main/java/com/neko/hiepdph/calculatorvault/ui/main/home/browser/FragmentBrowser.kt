@@ -137,7 +137,7 @@ class FragmentBrowser : Fragment() {
                 }
 
             }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }, viewLifecycleOwner, Lifecycle.State.CREATED)
 
     }
 

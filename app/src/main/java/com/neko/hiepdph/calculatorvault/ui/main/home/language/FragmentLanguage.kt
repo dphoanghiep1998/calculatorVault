@@ -75,7 +75,7 @@ class FragmentLanguage : Fragment() {
                     else -> false
                 }
             }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }, viewLifecycleOwner, Lifecycle.State.CREATED)
     }
     private fun handleUnSupportLang(mLanguageList: MutableList<Any>) {
         var support = false

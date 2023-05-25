@@ -54,7 +54,7 @@ class FragmentGeneral : Fragment() {
                 return false
             }
 
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }, viewLifecycleOwner, Lifecycle.State.CREATED)
     }
 
     private val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->

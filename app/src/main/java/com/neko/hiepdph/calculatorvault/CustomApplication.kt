@@ -36,6 +36,7 @@ import kotlin.math.log
 class CustomApplication : Application(), Application.ActivityLifecycleCallbacks, LifecycleObserver {
     private var currentActivity: Activity? = null
      var authority = false
+     var isLockShowed = false
 //    private var appOpenAdsManager: AppOpenAdManager? = null
 //    var shouldDestroyApp = false
 //    var showAdsClickBottomNav = false
@@ -125,16 +126,11 @@ class CustomApplication : Application(), Application.ActivityLifecycleCallbacks,
     }
 
     override fun onActivityPaused(p0: Activity) {
-//        Adjust.onPause()
-        if(p0 is ActivityVault && isScreenOn()){
-            applicationContext.config.isShowLock = false
-        }
+
     }
 
     override fun onActivityStopped(p0: Activity) {
-        if(p0 is ActivityVault && isScreenOn()){
-            applicationContext.config.isShowLock = false
-        }
+
     }
 
     override fun onActivitySaveInstanceState(p0: Activity, p1: Bundle) {

@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.view.Window
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
@@ -24,7 +25,7 @@ import com.neko.hiepdph.calculatorvault.viewmodel.IntruderViewModel
 class DialogShowIntruder() : DialogFragment() {
 
     private lateinit var binding: DialogShowIntruderBinding
-    private val viewModel by viewModels<IntruderViewModel>()
+    private val viewModel by activityViewModels<IntruderViewModel>()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val root = ConstraintLayout(requireContext())
@@ -67,12 +68,15 @@ class DialogShowIntruder() : DialogFragment() {
     private fun initData() {
         viewModel.getItemListFromFolder(requireContext().config.intruderFolder.path)
             .observe(viewLifecycleOwner) {
-                var requestOptions = RequestOptions()
-                requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
+                if(it.isNotEmpty()){
+                    var requestOptions = RequestOptions()
+                    requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
 
-                Glide.with(requireContext()).load(it.last().encryptedPath)
-                    .placeholder(R.drawable.ic_error_image).apply(requestOptions)
-                    .into(binding.imvIcon)
+                    Glide.with(requireContext()).load(it.last().encryptedPath)
+                        .placeholder(R.drawable.ic_error_image).apply(requestOptions)
+                        .into(binding.imvIcon)
+                }
+
             }
     }
 

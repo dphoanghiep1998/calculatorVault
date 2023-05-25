@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".ui.calculator.FragmentCalculator">
 
     <TextView
         android:id="@+id/tv_calculator"
@@ -10,12 +12,12 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_12sdp"
         android:fontFamily="@font/app_font_500"
+        android:paddingVertical="@dimen/_20sdp"
         android:text="@string/calculator"
         android:textColor="@color/neutral_06"
         android:textSize="@dimen/_20sdp"
-        app:layout_constraintBottom_toBottomOf="@id/imv_change_theme"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/imv_change_theme" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/imv_change_theme"
@@ -23,8 +25,9 @@
         android:layout_height="@dimen/_50sdp"
         android:padding="@dimen/_12sdp"
         android:src="@drawable/ic_change_theme"
+        app:layout_constraintBottom_toBottomOf="@id/tv_calculator"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@id/tv_calculator" />
 
     <TextView
         android:id="@+id/tv_input"
@@ -59,5 +62,43 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/container_instruction"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/blur"
+        android:visibility="visible">
+
+        <TextView
+            android:id="@+id/tv_calculator_highlight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_neu01_circle"
+            android:fontFamily="@font/app_font_500"
+            android:paddingHorizontal="@dimen/_12sdp"
+            android:paddingVertical="@dimen/_20sdp"
+            android:text="@string/calculator"
+            android:textColor="@color/neutral_06"
+            android:textSize="@dimen/_20sdp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_instruction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_30sdp"
+            android:background="@drawable/bg_neu01_corner_8"
+            android:fontFamily="@font/app_font_400"
+            android:paddingHorizontal="@dimen/_12sdp"
+            android:paddingVertical="@dimen/_16sdp"
+            android:text="@string/instruction_title"
+            android:textColor="@color/neutral_06"
+            android:textSize="@dimen/_16sdp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_calculator_highlight" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

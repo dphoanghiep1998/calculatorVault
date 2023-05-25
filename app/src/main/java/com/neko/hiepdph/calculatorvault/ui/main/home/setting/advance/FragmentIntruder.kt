@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,7 +29,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class FragmentIntruder : Fragment() {
     private lateinit var binding: FragmentIntruderBinding
     private var adapter: AdapterIntruder? = null
-    private val viewModel by viewModels<IntruderViewModel>()
+    private val viewModel by activityViewModels<IntruderViewModel>()
     private var action: (() -> Unit)? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?

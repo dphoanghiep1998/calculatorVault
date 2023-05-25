@@ -145,15 +145,10 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-//                    if(item.encryptionType == EncryptionMode.HIDDEN){
-                    Glide.with(itemView.context).load(item.encryptedPath)
+                    
+                    Glide.with(itemView.context).load(item.thumb)
                         .placeholder(R.drawable.ic_error_image).apply(requestOptions)
                         .into(binding.imvThumb)
-//                    }else{
-//                        Glide.with(itemView.context).load(item.encryptedPath)
-//                            .placeholder(R.drawable.ic_error_image).apply(requestOptions)
-//                            .into(binding.imvThumb)
-//                    }
 
 
                     if (editMode) {
@@ -203,8 +198,12 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(item.encryptedPath).apply(requestOptions)
-                        .error(R.drawable.ic_error_video).into(binding.imvThumb)
+
+
+                    Glide.with(itemView.context).load(item.thumb)
+                        .placeholder(R.drawable.ic_error_video).apply(requestOptions)
+                        .into(binding.imvThumb)
+
 
                     binding.checkBox.isChecked = item in listOfItemSelected
 
@@ -256,9 +255,10 @@ class AdapterPersistent(
                     val item = listItem[adapterPosition]
                     var requestOptions = RequestOptions()
                     requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(getThumbnail(item.encryptedPath))
+                    Glide.with(itemView.context).load(item.thumb)
                         .apply(requestOptions)
                         .error(R.drawable.ic_error_audio).into(binding.imvThumb)
+
                     binding.checkBox.isChecked = item in listOfItemSelected
 
                     if (editMode) {

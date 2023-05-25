@@ -3,6 +3,7 @@ package com.neko.hiepdph.calculatorvault.common.extensions
 //import com.gianghv.libads.*
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -38,6 +39,9 @@ enum class InterAds {
 enum class SnackBarType {
     SUCCESS, FAILED
 }
+//fun Context.pushEvent(name:String){
+//    FirebaseAnalytics.getInstance(this).logEvent(name,null)
+//}
 
 
 fun Fragment.navigateToPage(id: Int, actionId: Int, bundle: Bundle? = null) {

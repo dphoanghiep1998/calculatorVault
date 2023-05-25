@@ -22,6 +22,7 @@ class FileVaultItemEntity(
     var encryptionType: Int = 1,
     var fileType: String = "",
     var fileRealType: String? = null,
-    var isDeleted :Boolean = false
+    var isDeleted :Boolean = false,
+    var thumb: ByteArray? = null
 
 ) {}
