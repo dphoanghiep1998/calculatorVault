@@ -278,7 +278,6 @@ class FragmentListItem : Fragment() {
             }
         } else {
             adapterListItem?.unSelectAll()
-            File("").copyTo()
 
             binding.btnMoveToVault.apply {
                 setBackgroundResource(R.drawable.bg_neu04_corner_10)

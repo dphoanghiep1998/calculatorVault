@@ -91,7 +91,7 @@ class ActivityCamera : AppCompatActivity() {
                             progress = { state: Int, value: Float, currentFile: File? ->
 
                             },
-                            true,
+                            false,
                             onError = {
                                 finish()
                             },

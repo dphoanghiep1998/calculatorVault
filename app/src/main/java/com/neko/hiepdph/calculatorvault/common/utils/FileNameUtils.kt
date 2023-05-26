@@ -12,6 +12,7 @@ import android.util.Base64
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.documentfile.provider.DocumentFile
+import androidx.preference.PreferenceManager
 import com.google.common.io.Files.getNameWithoutExtension
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
@@ -93,7 +94,7 @@ object FileNameUtils {
     }
 
     fun getOutputStream(
-        target: File, context: Context?
+        target: File, context: Context
     ): OutputStream? {
         var outStream: OutputStream? = null
         // First try the normal way
@@ -273,9 +274,7 @@ object FileNameUtils {
     fun getDocumentFile(
         file: File, isDirectory: Boolean, context: Context
     ): DocumentFile? {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) return DocumentFile.fromFile(file)
-        val baseFolder: String? =
-            getExtSdCardFolder(file, context)
+        val baseFolder = getExtSdCardFolder(file, context)
         var originalDirectory = false
         if (baseFolder == null) {
             return null
@@ -283,30 +282,38 @@ object FileNameUtils {
         var relativePath: String? = null
         try {
             val fullPath = file.canonicalPath
-            if (baseFolder != fullPath) relativePath =
-                fullPath.substring(baseFolder.length + 1) else originalDirectory = true
+            if (baseFolder != fullPath) {
+                relativePath = fullPath.substring(baseFolder.length + 1)
+            } else {
+                originalDirectory = true
+            }
         } catch (e: IOException) {
             return null
-        } catch (f: java.lang.Exception) {
-            originalDirectory = true
-            // continue
         }
-        val `as` = "Prefs.getString(PrefKeys.KEY_ACCESS_GRANT_STORAGE, null)"
+
+        val preferenceUri = PreferenceManager.getDefaultSharedPreferences(context)
+            .getString("URI", null)
         var treeUri: Uri? = null
-        if (`as` != null) treeUri = Uri.parse(`as`)
+        if (preferenceUri != null) {
+            treeUri = Uri.parse(preferenceUri)
+        }
         if (treeUri == null) {
             return null
         }
 
         // start with root of SD card and then parse through document tree.
-        var document = DocumentFile.fromTreeUri(context!!, treeUri)
+        var document = DocumentFile.fromTreeUri(context, treeUri)
+        if (originalDirectory || relativePath == null) {
+            return document
+        }
 
-        if (document == null) return null
-
-        if (originalDirectory) return document
-        val parts = relativePath!!.split("/")
+        val parts = relativePath.split("/").toTypedArray()
         for (i in parts.indices) {
-            var nextDocument = document!!.findFile(parts[i])
+            if (document == null) {
+                return null
+            }
+
+            var nextDocument = document.findFile(parts[i])
             if (nextDocument == null) {
                 nextDocument = if (i < parts.size - 1 || isDirectory) {
                     document.createDirectory(parts[i])
@@ -316,6 +323,7 @@ object FileNameUtils {
             }
             document = nextDocument
         }
+
         return document
     }
 
@@ -508,7 +516,7 @@ object FileNameUtils {
         return false
     }
 
-    fun mkfile(context: Context?, file: File): Boolean {
+    fun mkfile(context: Context, file: File): Boolean {
         val outputStream = getOutputStream(file, context) ?: return false
         try {
             outputStream.close()

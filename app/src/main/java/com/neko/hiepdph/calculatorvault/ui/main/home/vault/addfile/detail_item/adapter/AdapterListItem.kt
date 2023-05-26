@@ -105,6 +105,7 @@ class AdapterListItem(private val onClickItem: (MutableSet<FileVaultItem>) -> Un
         return listItem.size
     }
 
+
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder.itemViewType) {
             0 -> {
@@ -247,7 +248,7 @@ class AdapterListItem(private val onClickItem: (MutableSet<FileVaultItem>) -> Un
         }
     }
 
-    private fun loadThumbnail(path:String): Bitmap? {
+    private fun loadThumbnail(path: String): Bitmap? {
 
         return try {
             val mr = MediaMetadataRetriever()

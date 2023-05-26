@@ -111,7 +111,7 @@ class FragmentBrowser : Fragment() {
                     override fun onQueryTextSubmit(query: String?): Boolean {
                         query?.let {
                             val intent = Intent(requireContext(), ActivityBrowser::class.java)
-                            intent.putExtra(Constant.KEY_URL, Constant.GOOGLE+"?q=$it")
+                            intent.putExtra(Constant.KEY_URL, Constant.GOOGLE+"/search?q=$it")
                             startActivity(intent)
                         }
                         return true

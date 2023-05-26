@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.provider.MediaStore
+import android.util.Log
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.Constant.PRIVACY_FOLDER_NAME
 import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_AUDIOS
@@ -353,8 +354,11 @@ object MediaStoreUtils {
                 val size = cursor.getLongValue(MediaStore.Images.Media.SIZE)
                 val modified = cursor.getLongValue(MediaStore.Images.Media.SIZE)
                 val name = cursor.getStringValue(MediaStore.Images.Media.DISPLAY_NAME)
+                val file = File(childPath)
+                if (!file.exists() || file.isHidden || !file.canRead()) return@queryCursor
 
                 if (childPath.isNotBlank() && childPath != path) {
+                    Log.d("TAG", "getChildImageFromPath: " + childPath)
                     listImageChild.add(
                         FileVaultItem(
                             0,
@@ -669,8 +673,11 @@ object MediaStoreUtils {
                                 }
                             }
                             TYPE_ZIP -> {
-                                if (name.lowercase(Locale.ROOT).endsWith(TYPE_ZIP) || name.lowercase(Locale.ROOT).endsWith(
-                                        TYPE_RAR)) {
+                                if (name.lowercase(Locale.ROOT)
+                                        .endsWith(TYPE_ZIP) || name.lowercase(Locale.ROOT).endsWith(
+                                        TYPE_RAR
+                                    )
+                                ) {
                                     listFileChild.add(
                                         FileVaultItem(
                                             0,
