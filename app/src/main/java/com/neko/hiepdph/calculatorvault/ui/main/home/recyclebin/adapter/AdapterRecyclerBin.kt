@@ -11,10 +11,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.PopupWindow
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
+import com.neko.hiepdph.calculatorvault.common.extensions.ItemDiffCallback
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
@@ -27,20 +29,21 @@ class AdapterRecyclerBin(
     private val onLongClickItem: (List<FileVaultItem>) -> Unit,
     private val onEditItem: (List<FileVaultItem>) -> Unit,
     private val onSelectAll: (List<FileVaultItem>) -> Unit,
-    private val onUnSelect: () -> Unit,
     private val onRestoreItem: (FileVaultItem) -> Unit,
     private val onDeleteItem: (FileVaultItem) -> Unit,
     private val onDetailItem: (FileVaultItem) -> Unit,
 
-    ) : RecyclerView.Adapter<AdapterRecyclerBin.ItemFileViewHolder>() {
+    ) : ListAdapter<FileVaultItem, AdapterRecyclerBin.ItemFileViewHolder>(ItemDiffCallback()) {
     private var listItem = mutableListOf<FileVaultItem>()
     private var listOfItemSelected = mutableSetOf<FileVaultItem>()
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun setData(listDataItem: List<FileVaultItem>) {
-        listItem = listDataItem.toMutableList()
-        notifyDataSetChanged()
+
+    override fun submitList(list: MutableList<FileVaultItem>?) {
+        super.submitList(list)
+        listItem = list?.toMutableList() ?: mutableListOf()
+
     }
+
 
     @SuppressLint("NotifyDataSetChanged")
     fun selectAll() {
@@ -54,57 +57,26 @@ class AdapterRecyclerBin(
     @SuppressLint("NotifyDataSetChanged")
     fun unSelectAll() {
         listOfItemSelected.clear()
-        onUnSelect()
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, 1, PAYLOAD_CHECK)
     }
 
 
     companion object {
         var editMode = false
+        private const val PAYLOAD_CHECK = "PAYLOAD_CHECK"
+
     }
 
     fun changeToEditView() {
         editMode = true
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, 1, PAYLOAD_CHECK)
     }
 
 
     inner class ItemFileViewHolder(val binding: LayoutItemRecyclerBinFileBinding) :
-        RecyclerView.ViewHolder(binding.root)
-
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemFileViewHolder {
-        val binding = LayoutItemRecyclerBinFileBinding.inflate(
-            LayoutInflater.from(parent.context), parent, false
-        )
-        return ItemFileViewHolder(binding)
-
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    fun changeToNormalView() {
-        editMode = false
-        listOfItemSelected.clear()
-        notifyDataSetChanged()
-    }
-
-
-    override fun getItemViewType(position: Int): Int = when (listItem[position].fileType) {
-        Constant.TYPE_PICTURE -> 0
-        Constant.TYPE_VIDEOS -> 1
-        Constant.TYPE_AUDIOS -> 2
-        else -> 3
-    }
-
-    override fun getItemCount(): Int {
-        return listItem.size
-    }
-
-    @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
-    override fun onBindViewHolder(holder: ItemFileViewHolder, position: Int) {
-
-        with(holder) {
-            val item = listItem[adapterPosition]
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(position: Int) {
+            val item = listItem[position]
 
             binding.tvNameDocument.isSelected = true
 
@@ -174,7 +146,7 @@ class AdapterRecyclerBin(
                 editMode = true
                 listOfItemSelected.add(item)
                 onLongClickItem(listOfItemSelected.toMutableList())
-                notifyDataSetChanged()
+                notifyItemRangeChanged(0, listItem.size, PAYLOAD_CHECK)
 
                 return@setOnLongClickListener true
             }
@@ -202,9 +174,60 @@ class AdapterRecyclerBin(
                 onEditItem(listOfItemSelected.toMutableList())
             }
 
-
         }
     }
+
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemFileViewHolder {
+        val binding = LayoutItemRecyclerBinFileBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false
+        )
+        return ItemFileViewHolder(binding)
+
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun changeToNormalView() {
+        editMode = false
+        listOfItemSelected.clear()
+        notifyDataSetChanged()
+    }
+
+
+    override fun getItemViewType(position: Int): Int = when (listItem[position].fileType) {
+        Constant.TYPE_PICTURE -> 0
+        Constant.TYPE_VIDEOS -> 1
+        Constant.TYPE_AUDIOS -> 2
+        else -> 3
+    }
+
+    override fun getItemCount(): Int {
+        return listItem.size
+    }
+
+    override fun onBindViewHolder(
+        holder: ItemFileViewHolder, position: Int, payloads: MutableList<Any>
+    ) {
+        if (payloads.isEmpty()) {
+            super.onBindViewHolder(holder, position, payloads)
+        } else {
+            val item = getItem(position)
+            holder.binding.checkBox.isChecked = item in listOfItemSelected
+            if (editMode) {
+                holder.binding.checkBox.show()
+                holder.binding.option.hide()
+            } else {
+                holder.binding.checkBox.hide()
+                holder.binding.option.show()
+            }
+        }
+    }
+
+    @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
+    override fun onBindViewHolder(holder: ItemFileViewHolder, position: Int) {
+        holder.bind(position)
+    }
+
 
     private fun showPopupWindow(context: Context, view: View, item: FileVaultItem) {
         val inflater: LayoutInflater =
@@ -238,16 +261,12 @@ class AdapterRecyclerBin(
         val displayMetrics: DisplayMetrics = view.context.resources.displayMetrics
         val height = displayMetrics.heightPixels * 2 / 3
         if (positionOfIcon < height) {
-            popupWindow?.showAsDropDown(
-                view,
-                0,
-                -view.height + popupWindow!!.height
+            popupWindow.showAsDropDown(
+                view, 0, -view.height + popupWindow.height
             )
-        }else{
-            popupWindow?.showAsDropDown(
-                view,
-                0,
-                -400
+        } else {
+            popupWindow.showAsDropDown(
+                view, 0, -400
             )
         }
     }

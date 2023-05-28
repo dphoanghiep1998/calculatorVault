@@ -3,6 +3,7 @@ package com.neko.hiepdph.calculatorvault.viewmodel
 import android.content.Context
 import android.view.View
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
@@ -16,9 +17,9 @@ import javax.inject.Inject
 @HiltViewModel
 class AddFileViewModel @Inject constructor():ViewModel() {
 
-    private val _listItemListGroupFile = SelfCleaningLiveData<MutableList<GroupItem>>()
-    val listItemListGroupFile: LiveData<MutableList<GroupItem>> get() = _listItemListGroupFile
-    fun setListItemPersistentData(list: MutableList<GroupItem>) {
+    private val _listItemListGroupFile = MutableLiveData<MutableList<GroupItem>?>()
+    val listItemListGroupFile: LiveData<MutableList<GroupItem>?> get() = _listItemListGroupFile
+     fun setListItemPersistentData(list: MutableList<GroupItem>?) {
         _listItemListGroupFile.postValue(list)
     }
 

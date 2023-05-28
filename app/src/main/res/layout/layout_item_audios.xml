@@ -30,7 +30,7 @@
         android:scrollHorizontally="true"
         android:marqueeRepeatLimit="marquee_forever"
         android:paddingHorizontal="@dimen/_12sdp"
-        app:layout_constraintEnd_toStartOf="@id/checkbox"
+        app:layout_constraintEnd_toStartOf="@id/checkBox"
         app:layout_constraintBottom_toTopOf="@id/tv_duration_author"
         app:layout_constraintStart_toEndOf="@id/imv_thumb"
         app:layout_constraintTop_toTopOf="@id/imv_thumb"
@@ -39,7 +39,7 @@
     <TextView
         android:id="@+id/tv_duration_author"
         android:layout_width="0dp"
-        app:layout_constraintEnd_toStartOf="@id/checkbox"
+        app:layout_constraintEnd_toStartOf="@id/checkBox"
         android:layout_height="wrap_content"
         android:textColor="@color/neutral_05"
         android:textSize="@dimen/_10sdp"
@@ -51,7 +51,7 @@
         app:layout_constraintTop_toBottomOf="@id/tv_name_audio" />
 
     <CheckBox
-        android:id="@+id/checkbox"
+        android:id="@+id/checkBox"
         android:layout_width="@dimen/_20sdp"
         android:layout_height="@dimen/_20sdp"
         android:button="@null"

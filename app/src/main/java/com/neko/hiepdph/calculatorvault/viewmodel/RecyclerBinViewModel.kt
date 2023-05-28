@@ -33,7 +33,7 @@ class RecyclerBinViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel
     }
 
 
-    fun getAllFileChildFromFolder(path: String): LiveData<List<FileVaultItem>> {
+    fun getAllFileChildFromFolder(path: String): LiveData<MutableList<FileVaultItem>> {
         return appRepo.getAllFileDeleted(path)
 
     }

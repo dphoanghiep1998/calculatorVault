@@ -301,5 +301,12 @@ class FragmentChangePin : Fragment() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.setState(null)
+        viewModel.setState1Password(null)
+        viewModel.setState2Password(null)
+        viewModel.setState3Password(null)
+    }
 
 }

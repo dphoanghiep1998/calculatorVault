@@ -18,7 +18,7 @@ class IntruderViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel() 
 
     fun getItemListFromFolder(
         folderPath: String
-    ): LiveData<List<FileVaultItem>> {
+    ): LiveData<MutableList<FileVaultItem>> {
         return appRepo.getAllFileInEnCryptFolder(folderPath)
     }
 

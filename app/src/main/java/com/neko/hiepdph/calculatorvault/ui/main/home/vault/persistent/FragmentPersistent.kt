@@ -213,9 +213,9 @@ class FragmentPersistent : Fragment() {
         viewModel.getAllFileFromFolderEncrypted(args.vaultPath).observe(viewLifecycleOwner) {
             it?.let {
                 if (args.type != Constant.TYPE_ADD_MORE) {
-                    adapterPersistent?.setData(it, args.type)
+                    adapterPersistent?.submitList(it)
                 } else {
-                    adapterOtherFolder?.setData(it)
+                    adapterOtherFolder?.submitList(it)
                 }
                 sizeList = it.size
                 binding.loading.hide()
@@ -457,8 +457,7 @@ class FragmentPersistent : Fragment() {
 
     private fun initRecyclerView() {
         if (args.type != Constant.TYPE_ADD_MORE) {
-
-            adapterPersistent = AdapterPersistent(onClickItem = {
+            adapterPersistent = AdapterPersistent(args.type, onClickItem = {
                 handleClickItem(it)
             }, onLongClickItem = {
                 listItemSelected.clear()
@@ -470,7 +469,7 @@ class FragmentPersistent : Fragment() {
             }, onSelectAll = {
                 listItemSelected.clear()
                 listItemSelected.addAll(it)
-            }, onUnSelect = {}, onEditItem = {
+            }, onEditItem = {
                 listItemSelected.clear()
                 listItemSelected.addAll(it)
                 checkItem()
@@ -509,7 +508,7 @@ class FragmentPersistent : Fragment() {
             }, onSelectAll = {
                 listItemSelected.clear()
                 listItemSelected.addAll(it)
-            }, onUnSelect = {}, onEditItem = {
+            }, onEditItem = {
                 listItemSelected.clear()
                 listItemSelected.addAll(it)
                 checkItem()
@@ -590,7 +589,7 @@ class FragmentPersistent : Fragment() {
                     false
                 )
 
-            }else{
+            } else {
                 ShareData.getInstance().setListItemImage(list)
                 val intent = Intent(requireContext(), ActivityImageDetail::class.java)
                 startActivity(intent)

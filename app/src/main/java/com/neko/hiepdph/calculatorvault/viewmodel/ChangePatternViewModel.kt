@@ -9,28 +9,28 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChangePatternViewModel @Inject constructor() : ViewModel() {
-    private var _currentState = SelfCleaningLiveData<Int>()
-    val currentState: LiveData<Int> get() = _currentState
-    fun setState(state: Int) {
+    private var _currentState = MutableLiveData<Int?>()
+    val currentState: LiveData<Int?> get() = _currentState
+    fun setState(state: Int?) {
         _currentState.postValue(state)
     }
 
-    private var _state1Pattern = SelfCleaningLiveData<MutableList<Int>>()
-    val state1Pattern: LiveData<MutableList<Int>> get() = _state1Pattern
-    fun setState1Pattern(pw: MutableList<Int>) {
-        _state1Pattern.value = pw
+    private var _state1Pattern = MutableLiveData<MutableList<Int>?>()
+    val state1Pattern: LiveData<MutableList<Int>?> get() = _state1Pattern
+    fun setState1Pattern(pw: MutableList<Int>?) {
+        _state1Pattern.postValue(pw)
     }
 
-    private var _state2Pattern = SelfCleaningLiveData<MutableList<Int>>()
-    val state2Pattern: LiveData<MutableList<Int>> get() = _state2Pattern
-    fun setState2Pattern(pw: MutableList<Int>) {
-        _state2Pattern.value = pw
+    private var _state2Pattern = MutableLiveData<MutableList<Int>?>()
+    val state2Pattern: LiveData<MutableList<Int>?> get() = _state2Pattern
+    fun setState2Pattern(pw: MutableList<Int>?) {
+        _state2Pattern.postValue(pw)
     }
 
-    private var _state3Pattern = SelfCleaningLiveData<MutableList<Int>>()
-    val state3Pattern: LiveData<MutableList<Int>> get() = _state3Pattern
-    fun setState3Pattern(pw: MutableList<Int>) {
-        _state3Pattern.value = pw
+    private var _state3Pattern = MutableLiveData<MutableList<Int>?>()
+    val state3Pattern: LiveData<MutableList<Int>?> get() = _state3Pattern
+    fun setState3Pattern(pw: MutableList<Int>?) {
+        _state3Pattern.postValue(pw)
     }
 
     init {

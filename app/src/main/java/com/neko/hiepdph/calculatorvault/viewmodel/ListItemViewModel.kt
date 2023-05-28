@@ -3,6 +3,7 @@ package com.neko.hiepdph.calculatorvault.viewmodel
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neko.hiepdph.calculatorvault.common.Constant
@@ -21,11 +22,10 @@ import javax.inject.Inject
 @HiltViewModel
 class ListItemViewModel @Inject constructor(val repo: AppRepo) : ViewModel() {
 
-    private val _listItemList = SelfCleaningLiveData<MutableList<FileVaultItem>>()
-    val listItemList: LiveData<MutableList<FileVaultItem>> get() = _listItemList
-    fun setListItemData(list: List<FileVaultItem>) {
-        Log.d("TAG", "setListItemData: " + list.size)
-        _listItemList.postValue(list.toMutableList())
+    private val _listItemList = MutableLiveData<MutableList<FileVaultItem>?>()
+    val listItemList: LiveData<MutableList<FileVaultItem>?> get() = _listItemList
+    fun setListItemData(list: MutableList<FileVaultItem>?) {
+        _listItemList.postValue(list)
     }
 
     fun getItemListFromFolder(

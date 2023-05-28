@@ -44,7 +44,7 @@
     <fragment
         android:id="@+id/fragmentNote"
         android:name="com.neko.hiepdph.calculatorvault.ui.main.home.note.FragmentNote"
-        android:label="@string/note"
+        android:label="@string/new_note"
         tools:layout="@layout/fragment_note">
         <action
             android:id="@+id/action_fragmentNote_to_fragmentAddNote"

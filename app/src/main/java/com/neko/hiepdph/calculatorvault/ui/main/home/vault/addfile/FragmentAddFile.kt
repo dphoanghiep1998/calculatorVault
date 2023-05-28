@@ -1,12 +1,14 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile
 
 import android.os.Bundle
-import android.view.*
-import android.widget.CheckBox
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.MenuProvider
-import androidx.core.view.get
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
@@ -21,11 +23,7 @@ import com.neko.hiepdph.calculatorvault.common.extensions.toastLocation
 import com.neko.hiepdph.calculatorvault.databinding.FragmentAddFileBinding
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.adapter.AdapterGroupItem
-import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterOtherFolder
-import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterPersistent
 import com.neko.hiepdph.calculatorvault.viewmodel.AddFileViewModel
-import com.neko.hiepdph.calculatorvault.viewmodel.HomeViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 
 
 class FragmentAddFile : Fragment() {
@@ -52,14 +50,9 @@ class FragmentAddFile : Fragment() {
         initToolBar()
     }
 
-    override fun onResume() {
-        super.onResume()
-        observeListGroupData()
-    }
 
     private fun getDataFromArgs() {
         (requireActivity() as ActivityVault).getToolbar().title = args.title
-        getDataGroupFile(args.type)
     }
 
     private fun initToolBar() {
@@ -76,7 +69,6 @@ class FragmentAddFile : Fragment() {
     }
 
 
-
     private fun initView() {
         initRecyclerView()
     }
@@ -86,9 +78,9 @@ class FragmentAddFile : Fragment() {
     }
 
     private fun initRecyclerView() {
-        adapter = AdapterGroupItem(onClickFolderItem = { groupItem, fileType ->
+        adapter = AdapterGroupItem(args.type, onClickFolderItem = { groupItem, fileType ->
             val action = FragmentAddFileDirections.actionFragmentAddFileToFragmentListItem(
-               fileType,args.vaultPath, groupItem
+                fileType, args.vaultPath, groupItem
             )
             navigateToPage(R.id.fragmentAddFile, action)
         })
@@ -99,25 +91,27 @@ class FragmentAddFile : Fragment() {
             GridLayoutManager(requireContext(), 3, RecyclerView.VERTICAL, false)
         }
         binding.rcvGroupItem.layoutManager = gridLayoutManager
+        getDataGroupFile(args.type)
     }
 
     private fun observeListGroupData() {
-            viewModel.listItemListGroupFile.observe(viewLifecycleOwner) {
-                it?.let {
-                    adapter.setData(it, args.type)
-                    binding.loading.hide()
-                    if (it.isNotEmpty()) {
-                        binding.tvEmpty.hide()
-                    } else {
-                        binding.tvEmpty.show()
-                    }
+        viewModel.listItemListGroupFile.observe(viewLifecycleOwner) {
+            it?.let {
+                adapter.submitList(it)
+                binding.loading.hide()
+                if (it.isNotEmpty()) {
+                    binding.tvEmpty.hide()
+                } else {
+                    binding.tvEmpty.show()
                 }
             }
+        }
 
     }
 
 
     override fun onDestroy() {
+        viewModel.setListItemPersistentData(null)
         _binding = null
         super.onDestroy()
     }

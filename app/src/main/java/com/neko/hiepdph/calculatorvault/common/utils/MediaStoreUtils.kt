@@ -300,7 +300,7 @@ object MediaStoreUtils {
                 val id = cursor.getLongValue(MediaStore.Images.Media._ID)
                 val childPath = cursor.getStringValue(MediaStore.Images.Media.DATA)
                 val size = cursor.getLongValue(MediaStore.Images.Media.SIZE)
-                val modified = cursor.getLongValue(MediaStore.Images.Media.SIZE)
+                val modified = cursor.getLongValue(MediaStore.Images.Media.SIZE) * 1000
                 val name = cursor.getStringValue(MediaStore.Images.Media.DISPLAY_NAME)
 
                 if (childPath.isNotBlank()) {
@@ -332,7 +332,7 @@ object MediaStoreUtils {
         }
     }
 
-    fun getChildImageFromPath(context: Context, path: String): List<FileVaultItem> {
+    fun getChildImageFromPath(context: Context, path: String): MutableList<FileVaultItem> {
         try {
             val listImageChild = mutableListOf<FileVaultItem>()
             val uri = MediaStore.Images.Media.getContentUri("external")
@@ -352,7 +352,7 @@ object MediaStoreUtils {
                 val id = cursor.getLongValue(MediaStore.Images.Media._ID)
                 val childPath = cursor.getStringValue(MediaStore.Images.Media.DATA)
                 val size = cursor.getLongValue(MediaStore.Images.Media.SIZE)
-                val modified = cursor.getLongValue(MediaStore.Images.Media.SIZE)
+                val modified = cursor.getLongValue(MediaStore.Images.Media.SIZE) * 1000
                 val name = cursor.getStringValue(MediaStore.Images.Media.DISPLAY_NAME)
                 val file = File(childPath)
                 if (!file.exists() || file.isHidden || !file.canRead()) return@queryCursor
@@ -388,7 +388,7 @@ object MediaStoreUtils {
 
     }
 
-    fun getChildVideoFromPath(context: Context, path: String): List<FileVaultItem> {
+    fun getChildVideoFromPath(context: Context, path: String): MutableList<FileVaultItem> {
 
         val listVideoChild = mutableListOf<FileVaultItem>()
         try {
@@ -406,7 +406,7 @@ object MediaStoreUtils {
                 val id = cursor.getLongValue(MediaStore.Video.Media._ID)
                 val childPath = cursor.getStringValue(MediaStore.Video.Media.DATA)
                 val size = cursor.getLongValue(MediaStore.Video.Media.SIZE)
-                val modified = cursor.getLongValue(MediaStore.Video.Media.DATE_MODIFIED)
+                val modified = cursor.getLongValue(MediaStore.Video.Media.DATE_MODIFIED)  * 1000
                 val name = cursor.getStringValue(MediaStore.Video.Media.DISPLAY_NAME)
 
                 if (childPath.isNotBlank()) {
@@ -440,7 +440,7 @@ object MediaStoreUtils {
 
     fun getChildAudioFromPath(
         context: Context, path: String
-    ): List<FileVaultItem> {
+    ): MutableList<FileVaultItem> {
         val listAudioChild = mutableListOf<FileVaultItem>()
 
         try {
@@ -460,7 +460,7 @@ object MediaStoreUtils {
                 val id = cursor.getLongValue(MediaStore.Audio.Media._ID)
                 val childPath = cursor.getStringValue(MediaStore.Audio.Media.DATA)
                 val size = cursor.getLongValue(MediaStore.Audio.Media.SIZE)
-                val modified = cursor.getLongValue(MediaStore.Audio.Media.DATE_MODIFIED)
+                val modified = cursor.getLongValue(MediaStore.Audio.Media.DATE_MODIFIED)  * 1000
                 val name = cursor.getStringValue(MediaStore.Audio.Media.DISPLAY_NAME)
 
                 if (childPath.isNotBlank()) {
@@ -492,7 +492,7 @@ object MediaStoreUtils {
         return listAudioChild
     }
 
-    fun getChildFileFromPath(context: Context, path: String, type: String): List<FileVaultItem> {
+    fun getChildFileFromPath(context: Context, path: String, type: String): MutableList<FileVaultItem> {
         val listFileChild = mutableListOf<FileVaultItem>()
         try {
             val uri = MediaStore.Files.getContentUri("external")
@@ -510,7 +510,8 @@ object MediaStoreUtils {
                 val id = cursor.getLongValue(MediaStore.Files.FileColumns._ID)
                 val childPath = cursor.getStringValue(MediaStore.Files.FileColumns.DATA)
                 val size = cursor.getLongValue(MediaStore.Files.FileColumns.SIZE)
-                val modified = cursor.getLongValue(MediaStore.Files.FileColumns.DATE_MODIFIED)
+                val modified = cursor.getLongValue(MediaStore.Files.FileColumns.DATE_MODIFIED) * 1000
+                Log.d("TAG", "getChildFileFromPath: " +modified)
                 val name = cursor.getStringValue(MediaStore.Files.FileColumns.DISPLAY_NAME)
 
                 val mimetype = fullMimetype.substringBefore("/")

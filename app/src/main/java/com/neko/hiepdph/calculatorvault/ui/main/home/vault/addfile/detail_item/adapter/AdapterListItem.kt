@@ -5,6 +5,8 @@ import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
@@ -12,6 +14,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
+import com.neko.hiepdph.calculatorvault.common.extensions.ItemDiffCallback
 import com.neko.hiepdph.calculatorvault.common.extensions.getFormattedDuration
 import com.neko.hiepdph.calculatorvault.common.utils.formatSize
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
@@ -21,41 +24,160 @@ import com.neko.hiepdph.calculatorvault.databinding.LayoutItemPictureBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutItemVideosBinding
 
 
-class AdapterListItem(private val onClickItem: (MutableSet<FileVaultItem>) -> Unit) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class AdapterListItem(
+    private val onClickItem: (MutableSet<FileVaultItem>) -> Unit,
+    private val type: String = Constant.TYPE_PICTURE
+) : ListAdapter<FileVaultItem, RecyclerView.ViewHolder>(ItemDiffCallback()) {
     private var listItem = mutableListOf<FileVaultItem>()
-    private var mType: String = Constant.TYPE_PICTURE
     private var listItemSelected = mutableSetOf<FileVaultItem>()
 
-    fun setData(listDataItem: List<FileVaultItem>, type: String) {
-        mType = type
-        listItem = listDataItem.toMutableList()
+    companion object {
+        const val PAYLOAD_CHECK = "PAYLOAD_CHECK"
+    }
+
+    override fun submitList(list: MutableList<FileVaultItem>?) {
+        super.submitList(list)
+        list?.let {
+            listItem.clear()
+            listItem.addAll(it)
+        }
         listItemSelected.clear()
-        notifyDataSetChanged()
     }
 
     fun selectAll() {
         listItemSelected.clear()
         listItemSelected.addAll(listItem)
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, listItem.size, PAYLOAD_CHECK)
     }
 
     fun unSelectAll() {
         listItemSelected.clear()
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, listItem.size,PAYLOAD_CHECK)
     }
 
     inner class ItemPictureViewHolder(val binding: LayoutItemPictureBinding) :
-        RecyclerView.ViewHolder(binding.root)
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind() {
+            val item = listItem[absoluteAdapterPosition]
+            var requestOptions = RequestOptions()
+            requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
+            binding.checkBox.isChecked = item in listItemSelected
+            Glide.with(itemView.context).load(item.originalPath).apply(requestOptions)
+                .error(R.drawable.ic_error_image).into(binding.imvThumb)
+            binding.root.setOnClickListener {
+                binding.checkBox.isChecked = !binding.checkBox.isChecked
+                if (binding.checkBox.isChecked) {
+                    listItemSelected.add(item)
+                } else {
+                    listItemSelected.remove(item)
+                }
+                onClickItem.invoke(listItemSelected)
+            }
+            binding.checkBox.setOnClickListener {
+                if (binding.checkBox.isChecked) {
+                    listItemSelected.add(item)
+                } else {
+                    listItemSelected.remove(item)
+                }
+                onClickItem.invoke(listItemSelected)
+            }
+        }
+    }
 
     inner class ItemVideoViewHolder(val binding: LayoutItemVideosBinding) :
-        RecyclerView.ViewHolder(binding.root)
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind() {
+            val item = listItem[absoluteAdapterPosition]
+            var requestOptions = RequestOptions()
+            requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
+            Glide.with(itemView.context).load(item.originalPath).apply(requestOptions)
+                .error(R.drawable.ic_error_video).into(binding.imvThumb)
+            binding.tvDuration.text = item.durationLength?.getFormattedDuration()
+            binding.checkBox.isChecked = item in listItemSelected
+
+            binding.root.setOnClickListener {
+                binding.checkBox.isChecked = !binding.checkBox.isChecked
+                if (binding.checkBox.isChecked) {
+                    listItemSelected.add(item)
+                } else {
+                    listItemSelected.remove(item)
+                }
+                onClickItem.invoke(listItemSelected)
+            }
+            binding.checkBox.setOnClickListener {
+                if (binding.checkBox.isChecked) {
+                    listItemSelected.add(item)
+                } else {
+                    listItemSelected.remove(item)
+                }
+                onClickItem.invoke(listItemSelected)
+            }
+        }
+    }
 
     inner class ItemAudioViewHolder(val binding: LayoutItemAudiosBinding) :
-        RecyclerView.ViewHolder(binding.root)
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(position: Int) {
+            val item = getItem(position)
+            var requestOptions = RequestOptions()
+            requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
+            Glide.with(itemView.context).load(loadThumbnail(item.originalPath))
+                .apply(requestOptions).error(R.drawable.ic_error_audio).into(binding.imvThumb)
+            binding.checkBox.isChecked = item in listItemSelected
+            binding.tvNameAudio.isSelected = true
+            binding.tvNameAudio.text = item.name
+            binding.tvDurationAuthor.text =
+                item.durationLength?.getFormattedDuration() + "-" + item.artist
+            binding.root.setOnClickListener {
+                binding.checkBox.isChecked = !binding.checkBox.isChecked
+                if (binding.checkBox.isChecked) {
+                    listItemSelected.add(item)
+                } else {
+                    listItemSelected.remove(item)
+                }
+                onClickItem.invoke(listItemSelected)
+            }
+
+            binding.checkBox.setOnClickListener {
+                if (binding.checkBox.isChecked) {
+                    listItemSelected.add(item)
+                } else {
+                    listItemSelected.remove(item)
+                }
+                onClickItem.invoke(listItemSelected)
+            }
+        }
+    }
 
     inner class ItemFileViewHolder(val binding: LayoutItemFileBinding) :
-        RecyclerView.ViewHolder(binding.root)
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind() {
+            val item = listItem[absoluteAdapterPosition]
+            binding.checkBox.isChecked = item in listItemSelected
+            binding.tvNameDocument.isSelected = true
+            Glide.with(itemView.context).load(getImageForItemFile(item))
+                .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+            binding.tvNameDocument.text = item.name
+            binding.tvSize.text = item.size.formatSize()
+            binding.root.setOnClickListener {
+                binding.checkBox.isChecked = !binding.checkBox.isChecked
+                if (binding.checkBox.isChecked) {
+                    listItemSelected.add(item)
+                } else {
+                    listItemSelected.remove(item)
+                }
+                onClickItem.invoke(listItemSelected)
+            }
+            binding.checkBox.setOnClickListener {
+                if (binding.checkBox.isChecked) {
+                    listItemSelected.add(item)
+                } else {
+                    listItemSelected.remove(item)
+                }
+                onClickItem.invoke(listItemSelected)
+            }
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         when (viewType) {
@@ -65,12 +187,14 @@ class AdapterListItem(private val onClickItem: (MutableSet<FileVaultItem>) -> Un
                 )
                 return ItemPictureViewHolder(binding)
             }
+
             1 -> {
                 val binding = LayoutItemVideosBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false
                 )
                 return ItemVideoViewHolder(binding)
             }
+
             2 -> {
                 val binding = LayoutItemAudiosBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false
@@ -78,22 +202,17 @@ class AdapterListItem(private val onClickItem: (MutableSet<FileVaultItem>) -> Un
                 return ItemAudioViewHolder(binding)
             }
 
-            3 -> {
+            else-> {
                 val binding = LayoutItemFileBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false
                 )
                 return ItemFileViewHolder(binding)
             }
-            else -> {
-                val binding = LayoutItemFileBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false
-                )
-                return ItemFileViewHolder(binding)
-            }
+
         }
     }
 
-    override fun getItemViewType(position: Int): Int = when (mType) {
+    override fun getItemViewType(position: Int): Int = when (type) {
         Constant.TYPE_PICTURE -> 0
         Constant.TYPE_VIDEOS -> 1
         Constant.TYPE_AUDIOS -> 2
@@ -105,130 +224,65 @@ class AdapterListItem(private val onClickItem: (MutableSet<FileVaultItem>) -> Un
         return listItem.size
     }
 
+    override fun onBindViewHolder(
+        holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>
+    ) {
+        if (payloads.isEmpty()) {
+            super.onBindViewHolder(holder, position, payloads)
+        } else {
+            for (payload in payloads) {
+
+                if (payload == PAYLOAD_CHECK) {
+                    val item = getItem(position)
+                    when (holder.itemViewType) {
+                        0 -> {
+                            with(holder as ItemPictureViewHolder) {
+                                binding.checkBox.isChecked = item in listItemSelected
+                            }
+                        }
+
+                        1 -> {
+                            with(holder as ItemVideoViewHolder) {
+                                binding.checkBox.isChecked = item in listItemSelected
+                            }
+                        }
+
+                        2 -> {
+                            with(holder as ItemAudioViewHolder) {
+                                binding.checkBox.isChecked = item in listItemSelected
+                            }
+                        }
+
+                        3 -> {
+                            with(holder as ItemFileViewHolder) {
+                                binding.checkBox.isChecked = item in listItemSelected
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+    }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder.itemViewType) {
             0 -> {
-                with(holder as ItemPictureViewHolder) {
-                    val item = listItem[adapterPosition]
-                    var requestOptions = RequestOptions()
-                    requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(item.originalPath).apply(requestOptions)
-                        .error(R.drawable.ic_error_image).into(binding.imvThumb)
-                    binding.checkBox.isChecked = item in listItemSelected
-
-                    binding.root.setOnClickListener {
-                        binding.checkBox.isChecked = !binding.checkBox.isChecked
-                        if (binding.checkBox.isChecked) {
-                            listItemSelected.add(item)
-                        } else {
-                            listItemSelected.remove(item)
-                        }
-                        onClickItem.invoke(listItemSelected)
-                    }
-                    binding.checkBox.setOnClickListener {
-                        if (binding.checkBox.isChecked) {
-                            listItemSelected.add(item)
-                        } else {
-                            listItemSelected.remove(item)
-                        }
-                        onClickItem.invoke(listItemSelected)
-                    }
-                }
+                (holder as ItemPictureViewHolder).bind()
             }
+
             1 -> {
-                with(holder as ItemVideoViewHolder) {
-                    val item = listItem[adapterPosition]
-                    var requestOptions = RequestOptions()
-                    requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(item.originalPath).apply(requestOptions)
-                        .error(R.drawable.ic_error_video).into(binding.imvThumb)
-                    binding.tvDuration.text = item.durationLength?.getFormattedDuration()
-                    binding.checkBox.isChecked = item in listItemSelected
+                (holder as ItemVideoViewHolder).bind()
 
-                    binding.root.setOnClickListener {
-                        binding.checkBox.isChecked = !binding.checkBox.isChecked
-                        if (binding.checkBox.isChecked) {
-                            listItemSelected.add(item)
-                        } else {
-                            listItemSelected.remove(item)
-                        }
-                        onClickItem.invoke(listItemSelected)
-                    }
-                    binding.checkBox.setOnClickListener {
-                        if (binding.checkBox.isChecked) {
-                            listItemSelected.add(item)
-                        } else {
-                            listItemSelected.remove(item)
-                        }
-                        onClickItem.invoke(listItemSelected)
-                    }
-                }
             }
+
             2 -> {
-                with(holder as ItemAudioViewHolder) {
-                    val item = listItem[adapterPosition]
-                    var requestOptions = RequestOptions()
-                    requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-                    Glide.with(itemView.context).load(loadThumbnail(item.originalPath))
-                        .apply(requestOptions).error(R.drawable.ic_error_audio)
-                        .into(binding.imvThumb)
+                (holder as ItemAudioViewHolder).bind(position)
 
-                    binding.tvNameAudio.isSelected = true
-
-                    binding.tvNameAudio.text = item.name
-                    binding.checkbox.isChecked = item in listItemSelected
-                    binding.tvDurationAuthor.text =
-                        item.durationLength?.getFormattedDuration() + "-" + item.artist
-                    binding.root.setOnClickListener {
-                        binding.checkbox.isChecked = !binding.checkbox.isChecked
-                        if (binding.checkbox.isChecked) {
-                            listItemSelected.add(item)
-                        } else {
-                            listItemSelected.remove(item)
-                        }
-                        onClickItem.invoke(listItemSelected)
-                    }
-
-                    binding.checkbox.setOnClickListener {
-                        if (binding.checkbox.isChecked) {
-                            listItemSelected.add(item)
-                        } else {
-                            listItemSelected.remove(item)
-                        }
-                        onClickItem.invoke(listItemSelected)
-                    }
-                }
             }
+
             3 -> {
-                with(holder as ItemFileViewHolder) {
-                    val item = listItem[adapterPosition]
-
-                    binding.tvNameDocument.isSelected = true
-                    Glide.with(itemView.context).load(getImageForItemFile(item))
-                        .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
-                    binding.checkbox.isChecked = item in listItemSelected
-
-                    binding.tvNameDocument.text = item.name
-                    binding.tvSize.text = item.size.formatSize()
-                    binding.root.setOnClickListener {
-                        binding.checkbox.isChecked = !binding.checkbox.isChecked
-                        if (binding.checkbox.isChecked) {
-                            listItemSelected.add(item)
-                        } else {
-                            listItemSelected.remove(item)
-                        }
-                        onClickItem.invoke(listItemSelected)
-                    }
-                    binding.checkbox.setOnClickListener {
-                        if (binding.checkbox.isChecked) {
-                            listItemSelected.add(item)
-                        } else {
-                            listItemSelected.remove(item)
-                        }
-                        onClickItem.invoke(listItemSelected)
-                    }
-                }
+                (holder as ItemFileViewHolder).bind()
             }
         }
     }
@@ -266,4 +320,5 @@ class AdapterListItem(private val onClickItem: (MutableSet<FileVaultItem>) -> Un
             null
         }
     }
+
 }

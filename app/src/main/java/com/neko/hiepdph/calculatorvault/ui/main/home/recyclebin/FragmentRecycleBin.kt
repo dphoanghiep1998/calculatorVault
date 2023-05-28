@@ -127,7 +127,7 @@ class FragmentRecycleBin : Fragment() {
         viewModel.getAllFileChildFromFolder(requireContext().config.recyclerBinFolder.path)
             .observe(viewLifecycleOwner) {
                 it?.let {
-                    adapterRecycleBin?.setData(it)
+                    adapterRecycleBin?.submitList(it)
                     sizeList = it.size
                     listOfITem.clear()
                     listOfITem.addAll(it)
@@ -179,8 +179,6 @@ class FragmentRecycleBin : Fragment() {
         }, onSelectAll = {
             listItemSelected.clear()
             listItemSelected.addAll(it)
-        }, onUnSelect = {
-//            unCheckItem()
         }, onEditItem = {
             listItemSelected.clear()
             listItemSelected.addAll(it)

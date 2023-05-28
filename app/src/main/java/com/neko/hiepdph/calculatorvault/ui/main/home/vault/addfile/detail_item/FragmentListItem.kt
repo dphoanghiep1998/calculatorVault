@@ -1,12 +1,15 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.CheckBox
 import androidx.core.view.MenuProvider
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
@@ -250,6 +253,7 @@ class FragmentListItem : Fragment() {
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
+                Log.d("TAG", "onCreateMenu: "+size)
                 if (size != null && size > 0) {
                     menuInflater.inflate(R.menu.toolbar_menu_pick, menu)
                     menu[0].actionView?.findViewById<View>(R.id.checkbox)?.setOnClickListener {
@@ -265,7 +269,7 @@ class FragmentListItem : Fragment() {
                 }
             }
 
-        })
+        },viewLifecycleOwner, Lifecycle.State.CREATED)
     }
 
     private fun checkAllItem(status: Boolean) {
@@ -302,14 +306,13 @@ class FragmentListItem : Fragment() {
     private fun observeData() {
         viewModel.listItemList.observe(viewLifecycleOwner) {
             it?.let {
-                adapterListItem?.setData(it, args.groupItem.type)
+                adapterListItem?.submitList(it)
                 sizeList = it.size
                 binding.loading.hide()
                 if (it.isNotEmpty()) {
                     binding.tvEmpty.hide()
                 } else {
                     binding.tvEmpty.show()
-//                    popBackStack(R.id.fragmentListItem)
                 }
             }
             initToolBar(it?.size)
@@ -322,7 +325,7 @@ class FragmentListItem : Fragment() {
             listItemSelected.addAll(it)
             checkListPath()
             checkCheckBoxAll()
-        })
+        },args.groupItem.type)
 
         binding.rcvGroupItem.adapter = adapterListItem
         when (args.groupItem.type) {
@@ -377,5 +380,6 @@ class FragmentListItem : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
+        viewModel.setListItemData(null)
     }
 }

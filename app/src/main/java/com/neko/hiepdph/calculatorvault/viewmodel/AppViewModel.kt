@@ -33,7 +33,7 @@ class AppViewModel @Inject constructor(
         }
     }
 
-    fun getAllFileFromFolderEncrypted(folderPath: String): LiveData<List<FileVaultItem>> {
+    fun getAllFileFromFolderEncrypted(folderPath: String): LiveData<MutableList<FileVaultItem>> {
         return appRepo.getAllFileInEnCryptFolder(folderPath)
     }
 

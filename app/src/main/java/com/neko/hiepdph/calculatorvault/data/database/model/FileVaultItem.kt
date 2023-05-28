@@ -3,7 +3,7 @@ package com.neko.hiepdph.calculatorvault.data.database.model
 import com.neko.hiepdph.calculatorvault.data.database.entity.FileVaultItemEntity
 
 
-class FileVaultItem(
+data class FileVaultItem(
     var id: Int,
     var originalPath: String,
     var encryptedPath: String = "",

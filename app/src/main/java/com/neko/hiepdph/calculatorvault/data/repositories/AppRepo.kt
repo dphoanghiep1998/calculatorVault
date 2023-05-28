@@ -63,10 +63,10 @@ class AppRepo @Inject constructor(
     }
 
     fun getAllFile(): List<FileVaultItem> = fileVaultService.fileVaultItemDao.getListFile()
-    fun getAllFileInEnCryptFolder(folderPath: String): LiveData<List<FileVaultItem>> =
+    fun getAllFileInEnCryptFolder(folderPath: String): LiveData<MutableList<FileVaultItem>> =
         fileVaultService.fileVaultItemDao.getListFileEncrypted(folderPath)
 
-    fun getAllFileDeleted(folderPath: String): LiveData<List<FileVaultItem>> =
+    fun getAllFileDeleted(folderPath: String): LiveData<MutableList<FileVaultItem>> =
         fileVaultService.fileVaultItemDao.getListFileDeleted(folderPath)
 
     suspend fun deleteFile(listId: List<Int>) = withContext(dispatcher) {

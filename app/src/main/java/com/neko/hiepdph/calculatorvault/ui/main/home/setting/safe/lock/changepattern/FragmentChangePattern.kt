@@ -178,5 +178,14 @@ class FragmentChangePattern : Fragment() {
 
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.setState(null)
+        viewModel.setState1Pattern(null)
+        viewModel.setState3Pattern(null)
+        viewModel.setState2Pattern(null)
+
+    }
+
 
 }

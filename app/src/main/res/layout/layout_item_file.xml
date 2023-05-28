@@ -28,7 +28,7 @@
         android:singleLine="true"
         android:textSize="@dimen/_14sdp"
         app:layout_constraintBottom_toTopOf="@id/tv_size"
-        app:layout_constraintEnd_toStartOf="@id/checkbox"
+        app:layout_constraintEnd_toStartOf="@id/checkBox"
         app:layout_constraintStart_toEndOf="@id/imv_thumb"
         app:layout_constraintTop_toTopOf="@id/imv_thumb"
         app:layout_constraintVertical_chainStyle="spread_inside" />
@@ -42,12 +42,12 @@
         android:textColor="@color/neutral_05"
         android:textSize="@dimen/_10sdp"
         app:layout_constraintBottom_toBottomOf="@id/imv_thumb"
-        app:layout_constraintEnd_toStartOf="@id/checkbox"
+        app:layout_constraintEnd_toStartOf="@id/checkBox"
         app:layout_constraintStart_toStartOf="@id/tv_name_document"
         app:layout_constraintTop_toBottomOf="@id/tv_name_document" />
 
     <CheckBox
-        android:id="@+id/checkbox"
+        android:id="@+id/checkBox"
         android:layout_width="@dimen/_20sdp"
         android:layout_height="@dimen/_20sdp"
         android:layout_margin="@dimen/_2sdp"
