@@ -66,26 +66,24 @@ class ListItemViewModel @Inject constructor(val repo: AppRepo) : ViewModel() {
     fun copyMoveFile(
         context: Context,
         listFile: MutableList<File>,
-        destination: File,
+        destination: MutableList<File>,
         targetName: MutableList<String>,
-        progress: (state: Int, value: Float, currentFile: File?) -> Unit,
-        onSuccess: () -> Unit,
+        progress: (value: Float, currentFile: File?) -> Unit,
+        onSuccess: (listPath:MutableList<String>) -> Unit,
         onError: (t: Throwable) -> Unit,
         encryptMode: Int = EncryptionMode.HIDDEN,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            CopyFiles.copyEncrypt(
+            CopyFiles.encrypt(
                 context,
                 listFile,
                 destination,
                 targetName,
                 0L,
                 progress,
-                true,
                 onSuccess,
                 onError,
                 encryptionMode = encryptMode,
-                true
             )
         }
     }

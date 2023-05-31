@@ -1,11 +1,14 @@
 package com.neko.hiepdph.calculatorvault.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.CreateFile
 import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
+import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.repositories.AppRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,6 +33,38 @@ class AppViewModel @Inject constructor(
     fun insertVaultItem(item:FileVaultItem){
         viewModelScope.launch {
             appRepo.insertFileVault(item)
+        }
+    }
+
+    fun deleteFileVault(listId:List<Int>){
+        viewModelScope.launch {
+            appRepo.deleteFile(listId)
+        }
+    }
+
+
+    fun encrypt(
+        context: Context,
+        listFile: List<File>,
+        destination: List<File>,
+        targetName: List<String>,
+        progress: (value: Float, currentFile: File?) -> Unit,
+        onSuccess: (MutableList<String>) -> Unit,
+        onError: (t: Throwable) -> Unit,
+        encryptMode: Int = EncryptionMode.HIDDEN,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            CopyFiles.encrypt(
+                context,
+                listFile,
+                destination,
+                targetName,
+                0L,
+                progress,
+                onSuccess,
+                onError,
+                encryptionMode = encryptMode,
+            )
         }
     }
 

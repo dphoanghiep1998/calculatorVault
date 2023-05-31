@@ -14,6 +14,7 @@
         android:layout_marginHorizontal="@dimen/_12sdp"
         android:fontFamily="@font/app_font_400"
         android:hint="@string/title"
+        android:maxLength="128"
         android:textColor="@color/neutral_06"
         android:textColorHint="@color/neutral_04"
         android:textSize="@dimen/_18sdp"

@@ -3,21 +3,46 @@ package com.neko.hiepdph.calculatorvault.dialog
 import android.app.Dialog
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import com.neko.hiepdph.calculatorvault.R
-import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
-import com.neko.hiepdph.calculatorvault.common.extensions.hide
-import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.common.Constant
+import com.neko.hiepdph.calculatorvault.common.enums.Action
+import com.neko.hiepdph.calculatorvault.common.extensions.*
+import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
+import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
+import com.neko.hiepdph.calculatorvault.config.EncryptionMode
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.DialogProgressBinding
+import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
+import com.neko.hiepdph.calculatorvault.viewmodel.AppViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileInputStream
+import java.util.*
 
 
-class DialogProgress() : DialogFragment() {
+class DialogProgress(
+    private val listItemSelected: List<FileVaultItem>,
+    private val listOfSourceFile: List<File>,
+    private val listOfTargetParentFolder: List<File>,
+    private val action: Action = Action.ENCRYPT,
+    private val encryptionMode: Int = EncryptionMode.HIDDEN,
+    private val vaultPath: String = "",
+    private val onSuccess: (String) -> Unit,
+    private val onFailed: (String) -> Unit
+
+) : DialogFragment() {
     private lateinit var binding: DialogProgressBinding
+    private val viewModel by activityViewModels<AppViewModel>()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val root = ConstraintLayout(requireContext())
@@ -50,46 +75,160 @@ class DialogProgress() : DialogFragment() {
     }
 
     private fun initView() {
+        binding.tvTitle.text = ""
+        when (action) {
+            Action.UNLOCK -> {
+                binding.tvTitle.text = getString(R.string.unlock)
+                binding.tvStatus.text =
+                    String.format(getString(R.string.unlocking), listItemSelected?.size.toString())
+            }
+            Action.DELETE -> {
+                binding.tvTitle.text = getString(R.string.delete)
+                binding.tvStatus.text =
+                    String.format(getString(R.string.deleting), listItemSelected?.size.toString())
+            }
+            else -> {
+
+            }
+        }
         initButton()
+        doAction()
     }
 
-    fun setData(title: String, status: String) {
-        binding.tvTitle.text = title
-        binding.tvStatus.text = status
+    private fun doAction() {
+        if (action == Action.UNLOCK) {
+            CopyFiles.decrypt(requireContext(),
+                listOfSourceFile,
+                listOfTargetParentFolder,
+                listItemSelected.map { it.name },
+                0L,
+                progress = { value: Float, _: File? ->
+                    setProgressValue(value.toInt())
+                },
+                onSuccess = {
+                    onSuccess.invoke(
+                        String.format(
+                            getString(R.string.unlock_sucess), listItemSelected.size.toString()
+                        )
+                    )
+                    dismiss()
+
+                },
+                onError = {
+                    onFailed.invoke(
+                        String.format(
+                            getString(R.string.unlock_failed), listItemSelected.size.toString()
+                        )
+                    )
+
+                    dismiss()
+                })
+        }
+
+        if (action == Action.ENCRYPT) {
+            val listOfEncryptedString = mutableListOf<String>()
+            listItemSelected?.let {
+                listOfEncryptedString.addAll(it.map {
+                    CryptoCore.getInstance(requireContext())
+                        .encryptString(Constant.SECRET_KEY, it.name)
+                })
+            }
+            disableCancelable()
+
+            listItemSelected.forEachIndexed { index, item ->
+                when (item.fileType) {
+                    Constant.TYPE_PICTURE, Constant.TYPE_VIDEOS -> {
+                        item.thumb = imageToByteArray(item.originalPath)
+                    }
+                    Constant.TYPE_AUDIOS -> {
+                        item.thumb = MediaStoreUtils.getThumbnail(item.originalPath)?.toByteArray()
+                    }
+                }
+
+            }
+            viewModel.encrypt(
+                requireContext(),
+                listOfSourceFile,
+                listOfTargetParentFolder,
+                listOfEncryptedString,
+                progress = { value: Float, _: File? ->
+                    setProgressValue(value.toInt())
+                },
+                onSuccess = {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        enableCancelable()
+                        showButton()
+                        statusSuccess()
+
+
+                        listItemSelected.forEachIndexed { index, item ->
+                            item.apply {
+                                recyclerPath =
+                                    "${requireContext().config.recyclerBinFolder.path}/${listOfEncryptedString[index]}"
+                                timeLock = Calendar.getInstance().timeInMillis
+                                encryptionType = encryptionMode
+                                encryptedPath = "$vaultPath/${
+                                    listOfEncryptedString[index]
+                                }"
+                            }
+                            viewModel.insertVaultItem(item)
+                        }
+                        popBackStack(R.id.fragmentListItem)
+                    }
+
+                },
+                onError = {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        enableCancelable()
+                        showButton()
+                        statusFailed()
+                    }
+                },
+                requireContext().config.encryptionMode
+            )
+        }
     }
+
+//    fun setData(title: String, status: String) {
+//        binding.tvTitle.text = title
+//        binding.tvStatus.text = status
+//    }
 
     fun setProgressValue(value: Int) {
         binding.progressLoading.progress = value
         binding.tvProgress.text = "$value %"
     }
 
-    fun hideButton(){
+    fun hideButton() {
         binding.btnOk.hide()
     }
-    fun statusSuccess(){
+
+    fun statusSuccess() {
         binding.progressLoading.hide()
         binding.tvProgress.hide()
         binding.imvSuccess.show()
     }
-    fun statusFailed(){
+
+    fun statusFailed() {
         binding.progressLoading.hide()
         binding.tvProgress.hide()
         binding.imvFailed.show()
     }
 
-    fun enableCancelable(){
+    fun enableCancelable() {
         binding.root.setOnClickListener {
             dismiss()
         }
 
     }
-    fun disableCancelable(){
+
+    fun disableCancelable() {
         binding.root.setOnClickListener {
 
         }
     }
 
-    fun showButton(){
+    fun showButton() {
         binding.btnOk.show()
 //        binding.btnTips.show()
     }
@@ -106,6 +245,18 @@ class DialogProgress() : DialogFragment() {
     private fun openTips() {
 
     }
+
+    private fun imageToByteArray(filePath: String): ByteArray {
+        val file = File(filePath)
+        val byteStream = FileInputStream(file)
+        val byteBuffer = ByteArray(file.length().toInt())
+
+        byteStream.read(byteBuffer)
+        byteStream.close()
+
+        return byteBuffer
+    }
+
 
     private val callback = object : BackPressDialogCallBack {
         override fun shouldInterceptBackPress(): Boolean {

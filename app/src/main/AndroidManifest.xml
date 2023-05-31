@@ -16,7 +16,6 @@
         android:required="false" />
 
     <application
-
         android:name=".CustomApplication"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -38,12 +37,12 @@
             android:name=".ui.activities.ActivityAudioPlayer"
             android:exported="false"
             android:screenOrientation="portrait" />
-
         <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
             android:exported="false"
-            android:grantUriPermissions="true">
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:grantUriPermissions="true"
+            android:readPermission="${applicationId}.provider.READ">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
@@ -73,6 +72,7 @@
             android:exported="false" />
 
         <activity
+            android:windowSoftInputMode="adjustResize"
             android:name=".ui.activities.ActivityVault"
             android:excludeFromRecents="false"
             android:exported="false">

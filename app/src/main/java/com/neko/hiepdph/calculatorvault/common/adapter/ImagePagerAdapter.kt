@@ -46,7 +46,6 @@ class ImagePagerAdapter(val context: Context,private val listImage: MutableList<
             )
         }
 
-        container.background = ContextCompat.getDrawable(context,R.color.neutral_06)
         photoView.setOnViewTapListener { view, x, y ->
             mListener?.onTap()
         }

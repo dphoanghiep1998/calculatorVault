@@ -8,7 +8,6 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.text.TextUtils
-import android.util.Base64
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.documentfile.provider.DocumentFile
@@ -18,7 +17,6 @@ import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
 import java.io.*
-import java.nio.file.Files
 import java.util.*
 
 
@@ -36,14 +34,12 @@ object FileNameUtils {
     }
 
     // encrypt == true -> encrypt or decrypt
-    fun copyDirectoryOneLocationToAnotherLocation(
+    fun copyFileToAnotherLocation(
         context: Context,
         sourceLocation: File,
         targetLocation: File,
         progress: (value: Int, currentFile: File) -> Unit,
         finish: (currentFile: File, targetFile: File) -> Unit,
-        encryptionMode: Int = EncryptionMode.HIDDEN,
-        encrypt: Boolean = true
     ) {
         val `in`: InputStream = FileInputStream(sourceLocation)
         val targetFile = if (!targetLocation.exists()) targetLocation
@@ -56,28 +52,39 @@ object FileNameUtils {
         // Copy the bits from instream to outstream
         val buf = ByteArray(1024)
         var len: Int = 0
-        if (encrypt) {
-            if (encryptionMode == EncryptionMode.HIDDEN) {
-                while (`in`.read(buf).also { len = it } > 0) {
-                    out?.write(buf, 0, len)
 
-                    progress(len, sourceLocation)
-                }
-                `in`.close()
-            } else {
-                val filePath = sourceLocation.path
-                val fileData = CryptoCore.getInstance(context).readFile(filePath)
-                val secretKey =
-                    CryptoCore.getInstance(context).getSecretKey(context.config.secretKey)
-                val encodedData = CryptoCore.getInstance(context).encrypt(secretKey, fileData)
-                val byteInputStream = ByteArrayInputStream(encodedData)
-                while (byteInputStream.read(buf).also { len = it } > 0) {
-                    out?.write(buf, 0, len)
-                    progress(len, sourceLocation)
-                }
-                byteInputStream.close()
-            }
-        } else {
+        while (`in`.read(buf).also { len = it } > 0) {
+            out?.write(buf, 0, len)
+
+            progress(len, sourceLocation)
+        }
+        `in`.close()
+
+        out?.close()
+        finish(sourceLocation, targetFile)
+    }
+
+    fun decryptFileToAnotherLocation(
+        context: Context,
+        sourceLocation: File,
+        targetLocation: File,
+        progress: (value: Int, currentFile: File) -> Unit,
+        finish: (currentFile: File, targetFile: File) -> Unit,
+        encryptionMode: Int = EncryptionMode.HIDDEN,
+    ) {
+        val `in`: InputStream = FileInputStream(sourceLocation)
+        val targetFile = if (!targetLocation.exists()) targetLocation
+        else if (targetLocation.isFile) targetLocation
+        else File(
+            targetLocation, sourceLocation.name
+        )
+        val out: OutputStream? = getOutputStream(targetFile, context)
+
+        // Copy the bits from instream to outstream
+        val buf = ByteArray(1024)
+        var len: Int = 0
+
+        if (encryptionMode == EncryptionMode.ENCRYPTION) {
             val filePath = sourceLocation.path
             val fileData = CryptoCore.getInstance(context).readFile(filePath)
             val secretKey = CryptoCore.getInstance(context).getSecretKey(context.config.secretKey)
@@ -87,10 +94,60 @@ object FileNameUtils {
                 out?.write(buf, 0, len)
                 progress(len, sourceLocation)
             }
+        } else {
+            while (`in`.read(buf).also { len = it } > 0) {
+                out?.write(buf, 0, len)
+                progress(len, sourceLocation)
+            }
+            `in`.close()
         }
+
         out?.close()
         finish(sourceLocation, targetFile)
-//        }
+    }
+
+    fun encryptFileToAnotherLocation(
+        context: Context,
+        sourceLocation: File,
+        targetLocation: File,
+        progress: (value: Int, currentFile: File) -> Unit,
+        finish: (currentFile: File, targetFile: File) -> Unit,
+        encryptionMode: Int = EncryptionMode.HIDDEN,
+    ) {
+        val `in`: InputStream = FileInputStream(sourceLocation)
+        val targetFile = if (!targetLocation.exists()) targetLocation
+        else if (targetLocation.isFile) targetLocation
+        else File(
+            targetLocation, sourceLocation.name
+        )
+        val out: OutputStream? = getOutputStream(targetFile, context)
+
+        // Copy the bits from instream to outstream
+        val buf = ByteArray(1024)
+        var len: Int = 0
+        if (encryptionMode == EncryptionMode.HIDDEN) {
+            while (`in`.read(buf).also { len = it } > 0) {
+                out?.write(buf, 0, len)
+
+                progress(len, sourceLocation)
+            }
+            `in`.close()
+        } else {
+            val filePath = sourceLocation.path
+            val fileData = CryptoCore.getInstance(context).readFile(filePath)
+            val secretKey = CryptoCore.getInstance(context).getSecretKey(context.config.secretKey)
+            val encodedData = CryptoCore.getInstance(context).encrypt(secretKey, fileData)
+            val byteInputStream = ByteArrayInputStream(encodedData)
+            while (byteInputStream.read(buf).also { len = it } > 0) {
+                out?.write(buf, 0, len)
+                progress(len, sourceLocation)
+            }
+            byteInputStream.close()
+        }
+
+        out?.close()
+        finish(sourceLocation, targetFile)
+
     }
 
     fun getOutputStream(
@@ -167,10 +224,8 @@ object FileNameUtils {
         val fileDelete: Boolean = rmdir(file, context)
         if (file.delete() || fileDelete) return true
         // Try with Storage Access Framework.
-        if (isOnExtSdCard(file, context)
-        ) {
-            val document: DocumentFile? =
-                getDocumentFile(file, false, context)
+        if (isOnExtSdCard(file, context)) {
+            val document: DocumentFile? = getDocumentFile(file, false, context)
             return document?.delete() ?: false
         }
 
@@ -291,8 +346,8 @@ object FileNameUtils {
             return null
         }
 
-        val preferenceUri = PreferenceManager.getDefaultSharedPreferences(context)
-            .getString("URI", null)
+        val preferenceUri =
+            PreferenceManager.getDefaultSharedPreferences(context).getString("URI", null)
         var treeUri: Uri? = null
         if (preferenceUri != null) {
             treeUri = Uri.parse(preferenceUri)

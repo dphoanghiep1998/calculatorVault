@@ -58,27 +58,24 @@ class PersistentViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel(
     fun decryptFile(
         context: Context,
         listFile: MutableList<File>,
-        destination: File,
+        destination: MutableList<File>,
         targetName:MutableList<String>,
-        progress: (state: Int, value: Float, currentFile: File?) -> Unit,
-        onSuccess: () -> Unit,
+        progress: ( value: Float, currentFile: File?) -> Unit,
+        onSuccess: (MutableList<String>) -> Unit,
         onError: (t: Throwable) -> Unit,
         encryptMode: Int = EncryptionMode.HIDDEN,
-        encrypt:Boolean = true
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            CopyFiles.copyEncrypt(
+            CopyFiles.decrypt(
                 context,
                 listFile,
                 destination,
                 targetName,
                 0L,
                 progress,
-                false,
                 onSuccess,
                 onError,
                 encryptionMode = encryptMode,
-                encrypt
             )
         }
     }

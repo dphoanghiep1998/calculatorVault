@@ -5,9 +5,11 @@ import android.content.Intent
 import android.net.Uri
 import android.text.TextUtils
 import com.google.common.io.Files.getNameWithoutExtension
-import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.copyDirectoryOneLocationToAnotherLocation
+import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.copyFileToAnotherLocation
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.createNewFile
+import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.decryptFileToAnotherLocation
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.deleteFile
+import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.encryptFileToAnotherLocation
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.getExtension
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.isWritableNormalOrSaf
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.mkdir
@@ -19,72 +21,19 @@ const val STATE_PROCESSING = 2
 private const val STATE_DONE = 3
 
 object CopyFiles {
-    fun copy(
+    fun encrypt(
         context: Context,
         files: List<File>?,
-        targetFolder: File,
+        targetFolders: List<File>,
+        targetName: List<String>,
         tSize: Long,
-        progress: (state: Int, value: Float, currentFile: File?) -> Unit,
-        isMove: Boolean = false,
-        onSuccess: () -> Unit = {},
-        onError: (t: Throwable) -> Unit = {},
-    ) {
-        try {
-            if (files?.isEmpty() == true) return
-            var totalSize = 0L
-            if (tSize == 0L) files?.forEach {
-                totalSize += calFolderSize(it)
-            } else totalSize = tSize
-            var currentSize = 0f
-            // move file
-            files?.forEach { itemFile ->
-                val targetFile = if (itemFile.isDirectory) {
-                    File(createNewFolder(context, targetFolder, itemFile.name))
-                } else {
-                    File(createNewFile(context, targetFolder, itemFile.name))
-                }
-
-                copyDirectoryOneLocationToAnotherLocation(context, itemFile, targetFile,
-                    // on progress
-                    { len, file ->
-                        run {
-                            currentSize += len
-
-                            progress(
-                                STATE_PROCESSING, (currentSize * 100 / totalSize), file
-                            )
-                        }
-                    },
-                    // on finish
-                    { sourceFile, targetFile ->
-                        if (isMove) {
-                            deleteFile(sourceFile, context)
-                        }
-                        addMedia(context, targetFile)
-                    })
-            }
-            onSuccess()
-
-
-        } catch (e: Exception) {
-            onError(e)
-        }
-    }
-
-    fun copyEncrypt(
-        context: Context,
-        files: MutableList<File>?,
-        targetFolder: File,
-        targetName: MutableList<String>,
-        tSize: Long,
-        progress: (state: Int, value: Float, currentFile: File?) -> Unit,
-        isMove: Boolean = false,
-        onSuccess: () -> Unit = {},
+        progress: (value: Float, currentFile: File?) -> Unit,
+        onSuccess: (MutableList<String>) -> Unit = {},
         onError: (t: Throwable) -> Unit = {},
         encryptionMode: Int = EncryptionMode.HIDDEN,
-        encrypt:Boolean = true
     ) {
         try {
+            val listOfFile = mutableListOf<String>()
             if (files?.isEmpty() == true) return
             var totalSize = 0L
             if (tSize == 0L) files?.forEach {
@@ -94,36 +43,101 @@ object CopyFiles {
             var currentSize = 0f
             // move file
             files?.forEachIndexed { index, itemFile ->
+                if (targetFolders[index].exists()) {
+                    listOfFile.add(targetFolders[index].name)
+                    return@forEachIndexed
+                }
                 val targetFile = File(
                     createNewFile(
                         context,
-                        targetFolder,
+                        targetFolders[index],
                         targetName[index],
                     ).toString()
                 )
 
-                copyDirectoryOneLocationToAnotherLocation(
+                encryptFileToAnotherLocation(
                     context, itemFile, targetFile,
                     // on progress
                     { len, file ->
                         run {
                             currentSize += len
                             progress(
-                                STATE_PROCESSING, (currentSize * 100 / totalSize), file
+                                (currentSize * 100 / totalSize), file
                             )
                         }
                     },
                     // on finish
                     { sourceFile, targetFile ->
-                        if (isMove) {
-                            deleteFile(sourceFile, context)
-                        }
+                        listOfFile.add(targetFile.name)
+                        deleteFile(sourceFile, context)
                         addMedia(context, targetFile)
-                    }, encryptionMode,encrypt
+                    }, encryptionMode
                 )
 
             }
-            onSuccess()
+            onSuccess(listOfFile)
+
+
+        } catch (e: Exception) {
+            onError(e)
+        }
+    }
+
+    fun decrypt(
+        context: Context,
+        files: List<File>?,
+        targetFolders: List<File>,
+        targetName: List<String>,
+        tSize: Long,
+        progress: ( value: Float, currentFile: File?) -> Unit,
+        onSuccess: (MutableList<String>) -> Unit = {},
+        onError: (t: Throwable) -> Unit = {},
+        encryptionMode: Int = EncryptionMode.HIDDEN,
+    ) {
+        try {
+            val listOfFile = mutableListOf<String>()
+
+            if (files?.isEmpty() == true) return
+            var totalSize = 0L
+            if (tSize == 0L) files?.forEach {
+                totalSize += calFolderSize(it)
+            }
+            else totalSize = tSize
+            var currentSize = 0f
+            // move file
+            files?.forEachIndexed { index, itemFile ->
+                if (targetFolders[index].exists()) {
+                    listOfFile.add(targetFolders[index].name)
+                    return@forEachIndexed
+                }
+                val targetFile = File(
+                    createNewFile(
+                        context,
+                        targetFolders[index],
+                        targetName[index],
+                    ).toString()
+                )
+
+                decryptFileToAnotherLocation(
+                    context, itemFile, targetFile,
+                    // on progress
+                    { len, file ->
+                        run {
+                            currentSize += len
+                            progress((currentSize * 100 / totalSize), file
+                            )
+                        }
+                    },
+                    // on finish
+                    { sourceFile, targetFile ->
+                        listOfFile.add(targetFolders[index].name)
+                        deleteFile(sourceFile, context)
+                        addMedia(context, targetFile)
+                    }, encryptionMode
+                )
+
+            }
+            onSuccess(listOfFile)
 
 
         } catch (e: Exception) {
@@ -134,14 +148,14 @@ object CopyFiles {
     fun copy(
         context: Context,
         files: List<File>?,
-        targetFolder: List<File>,
+        targetFolders: List<File>,
         tSize: Long,
-        progress: (state: Int, value: Float, currentFile: File?) -> Unit,
-        isMove: Boolean = false,
-        onSuccess: () -> Unit = {},
+        progress: (value: Float, currentFile: File?) -> Unit,
+        onSuccess: (MutableList<String>) -> Unit = {},
         onError: (t: Throwable) -> Unit = {},
     ) {
         try {
+            val listOfFile = mutableListOf<String>()
             if (files?.isEmpty() == true) return
             var totalSize = 0L
             if (tSize == 0L) files?.forEach {
@@ -151,30 +165,33 @@ object CopyFiles {
             var currentSize = 0f
             // move file
             files?.forEachIndexed { index, itemFile ->
-                val targetFile = if (itemFile.isDirectory) {
-                    File(createNewFolder(context, targetFolder[index], itemFile.name))
-                } else {
-                    File(createNewFile(context, targetFolder[index], itemFile.name).toString())
+                if (targetFolders[index].exists()) {
+                    listOfFile.add(targetFolders[index].name)
+                    return@forEachIndexed
                 }
-                copyDirectoryOneLocationToAnotherLocation(context, itemFile, targetFile,
+                val targetFile = if (itemFile.isDirectory) {
+                    File(createNewFolder(context, targetFolders[index], itemFile.name))
+                } else {
+                    File(createNewFile(context, targetFolders[index], itemFile.name).toString())
+                }
+                copyFileToAnotherLocation(context, itemFile, targetFile,
                     // on progress
                     { len, file ->
                         run {
                             currentSize += len
                             progress(
-                                STATE_PROCESSING, (currentSize * 100 / tSize), file
+                                (currentSize * 100 / tSize), file
                             )
                         }
                     },
                     // on finish
                     { sourceFile, targetFile ->
-                        if (isMove) {
-                            deleteFile(sourceFile, context)
-                        }
+                        listOfFile.add(targetFile.name)
+                        deleteFile(sourceFile, context)
                         addMedia(context, targetFile)
                     })
             }
-            onSuccess()
+            onSuccess(listOfFile)
 
 
         } catch (e: Exception) {
@@ -187,53 +204,6 @@ object CopyFiles {
         return it.length()
     }
 
-    fun copy(
-        context: Context,
-        file: File,
-        targetFolder: File,
-        tSize: Long,
-        progress: (state: Int, value: Float, currentFile: File?) -> Unit,
-        isMove: Boolean = false,
-        onSuccess: () -> Unit = {},
-        onError: (t: Throwable) -> Unit = {},
-    ) {
-        try {
-
-//            if (!isWritableNormalOrSaf(file, context)) {
-//                throw Exception(file.parent)
-//            }
-
-            var currentSize = 0f
-            // move file
-//                 = if (file.isDirectory) {
-//                    File(createNewFolder(context, targetFolder, file.name))
-//                } else {
-            var targetFile = File(createNewFile(context, targetFolder, file.name))
-//                }
-            copyDirectoryOneLocationToAnotherLocation(context, file, targetFile,
-                // on progress
-                { len, file ->
-                    run {
-                        currentSize += len
-                        progress(
-                            STATE_PROCESSING, (currentSize * 100 / tSize).toFloat(), file
-                        )
-                    }
-                },
-                // on finish
-                { sourceFile, targetFile ->
-                    if (isMove) {
-                        deleteFile(sourceFile, context)
-                    }
-//                    addMedia(context, targetFile)
-                    onSuccess()
-                })
-
-
-        } catch (e: Exception) {
-            onError(e)
-        }
-    }
 
     fun addMedia(c: Context, f: File?) {
         val intent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)

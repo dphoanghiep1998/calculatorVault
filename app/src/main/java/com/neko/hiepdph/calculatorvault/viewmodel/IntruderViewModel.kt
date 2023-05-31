@@ -25,13 +25,13 @@ class IntruderViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel() 
     fun copyMoveFile(
         context: Context,
         listFile: MutableList<File>,
-        destination: File,
-        progress: (state: Int, value: Float, currentFile: File?) -> Unit,
-        onSuccess: () -> Unit,
+        destination: MutableList<File>,
+        progress: (value: Float, currentFile: File?) -> Unit,
+        onSuccess: (MutableList<String>) -> Unit,
         onError: (t: Throwable) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            CopyFiles.copy(context, listFile, destination, 0L, progress, true, onSuccess, onError)
+            CopyFiles.copy(context, listFile, destination, 0L, progress, onSuccess, onError)
         }
     }
 }

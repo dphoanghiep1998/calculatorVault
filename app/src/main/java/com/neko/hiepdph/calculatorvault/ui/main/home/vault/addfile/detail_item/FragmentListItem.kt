@@ -9,37 +9,29 @@ import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
+import com.neko.hiepdph.calculatorvault.common.enums.Action
 import com.neko.hiepdph.calculatorvault.common.extensions.*
-import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentListItemBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogAskEncryptionMode
 import com.neko.hiepdph.calculatorvault.dialog.DialogProgress
-import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item.adapter.AdapterListItem
 import com.neko.hiepdph.calculatorvault.viewmodel.ListItemViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.File
-import java.io.FileInputStream
-import java.util.*
 
 @AndroidEntryPoint
 class FragmentListItem : Fragment() {
     private var _binding: FragmentListItemBinding? = null
     private val binding get() = _binding!!
-    private var dialogProgress: DialogProgress? = null
 
     private val viewModel by viewModels<ListItemViewModel>()
     private var adapterListItem: AdapterListItem? = null
@@ -90,7 +82,6 @@ class FragmentListItem : Fragment() {
     }
 
     private fun initView() {
-        dialogProgress = DialogProgress()
         initRecycleView()
         initButton()
     }
@@ -98,151 +89,32 @@ class FragmentListItem : Fragment() {
     private fun initButton() {
 
         binding.btnMoveToVault.clickWithDebounce {
-            var size = listItemSelected.size
-            val listOfEncryptedString = mutableListOf<String>()
-            listOfEncryptedString.addAll(listItemSelected.map {
-                CryptoCore.getInstance(requireContext()).encryptString(Constant.SECRET_KEY, it.name)
-            })
-            dialogProgress?.show(childFragmentManager, dialogProgress?.tag)
+
             if (requireContext().config.encryptionMode != EncryptionMode.ALWAYS_ASK) {
-                dialogProgress?.setData(
-                    "Encrypt File", "Encrypting $size files ..."
-                )
-                dialogProgress?.disableCancelable()
-
-                listItemSelected.forEachIndexed { index, item ->
-                    when (item.fileType) {
-                        Constant.TYPE_PICTURE, Constant.TYPE_VIDEOS -> {
-                            item.thumb = imageToByteArray(item.originalPath)
-                        }
-                        Constant.TYPE_AUDIOS -> {
-                            item.thumb =
-                                MediaStoreUtils.getThumbnail(item.originalPath)?.toByteArray()
-                        }
-                    }
-
-                }
-                viewModel.copyMoveFile(
-                    requireContext(),
+                val dialogProgress = DialogProgress(
+                    listItemSelected,
                     listItemSelected.map { File(it.originalPath) }.toMutableList(),
-                    File(args.vaultPath),
-                    listOfEncryptedString,
-                    progress = { state: Int, value: Float, currentFile: File? ->
-                        dialogProgress?.setProgressValue(value.toInt())
-                    },
-                    onSuccess = {
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            dialogProgress?.enableCancelable()
-                            dialogProgress?.showButton()
-                            dialogProgress?.statusSuccess()
-                            dialogProgress?.setData(
-                                "Encrypt File", "Encrypted successfully $size file"
-                            )
+                    listItemSelected.map { File(args.vaultPath)},
+                    Action.ENCRYPT,
+                    requireContext().config.encryptionMode,
+                    args.vaultPath,
+                    onSuccess = {}
+                ) {}
+                dialogProgress.show(childFragmentManager, dialogProgress.tag)
 
-                            listItemSelected.forEachIndexed { index, item ->
-                                item.apply {
-                                    recyclerPath =
-                                        "${requireContext().config.recyclerBinFolder.path}/${listOfEncryptedString[index]}"
-                                    timeLock = Calendar.getInstance().timeInMillis
-                                    encryptionType = currentEncryptionMode
-                                    encryptedPath = "${args.vaultPath}/${
-                                        listOfEncryptedString[index]
-                                    }"
-                                }
-                                viewModel.insertFileToRoom(item)
-                            }
-                            getData()
-                            checkListPath()
-                            checkCheckBoxAll()
-                            popBackStack(R.id.fragmentListItem)
-                        }
-
-                    },
-                    onError = {
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            dialogProgress?.enableCancelable()
-                            dialogProgress?.showButton()
-                            dialogProgress?.statusFailed()
-                            dialogProgress?.setData(
-                                "Encrypt File", "Encrypted failed !"
-                            )
-                        }
-                    },
-                    requireContext().config.encryptionMode
-                )
             } else {
                 val dialogAskEncryptionMode = DialogAskEncryptionMode(onPressPositive = { enMode ->
-                    dialogProgress?.setData(
-                        "Encrypt File", "Encrypting $size files ..."
-                    )
-                    dialogProgress?.disableCancelable()
                     currentEncryptionMode = enMode
-                    listItemSelected.forEachIndexed { index, item ->
-                        when (item.fileType) {
-                            Constant.TYPE_PICTURE, Constant.TYPE_VIDEOS -> {
-                                item.thumb = imageToByteArray(item.originalPath)
-                            }
-                            Constant.TYPE_AUDIOS -> {
-                                item.thumb =
-                                    MediaStoreUtils.getThumbnail(item.originalPath)?.toByteArray()
-                            }
-                        }
-
-                    }
-                    viewModel.copyMoveFile(
-                        requireContext(),
+                    val dialogProgress = DialogProgress(
+                        listItemSelected,
                         listItemSelected.map { File(it.originalPath) }.toMutableList(),
-                        File(args.vaultPath),
-                        listOfEncryptedString,
-                        progress = { state: Int, value: Float, currentFile: File? ->
-                            dialogProgress?.setProgressValue(value.toInt())
-                        },
-                        onSuccess = {
-                            lifecycleScope.launch(Dispatchers.Main) {
-                                dialogProgress?.enableCancelable()
-                                dialogProgress?.showButton()
-                                dialogProgress?.statusSuccess()
-                                dialogProgress?.setData(
-                                    "Encrypt File", "Encrypted successfully $size file"
-                                )
-
-                                listItemSelected.forEachIndexed { index, item ->
-                                    item.apply {
-                                        recyclerPath =
-                                            "${requireContext().config.recyclerBinFolder.path}/${listOfEncryptedString[index]}"
-                                        timeLock = Calendar.getInstance().timeInMillis
-                                        encryptionType = currentEncryptionMode
-                                        encryptedPath = "${args.vaultPath}/${
-                                            listOfEncryptedString[index]
-                                        }"
-                                    }
-
-                                    viewModel.insertFileToRoom(item)
-                                }
-                                getData()
-                                checkListPath()
-                                checkCheckBoxAll()
-                                popBackStack(R.id.fragmentListItem)
-                            }
-
-                        },
-                        onError = {
-                            it.printStackTrace()
-                            lifecycleScope.launch(Dispatchers.Main) {
-                                dialogProgress?.enableCancelable()
-                                dialogProgress?.showButton()
-                                dialogProgress?.statusFailed()
-                                dialogProgress?.setData(
-                                    "Encrypt File", "Encrypted failed !"
-                                )
-                                getData()
-                                checkListPath()
-                                checkCheckBoxAll()
-                            }
-
-                        },
-                        currentEncryptionMode
-                    )
+                        listItemSelected.map { File(args.vaultPath)},
+                        Action.ENCRYPT,
+                       currentEncryptionMode,
+                        args.vaultPath,
+                        onSuccess = {}
+                    ) {}
+                    dialogProgress.show(childFragmentManager, dialogProgress.tag)
                 })
                 dialogAskEncryptionMode.show(childFragmentManager, dialogAskEncryptionMode.tag)
             }
@@ -253,7 +125,7 @@ class FragmentListItem : Fragment() {
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
-                Log.d("TAG", "onCreateMenu: "+size)
+                Log.d("TAG", "onCreateMenu: " + size)
                 if (size != null && size > 0) {
                     menuInflater.inflate(R.menu.toolbar_menu_pick, menu)
                     menu[0].actionView?.findViewById<View>(R.id.checkbox)?.setOnClickListener {
@@ -269,7 +141,7 @@ class FragmentListItem : Fragment() {
                 }
             }
 
-        },viewLifecycleOwner, Lifecycle.State.CREATED)
+        }, viewLifecycleOwner, Lifecycle.State.CREATED)
     }
 
     private fun checkAllItem(status: Boolean) {
@@ -325,7 +197,7 @@ class FragmentListItem : Fragment() {
             listItemSelected.addAll(it)
             checkListPath()
             checkCheckBoxAll()
-        },args.groupItem.type)
+        }, args.groupItem.type)
 
         binding.rcvGroupItem.adapter = adapterListItem
         when (args.groupItem.type) {
@@ -366,16 +238,6 @@ class FragmentListItem : Fragment() {
         }
     }
 
-    private fun imageToByteArray(filePath: String): ByteArray {
-        val file = File(filePath)
-        val byteStream = FileInputStream(file)
-        val byteBuffer = ByteArray(file.length().toInt())
-
-        byteStream.read(byteBuffer)
-        byteStream.close()
-
-        return byteBuffer
-    }
 
     override fun onDestroy() {
         super.onDestroy()

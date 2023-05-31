@@ -67,14 +67,13 @@ class RecyclerBinViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel
         files: List<File>?,
         targetFolder: List<File>,
         tSize: Long,
-        progress: (state: Int, value: Float, currentFile: File?) -> Unit,
-        isMove: Boolean = false,
-        onSuccess: () -> Unit,
+        progress: (value: Float, currentFile: File?) -> Unit,
+        onSuccess: (MutableList<String>) -> Unit,
         onError: (t: Throwable) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             CopyFiles.copy(
-                context, files, targetFolder, tSize, progress, isMove, onSuccess, onError
+                context, files, targetFolder, tSize, progress, onSuccess, onError
             )
         }
     }

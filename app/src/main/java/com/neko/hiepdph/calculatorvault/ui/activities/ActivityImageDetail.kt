@@ -44,10 +44,8 @@ class ActivityImageDetail : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityImageDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
         binding.toolbar.setNavigationOnClickListener {
             finish()
         }
@@ -135,11 +133,10 @@ class ActivityImageDetail : AppCompatActivity() {
 
 
                     CopyFiles.copy(this,
-                        File(currentItem?.encryptedPath.toString()),
-                        config.recyclerBinFolder,
+                        mutableListOf(File(currentItem?.encryptedPath.toString())),
+                        mutableListOf(config.recyclerBinFolder),
                         0L,
-                        progress = { _: Int, _: Float, _: File? -> },
-                        true,
+                        progress = { _: Float, _: File? -> },
                         onSuccess = {
                             listItem.remove(currentItem)
                             if (listItem.isEmpty()) {
@@ -151,15 +148,17 @@ class ActivityImageDetail : AppCompatActivity() {
                         },
 
                         onError = {})
-                } else FileUtils.deleteFolderInDirectory(currentItem?.encryptedPath.toString(), onSuccess = {
-                    listItem.remove(currentItem)
-                    if (listItem.isEmpty()) {
-                        ShareData.getInstance().setListItemImage(mutableListOf())
-                        finish()
-                    } else {
-                        ShareData.getInstance().setListItemImage(listItem)
-                    }
-                }, onError = {})
+                } else FileUtils.deleteFolderInDirectory(currentItem?.encryptedPath.toString(),
+                    onSuccess = {
+                        listItem.remove(currentItem)
+                        if (listItem.isEmpty()) {
+                            ShareData.getInstance().setListItemImage(mutableListOf())
+                            finish()
+                        } else {
+                            ShareData.getInstance().setListItemImage(listItem)
+                        }
+                    },
+                    onError = {})
             }, DialogConfirmType.DELETE, getString(R.string.pictures))
 
             confirmDialog.show(supportFragmentManager, confirmDialog.tag)
@@ -235,7 +234,6 @@ class ActivityImageDetail : AppCompatActivity() {
     }
 
 
-
     private fun showDialogUnlock() {
         val name = getString(R.string.pictures)
         val confirmDialog = DialogConfirm(onPositiveClicked = {
@@ -248,11 +246,10 @@ class ActivityImageDetail : AppCompatActivity() {
     private fun unLockPicture() {
         lifecycleScope.launch {
             CopyFiles.copy(this@ActivityImageDetail,
-                File(currentItem?.encryptedPath.toString()),
-                File(currentItem?.originalPath).parentFile,
+                mutableListOf(File(currentItem?.encryptedPath.toString())),
+                mutableListOf(File(currentItem?.encryptedPath.toString())),
                 0L,
-                progress = { _: Int, _: Float, _: File? -> },
-                true,
+                progress = {  _: Float, _: File? -> },
                 onSuccess = {
                     listItem.remove(currentItem)
                     if (listItem.isEmpty()) {

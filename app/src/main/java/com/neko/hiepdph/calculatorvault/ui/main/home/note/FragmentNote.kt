@@ -16,13 +16,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.databinding.FragmentNoteBinding
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.main.home.note.adapter.AdapterNote
 import com.neko.hiepdph.calculatorvault.viewmodel.NoteViewModel
@@ -83,7 +84,9 @@ class FragmentNote : Fragment() {
     }
 
     private fun initView() {
-        binding.tvEmpty.text = String.format(getString(R.string.empty_text),getString(R.string.note),getString(R.string.note_lower))
+        binding.tvEmpty.text = String.format(
+            getString(R.string.empty_text), getString(R.string.note), getString(R.string.note_lower)
+        )
         initRecyclerView()
         initButton()
     }
@@ -218,6 +221,7 @@ class FragmentNote : Fragment() {
             normalMenuProvider as MenuProvider, viewLifecycleOwner, Lifecycle.State.CREATED
         )
     }
+
     private fun editHome() {
         val actionBar = (requireActivity() as? ActivityVault)?.supportActionBar
         val exitIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_exit)
@@ -253,8 +257,6 @@ class FragmentNote : Fragment() {
     }
 
 
-
-
     private fun changeLayout(item: MenuItem) {
         AdapterNote.isSwitchView = !AdapterNote.isSwitchView
         if (AdapterNote.isSwitchView) {
@@ -277,7 +279,11 @@ class FragmentNote : Fragment() {
         if (listIdNoteSelected.isEmpty()) {
             showSnackBar(getString(R.string.nothing_to_delete), SnackBarType.FAILED)
         } else {
-            viewModel.deleteNote(listIdNoteSelected)
+            val confirmDialog = DialogConfirm(onPositiveClicked = {
+                viewModel.deleteNote(listIdNoteSelected)
+
+            }, DialogConfirmType.DELETE, getString(R.string.this_note))
+            confirmDialog.show(childFragmentManager, confirmDialog.tag)
         }
     }
 

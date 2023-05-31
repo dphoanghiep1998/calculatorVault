@@ -19,17 +19,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
+import com.neko.hiepdph.calculatorvault.common.enums.Action
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.openWith
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentPersistentBinding
-import com.neko.hiepdph.calculatorvault.dialog.DialogAddFile
-import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
-import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
-import com.neko.hiepdph.calculatorvault.dialog.DialogDetail
-import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
+import com.neko.hiepdph.calculatorvault.dialog.*
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityImageDetail
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
@@ -84,6 +81,7 @@ class FragmentPersistent : Fragment() {
 
 
     private fun initView() {
+        initTitle()
         initRecyclerView()
         initButton()
         resetAllViewAndData()
@@ -99,55 +97,7 @@ class FragmentPersistent : Fragment() {
         }
     }
 
-    private fun initToolBar() {
-        requireActivity().addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menu.clear()
-                if (AdapterPersistent.editMode || AdapterOtherFolder.editMode) {
-                    menu.clear()
-                    menuInflater.inflate(R.menu.toolbar_menu_persistent, menu)
-                    menu[0].actionView?.findViewById<View>(R.id.checkbox)?.setOnClickListener {
-                        checkAllItem(menu[0].actionView?.findViewById<CheckBox>(R.id.checkbox)?.isChecked == true)
-                    }
-                    checkItem()
-                } else {
-                    menu.clear()
-                }
-
-            }
-
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return if (AdapterPersistent.editMode || AdapterOtherFolder.editMode) {
-                    when (menuItem.itemId) {
-                        android.R.id.home -> {
-                            adapterPersistent?.changeToNormalView()
-                            adapterOtherFolder?.changeToNormalView()
-                            binding.containerController.hide()
-                            (requireActivity() as ActivityVault).setupActionBar()
-                            initToolBar()
-                            true
-                        }
-
-                        else -> false
-                    }
-                } else {
-                    false
-                }
-            }
-
-        }, viewLifecycleOwner, Lifecycle.State.CREATED)
-    }
-
-    private fun checkItem() {
-        val checkbox =
-            (requireActivity() as ActivityVault).getToolbar().menu[0].actionView?.findViewById<CheckBox>(
-                R.id.checkbox
-            )
-        checkbox?.isChecked = listItemSelected.size == sizeList && sizeList > 0
-    }
-
-    private fun getDataFile() {
+    private fun initTitle() {
         when (args.type) {
             Constant.TYPE_PICTURE -> {
                 binding.tvEmpty.text = String.format(
@@ -210,6 +160,58 @@ class FragmentPersistent : Fragment() {
                 )
             }
         }
+    }
+
+    private fun initToolBar() {
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
+                if (AdapterPersistent.editMode || AdapterOtherFolder.editMode) {
+                    menu.clear()
+                    menuInflater.inflate(R.menu.toolbar_menu_persistent, menu)
+                    menu[0].actionView?.findViewById<View>(R.id.checkbox)?.setOnClickListener {
+                        checkAllItem(menu[0].actionView?.findViewById<CheckBox>(R.id.checkbox)?.isChecked == true)
+                    }
+                    checkItem()
+                } else {
+                    menu.clear()
+                }
+
+            }
+
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return if (AdapterPersistent.editMode || AdapterOtherFolder.editMode) {
+                    when (menuItem.itemId) {
+                        android.R.id.home -> {
+                            adapterPersistent?.changeToNormalView()
+                            adapterOtherFolder?.changeToNormalView()
+                            binding.containerController.hide()
+                            (requireActivity() as ActivityVault).setupActionBar()
+                            initToolBar()
+                            true
+                        }
+
+                        else -> false
+                    }
+                } else {
+                    false
+                }
+            }
+
+        }, viewLifecycleOwner, Lifecycle.State.CREATED)
+    }
+
+    private fun checkItem() {
+        val checkbox =
+            (requireActivity() as ActivityVault).getToolbar().menu[0].actionView?.findViewById<CheckBox>(
+                R.id.checkbox
+            )
+        checkbox?.isChecked = listItemSelected.size == sizeList && sizeList > 0
+    }
+
+    private fun getDataFile() {
+
         viewModel.getAllFileFromFolderEncrypted(args.vaultPath).observe(viewLifecycleOwner) {
             it?.let {
                 if (args.type != Constant.TYPE_ADD_MORE) {
@@ -222,11 +224,6 @@ class FragmentPersistent : Fragment() {
                 if (it.isNotEmpty()) {
                     binding.tvEmpty.hide()
                 } else {
-                    adapterPersistent?.changeToNormalView()
-                    adapterOtherFolder?.changeToNormalView()
-                    initToolBar()
-                    (requireActivity() as ActivityVault).setupActionBar()
-                    binding.containerController.hide()
                     binding.tvEmpty.show()
                 }
             }
@@ -309,11 +306,10 @@ class FragmentPersistent : Fragment() {
             if (requireContext().config.moveToRecyclerBin) {
 
                 CopyFiles.copy(requireContext(),
-                    File(item.encryptedPath),
-                    requireContext().config.recyclerBinFolder,
+                    mutableListOf(File(item.encryptedPath)),
+                    mutableListOf(requireContext().config.recyclerBinFolder),
                     0L,
-                    progress = { _: Int, _: Float, _: File? -> },
-                    true,
+                    progress = { _: Float, _: File? -> },
                     onSuccess = {
                         item.isDeleted = true
                         viewModel.updateFileVault(item)
@@ -359,10 +355,9 @@ class FragmentPersistent : Fragment() {
 
                 CopyFiles.copy(requireContext(),
                     listItemSelected.map { File(it.encryptedPath) },
-                    requireContext().config.recyclerBinFolder,
+                    listItemSelected.map { requireContext().config.recyclerBinFolder },
                     0L,
-                    progress = { _: Int, _: Float, _: File? -> },
-                    true,
+                    progress = { _: Float, _: File? -> },
                     onSuccess = {
                         listItemSelected.forEach {
                             val item = it
@@ -394,8 +389,23 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun share() {
-        requireContext().shareFile(listItemSelected.map { it.encryptedPath })
+
+        viewModel.decryptFile(
+            requireContext(),
+            listItemSelected.map { File(it.encryptedPath) }.toMutableList(),
+            listItemSelected.map { requireContext().config.decryptFolder }.toMutableList(),
+            listItemSelected.map { it.name }.toMutableList(),
+            progress = { _: Float, _: File? -> },
+            onSuccess = {
+                requireContext().shareFile(it.map { path -> path })
+            },
+            onError = {},
+            EncryptionMode.ENCRYPTION,
+        )
+
+
     }
+
 
     private fun slideShow() {
         if (listItemSelected.size <= 1) {
@@ -424,24 +434,34 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun unLockFile() {
-        lifecycleScope.launch {
-            CopyFiles.copy(requireContext(),
-                listItemSelected.map { File(it.encryptedPath) },
-                listItemSelected.map { File(it.originalPath).parentFile },
-                0L,
-                progress = { _: Int, _: Float, _: File? -> },
-                true,
-                onSuccess = {
-                    viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
-                    listItemSelected.clear()
-                    adapterPersistent?.unSelectAll()
-                    adapterOtherFolder?.unSelectAll()
-                    getDataFile()
-                },
-                onError = {
-                    Log.d("TAG", "unLockFile: " + it.printStackTrace())
-                })
-        }
+        val dialogProgress = DialogProgress(listItemSelected,
+            listItemSelected.map { File(it.encryptedPath) },
+            listItemSelected.map { File(it.originalPath).parentFile } as List<File>,
+            Action.UNLOCK,
+            onSuccess = {
+                viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
+                normalView()
+                showSnackBar(
+                    String.format(it), SnackBarType.SUCCESS
+                )
+            },
+            onFailed = {
+                showSnackBar((it), SnackBarType.FAILED)
+                normalView()
+            })
+        dialogProgress.show(childFragmentManager, dialogProgress.tag)
+
+    }
+
+    private fun normalView() {
+        listItemSelected.clear()
+        adapterPersistent?.unSelectAll()
+        adapterOtherFolder?.unSelectAll()
+        adapterPersistent?.changeToNormalView()
+        adapterOtherFolder?.changeToNormalView()
+        initToolBar()
+        (requireActivity() as ActivityVault).setupActionBar()
+        binding.containerController.hide()
     }
 
 
@@ -559,22 +579,12 @@ class FragmentPersistent : Fragment() {
             }
         } else {
             if (!File(requireContext().config.decryptFolder, item.name).exists()) {
-//                CryptoCore.getInstance(requireContext()).decodeFile(File(item.encryptedPath),
-//                    File(requireContext().config.decryptFolder, item.name),
-//                    onSuccess = {
-//                        ShareData.getInstance().setListItemImage(list)
-//                        val intent = Intent(requireContext(), ActivityImageDetail::class.java)
-//                        startActivity(intent)
-//                    },
-//                    onProgress = {},
-//                    onError = {})
-
                 viewModel.decryptFile(
                     requireContext(),
                     mutableListOf(File(item.encryptedPath)),
-                    requireContext().config.decryptFolder,
+                    mutableListOf(requireContext().config.decryptFolder),
                     mutableListOf(item.name),
-                    progress = { state: Int, value: Float, currentFile: File? -> },
+                    progress = { value: Float, currentFile: File? -> },
                     onSuccess = {
                         Log.d("TAG", "handleClickItem: ")
                         lifecycleScope.launch(Dispatchers.Main) {
@@ -586,7 +596,6 @@ class FragmentPersistent : Fragment() {
                     },
                     onError = {},
                     item.encryptionType,
-                    false
                 )
 
             } else {
@@ -604,7 +613,6 @@ class FragmentPersistent : Fragment() {
                 binding.tvSlideshow.show()
 
             }
-
             Constant.TYPE_VIDEOS -> {
                 binding.tvSlideshow.hide()
             }

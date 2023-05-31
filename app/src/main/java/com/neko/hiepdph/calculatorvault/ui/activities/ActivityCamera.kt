@@ -3,7 +3,6 @@ package com.neko.hiepdph.calculatorvault.ui.activities
 import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -82,16 +81,15 @@ class ActivityCamera : AppCompatActivity() {
                                 this@ActivityCamera
                             ).encryptString(Constant.SECRET_KEY, item.name)
                         })
-                        CopyFiles.copyEncrypt(
+                        CopyFiles.encrypt(
                             this@ActivityCamera,
-                            listItemDiff.map { item -> File(item.originalPath) }.toMutableList(),
-                            config.picturePrivacyFolder,
+                            listItemDiff.map { item -> File(item.originalPath) },
+                            listItemDiff.map { config.picturePrivacyFolder },
                             listEncryptedString,
                             0L,
-                            progress = { state: Int, value: Float, currentFile: File? ->
+                            progress = {  value: Float, currentFile: File? ->
 
                             },
-                            false,
                             onError = {
                                 finish()
                             },

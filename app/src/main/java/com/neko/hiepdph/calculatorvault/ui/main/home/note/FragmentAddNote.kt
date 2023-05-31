@@ -9,6 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
+import com.neko.hiepdph.calculatorvault.common.extensions.hideSoftKeyboard
 import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
 import com.neko.hiepdph.calculatorvault.data.model.NoteModel
 import com.neko.hiepdph.calculatorvault.databinding.FragmentAddNoteBinding
@@ -53,7 +54,8 @@ class FragmentAddNote : Fragment() {
 
 
     private fun saveNote() {
-        if (binding.edtTitle.text.isBlank() || binding.edtContent.text.isBlank()) {
+        hideSoftKeyboard(requireActivity(),binding.root)
+        if (binding.edtTitle.text.isBlank()) {
             showSnackBar(getString(R.string.title_and_content_required), SnackBarType.FAILED)
             return
         }

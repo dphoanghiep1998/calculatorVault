@@ -33,6 +33,9 @@ fun Context.shareFile(listPath: List<String>) {
 
 
         val shareIntent = Intent(Intent.ACTION_SEND_MULTIPLE)
+        shareIntent.flags =
+            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+
         shareIntent.type = "*/*"
         shareIntent.putParcelableArrayListExtra(
             Intent.EXTRA_STREAM, uris

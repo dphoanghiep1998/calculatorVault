@@ -127,7 +127,7 @@ class AdapterNote(
             listOfNote.addAll(dataOfNote)
         } else {
             val filterList = listOfNote.filter {
-                it.title.contains(query) || it.content.contains(query)
+                it.title.lowercase().contains(query) || it.content.lowercase().contains(query)
             }
             val noteDiffCallback = DiffUtil.calculateDiff(NoteDiffCallback(listOfNote, filterList))
             noteDiffCallback.dispatchUpdatesTo(this)

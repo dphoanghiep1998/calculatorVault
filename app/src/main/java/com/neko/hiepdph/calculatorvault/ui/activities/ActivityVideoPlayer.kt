@@ -138,11 +138,10 @@ class ActivityVideoPlayer : AppCompatActivity() {
             val confirmDialog = DialogConfirm(onPositiveClicked = {
                 if (config.moveToRecyclerBin) {
                     CopyFiles.copy(this,
-                        File(currentItem?.encryptionType.toString()),
-                        config.recyclerBinFolder,
+                        mutableListOf(File(currentItem?.encryptionType.toString())),
+                        mutableListOf(config.recyclerBinFolder),
                         0L,
-                        progress = { _: Int, _: Float, _: File? -> },
-                        true,
+                        progress = {  _: Float, _: File? -> },
                         onSuccess = {
                             listItem.remove(currentItem)
                             if (listItem.isEmpty()) {
@@ -183,11 +182,10 @@ class ActivityVideoPlayer : AppCompatActivity() {
         lifecycleScope.launch {
 
             CopyFiles.copy(this@ActivityVideoPlayer,
-                File(currentItem?.encryptedPath.toString()),
-                File(currentItem?.originalPath.toString()),
+                mutableListOf(File(currentItem?.encryptedPath.toString())),
+                mutableListOf(File(currentItem?.originalPath.toString())),
                 0L,
-                progress = { _: Int, _: Float, _: File? -> },
-                true,
+                progress = { _: Float, _: File? -> },
                 onSuccess = {
                     listItem.remove(currentItem)
                     if (listItem.isEmpty()) {

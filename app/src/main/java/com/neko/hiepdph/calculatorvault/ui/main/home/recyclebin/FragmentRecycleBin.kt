@@ -234,8 +234,7 @@ class FragmentRecycleBin : Fragment() {
                 mutableListOf( File(vaultItem.recyclerPath)),
                 mutableListOf( File(vaultItem.encryptedPath).parentFile),
                 0L,
-                progress = { _: Int, _: Float, _: File? -> },
-                true,
+                progress = { _: Float, _: File? -> },
                 onSuccess = {
                     vaultItem.isDeleted = false
                     viewModel.updateFileVault(vaultItem)
@@ -261,8 +260,7 @@ class FragmentRecycleBin : Fragment() {
                 listItemSelected.map { File(it.recyclerPath) },
                 listItemSelected.map { File(it.encryptedPath).parentFile },
                 0L,
-                progress = { _: Int, _: Float, _: File? -> },
-                true,
+                progress = {  _: Float, _: File? -> },
                 onSuccess = {
                     listItemSelected.map {
                         val item = it
