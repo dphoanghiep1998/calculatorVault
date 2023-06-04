@@ -63,18 +63,25 @@ class FragmentListItem : Fragment() {
             when (args.fileType) {
                 Constant.TYPE_EXCEL -> (requireActivity() as ActivityVault).getToolbar().title =
                     getString(R.string.excel)
+
                 Constant.TYPE_ZIP -> (requireActivity() as ActivityVault).getToolbar().title =
                     getString(R.string.zip)
+
                 Constant.TYPE_TEXT -> (requireActivity() as ActivityVault).getToolbar().title =
                     getString(R.string.text)
+
                 Constant.TYPE_PPT -> (requireActivity() as ActivityVault).getToolbar().title =
                     getString(R.string.ppt)
+
                 Constant.TYPE_WORD -> (requireActivity() as ActivityVault).getToolbar().title =
                     getString(R.string.word)
+
                 Constant.TYPE_CSV -> (requireActivity() as ActivityVault).getToolbar().title =
                     getString(R.string.csv)
+
                 Constant.TYPE_PDF -> (requireActivity() as ActivityVault).getToolbar().title =
                     getString(R.string.pdf)
+
                 else -> (requireActivity() as ActivityVault).getToolbar().title =
                     getString(R.string.other_file)
             }
@@ -91,15 +98,17 @@ class FragmentListItem : Fragment() {
         binding.btnMoveToVault.clickWithDebounce {
 
             if (requireContext().config.encryptionMode != EncryptionMode.ALWAYS_ASK) {
+
                 val dialogProgress = DialogProgress(
                     listItemSelected,
-                    listItemSelected.map { File(it.originalPath) }.toMutableList(),
-                    listItemSelected.map { File(args.vaultPath)},
+                    listItemSelected.map { File(it.originalPath) },
+                    listItemSelected.map { File(args.vaultPath) },
                     Action.ENCRYPT,
                     requireContext().config.encryptionMode,
                     args.vaultPath,
-                    onSuccess = {}
-                ) {}
+                    onSuccess = {},
+                    onFailed = {}
+                )
                 dialogProgress.show(childFragmentManager, dialogProgress.tag)
 
             } else {
@@ -107,13 +116,14 @@ class FragmentListItem : Fragment() {
                     currentEncryptionMode = enMode
                     val dialogProgress = DialogProgress(
                         listItemSelected,
-                        listItemSelected.map { File(it.originalPath) }.toMutableList(),
-                        listItemSelected.map { File(args.vaultPath)},
+                        listItemSelected.map { File(it.originalPath) },
+                        listItemSelected.map { File(args.vaultPath) },
                         Action.ENCRYPT,
-                       currentEncryptionMode,
+                        currentEncryptionMode,
                         args.vaultPath,
-                        onSuccess = {}
-                    ) {}
+                        onSuccess = {},
+                        onFailed = {}
+                    )
                     dialogProgress.show(childFragmentManager, dialogProgress.tag)
                 })
                 dialogAskEncryptionMode.show(childFragmentManager, dialogAskEncryptionMode.tag)
@@ -206,6 +216,7 @@ class FragmentListItem : Fragment() {
                     GridLayoutManager(requireContext(), 4, RecyclerView.VERTICAL, false)
                 binding.rcvGroupItem.layoutManager = gridLayoutManager
             }
+
             Constant.TYPE_AUDIOS, Constant.TYPE_FILE -> {
                 val linearLayoutManager =
                     LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)

@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
+import android.util.Base64
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
@@ -70,6 +71,10 @@ class AdapterPersistent(
 
     }
 
+    override fun getItemCount(): Int {
+        return listItem.size
+    }
+
     private fun showCheckboxAll() {
         notifyItemRangeChanged(0, listItem.size, PAYLOAD_CHECK)
     }
@@ -80,8 +85,9 @@ class AdapterPersistent(
             val item = listItem[position]
             var requestOptions = RequestOptions()
             requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
+            val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
 
-            Glide.with(itemView.context).load(item.thumb).placeholder(R.drawable.ic_error_image)
+            Glide.with(itemView.context).load(imageByte).placeholder(R.drawable.ic_error_image)
                 .apply(requestOptions).into(binding.imvThumb)
 
             binding.checkBox.isChecked = item in listOfItemSelected
@@ -128,9 +134,14 @@ class AdapterPersistent(
             requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
 
             binding.checkBox.isChecked = item in listOfItemSelected
+            if(item.thumb != null){
+                val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
+                Glide.with(itemView.context).load(imageByte)
+                    .placeholder(R.drawable.ic_error_video).apply(requestOptions).into(binding.imvThumb)
+            }else{
+                Glide.with(itemView.context).load(R.drawable.ic_error_video).apply(requestOptions).into(binding.imvThumb)
+            }
 
-            Glide.with(itemView.context).load(item.thumb).placeholder(R.drawable.ic_error_video)
-                .apply(requestOptions).into(binding.imvThumb)
 
             binding.tvDuration.text = item.durationLength?.getFormattedDuration()
             binding.root.setOnLongClickListener {
@@ -174,7 +185,9 @@ class AdapterPersistent(
             val item = listItem[position]
             var requestOptions = RequestOptions()
             requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-            Glide.with(itemView.context).load(item.thumb).apply(requestOptions)
+            val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
+
+            Glide.with(itemView.context).load(imageByte).apply(requestOptions)
                 .error(R.drawable.ic_error_audio).into(binding.imvThumb)
             binding.checkBox.isChecked = item in listOfItemSelected
             if (editMode) {

@@ -301,35 +301,25 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun showDialogDelete(item: FileVaultItem) {
+
         val confirmDialog = DialogConfirm(onPositiveClicked = {
 
-            if (requireContext().config.moveToRecyclerBin) {
+            val dialogProgress = DialogProgress(listItemSelected = mutableListOf(item),
+                listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                listOfTargetParentFolder = mutableListOf(requireActivity().config.recyclerBinFolder),
+                action = Action.DELETE,
+                onSuccess = {
+                    normalView()
+                    showSnackBar(it, SnackBarType.SUCCESS)
 
-                CopyFiles.copy(requireContext(),
-                    mutableListOf(File(item.encryptedPath)),
-                    mutableListOf(requireContext().config.recyclerBinFolder),
-                    0L,
-                    progress = { _: Float, _: File? -> },
-                    onSuccess = {
-                        item.isDeleted = true
-                        viewModel.updateFileVault(item)
-                        getDataFile()
-                        showSnackBar(
-                            getString(R.string.move_to_recycler_bin), SnackBarType.SUCCESS
-                        )
-                    },
+                },
+                onFailed = {
+                    normalView()
+                    showSnackBar(it, SnackBarType.FAILED)
 
-                    onError = {})
-            } else {
-                viewModel.deleteFolder(item.encryptedPath, onSuccess = {
-                    item.isDeleted = true
-                    viewModel.updateFileVault(item)
-                    getDataFile()
-                    showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
-                }, onError = {
-                    showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
                 })
-            }
+
+            dialogProgress.show(childFragmentManager, dialogProgress.tag)
         }, DialogConfirmType.DELETE, item.name)
 
         confirmDialog.show(childFragmentManager, confirmDialog.tag)
@@ -338,7 +328,7 @@ class FragmentPersistent : Fragment() {
     private fun showDialogDelete() {
         if (listItemSelected.isEmpty()) {
             Toast.makeText(
-                requireContext(), getString(R.string.select_no_more_than_one), Toast.LENGTH_SHORT
+                requireContext(), getString(R.string.require_size_more_than_1), Toast.LENGTH_SHORT
             ).show()
             return
         }
@@ -351,38 +341,24 @@ class FragmentPersistent : Fragment() {
         }
         val confirmDialog = DialogConfirm(onPositiveClicked = {
 
-            if (requireContext().config.moveToRecyclerBin) {
+            val dialogProgress = DialogProgress(listItemSelected = listItemSelected,
+                listOfSourceFile = listItemSelected.map { File(it.encryptedPath) },
+                listOfTargetParentFolder = listItemSelected.map { requireContext().config.recyclerBinFolder },
+                action = Action.DELETE,
+                onSuccess = {
+                    normalView()
+                    showSnackBar(it, SnackBarType.SUCCESS)
 
-                CopyFiles.copy(requireContext(),
-                    listItemSelected.map { File(it.encryptedPath) },
-                    listItemSelected.map { requireContext().config.recyclerBinFolder },
-                    0L,
-                    progress = { _: Float, _: File? -> },
-                    onSuccess = {
-                        listItemSelected.forEach {
-                            val item = it
-                            item.isDeleted = true
-                            viewModel.updateFileVault(item)
-                        }
-                        getDataFile()
-                        listItemSelected.clear()
-                        showSnackBar(
-                            getString(R.string.move_to_recycler_bin), SnackBarType.SUCCESS
-                        )
-                    },
-                    onError = {})
-            } else {
-                viewModel.deleteMultipleFolder(listItemSelected.map { it.encryptedPath },
-                    onSuccess = {
-                        viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
-                        getDataFile()
-                        listItemSelected.clear()
-                        showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
-                    },
-                    onError = {
-                        showSnackBar(getString(R.string.delete_success), SnackBarType.SUCCESS)
-                    })
-            }
+                },
+                onFailed = {
+                    normalView()
+                    showSnackBar(it, SnackBarType.FAILED)
+
+                })
+
+            dialogProgress.show(childFragmentManager, dialogProgress.tag)
+
+
         }, DialogConfirmType.DELETE, name)
 
         confirmDialog.show(childFragmentManager, confirmDialog.tag)
@@ -613,6 +589,7 @@ class FragmentPersistent : Fragment() {
                 binding.tvSlideshow.show()
 
             }
+
             Constant.TYPE_VIDEOS -> {
                 binding.tvSlideshow.hide()
             }

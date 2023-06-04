@@ -21,7 +21,7 @@ data class FileVaultItem(
     var fileType: String = "",
     var fileRealType: String? = null,
     var isDeleted: Boolean = false,
-    var thumb: ByteArray? = null
+    var thumb: String? = null
 ) {
     fun toFileVaultEntity(): FileVaultItemEntity {
         val fileId = if (id == -1) 0 else id

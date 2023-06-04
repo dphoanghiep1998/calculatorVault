@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.changeBackPressCallBack
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
@@ -71,6 +72,7 @@ class FragmentSetupLock : Fragment() {
             requireContext().config.securityQuestion = binding.question.text.toString()
             requireContext().config.securityAnswer = binding.edtAnswer.text.toString()
             requireContext().config.isSetupPasswordDone = true
+            (requireActivity().application as CustomApplication).authority = true
             popBackStack(R.id.fragmentSetupLock)
         }
     }

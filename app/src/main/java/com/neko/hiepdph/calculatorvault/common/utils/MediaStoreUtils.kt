@@ -301,6 +301,7 @@ object MediaStoreUtils {
                 val childPath = cursor.getStringValue(MediaStore.Images.Media.DATA)
                 val size = cursor.getLongValue(MediaStore.Images.Media.SIZE)
                 val modified = cursor.getLongValue(MediaStore.Images.Media.SIZE) * 1000
+                Log.d("TAG", "getAllImage: "+modified)
                 val name = cursor.getStringValue(MediaStore.Images.Media.DISPLAY_NAME)
 
                 if (childPath.isNotBlank()) {
@@ -352,7 +353,9 @@ object MediaStoreUtils {
                 val id = cursor.getLongValue(MediaStore.Images.Media._ID)
                 val childPath = cursor.getStringValue(MediaStore.Images.Media.DATA)
                 val size = cursor.getLongValue(MediaStore.Images.Media.SIZE)
-                val modified = cursor.getLongValue(MediaStore.Images.Media.SIZE) * 1000
+                val modified = cursor.getLongValue(MediaStore.Images.Media.DATE_MODIFIED) * 1000
+                Log.d("TAG", "getAllImage: "+modified)
+
                 val name = cursor.getStringValue(MediaStore.Images.Media.DISPLAY_NAME)
                 val file = File(childPath)
                 if (!file.exists() || file.isHidden || !file.canRead()) return@queryCursor

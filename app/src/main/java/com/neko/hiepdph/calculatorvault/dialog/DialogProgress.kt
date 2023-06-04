@@ -3,6 +3,7 @@ package com.neko.hiepdph.calculatorvault.dialog
 import android.app.Dialog
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +16,14 @@ import androidx.lifecycle.lifecycleScope
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.enums.Action
-import com.neko.hiepdph.calculatorvault.common.extensions.*
+import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
+import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.config
+import com.neko.hiepdph.calculatorvault.common.extensions.hide
+import com.neko.hiepdph.calculatorvault.common.extensions.popBackStack
+import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
+import com.neko.hiepdph.calculatorvault.common.extensions.toByteArray
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
@@ -27,13 +35,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
-import java.util.*
+import java.util.Calendar
 
 
 class DialogProgress(
-    private val listItemSelected: List<FileVaultItem>,
-    private val listOfSourceFile: List<File>,
-    private val listOfTargetParentFolder: List<File>,
+    private val listItemSelected: List<FileVaultItem> = mutableListOf(),
+    private val listOfSourceFile: List<File> = mutableListOf(),
+    private val listOfTargetParentFolder: List<File> = mutableListOf(),
     private val action: Action = Action.ENCRYPT,
     private val encryptionMode: Int = EncryptionMode.HIDDEN,
     private val vaultPath: String = "",
@@ -82,11 +90,13 @@ class DialogProgress(
                 binding.tvStatus.text =
                     String.format(getString(R.string.unlocking), listItemSelected?.size.toString())
             }
+
             Action.DELETE -> {
                 binding.tvTitle.text = getString(R.string.delete)
                 binding.tvStatus.text =
                     String.format(getString(R.string.deleting), listItemSelected?.size.toString())
             }
+
             else -> {
 
             }
@@ -96,6 +106,65 @@ class DialogProgress(
     }
 
     private fun doAction() {
+        if (action == Action.DELETE) {
+            if (requireActivity().config.moveToRecyclerBin) {
+                CopyFiles.copy(requireContext(),
+                    listOfSourceFile,
+                    listOfTargetParentFolder,
+                    0L,
+                    progress = { value: Float, _: File? -> setProgressValue(value.toInt()) },
+                    onSuccess = {
+                        listItemSelected.forEach {
+                            val item = it
+                            item.isDeleted = true
+                            viewModel.updateVaultItem(item)
+                        }
+                        onSuccess.invoke(getString(R.string.move_to_recycler_bin))
+                        dismiss()
+                    },
+                    onError = {
+                        onFailed.invoke(getString(R.string.move_to_recycler_bin_failed))
+                        dismiss()
+                    })
+            } else {
+                viewModel.deleteMultipleFolder(listItemSelected.map { it.encryptedPath },
+                    onSuccess = {
+                        viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
+                        onSuccess(getString(R.string.delete_success))
+                        dismiss()
+                    },
+                    onProgress = { setProgressValue(it.toInt()) },
+                    onError = {
+                        onFailed(getString(R.string.delete_success))
+                        dismiss()
+                    })
+            }
+
+        }
+        if (action == Action.DELETE_PERMANENT) {
+            viewModel.deleteMultipleFolder(listItemSelected.map { it.recyclerPath }, onSuccess = {
+                viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
+                onSuccess(getString(R.string.delete_success))
+                dismiss()
+            }, onProgress = { setProgressValue(it.toInt()) }, onError = {
+                onFailed(getString(R.string.delete_success))
+                dismiss()
+            })
+
+        }
+        if (action == Action.DELETE_All_PERMANENT) {
+            viewModel.deleteAllRecyclerBin(requireContext().config.recyclerBinFolder.path,
+                onSuccess = {
+                    viewModel.deleteFileVault(listItemSelected.map { it.id })
+                    onSuccess(getString(R.string.delete_success))
+                    dismiss()
+                },
+                onError = {
+                    onFailed(getString(R.string.delete_failed))
+                    dismiss()
+                })
+
+        }
         if (action == Action.UNLOCK) {
             CopyFiles.decrypt(requireContext(),
                 listOfSourceFile,
@@ -138,10 +207,16 @@ class DialogProgress(
             listItemSelected.forEachIndexed { index, item ->
                 when (item.fileType) {
                     Constant.TYPE_PICTURE, Constant.TYPE_VIDEOS -> {
-                        item.thumb = imageToByteArray(item.originalPath)
+                        item.thumb = Base64.encodeToString(
+                            imageToByteArray(item.originalPath), Base64.DEFAULT
+                        )
                     }
+
                     Constant.TYPE_AUDIOS -> {
-                        item.thumb = MediaStoreUtils.getThumbnail(item.originalPath)?.toByteArray()
+                        item.thumb = Base64.encodeToString(
+                            MediaStoreUtils.getThumbnail(item.originalPath)?.toByteArray(),
+                            Base64.DEFAULT
+                        )
                     }
                 }
 

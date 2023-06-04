@@ -109,15 +109,20 @@ object FileUtils {
     }
 
     fun deleteMultipleFolderInDirectory(
-        pathFolder: List<String>, onSuccess: () -> Unit, onError: (message: String) -> Unit
+        pathFolder: List<String>,
+        onProgress: (value: Float) -> Unit,
+        onSuccess: () -> Unit,
+        onError: (message: String) -> Unit
     ) {
         try {
             var count = 0
+            val sizeFolder = pathFolder.size
             pathFolder.forEach {
                 val folder = File(it)
                 val delete = folder.deleteRecursively()
                 if (delete) {
                     count++
+                    onProgress((count / sizeFolder * 100).toFloat())
                 }
             }
             if (count == pathFolder.size) {

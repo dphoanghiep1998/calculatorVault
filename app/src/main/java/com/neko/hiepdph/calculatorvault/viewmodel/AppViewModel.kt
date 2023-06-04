@@ -36,6 +36,12 @@ class AppViewModel @Inject constructor(
         }
     }
 
+    fun updateVaultItem(item:FileVaultItem){
+        viewModelScope.launch {
+            appRepo.updateFileVault(item)
+        }
+    }
+
     fun deleteFileVault(listId:List<Int>){
         viewModelScope.launch {
             appRepo.deleteFile(listId)
@@ -70,6 +76,19 @@ class AppViewModel @Inject constructor(
 
     fun getAllFileFromFolderEncrypted(folderPath: String): LiveData<MutableList<FileVaultItem>> {
         return appRepo.getAllFileInEnCryptFolder(folderPath)
+    }
+
+    fun deleteMultipleFolder(
+        path: List<String>,onProgress:(value:Float) -> Unit,onSuccess: () -> Unit, onError: (e: String) -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            FileUtils.deleteMultipleFolderInDirectory(path, onProgress,onSuccess, onError)
+        }
+    }
+    fun deleteAllRecyclerBin(path: String, onSuccess: () -> Unit, onError: (e: String) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            FileUtils.deleteAllChildInDirectory(path, onSuccess, onError)
+        }
     }
 
 }

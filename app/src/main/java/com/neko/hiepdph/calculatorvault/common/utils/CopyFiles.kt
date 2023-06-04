@@ -16,9 +16,6 @@ import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.mkdir
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import java.io.File
 
-private const val STATE_PREPARE = 1
-const val STATE_PROCESSING = 2
-private const val STATE_DONE = 3
 
 object CopyFiles {
     fun encrypt(
@@ -43,10 +40,7 @@ object CopyFiles {
             var currentSize = 0f
             // move file
             files?.forEachIndexed { index, itemFile ->
-                if (targetFolders[index].exists()) {
-                    listOfFile.add(targetFolders[index].name)
-                    return@forEachIndexed
-                }
+
                 val targetFile = File(
                     createNewFile(
                         context,
@@ -89,7 +83,7 @@ object CopyFiles {
         targetFolders: List<File>,
         targetName: List<String>,
         tSize: Long,
-        progress: ( value: Float, currentFile: File?) -> Unit,
+        progress: (value: Float, currentFile: File?) -> Unit,
         onSuccess: (MutableList<String>) -> Unit = {},
         onError: (t: Throwable) -> Unit = {},
         encryptionMode: Int = EncryptionMode.HIDDEN,
@@ -106,8 +100,8 @@ object CopyFiles {
             var currentSize = 0f
             // move file
             files?.forEachIndexed { index, itemFile ->
-                if (targetFolders[index].exists()) {
-                    listOfFile.add(targetFolders[index].name)
+                if (File(targetFolders[index], targetName[index]).exists()) {
+                    listOfFile.add(targetFolders[index].path + "/${targetName}")
                     return@forEachIndexed
                 }
                 val targetFile = File(
@@ -124,7 +118,8 @@ object CopyFiles {
                     { len, file ->
                         run {
                             currentSize += len
-                            progress((currentSize * 100 / totalSize), file
+                            progress(
+                                (currentSize * 100 / totalSize), file
                             )
                         }
                     },
@@ -165,8 +160,8 @@ object CopyFiles {
             var currentSize = 0f
             // move file
             files?.forEachIndexed { index, itemFile ->
-                if (targetFolders[index].exists()) {
-                    listOfFile.add(targetFolders[index].name)
+                if (File(targetFolders[index], files[index].name).exists()) {
+                    listOfFile.add(targetFolders[index].path + "/${files[index].name}")
                     return@forEachIndexed
                 }
                 val targetFile = if (itemFile.isDirectory) {

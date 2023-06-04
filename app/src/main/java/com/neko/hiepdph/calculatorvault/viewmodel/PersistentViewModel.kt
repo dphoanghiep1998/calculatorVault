@@ -26,10 +26,10 @@ class PersistentViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel(
     }
 
     fun deleteMultipleFolder(
-        path: List<String>, onSuccess: () -> Unit, onError: (e: String) -> Unit
+        path: List<String>,onProgress:(value:Float)->Unit, onSuccess: () -> Unit, onError: (e: String) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            FileUtils.deleteMultipleFolderInDirectory(path, onSuccess, onError)
+            FileUtils.deleteMultipleFolderInDirectory(path,onProgress, onSuccess, onError)
         }
     }
 

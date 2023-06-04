@@ -87,6 +87,10 @@ class ActivityVault : AppCompatActivity() {
         mSensorManager?.registerListener(
             mShakeDetector, mAccelerometer, SensorManager.SENSOR_DELAY_UI
         )
+        Log.d("TAG", "onResume: "+config.isSetupPasswordDone)
+        Log.d("TAG", "onResume: "+(application as CustomApplication).authority)
+        Log.d("TAG", "onResume: "+config.fakePassword)
+        Log.d("TAG", "onResume: "+(application as CustomApplication).isLockShowed)
 
         if (config.isSetupPasswordDone && (!((application as CustomApplication).authority) && !config.fakePassword || !(application as CustomApplication).isLockShowed)) {
             when (config.lockType) {

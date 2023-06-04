@@ -1,6 +1,7 @@
 package com.neko.hiepdph.calculatorvault.common.adapter
 
 import android.content.Context
+import android.util.Base64
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -17,10 +18,10 @@ interface TapViewListener {
     fun onTap()
 }
 
-class ImagePagerAdapter(val context: Context,private val listImage: MutableList<FileVaultItem>) : PagerAdapter() {
+class ImagePagerAdapter(val context: Context, private val listImage: MutableList<FileVaultItem>) :
+    PagerAdapter() {
     private var listPhotoView: MutableList<CustomPhotoView> = mutableListOf()
     private var mListener: TapViewListener? = null
-
 
 
     fun setListener(listener: TapViewListener) {
@@ -34,17 +35,10 @@ class ImagePagerAdapter(val context: Context,private val listImage: MutableList<
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val photoView = CustomPhotoView(container.context)
-        if(listImage[position].encryptionType == EncryptionMode.HIDDEN){
-            Glide.with(context).load(listImage[position].encryptedPath).centerInside().into(photoView)
-            container.addView(
-                photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        }else{
-            Glide.with(context).load(context.config.decryptFolder.path + "/${listImage[position].name}").centerInside().into(photoView)
-            container.addView(
-                photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        }
+        Glide.with(context).load(Base64.decode(listImage[position].thumb,Base64.DEFAULT)).centerInside().into(photoView)
+        container.addView(
+            photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
+        )
 
         photoView.setOnViewTapListener { view, x, y ->
             mListener?.onTap()

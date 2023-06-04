@@ -325,4 +325,6 @@
     <string name="deleting">Deleting %s file, please wait!</string>
     <string name="unlock_sucess">Unlock success %s files !</string>
     <string name="unlock_failed">Unlock %s file failed, please try again!</string>
+    <string name="move_to_recycler_bin_failed">Move failed to recycler bin</string>
+
 </resources>

@@ -23,6 +23,6 @@ class FileVaultItemEntity(
     var fileType: String = "",
     var fileRealType: String? = null,
     var isDeleted :Boolean = false,
-    var thumb: ByteArray? = null
+    var thumb: String? = null
 
 ) {}
