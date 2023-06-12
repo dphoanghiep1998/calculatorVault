@@ -264,8 +264,8 @@ class FragmentRecycleBin : Fragment() {
         }
 
         val dialogConfirm = DialogConfirm(onPositiveClicked = {
-            val dialogProgress = DialogProgress(listItemSelected = mutableListOf(item),
-                action = Action.UNLOCK,
+            val dialogProgress = DialogProgress(listItemSelected = listItemSelected,
+                action = Action.RESTORE,
                 onSuccess = {
                     viewModel.deleteFileVault(listItemSelected.map { it.id })
                     showSnackBar(it, SnackBarType.SUCCESS)
@@ -275,25 +275,25 @@ class FragmentRecycleBin : Fragment() {
                     showSnackBar(it, SnackBarType.FAILED)
                 })
             dialogProgress.show(childFragmentManager, dialogProgress.tag)
-            viewModel.restoreFile(requireContext(),
-                listItemSelected.map { File(it.recyclerPath) },
-                listItemSelected.map { File(it.encryptedPath).parentFile },
-                0L,
-                progress = { _: Float, _: File? -> },
-                onSuccess = {
-                    listItemSelected.map {
-                        val item = it
-                        item.isDeleted = false
-                        viewModel.updateFileVault(item)
-                    }
-                    listItemSelected.clear()
-
-                    showSnackBar(getString(R.string.restore_successfully), SnackBarType.SUCCESS)
-                },
-                onError = {
-                    Log.d("TAG", "restore: " + it)
-                    showSnackBar(getString(R.string.restore_failed), SnackBarType.FAILED)
-                })
+//            viewModel.restoreFile(requireContext(),
+//                listItemSelected.map { File(it.recyclerPath) },
+//                listItemSelected.map { File(it.encryptedPath).parentFile },
+//                0L,
+//                progress = { _: Float, _: File? -> },
+//                onSuccess = {
+//                    listItemSelected.map {
+//                        val item = it
+//                        item.isDeleted = false
+//                        viewModel.updateFileVault(item)
+//                    }
+//                    listItemSelected.clear()
+//
+//                    showSnackBar(getString(R.string.restore_successfully), SnackBarType.SUCCESS)
+//                },
+//                onError = {
+//                    Log.d("TAG", "restore: " + it)
+//                    showSnackBar(getString(R.string.restore_failed), SnackBarType.FAILED)
+//                })
         }, DialogConfirmType.RESTORE, null)
 
         dialogConfirm.show(childFragmentManager, dialogConfirm.tag)

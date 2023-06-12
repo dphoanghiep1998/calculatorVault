@@ -81,9 +81,9 @@ class ActivityImageDetail : AppCompatActivity() {
                 override fun onTap() {
                     jobSlide?.cancel()
                     showController()
-                    viewPagerAdapter = ImagePagerAdapter(this@ActivityImageDetail, it)
-                    binding.imageViewPager.adapter = viewPagerAdapter
-                    binding.imageViewPager.setCurrentItem(currentPage, false)
+//                    viewPagerAdapter = ImagePagerAdapter(this@ActivityImageDetail, it)
+//                    binding.imageViewPager.adapter = viewPagerAdapter
+//                    binding.imageViewPager.setCurrentItem(currentPage, false)
 
                 }
             })

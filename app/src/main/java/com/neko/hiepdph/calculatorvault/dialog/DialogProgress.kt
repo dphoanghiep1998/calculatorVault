@@ -206,7 +206,7 @@ class DialogProgress(
 
             listItemSelected.forEachIndexed { index, item ->
                 when (item.fileType) {
-                    Constant.TYPE_PICTURE, Constant.TYPE_VIDEOS -> {
+                    Constant.TYPE_PICTURE -> {
                         item.thumb = Base64.encodeToString(
                             imageToByteArray(item.originalPath), Base64.DEFAULT
                         )

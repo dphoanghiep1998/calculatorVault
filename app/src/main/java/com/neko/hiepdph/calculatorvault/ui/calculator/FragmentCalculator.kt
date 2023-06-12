@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.customview.CalculatorFunction
@@ -108,6 +109,7 @@ class FragmentCalculator : Fragment() {
     private fun checkSecretKey() {
 
         if (requireContext().config.isSetupPasswordDone && binding.tvInput.text.toString() == requireContext().config.secretPin) {
+            (requireActivity().application as CustomApplication).authority = true
             startActivity(Intent(requireContext(), ActivityVault::class.java))
         }
     }

@@ -87,25 +87,34 @@ class ActivityVault : AppCompatActivity() {
         mSensorManager?.registerListener(
             mShakeDetector, mAccelerometer, SensorManager.SENSOR_DELAY_UI
         )
-        Log.d("TAG", "onResume: "+config.isSetupPasswordDone)
-        Log.d("TAG", "onResume: "+(application as CustomApplication).authority)
-        Log.d("TAG", "onResume: "+config.fakePassword)
-        Log.d("TAG", "onResume: "+(application as CustomApplication).isLockShowed)
+        Log.d("TAG", "onResume: " + config.isSetupPasswordDone)
+        Log.d("TAG", "onResume: " + (application as CustomApplication).authority)
+        Log.d("TAG", "onResume: " + config.fakePassword)
+        Log.d("TAG", "onResume: " + (application as CustomApplication).isLockShowed)
 
-        if (config.isSetupPasswordDone && (!((application as CustomApplication).authority) && !config.fakePassword || !(application as CustomApplication).isLockShowed)) {
-            when (config.lockType) {
-                LockType.PATTERN -> {
-                    startActivity(Intent(this@ActivityVault, ActivityPatternLock::class.java))
-                }
-                LockType.PIN -> {
-                    startActivity(Intent(this@ActivityVault, ActivityPinLock::class.java))
-                }
-            }
-        }
+        // case that we can pop password secure up or not
+
+        //case 1: First setup app: Install app -> hold button -> grant permission -> show lock
+        //case 2: Since app password was setup already, user hold button -> show lock
+        //case 3: When click "=" to check password enabled -> don't show lock if password acceptable
+        //case 4: When user turn on Fake Password -> don't show lock again then pass to fake content
+        //case 5: When user turn on Screen Off Action -> Show lock when screen is off
+        //case 6: When user turn on Lock when leaving app -> Show lock when app go background
+
+//            when (config.lockType) {
+//                LockType.PATTERN -> {
+//                    startActivity(Intent(this@ActivityVault, ActivityPatternLock::class.java))
+//                }
+//
+//                LockType.PIN -> {
+//                    startActivity(Intent(this@ActivityVault, ActivityPinLock::class.java))
+//                }
+//            }
+
     }
 
     private fun checkPasswordSetDone() {
-        Log.d("TAG", "checkPasswordSetDone: "+config.isSetupPasswordDone)
+        Log.d("TAG", "checkPasswordSetDone: " + config.isSetupPasswordDone)
         if (!config.isSetupPasswordDone) {
             val navHostFragment =
                 supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
@@ -207,7 +216,9 @@ class ActivityVault : AppCompatActivity() {
                 binding.itemRecyclerBin.root.hide()
                 binding.itemSetting.root.hide()
                 binding.itemPrivacy.root.hide()
-                (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController.navigate(R.id.fragmentBrowser)
+                (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController.navigate(
+                    R.id.fragmentBrowser
+                )
             } else {
                 binding.itemVault.root.show()
                 binding.itemRecyclerBin.root.show()
@@ -320,26 +331,32 @@ class ActivityVault : AppCompatActivity() {
                     resetBackground(binding.itemVault)
                     binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                 }
+
                 R.id.fragmentBrowser -> {
                     resetBackground(binding.itemBrowser)
                     binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                 }
+
                 R.id.fragmentNote -> {
                     resetBackground(binding.itemNote)
                     binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                 }
+
                 R.id.fragmentRecycleBin -> {
                     resetBackground(binding.itemRecyclerBin)
                     binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                 }
+
                 R.id.fragmentSetting -> {
                     resetBackground(binding.itemSetting)
                     binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                 }
+
                 R.id.fragmentLanguage -> {
                     resetBackground(binding.itemLanguage)
                     binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                 }
+
                 else -> {
                     binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
                 }
@@ -474,7 +491,7 @@ class ActivityVault : AppCompatActivity() {
         mShakeDetector = ShakeDetector(this)
         mShakeDetector?.setOnShakeListener(object : ShakeDetector.OnShakeListener {
             override fun onShake(count: Int) {
-                if(config.shakeClose){
+                if (config.shakeClose) {
                     finishAffinity()
                     exitProcess(-1)
                 }

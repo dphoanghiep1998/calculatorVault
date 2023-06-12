@@ -85,10 +85,16 @@ class AdapterPersistent(
             val item = listItem[position]
             var requestOptions = RequestOptions()
             requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-            val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
+            if (item.thumb != null) {
+                val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
 
-            Glide.with(itemView.context).load(imageByte).placeholder(R.drawable.ic_error_image)
-                .apply(requestOptions).into(binding.imvThumb)
+                Glide.with(itemView.context).load(imageByte).placeholder(R.drawable.ic_error_image)
+                    .apply(requestOptions).into(binding.imvThumb)
+            } else {
+                Glide.with(itemView.context).load(R.drawable.ic_error_image).apply(requestOptions)
+                    .into(binding.imvThumb)
+            }
+
 
             binding.checkBox.isChecked = item in listOfItemSelected
 
@@ -134,12 +140,13 @@ class AdapterPersistent(
             requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
 
             binding.checkBox.isChecked = item in listOfItemSelected
-            if(item.thumb != null){
+            if (item.thumb != null) {
                 val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
-                Glide.with(itemView.context).load(imageByte)
-                    .placeholder(R.drawable.ic_error_video).apply(requestOptions).into(binding.imvThumb)
-            }else{
-                Glide.with(itemView.context).load(R.drawable.ic_error_video).apply(requestOptions).into(binding.imvThumb)
+                Glide.with(itemView.context).load(imageByte).placeholder(R.drawable.ic_error_video)
+                    .apply(requestOptions).into(binding.imvThumb)
+            } else {
+                Glide.with(itemView.context).load(R.drawable.ic_error_video).apply(requestOptions)
+                    .into(binding.imvThumb)
             }
 
 
@@ -185,10 +192,14 @@ class AdapterPersistent(
             val item = listItem[position]
             var requestOptions = RequestOptions()
             requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-            val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
-
-            Glide.with(itemView.context).load(imageByte).apply(requestOptions)
-                .error(R.drawable.ic_error_audio).into(binding.imvThumb)
+            if (item.thumb != null) {
+                val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
+                Glide.with(itemView.context).load(imageByte).placeholder(R.drawable.ic_error_image)
+                    .apply(requestOptions).into(binding.imvThumb)
+            } else {
+                Glide.with(itemView.context).load(R.drawable.ic_error_image).apply(requestOptions)
+                    .into(binding.imvThumb)
+            }
             binding.checkBox.isChecked = item in listOfItemSelected
             if (editMode) {
                 binding.option.hide()
