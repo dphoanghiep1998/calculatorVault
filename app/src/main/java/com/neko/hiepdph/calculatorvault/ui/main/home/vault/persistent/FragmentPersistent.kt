@@ -413,14 +413,19 @@ class FragmentPersistent : Fragment() {
             Action.UNLOCK,
             onSuccess = {
                 viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
-                normalView()
-                showSnackBar(
-                    String.format(it), SnackBarType.SUCCESS
-                )
+                requireActivity().runOnUiThread {
+                    normalView()
+                    showSnackBar(
+                        String.format(it), SnackBarType.SUCCESS
+                    )
+                }
+
             },
             onFailed = {
-                showSnackBar((it), SnackBarType.FAILED)
-                normalView()
+                requireActivity().runOnUiThread {
+                    showSnackBar((it), SnackBarType.FAILED)
+                    normalView()
+                }
             })
         dialogProgress.show(childFragmentManager, dialogProgress.tag)
 

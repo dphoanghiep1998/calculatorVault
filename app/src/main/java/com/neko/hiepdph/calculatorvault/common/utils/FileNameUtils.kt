@@ -16,6 +16,7 @@ import com.google.common.io.Files.getNameWithoutExtension
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
+import org.apache.commons.io.FileUtils.deleteQuietly
 import java.io.*
 import java.util.*
 
@@ -236,7 +237,7 @@ object FileNameUtils {
         return getExtSdCardFolder(file, c) != null
     }
 
-    fun rmdir(file: File, context: Context): Boolean {
+    private fun rmdir(file: File, context: Context): Boolean {
 //        if (!file.exists()) return true
         val files = file.listFiles()
         if (files != null && files.size > 0) {
@@ -249,18 +250,30 @@ object FileNameUtils {
         if (file.delete()) {
             return true
         }
+        if (deleteQuietly(file))
+            return true
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val document: DocumentFile? =
+                getDocumentFile(file, true, context)
+            if (document != null && document.delete()) {
+                return true
+            }
+        }
 
-        val resolver = context.contentResolver
-        val values = ContentValues()
-        values.put(MediaStore.MediaColumns.DATA, file.absolutePath)
-        resolver.insert(MediaStore.Files.getContentUri("external"), values)
+        // Try the Kitkat workaround.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            val resolver = context.contentResolver
+            val values = ContentValues()
+            values.put(MediaStore.MediaColumns.DATA, file.absolutePath)
+            resolver.insert(MediaStore.Files.getContentUri("external"), values)
 
-        resolver.delete(
-            MediaStore.Files.getContentUri("external"),
-            MediaStore.MediaColumns.DATA + "=?",
-            arrayOf(file.absolutePath)
-        )
+            // Delete the created entry, such that content provider will delete the file.
+            resolver.delete(
+                MediaStore.Files.getContentUri("external"),
+                MediaStore.MediaColumns.DATA + "=?", arrayOf(file.absolutePath)
+            )
+        }
         return !file.exists()
     }
 
@@ -315,10 +328,12 @@ object FileNameUtils {
      * @param isDirectory flag indicating if the file should be a directory.
      * @return The DocumentFile
      */
-    fun getDocumentFile(
+    private fun getDocumentFile(
         file: File, isDirectory: Boolean, context: Context
     ): DocumentFile? {
-        val baseFolder = getExtSdCardFolder(file, context)
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) return DocumentFile.fromFile(file)
+        val baseFolder: String? =
+            getExtSdCardFolder(file, context)
         var originalDirectory = false
         if (baseFolder == null) {
             return null
@@ -326,38 +341,32 @@ object FileNameUtils {
         var relativePath: String? = null
         try {
             val fullPath = file.canonicalPath
-            if (baseFolder != fullPath) {
-                relativePath = fullPath.substring(baseFolder.length + 1)
-            } else {
-                originalDirectory = true
-            }
+            if (baseFolder != fullPath) relativePath =
+                fullPath.substring(baseFolder.length + 1) else originalDirectory = true
         } catch (e: IOException) {
             return null
+        } catch (f: java.lang.Exception) {
+            originalDirectory = true
+            // continue
         }
 
-        val preferenceUri =
-            PreferenceManager.getDefaultSharedPreferences(context).getString("URI", null)
+//        val `as` = "Prefs.getString(PrefKeys.KEY_ACCESS_GRANT_STORAGE, null)"
         var treeUri: Uri? = null
-        if (preferenceUri != null) {
-            treeUri = Uri.parse(preferenceUri)
-        }
+//        if (`as` != null) treeUri = Uri.parse(`as`)
+        treeUri = Uri.parse(file.path)
         if (treeUri == null) {
             return null
         }
 
         // start with root of SD card and then parse through document tree.
-        var document = DocumentFile.fromTreeUri(context, treeUri)
-        if (originalDirectory || relativePath == null) {
-            return document
-        }
+        var document = DocumentFile.fromTreeUri(context!!, treeUri)
 
-        val parts = relativePath.split("/").toTypedArray()
+        if (document == null) return null
+
+        if (originalDirectory) return document
+        val parts = relativePath!!.split("/")
         for (i in parts.indices) {
-            if (document == null) {
-                return null
-            }
-
-            var nextDocument = document.findFile(parts[i])
+            var nextDocument = document!!.findFile(parts[i])
             if (nextDocument == null) {
                 nextDocument = if (i < parts.size - 1 || isDirectory) {
                     document.createDirectory(parts[i])
@@ -367,7 +376,6 @@ object FileNameUtils {
             }
             document = nextDocument
         }
-
         return document
     }
 

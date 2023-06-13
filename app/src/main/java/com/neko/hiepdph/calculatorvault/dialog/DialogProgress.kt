@@ -116,16 +116,18 @@ class DialogProgress(
                     listOfTargetParentFolder,
                     progress = { _: File? -> },
                     onSuccess = {
-                        listItemSelected.forEach {
-                            val item = it
-                            item.isDeleted = true
-                            viewModel.updateVaultItem(item)
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            listItemSelected.forEach {
+                                val item = it
+                                item.isDeleted = true
+                                viewModel.updateVaultItem(item)
+                            }
+                            onSuccess.invoke(getString(R.string.move_to_recycler_bin))
+                            dismiss()
                         }
-                        onSuccess.invoke(getString(R.string.move_to_recycler_bin))
-                        dismiss()
+
                     },
                     onError = {
-                        Log.d("TAG", "doAction: "+it.printStackTrace())
                         lifecycleScope.launch(Dispatchers.Main) {
                             onFailed.invoke(getString(R.string.move_to_recycler_bin_failed))
                             dismiss()

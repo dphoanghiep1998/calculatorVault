@@ -102,6 +102,10 @@ dependencies {
     implementation 'in.dd4you.animatoo:anim:1.0.0'
     // exoplayer2
     implementation 'com.google.android.exoplayer:exoplayer:2.18.6'
+    //apache
+    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'com.github.SimpleMobileTools:Simple-Commons:94b616f462'
+
 }
 
 
