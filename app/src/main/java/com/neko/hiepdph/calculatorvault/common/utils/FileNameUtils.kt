@@ -250,28 +250,17 @@ object FileNameUtils {
             return true
         }
 
-        // Try with Storage Access Framework.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val document: DocumentFile? = getDocumentFile(file, true, context)
-            if (document != null && document.delete()) {
-                return true
-            }
-        }
 
-        // Try the Kitkat workaround.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            val resolver = context.contentResolver
-            val values = ContentValues()
-            values.put(MediaStore.MediaColumns.DATA, file.absolutePath)
-            resolver.insert(MediaStore.Files.getContentUri("external"), values)
+        val resolver = context.contentResolver
+        val values = ContentValues()
+        values.put(MediaStore.MediaColumns.DATA, file.absolutePath)
+        resolver.insert(MediaStore.Files.getContentUri("external"), values)
 
-            // Delete the created entry, such that content provider will delete the file.
-            resolver.delete(
-                MediaStore.Files.getContentUri("external"),
-                MediaStore.MediaColumns.DATA + "=?",
-                arrayOf(file.absolutePath)
-            )
-        }
+        resolver.delete(
+            MediaStore.Files.getContentUri("external"),
+            MediaStore.MediaColumns.DATA + "=?",
+            arrayOf(file.absolutePath)
+        )
         return !file.exists()
     }
 

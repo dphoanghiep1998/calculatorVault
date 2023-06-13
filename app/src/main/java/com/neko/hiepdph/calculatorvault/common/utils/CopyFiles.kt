@@ -175,7 +175,7 @@ object CopyFiles {
                         run {
                             currentSize += len
                             progress(
-                                (currentSize * 100 / tSize), file
+                                (currentSize * 100 / totalSize), file
                             )
                         }
                     },

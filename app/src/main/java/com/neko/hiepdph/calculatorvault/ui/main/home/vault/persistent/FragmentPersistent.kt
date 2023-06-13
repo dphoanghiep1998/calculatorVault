@@ -355,10 +355,7 @@ class FragmentPersistent : Fragment() {
                     showSnackBar(it, SnackBarType.FAILED)
 
                 })
-
             dialogProgress.show(childFragmentManager, dialogProgress.tag)
-
-
         }, DialogConfirmType.DELETE, name)
 
         confirmDialog.show(childFragmentManager, confirmDialog.tag)

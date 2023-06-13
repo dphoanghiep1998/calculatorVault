@@ -128,8 +128,8 @@ class DialogConfirm(
 
     private fun initButton() {
         binding.btnConfirm.clickWithDebounce {
-            dismiss()
             onPositiveClicked()
+            dismiss()
         }
         binding.btnCancel.clickWithDebounce {
             dismiss()

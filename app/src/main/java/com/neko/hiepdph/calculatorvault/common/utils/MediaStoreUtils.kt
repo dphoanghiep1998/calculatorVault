@@ -411,7 +411,8 @@ object MediaStoreUtils {
                 val size = cursor.getLongValue(MediaStore.Video.Media.SIZE)
                 val modified = cursor.getLongValue(MediaStore.Video.Media.DATE_MODIFIED)  * 1000
                 val name = cursor.getStringValue(MediaStore.Video.Media.DISPLAY_NAME)
-
+                val file = File(childPath)
+                if (!file.exists() || file.isHidden || !file.canRead()) return@queryCursor
                 if (childPath.isNotBlank()) {
                     listVideoChild.add(
                         FileVaultItem(
@@ -465,7 +466,8 @@ object MediaStoreUtils {
                 val size = cursor.getLongValue(MediaStore.Audio.Media.SIZE)
                 val modified = cursor.getLongValue(MediaStore.Audio.Media.DATE_MODIFIED)  * 1000
                 val name = cursor.getStringValue(MediaStore.Audio.Media.DISPLAY_NAME)
-
+                val file = File(childPath)
+                if (!file.exists() || file.isHidden || !file.canRead()) return@queryCursor
                 if (childPath.isNotBlank()) {
                     listAudioChild.add(
                         FileVaultItem(
@@ -516,7 +518,8 @@ object MediaStoreUtils {
                 val modified = cursor.getLongValue(MediaStore.Files.FileColumns.DATE_MODIFIED) * 1000
                 Log.d("TAG", "getChildFileFromPath: " +modified)
                 val name = cursor.getStringValue(MediaStore.Files.FileColumns.DISPLAY_NAME)
-
+                val file = File(childPath)
+                if (!file.exists() || file.isHidden || !file.canRead()) return@queryCursor
                 val mimetype = fullMimetype.substringBefore("/")
 
                 if (mimetype == "text" || extraDocumentMimeTypes.contains(fullMimetype) || archiveMimeTypes.contains(

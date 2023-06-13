@@ -16,15 +16,12 @@ import androidx.lifecycle.lifecycleScope
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.enums.Action
-import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.popBackStack
 import com.neko.hiepdph.calculatorvault.common.extensions.show
-import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
 import com.neko.hiepdph.calculatorvault.common.extensions.toByteArray
-import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
@@ -80,6 +77,12 @@ class DialogProgress(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initView()
+        lifecycleScope.launch(Dispatchers.Main) {
+            viewModel.progressValue.observe(viewLifecycleOwner) {
+                setProgressValue(it.toInt())
+            }
+        }
+
     }
 
     private fun initView() {
@@ -88,13 +91,13 @@ class DialogProgress(
             Action.UNLOCK -> {
                 binding.tvTitle.text = getString(R.string.unlock)
                 binding.tvStatus.text =
-                    String.format(getString(R.string.unlocking), listItemSelected?.size.toString())
+                    String.format(getString(R.string.unlocking), listItemSelected.size.toString())
             }
 
             Action.DELETE -> {
                 binding.tvTitle.text = getString(R.string.delete)
                 binding.tvStatus.text =
-                    String.format(getString(R.string.deleting), listItemSelected?.size.toString())
+                    String.format(getString(R.string.deleting), listItemSelected.size.toString())
             }
 
             else -> {
@@ -108,11 +111,10 @@ class DialogProgress(
     private fun doAction() {
         if (action == Action.DELETE) {
             if (requireActivity().config.moveToRecyclerBin) {
-                CopyFiles.copy(requireContext(),
+                viewModel.copy(requireContext(),
                     listOfSourceFile,
                     listOfTargetParentFolder,
-                    0L,
-                    progress = { value: Float, _: File? -> setProgressValue(value.toInt()) },
+                    progress = { _: File? -> },
                     onSuccess = {
                         listItemSelected.forEach {
                             val item = it
@@ -123,9 +125,14 @@ class DialogProgress(
                         dismiss()
                     },
                     onError = {
-                        onFailed.invoke(getString(R.string.move_to_recycler_bin_failed))
-                        dismiss()
+                        Log.d("TAG", "doAction: "+it.printStackTrace())
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            onFailed.invoke(getString(R.string.move_to_recycler_bin_failed))
+                            dismiss()
+                        }
+
                     })
+
             } else {
                 viewModel.deleteMultipleFolder(listItemSelected.map { it.encryptedPath },
                     onSuccess = {
@@ -133,7 +140,7 @@ class DialogProgress(
                         onSuccess(getString(R.string.delete_success))
                         dismiss()
                     },
-                    onProgress = { setProgressValue(it.toInt()) },
+                    onProgress = { },
                     onError = {
                         onFailed(getString(R.string.delete_success))
                         dismiss()
@@ -166,13 +173,12 @@ class DialogProgress(
 
         }
         if (action == Action.UNLOCK) {
-            CopyFiles.decrypt(requireContext(),
+            viewModel.decrypt(requireContext(),
                 listOfSourceFile,
                 listOfTargetParentFolder,
                 listItemSelected.map { it.name },
-                0L,
-                progress = { value: Float, _: File? ->
-                    setProgressValue(value.toInt())
+                progress = { _: File? ->
+
                 },
                 onSuccess = {
                     onSuccess.invoke(
@@ -196,7 +202,7 @@ class DialogProgress(
 
         if (action == Action.ENCRYPT) {
             val listOfEncryptedString = mutableListOf<String>()
-            listItemSelected?.let {
+            listItemSelected.let {
                 listOfEncryptedString.addAll(it.map {
                     CryptoCore.getInstance(requireContext())
                         .encryptString(Constant.SECRET_KEY, it.name)
@@ -226,8 +232,8 @@ class DialogProgress(
                 listOfSourceFile,
                 listOfTargetParentFolder,
                 listOfEncryptedString,
-                progress = { value: Float, _: File? ->
-                    setProgressValue(value.toInt())
+                progress = { _: File? ->
+
                 },
                 onSuccess = {
                     lifecycleScope.launch(Dispatchers.Main) {
@@ -269,8 +275,8 @@ class DialogProgress(
 //        binding.tvStatus.text = status
 //    }
 
-    fun setProgressValue(value: Int) {
-        binding.progressLoading.progress = value
+    private fun setProgressValue(value: Int) {
+        binding.progressLoading.setProgress(value.toFloat())
         binding.tvProgress.text = "$value %"
     }
 
@@ -278,32 +284,32 @@ class DialogProgress(
         binding.btnOk.hide()
     }
 
-    fun statusSuccess() {
+    private fun statusSuccess() {
         binding.progressLoading.hide()
         binding.tvProgress.hide()
         binding.imvSuccess.show()
     }
 
-    fun statusFailed() {
+    private fun statusFailed() {
         binding.progressLoading.hide()
         binding.tvProgress.hide()
         binding.imvFailed.show()
     }
 
-    fun enableCancelable() {
+    private fun enableCancelable() {
         binding.root.setOnClickListener {
             dismiss()
         }
 
     }
 
-    fun disableCancelable() {
+    private fun disableCancelable() {
         binding.root.setOnClickListener {
 
         }
     }
 
-    fun showButton() {
+    private fun showButton() {
         binding.btnOk.show()
 //        binding.btnTips.show()
     }

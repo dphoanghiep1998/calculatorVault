@@ -33,23 +33,14 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ProgressBar
+        <com.neko.hiepdph.calculatorvault.common.customview.CircleProgressBar
             android:id="@+id/progress_loading"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="@dimen/_12sdp"
-            android:background="@drawable/bg_circle_shape"
-            android:indeterminate="false"
-            android:max="100"
-            android:progress="0"
-            android:progressDrawable="@drawable/bg_circle_progress_bar"
-            android:textAlignment="center"
-            app:layout_constraintBottom_toTopOf="@id/barrier"
-            app:layout_constraintDimensionRatio="1:1"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_title"
-            app:layout_constraintWidth_percent="0.3" />
+            app:progress="0"
+            app:progressBarThickness="4dp" />
 
         <ImageView
             android:id="@+id/imv_success"
@@ -105,8 +96,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/_12sdp"
-            android:paddingVertical="2dp"
             android:gravity="center"
+            android:paddingVertical="2dp"
             android:textColor="@color/neutral_06"
             android:textSize="@dimen/_12sdp"
             app:layout_constraintBottom_toBottomOf="@id/progress_loading"
@@ -121,20 +112,19 @@
             app:barrierDirection="bottom"
             app:constraint_referenced_ids="tv_status,progress_loading" />
 
-<!--        <TextView-->
-<!--            android:id="@+id/btn_tips"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginTop="@dimen/_12sdp"-->
-<!--            android:fontFamily="@font/app_font_500"-->
-<!--            android:paddingHorizontal="@dimen/_10sdp"-->
-<!--            android:paddingVertical="@dimen/_10sdp"-->
-<!--            android:text="@string/tips"-->
-<!--            android:textColor="@color/neutral_06"-->
-<!--            android:visibility="gone"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toBottomOf="@id/barrier" />-->
-
+        <!--        <TextView-->
+        <!--            android:id="@+id/btn_tips"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginTop="@dimen/_12sdp"-->
+        <!--            android:fontFamily="@font/app_font_500"-->
+        <!--            android:paddingHorizontal="@dimen/_10sdp"-->
+        <!--            android:paddingVertical="@dimen/_10sdp"-->
+        <!--            android:text="@string/tips"-->
+        <!--            android:textColor="@color/neutral_06"-->
+        <!--            android:visibility="gone"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@id/barrier" />-->
 
 
         <TextView
