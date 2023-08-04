@@ -13,6 +13,30 @@
     <external-path
         name="external_files"
         path="." />
+
+    <external-path
+        name="privacy_file"
+        path="Android/data/${applicationId}/files" />
+
+    <external-path
+        name="privacy_file_image"
+        path="Android/data/${applicationId}/files/Pictures" />
+
+    <external-path
+        name="privacy_file_audio"
+        path="Android/data/${applicationId}/files/Audios" />
+
+    <external-path
+        name="privacy_file_file"
+        path="Android/data/${applicationId}/files/Files" />
+
+    <external-path
+        name="privacy_file_video"
+        path="Android/data/${applicationId}/files/Videos" />
+
+    <external-path
+        name="privacy_file_bin"
+        path="Android/data/${applicationId}/files/Bin" />
     <root-path
         name="external_files"
         path="." />

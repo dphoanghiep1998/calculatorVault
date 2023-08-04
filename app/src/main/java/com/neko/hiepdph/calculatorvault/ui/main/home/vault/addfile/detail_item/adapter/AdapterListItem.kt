@@ -26,6 +26,7 @@ import com.neko.hiepdph.calculatorvault.databinding.LayoutItemVideosBinding
 
 class AdapterListItem(
     private val onClickItem: (MutableSet<FileVaultItem>) -> Unit,
+    private val onSelectAll: (MutableSet<FileVaultItem>) -> Unit,
     private val type: String = Constant.TYPE_PICTURE
 ) : ListAdapter<FileVaultItem, RecyclerView.ViewHolder>(ItemDiffCallback()) {
     private var listItem = mutableListOf<FileVaultItem>()
@@ -47,11 +48,13 @@ class AdapterListItem(
     fun selectAll() {
         listItemSelected.clear()
         listItemSelected.addAll(listItem)
+        onSelectAll(listItemSelected)
         notifyItemRangeChanged(0, listItem.size, PAYLOAD_CHECK)
     }
 
     fun unSelectAll() {
         listItemSelected.clear()
+        onSelectAll(listItemSelected)
         notifyItemRangeChanged(0, listItem.size,PAYLOAD_CHECK)
     }
 

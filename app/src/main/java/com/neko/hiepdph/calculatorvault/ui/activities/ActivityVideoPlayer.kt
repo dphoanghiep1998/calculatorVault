@@ -15,17 +15,20 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.common.enums.Action
+import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.shareFile
+import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
-import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityVideoPlayerBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.dialog.DialogDetail
+import com.neko.hiepdph.calculatorvault.dialog.DialogProgress
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -60,6 +63,7 @@ class ActivityVideoPlayer : AppCompatActivity() {
                 openInformationDialog()
                 true
             }
+
             else -> false
         }
     }
@@ -88,7 +92,7 @@ class ActivityVideoPlayer : AppCompatActivity() {
                 currentItem = listItem[0]
                 supportActionBar?.title = currentItem?.name
                 setupPlayer(it.map { item ->
-                    item.encryptedPath
+                    item.decodePath
                 })
             }
         }
@@ -136,32 +140,53 @@ class ActivityVideoPlayer : AppCompatActivity() {
         }
         findViewById<TextView>(R.id.tv_delete).clickWithDebounce {
             val confirmDialog = DialogConfirm(onPositiveClicked = {
-                if (config.moveToRecyclerBin) {
-                    CopyFiles.copy(this,
-                        mutableListOf(File(currentItem?.encryptionType.toString())),
-                        mutableListOf(config.recyclerBinFolder),
-                        0L,
-                        progress = {  _: Float, _: File? -> },
-                        onSuccess = {
-                            listItem.remove(currentItem)
-                            if (listItem.isEmpty()) {
-                                ShareData.getInstance().setListItemImage(mutableListOf())
-                                finish()
-                            } else {
-                                ShareData.getInstance().setListItemImage(listItem)
-                            }
-                        },
+//                if (config.moveToRecyclerBin) {
+//                    CopyFiles.copy(this,
+//                        mutableListOf(File(currentItem?.encryptionType.toString())),
+//                        mutableListOf(config.recyclerBinFolder),
+//                        0L,
+//                        progress = { _: Float, _: File? -> },
+//                        onSuccess = {
+//                            listItem.remove(currentItem)
+//                            if (listItem.isEmpty()) {
+//                                ShareData.getInstance().setListItemImage(mutableListOf())
+//                                finish()
+//                            } else {
+//                                ShareData.getInstance().setListItemImage(listItem)
+//                            }
+//                        },
+//
+//                        onError = {})
+//                } else FileUtils.deleteFolderInDirectory(currentItem?.encryptedPath.toString(),
+//                    onSuccess = {
+//                        listItem.remove(currentItem)
+//                        if (listItem.isEmpty()) {
+//                            ShareData.getInstance().setListItemImage(mutableListOf())
+//                            finish()
+//                        } else {
+//                            ShareData.getInstance().setListItemImage(listItem)
+//                        }
+//                    },
+//                    onError = {})
+               val dialogProgress =  DialogProgress(listItemSelected = mutableListOf(currentItem!!),
+                    listOfSourceFile = mutableListOf(File(currentItem!!.encryptedPath)),
+                    listOfTargetParentFolder = mutableListOf(config.recyclerBinFolder),
+                    action = Action.DELETE,
+                    onSuccess = {
+                        listItem.remove(currentItem)
+                        if (listItem.isEmpty()) {
+                            ShareData.getInstance().setListItemImage(mutableListOf())
+                            finish()
+                        } else {
+                            ShareData.getInstance().setListItemImage(listItem)
+                        }
+                        showSnackBar(it, SnackBarType.SUCCESS)
 
-                        onError = {})
-                } else FileUtils.deleteFolderInDirectory(currentItem?.encryptedPath.toString(), onSuccess = {
-                    listItem.remove(currentItem)
-                    if (listItem.isEmpty()) {
-                        ShareData.getInstance().setListItemImage(mutableListOf())
-                        finish()
-                    } else {
-                        ShareData.getInstance().setListItemImage(listItem)
-                    }
-                }, onError = {})
+                    },
+                    onFailed = {
+                        showSnackBar(it, SnackBarType.FAILED)
+                    })
+                dialogProgress.show(supportFragmentManager, dialogProgress.tag)
             }, DialogConfirmType.DELETE, currentItem?.name)
 
             confirmDialog.show(supportFragmentManager, confirmDialog.tag)

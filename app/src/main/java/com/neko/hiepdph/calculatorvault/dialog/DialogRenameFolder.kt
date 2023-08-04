@@ -21,6 +21,7 @@ interface RenameDialogCallBack {
 }
 
 class DialogRenameFolder(
+    private val initialName:String,
     private val callBack: RenameDialogCallBack
 ) : DialogFragment() {
     private lateinit var binding: DialogAddFolderBinding
@@ -57,6 +58,7 @@ class DialogRenameFolder(
     }
 
     private fun initView() {
+        binding.edtName.setText(initialName)
         initButton()
     }
 

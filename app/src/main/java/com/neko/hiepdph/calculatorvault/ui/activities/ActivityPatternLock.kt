@@ -276,4 +276,8 @@ class ActivityPatternLock : AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+
+    }
+
 }

@@ -35,7 +35,9 @@ class ImagePagerAdapter(val context: Context, private val listImage: MutableList
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val photoView = CustomPhotoView(container.context)
-        Glide.with(context).load(Base64.decode(listImage[position].thumb,Base64.DEFAULT)).centerInside().into(photoView)
+        if(listImage[position].thumb!= null){
+            Glide.with(context).load(Base64.decode(listImage[position].thumb,Base64.DEFAULT)).centerInside().into(photoView)
+        }
         container.addView(
             photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
         )

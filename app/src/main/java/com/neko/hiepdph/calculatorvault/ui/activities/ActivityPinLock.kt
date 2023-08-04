@@ -15,11 +15,15 @@ import com.neko.hiepdph.calculatorvault.common.customview.PinFunction
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
+import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityPinLockBinding
-import com.neko.hiepdph.calculatorvault.dialog.*
-import com.neko.hiepdph.calculatorvault.viewmodel.ListItemViewModel
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
+import com.neko.hiepdph.calculatorvault.dialog.DialogPassword
+import com.neko.hiepdph.calculatorvault.dialog.DialogShowPassword
+import com.neko.hiepdph.calculatorvault.dialog.SetupPassWordCallBack
 import com.neko.hiepdph.calculatorvault.viewmodel.PinLockViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -106,31 +110,13 @@ class ActivityPinLock : AppCompatActivity() {
         })
 
         binding.fingerPrint.clickWithDebounce {
-            val biometric = BiometricConfig.biometricConfig {
-                ownerFragmentActivity = this@ActivityPinLock
-                authenticateSuccess = {
-                    (application as CustomApplication).authority = true
-                    (application as CustomApplication).isLockShowed = true
-                    finish()
-                }
-                authenticateFailed = {
-                    if (config.fakePassword) {
-                        (application as CustomApplication).authority = false
-                        (application as CustomApplication).isLockShowed = true
-                        if (config.photoIntruder && !takePhotoIntruder) {
-                            takePicture(action = {
-                                finish()
-                            })
-                        }else {
-                            takePicture(action = {
-                            })
-                        }
-                    } else if (config.fingerprintFailure) {
-                        finishAffinity()
-                    }
-                }
-            }
-            biometric.showPrompt()
+            openFingerPrint()
+        }
+        if(config.unlockByFingerprint){
+            openFingerPrint()
+            binding.containerFingerPrint.show()
+        }else{
+            binding.containerFingerPrint.hide()
         }
 
         binding.tvPassword.clickWithDebounce {
@@ -143,6 +129,33 @@ class ActivityPinLock : AppCompatActivity() {
             }, DialogConfirmType.FORGOT_PASSWORD, null)
             confirmDialog.show(supportFragmentManager, confirmDialog.tag)
         }
+    }
+
+    private fun openFingerPrint(){
+        val biometric = BiometricConfig.biometricConfig {
+            ownerFragmentActivity = this@ActivityPinLock
+            authenticateSuccess = {
+                (application as CustomApplication).authority = true
+                (application as CustomApplication).isLockShowed = true
+                finish()
+            }
+            authenticateFailed = {
+                if (config.fakePassword) {
+                    (application as CustomApplication).authority = false
+                    (application as CustomApplication).isLockShowed = true
+                    if (config.photoIntruder && !takePhotoIntruder) {
+                        takePicture(action = {
+                            finish()
+                        })
+                    } else {
+                        takePicture(action = {})
+                    }
+                } else if (config.fingerprintFailure) {
+                    finishAffinity()
+                }
+            }
+        }
+        biometric.showPrompt()
     }
 
     private fun takePhotoIntruder(action: (() -> Unit)? = null) {
@@ -193,10 +206,15 @@ class ActivityPinLock : AppCompatActivity() {
         if (config.secretPin != currentPassword && config.fakePassword) {
             (application as CustomApplication).authority = false
             (application as CustomApplication).isLockShowed = true
+            if (!(application as CustomApplication).firstTimeOpen) {
+                (application as CustomApplication).changePassFail = true
+            }
             if (config.photoIntruder && !takePhotoIntruder) {
                 takePicture(action = {
                     finish()
                 })
+            } else {
+                finish()
             }
             return
         }
@@ -301,13 +319,20 @@ class ActivityPinLock : AppCompatActivity() {
                 fos.close()
                 viewModel.insertFileToRoom(
                     FileVaultItem(
-                        0, "${config.intruderFolder.path}/" + name,"${config.intruderFolder.path}/" + name, name = name
+                        0,
+                        "${config.intruderFolder.path}/" + name,
+                        "${config.intruderFolder.path}/" + name,
+                        name = name
                     )
                 )
             }
 
         }
         stopCamera()
+
+    }
+
+    override fun onBackPressed() {
 
     }
 }

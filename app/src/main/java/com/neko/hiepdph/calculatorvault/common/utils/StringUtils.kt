@@ -5,11 +5,12 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.core.content.FileProvider
+import com.neko.hiepdph.calculatorvault.BuildConfig
 import com.neko.hiepdph.calculatorvault.common.Constant
 import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.util.*
+import java.util.Locale
 import kotlin.math.roundToInt
 
 val String.Companion.EMPTY: String get() = ""
@@ -48,14 +49,14 @@ fun roundOffDecimal(number: Double): Double {
 }
 
 fun String.openWith(context: Context, type: String, realType: String?) {
-    Log.d("TAG", "openWith: "+type)
+    Log.d("TAG", "openWith: " + this)
     val file = File(this)
     val uri: Uri = Uri.fromFile(file)
     val intent = Intent(Intent.ACTION_VIEW)
-    val contentUri =
-        FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+
+    val contentUri = FileProvider.getUriForFile(context, "${BuildConfig.APPLICATION_ID}.provider", file)
     context.grantUriPermission(
-        context.packageName, contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+        BuildConfig.APPLICATION_ID, contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION
     )
     when (type) {
         Constant.TYPE_FILE -> {
@@ -69,30 +70,39 @@ fun String.openWith(context: Context, type: String, realType: String?) {
                 Constant.TYPE_PPT, Constant.TYPE_PPTX -> intent.setDataAndType(
                     uri, "application/vnd.ms-powerpoint"
                 )
+
                 Constant.TYPE_EXCEL, Constant.TYPE_CSV -> intent.setDataAndType(
                     uri, "application/vnd.ms-excel"
                 )
+
                 Constant.TYPE_ZIP -> intent.setDataAndType(
                     uri, "application/zip"
                 )
+
                 Constant.TYPE_RAR -> intent.setDataAndType(
                     uri, "application/rar"
                 )
+
                 Constant.TYPE_TEXT -> intent.setDataAndType(uri, "text/plain")
             }
         }
+
         Constant.TYPE_AUDIOS -> intent.setDataAndType(
             uri, "audio/*"
         )
-        Constant.TYPE_VIDEOS -> intent.setDataAndType(
-            uri, "video/*"
-        )
+
+        Constant.TYPE_VIDEOS -> {
+            intent.setDataAndType(
+                uri, "video/*"
+            )
+        }
+
         else -> {
             // Use default type for unknown extensions
             intent.setDataAndType(uri, "*/*")
         }
     }
-
+    intent.setDataAndType(uri, TypeOpen.getType(file))
     intent.data = contentUri
     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     context.startActivity(Intent.createChooser(intent, "Complete action using"))

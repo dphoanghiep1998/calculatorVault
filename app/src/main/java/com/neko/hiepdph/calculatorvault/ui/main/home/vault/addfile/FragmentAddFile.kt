@@ -1,6 +1,7 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -40,6 +41,11 @@ class FragmentAddFile : Fragment() {
         _binding = FragmentAddFileBinding.inflate(inflater, container, false)
         toastLocation()
         return binding.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        getDataGroupFile(args.type)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -91,11 +97,11 @@ class FragmentAddFile : Fragment() {
             GridLayoutManager(requireContext(), 3, RecyclerView.VERTICAL, false)
         }
         binding.rcvGroupItem.layoutManager = gridLayoutManager
-        getDataGroupFile(args.type)
     }
 
     private fun observeListGroupData() {
         viewModel.listItemListGroupFile.observe(viewLifecycleOwner) {
+            Log.d("TAG", "observeListGroupData: " + it)
             it?.let {
                 adapter.submitList(it)
                 binding.loading.hide()
@@ -111,7 +117,7 @@ class FragmentAddFile : Fragment() {
 
 
     override fun onDestroy() {
-        viewModel.setListItemPersistentData(null)
+        viewModel.setListItemPersistentData(mutableListOf())
         _binding = null
         super.onDestroy()
     }

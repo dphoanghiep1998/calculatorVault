@@ -87,16 +87,18 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/container_fingerPrint"
+        android:background="@color/white"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone">
+        android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/fingerPrint"
             android:layout_width="@dimen/_40sdp"
             android:layout_height="@dimen/_40sdp"
             android:layout_marginTop="@dimen/_12sdp"
+            android:foreground="@drawable/fg_ripple_effect"
             android:src="@drawable/ic_fingerprint"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -105,10 +107,12 @@
             android:id="@+id/tv_password"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_20sdp"
             android:paddingHorizontal="@dimen/_12sdp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="@string/use_password"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fingerPrint" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

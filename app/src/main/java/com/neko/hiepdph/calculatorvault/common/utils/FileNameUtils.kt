@@ -11,7 +11,6 @@ import android.text.TextUtils
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.documentfile.provider.DocumentFile
-import androidx.preference.PreferenceManager
 import com.google.common.io.Files.getNameWithoutExtension
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
@@ -42,6 +41,7 @@ object FileNameUtils {
         progress: (value: Int, currentFile: File) -> Unit,
         finish: (currentFile: File, targetFile: File) -> Unit,
     ) {
+
         val `in`: InputStream = FileInputStream(sourceLocation)
         val targetFile = if (!targetLocation.exists()) targetLocation
         else if (targetLocation.isFile) targetLocation
@@ -56,16 +56,60 @@ object FileNameUtils {
 
         while (`in`.read(buf).also { len = it } > 0) {
             out?.write(buf, 0, len)
-
             progress(len, sourceLocation)
         }
         `in`.close()
-
         out?.close()
         finish(sourceLocation, targetFile)
     }
 
     fun decryptFileToAnotherLocation(
+        context: Context,
+        sourceLocation: File,
+        targetLocation: File,
+        progress: (value: Int, currentFile: File) -> Unit,
+        finish: (currentFile: File, targetFile: File) -> Unit,
+        encryptionMode: Int = EncryptionMode.HIDDEN,
+    ) {
+        val `in`: InputStream = FileInputStream(sourceLocation)
+        val targetFile = if (!targetLocation.exists()) targetLocation
+        else if (targetLocation.isFile) targetLocation
+        else File(
+            targetLocation, sourceLocation.name
+        )
+        val out: OutputStream? = getOutputStream(targetFile, context)
+
+        // Copy the bits from instream to outstream
+        val buf = ByteArray(1024)
+        var len: Int = 0
+
+
+
+        if (encryptionMode == EncryptionMode.HIDDEN) {
+            while (`in`.read(buf).also { len = it } > 0) {
+                out?.write(buf, 0, len)
+                progress(len, sourceLocation)
+            }
+            `in`.close()
+            out?.close()
+            finish(sourceLocation, targetFile)
+        } else {
+            val filePath = sourceLocation.path
+            val fileData = CryptoCore.getInstance(context).readFile(filePath)
+            val secretKey = CryptoCore.getInstance(context).getSecretKey(context.config.secretKey)
+            val decodedData = CryptoCore.getInstance(context).decrypt(secretKey, fileData)
+            val byteInputStream = ByteArrayInputStream(decodedData)
+            while (byteInputStream.read(buf).also { len = it } > 0) {
+                out?.write(buf, 0, len)
+                progress(len, sourceLocation)
+            }
+            byteInputStream.close()
+            out?.close()
+            finish(sourceLocation, targetFile)
+        }
+    }
+
+    fun unLockFile(
         context: Context,
         sourceLocation: File,
         targetLocation: File,
@@ -126,13 +170,16 @@ object FileNameUtils {
         // Copy the bits from instream to outstream
         val buf = ByteArray(1024)
         var len: Int = 0
+
+
         if (encryptionMode == EncryptionMode.HIDDEN) {
             while (`in`.read(buf).also { len = it } > 0) {
                 out?.write(buf, 0, len)
-
                 progress(len, sourceLocation)
             }
             `in`.close()
+            out?.close()
+            finish(sourceLocation, targetFile)
         } else {
             val filePath = sourceLocation.path
             val fileData = CryptoCore.getInstance(context).readFile(filePath)
@@ -144,10 +191,10 @@ object FileNameUtils {
                 progress(len, sourceLocation)
             }
             byteInputStream.close()
+            out?.close()
+            finish(sourceLocation, targetFile)
         }
 
-        out?.close()
-        finish(sourceLocation, targetFile)
 
     }
 
@@ -168,7 +215,7 @@ object FileNameUtils {
                 outStream = context?.contentResolver?.openOutputStream(targetDocument.uri)
             } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
                 // Workaround for Kitkat ext SD card
-                return getOutputStream(target, context)
+                return MediaStoreHack.getOutputStream(context, target.path)
             }
         }
         return outStream
@@ -179,11 +226,6 @@ object FileNameUtils {
         folder: File, c: Context
     ): Boolean {
 
-        // Verify that this is a directory.
-        if (folder == null) return false
-        if (!folder.exists() || !folder.isDirectory) {
-            return false
-        }
         // Find a non-existing file in this directory.
         var i = 0
         var file: File
@@ -250,12 +292,10 @@ object FileNameUtils {
         if (file.delete()) {
             return true
         }
-        if (deleteQuietly(file))
-            return true
+        if (deleteQuietly(file)) return true
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val document: DocumentFile? =
-                getDocumentFile(file, true, context)
+            val document: DocumentFile? = getDocumentFile(file, true, context)
             if (document != null && document.delete()) {
                 return true
             }
@@ -271,7 +311,8 @@ object FileNameUtils {
             // Delete the created entry, such that content provider will delete the file.
             resolver.delete(
                 MediaStore.Files.getContentUri("external"),
-                MediaStore.MediaColumns.DATA + "=?", arrayOf(file.absolutePath)
+                MediaStore.MediaColumns.DATA + "=?",
+                arrayOf(file.absolutePath)
             )
         }
         return !file.exists()
@@ -332,8 +373,7 @@ object FileNameUtils {
         file: File, isDirectory: Boolean, context: Context
     ): DocumentFile? {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) return DocumentFile.fromFile(file)
-        val baseFolder: String? =
-            getExtSdCardFolder(file, context)
+        val baseFolder: String? = getExtSdCardFolder(file, context)
         var originalDirectory = false
         if (baseFolder == null) {
             return null
@@ -486,16 +526,17 @@ object FileNameUtils {
         // Try the normal way
         try {
             if (newFile.createNewFile()) {
-                return newFile.absolutePath
+                return newFile.path
             }
         } catch (e: IOException) {
             e.printStackTrace()
         }
 
-
-        if (!isWritableNormalOrSaf(currentFolder, context)) {
-            throw Exception(currentFolder.absolutePath)
-        }
+        Log.d("TAG", "createNewFile: ")
+//        if (!isWritableNormalOrSaf(currentFolder, context)) {
+//            Log.d("TAG", "createNewFile2: ")
+//            throw Exception(currentFolder.path)
+//        }
 
 
         // Try with Storage Access Framework.
@@ -508,7 +549,11 @@ object FileNameUtils {
                 if (document?.createFile(
                         getMimeType(newFile.path, newFile.isDirectory), newFile.name
                     ) != null
-                ) return newFile.absolutePath
+
+                ) {
+                    Log.d("TAG", "createNewFile3: ")
+                    return newFile.path
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
 
@@ -518,7 +563,9 @@ object FileNameUtils {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             try {
                 mkfile(context, newFile)
-                newFile.absolutePath
+                Log.d("TAG", "createNewFile4: ")
+                newFile.path
+
             } catch (e: Exception) {
                 null
             }

@@ -11,16 +11,28 @@ import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.adapter.ImagePagerAdapter
 import com.neko.hiepdph.calculatorvault.common.adapter.TapViewListener
 import com.neko.hiepdph.calculatorvault.common.customview.FixedSpeedScroller
-import com.neko.hiepdph.calculatorvault.common.extensions.*
-import com.neko.hiepdph.calculatorvault.common.transformer.*
+import com.neko.hiepdph.calculatorvault.common.enums.Action
+import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
+import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.config
+import com.neko.hiepdph.calculatorvault.common.extensions.hide
+import com.neko.hiepdph.calculatorvault.common.extensions.shareFile
+import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
+import com.neko.hiepdph.calculatorvault.common.transformer.BottomTransformer
+import com.neko.hiepdph.calculatorvault.common.transformer.FadeTransformer
+import com.neko.hiepdph.calculatorvault.common.transformer.LeftTransformer
+import com.neko.hiepdph.calculatorvault.common.transformer.RightTransformer
+import com.neko.hiepdph.calculatorvault.common.transformer.RotationTransformer
+import com.neko.hiepdph.calculatorvault.common.transformer.TopTransformer
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
-import com.neko.hiepdph.calculatorvault.common.utils.FileUtils
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityImageDetailBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.dialog.DialogDetail
+import com.neko.hiepdph.calculatorvault.dialog.DialogProgress
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
 import dagger.hilt.android.AndroidEntryPoint
 import `in`.dd4you.animatoo.VpAnimatoo
@@ -64,6 +76,7 @@ class ActivityImageDetail : AppCompatActivity() {
                 openImageInformationDialog()
                 true
             }
+
             else -> false
         }
     }
@@ -130,44 +143,33 @@ class ActivityImageDetail : AppCompatActivity() {
         binding.tvDelete.clickWithDebounce {
             val confirmDialog = DialogConfirm(onPositiveClicked = {
                 if (config.moveToRecyclerBin) {
-
-
-                    CopyFiles.copy(this,
-                        mutableListOf(File(currentItem?.encryptedPath.toString())),
-                        mutableListOf(config.recyclerBinFolder),
-                        0L,
-                        progress = { _: Float, _: File? -> },
-                        onSuccess = {
-                            listItem.remove(currentItem)
-                            if (listItem.isEmpty()) {
+                    val dialogProgress =
+                        DialogProgress(listItemSelected = mutableListOf(currentItem!!),
+                            listOfSourceFile = mutableListOf(File(currentItem!!.encryptedPath)),
+                            listOfTargetParentFolder = mutableListOf(config.recyclerBinFolder),
+                            action = Action.DELETE,
+                            onSuccess = {
                                 ShareData.getInstance().setListItemImage(mutableListOf())
                                 finish()
-                            } else {
-                                ShareData.getInstance().setListItemImage(listItem)
-                            }
-                        },
+                                showSnackBar(it, SnackBarType.SUCCESS)
 
-                        onError = {})
-                } else FileUtils.deleteFolderInDirectory(currentItem?.encryptedPath.toString(),
-                    onSuccess = {
-                        listItem.remove(currentItem)
-                        if (listItem.isEmpty()) {
-                            ShareData.getInstance().setListItemImage(mutableListOf())
-                            finish()
-                        } else {
-                            ShareData.getInstance().setListItemImage(listItem)
-                        }
-                    },
-                    onError = {})
+                            },
+                            onFailed = {
+                                showSnackBar(it, SnackBarType.FAILED)
+                            })
+                    dialogProgress.show(supportFragmentManager, dialogProgress.tag)
+                } else {
+
+                }
             }, DialogConfirmType.DELETE, getString(R.string.pictures))
 
-            confirmDialog.show(supportFragmentManager, confirmDialog.tag)
 
+            confirmDialog.show(supportFragmentManager, confirmDialog.tag)
         }
 
         binding.tvShare.clickWithDebounce {
             val listPath = mutableListOf<String>()
-            listPath.add(currentItem!!.encryptedPath)
+            listPath.add(currentItem!!.decodePath)
             shareFile(listPath)
         }
 
@@ -249,7 +251,7 @@ class ActivityImageDetail : AppCompatActivity() {
                 mutableListOf(File(currentItem?.encryptedPath.toString())),
                 mutableListOf(File(currentItem?.encryptedPath.toString())),
                 0L,
-                progress = {  _: Float, _: File? -> },
+                progress = { _: Float, _: File? -> },
                 onSuccess = {
                     listItem.remove(currentItem)
                     if (listItem.isEmpty()) {

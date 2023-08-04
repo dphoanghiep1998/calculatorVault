@@ -11,8 +11,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.PopupWindow
+import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
@@ -20,16 +20,17 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
-import com.neko.hiepdph.calculatorvault.common.extensions.ItemDiffCallback
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.utils.formatSize
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
-import com.neko.hiepdph.calculatorvault.databinding.*
+import com.neko.hiepdph.calculatorvault.databinding.LayoutItemPersistentFileBinding
+import com.neko.hiepdph.calculatorvault.databinding.LayoutPersistentItemFileOptionMenuBinding
+import com.neko.hiepdph.calculatorvault.databinding.LayoutPersistentItemOptionMenuBinding
 
 
-class AdapterOtherFolder(
+class AdapterOtherFolderNew(
     private val onClickItem: (FileVaultItem) -> Unit,
     private val onLongClickItem: (List<FileVaultItem>) -> Unit,
     private val onEditItem: (List<FileVaultItem>) -> Unit,
@@ -37,13 +38,24 @@ class AdapterOtherFolder(
     private val onOpenDetail: (FileVaultItem) -> Unit,
     private val onDeleteItem: (FileVaultItem) -> Unit
 
-) : ListAdapter<FileVaultItem,AdapterOtherFolder.ItemFileViewHolder>(ItemDiffCallback()) {
+) : RecyclerView.Adapter<AdapterOtherFolderNew.ItemFileViewHolder>() {
     private var listItem = mutableListOf<FileVaultItem>()
     private var listOfItemSelected = mutableSetOf<FileVaultItem>()
+    private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<FileVaultItem>() {
 
+        override fun areItemsTheSame(oldItem: FileVaultItem, newItem: FileVaultItem): Boolean {
+            return oldItem.id == newItem.id
+        }
 
-    override fun submitList(list: MutableList<FileVaultItem>?) {
-        super.submitList(list)
+        override fun areContentsTheSame(oldItem: FileVaultItem, newItem: FileVaultItem): Boolean {
+            return oldItem == newItem
+        }
+
+    }
+    private val differ = AsyncListDiffer(this, DIFF_CALLBACK)
+
+    fun submitList(list: MutableList<FileVaultItem>?) {
+        differ.submitList(list)
         list?.let {
             listItem.clear()
             listItem.addAll(it)
@@ -216,6 +228,11 @@ class AdapterOtherFolder(
         Constant.TYPE_AUDIOS -> 2
         else -> 3
     }
+
+    override fun getItemCount(): Int {
+        return differ.currentList.size
+    }
+
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onBindViewHolder(holder: ItemFileViewHolder, position: Int) {
         with(holder) {

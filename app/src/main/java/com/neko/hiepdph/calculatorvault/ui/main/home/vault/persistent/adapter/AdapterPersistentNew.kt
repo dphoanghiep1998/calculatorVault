@@ -2,9 +2,6 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.media.MediaMetadataRetriever
 import android.util.Base64
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
@@ -12,7 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.PopupWindow
-import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
@@ -20,18 +18,21 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
-import com.neko.hiepdph.calculatorvault.common.extensions.ItemDiffCallback
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.getFormattedDuration
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.utils.formatSize
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
-import com.neko.hiepdph.calculatorvault.data.model.*
-import com.neko.hiepdph.calculatorvault.databinding.*
+import com.neko.hiepdph.calculatorvault.databinding.LayoutItemPersistentAudiosBinding
+import com.neko.hiepdph.calculatorvault.databinding.LayoutItemPersistentFileBinding
+import com.neko.hiepdph.calculatorvault.databinding.LayoutItemPersistentOtherFileBinding
+import com.neko.hiepdph.calculatorvault.databinding.LayoutItemPersistentPictureBinding
+import com.neko.hiepdph.calculatorvault.databinding.LayoutItemPersistentVideosBinding
+import com.neko.hiepdph.calculatorvault.databinding.LayoutPersistentItemFileOptionMenuBinding
+import com.neko.hiepdph.calculatorvault.databinding.LayoutPersistentItemOptionMenuBinding
 
-
-class AdapterPersistent(
+class AdapterPersistentNew(
     private var mType: String = Constant.TYPE_PICTURE,
     private val onClickItem: (FileVaultItem) -> Unit,
     private val onLongClickItem: (List<FileVaultItem>) -> Unit,
@@ -39,24 +40,21 @@ class AdapterPersistent(
     private val onSelectAll: (List<FileVaultItem>) -> Unit,
     private val onOpenDetail: (FileVaultItem) -> Unit,
     private val onDeleteItem: (FileVaultItem) -> Unit
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-) : ListAdapter<FileVaultItem, RecyclerView.ViewHolder>(ItemDiffCallback()) {
-    private var listItem = mutableListOf<FileVaultItem>()
-    private var listOfItemSelected = mutableSetOf<FileVaultItem>()
+    companion object {
+        var editMode = false
+        private const val PAYLOAD_CHECK = "PAYLOAD_CHECK"
+    }
 
-
-    override fun submitList(list: MutableList<FileVaultItem>?) {
-        super.submitList(list)
-        list?.let {
-            listItem.clear()
-            listItem.addAll(it)
-        }
+    private fun showCheckboxAll() {
+        notifyItemRangeChanged(0, listItem.size, PAYLOAD_CHECK)
     }
 
     fun selectAll() {
         listOfItemSelected.addAll(listItem)
-        showCheckboxAll()
         onSelectAll.invoke(listOfItemSelected.toMutableList())
+        notifyItemRangeChanged(0, listItem.size, PAYLOAD_CHECK)
     }
 
     fun unSelectAll() {
@@ -64,300 +62,58 @@ class AdapterPersistent(
         showCheckboxAll()
     }
 
+    private var listItem = mutableListOf<FileVaultItem>()
+    private var listOfItemSelected = mutableSetOf<FileVaultItem>()
+    private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<FileVaultItem>() {
 
-    companion object {
-        var editMode = false
-        private const val PAYLOAD_CHECK = "PAYLOAD_CHECK"
-
-    }
-
-    override fun getItemCount(): Int {
-        return listItem.size
-    }
-
-    private fun showCheckboxAll() {
-        notifyItemRangeChanged(0, listItem.size, PAYLOAD_CHECK)
-    }
-
-    inner class ItemPictureViewHolder(val binding: LayoutItemPersistentPictureBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(position: Int) {
-            val item = listItem[position]
-            var requestOptions = RequestOptions()
-            requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-            if (item.thumb != null) {
-                val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
-
-                Glide.with(itemView.context).load(imageByte).placeholder(R.drawable.ic_error_image)
-                    .apply(requestOptions).into(binding.imvThumb)
-            } else {
-                Glide.with(itemView.context).load(R.drawable.ic_error_image).apply(requestOptions)
-                    .into(binding.imvThumb)
-            }
-
-
-            binding.checkBox.isChecked = item in listOfItemSelected
-
-            binding.root.setOnLongClickListener {
-                if (editMode) {
-                    return@setOnLongClickListener false
-                }
-                editMode = true
-                listOfItemSelected.add(item)
-                onLongClickItem(listOfItemSelected.toMutableList())
-                showCheckboxAll()
-                return@setOnLongClickListener true
-            }
-            binding.root.setOnClickListener {
-                if (!editMode) {
-                    onClickItem.invoke(item)
-                } else {
-                    binding.checkBox.isChecked = !binding.checkBox.isChecked
-                    if (binding.checkBox.isChecked) {
-                        listOfItemSelected.add(item)
-                    } else {
-                        listOfItemSelected.remove(item)
-                    }
-                    onEditItem(listOfItemSelected.toMutableList())
-                }
-            }
-            binding.checkBox.setOnClickListener {
-                if (binding.checkBox.isChecked) {
-                    listOfItemSelected.add(item)
-                } else {
-                    listOfItemSelected.remove(item)
-                }
-                onEditItem(listOfItemSelected.toMutableList())
-            }
+        override fun areItemsTheSame(oldItem: FileVaultItem, newItem: FileVaultItem): Boolean {
+            return oldItem.id == newItem.id
         }
-    }
 
-    inner class ItemVideoViewHolder(val binding: LayoutItemPersistentVideosBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(position: Int) {
-            val item = listItem[position]
-            var requestOptions = RequestOptions()
-            requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-
-            binding.checkBox.isChecked = item in listOfItemSelected
-            if (item.thumb != null) {
-                val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
-                Glide.with(itemView.context).load(imageByte).placeholder(R.drawable.ic_error_video)
-                    .apply(requestOptions).into(binding.imvThumb)
-            } else {
-                Glide.with(itemView.context).load(R.drawable.ic_error_video).apply(requestOptions)
-                    .into(binding.imvThumb)
-            }
-
-
-            binding.tvDuration.text = item.durationLength?.getFormattedDuration()
-            binding.root.setOnLongClickListener {
-                if (editMode) {
-                    return@setOnLongClickListener false
-                }
-                editMode = true
-                listOfItemSelected.add(item)
-                onLongClickItem(listOfItemSelected.toMutableList())
-                showCheckboxAll()
-                return@setOnLongClickListener true
-            }
-            binding.root.setOnClickListener {
-                if (!editMode) {
-                    onClickItem.invoke(item)
-                } else {
-                    binding.checkBox.isChecked = !binding.checkBox.isChecked
-                    if (binding.checkBox.isChecked) {
-                        listOfItemSelected.add(item)
-                    } else {
-                        listOfItemSelected.remove(item)
-                    }
-                    onEditItem(listOfItemSelected.toMutableList())
-                }
-            }
-            binding.checkBox.setOnClickListener {
-                if (binding.checkBox.isChecked) {
-                    listOfItemSelected.add(item)
-                } else {
-                    listOfItemSelected.remove(item)
-                }
-                onEditItem(listOfItemSelected.toMutableList())
-            }
+        override fun areContentsTheSame(oldItem: FileVaultItem, newItem: FileVaultItem): Boolean {
+            return oldItem == newItem
         }
-    }
 
-    inner class ItemAudioViewHolder(val binding: LayoutItemPersistentAudiosBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(position: Int) {
-            binding.tvNameAudio.isSelected = true
-            val item = listItem[position]
-            var requestOptions = RequestOptions()
-            requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
-            if (item.thumb != null) {
-                val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
-                Glide.with(itemView.context).load(imageByte).placeholder(R.drawable.ic_error_image)
-                    .apply(requestOptions).into(binding.imvThumb)
-            } else {
-                Glide.with(itemView.context).load(R.drawable.ic_error_image).apply(requestOptions)
-                    .into(binding.imvThumb)
-            }
-            binding.checkBox.isChecked = item in listOfItemSelected
-            if (editMode) {
-                binding.option.hide()
-                binding.checkBox.show()
-            } else {
-                binding.option.show()
-                binding.checkBox.hide()
-            }
-            binding.tvNameAudio.text = item.name
-            binding.tvDurationAuthor.text =
-                item.durationLength?.getFormattedDuration().toString() + "-" + item.artist
-            binding.option.clickWithDebounce {
-                showPopupWindow(
-                    itemView.context, binding.option, item, onClickItem, onDeleteItem, onOpenDetail
+    }
+    private val differ = AsyncListDiffer(this, DIFF_CALLBACK)
+
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        when (viewType) {
+            0 -> {
+                val binding = LayoutItemPersistentPictureBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false
                 )
+
+                return ItemPictureViewHolder(binding)
             }
 
-
-            binding.root.setOnLongClickListener {
-                if (editMode) {
-                    return@setOnLongClickListener false
-                }
-                editMode = true
-                listOfItemSelected.add(item)
-                onLongClickItem(listOfItemSelected.toMutableList())
-
-                showCheckboxAll()
-
-                return@setOnLongClickListener true
-            }
-            binding.root.setOnClickListener {
-                if (!editMode) {
-                    onClickItem.invoke(item)
-                } else {
-                    binding.checkBox.isChecked = !binding.checkBox.isChecked
-                    if (binding.checkBox.isChecked) {
-                        listOfItemSelected.add(item)
-                    } else {
-                        listOfItemSelected.remove(item)
-                    }
-                    onEditItem(listOfItemSelected.toMutableList())
-                }
-            }
-
-            binding.checkBox.setOnClickListener {
-                if (binding.checkBox.isChecked) {
-                    listOfItemSelected.add(item)
-                } else {
-                    listOfItemSelected.remove(item)
-                }
-                onEditItem(listOfItemSelected.toMutableList())
-            }
-        }
-    }
-
-    inner class ItemFileViewHolder(val binding: LayoutItemPersistentFileBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(position: Int) {
-            val item = listItem[position]
-            Glide.with(itemView.context).load(getImageForItemFile(item))
-                .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
-            binding.tvNameDocument.isSelected = true
-            binding.tvNameDocument.text = item.name
-            binding.tvSize.text = item.size.formatSize()
-            binding.option.clickWithDebounce {
-                showPopupWindowFile(
-                    itemView.context, binding.option, item, onClickItem, onDeleteItem, onOpenDetail
+            1 -> {
+                val binding = LayoutItemPersistentAudiosBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false
                 )
+                return ItemAudioViewHolder(binding)
             }
-            if (editMode) {
-                binding.option.hide()
-                binding.checkBox.show()
-            } else {
-                binding.option.show()
-                binding.checkBox.hide()
-            }
-            binding.checkBox.isChecked = item in listOfItemSelected
 
-            binding.root.setOnLongClickListener {
-                if (editMode) {
-                    return@setOnLongClickListener false
-                }
-                editMode = true
-                listOfItemSelected.add(item)
-                onLongClickItem(listOfItemSelected.toMutableList())
-                showCheckboxAll()
+            2 -> {
+                val binding = LayoutItemPersistentVideosBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false
+                )
+                return ItemVideoViewHolder(binding)
+            }
 
-                return@setOnLongClickListener true
+            3 -> {
+                val binding = LayoutItemPersistentFileBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false
+                )
+                return ItemFileViewHolder(binding)
             }
-            binding.root.setOnClickListener {
-                if (!editMode) {
-                    onClickItem.invoke(item)
-                } else {
-                    binding.checkBox.isChecked = !binding.checkBox.isChecked
-                    if (binding.checkBox.isChecked) {
-                        listOfItemSelected.add(item)
-                    } else {
-                        listOfItemSelected.remove(item)
-                    }
-                    onEditItem(listOfItemSelected.toMutableList())
-                }
-            }
-            binding.checkBox.setOnClickListener {
-                if (binding.checkBox.isChecked) {
-                    listOfItemSelected.add(item)
-                } else {
-                    listOfItemSelected.remove(item)
-                }
-                onEditItem(listOfItemSelected.toMutableList())
-            }
-        }
-    }
 
-    inner class ItemOtherFileViewHolder(val binding: LayoutItemPersistentOtherFileBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(position: Int) {
-            val item = listItem[position]
-            Glide.with(itemView.context).load(getImageForItemFile(item))
-                .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
-            binding.checkBox.isChecked = item in listOfItemSelected
-
-            binding.root.setOnLongClickListener {
-                if (editMode) {
-                    return@setOnLongClickListener false
-                }
-                editMode = true
-                listOfItemSelected.add(item)
-                onLongClickItem(listOfItemSelected.toMutableList())
-                showCheckboxAll()
-                return@setOnLongClickListener true
-            }
-            binding.root.setOnClickListener {
-                if (!editMode) {
-                    onClickItem.invoke(item)
-                } else {
-                    binding.checkBox.isChecked = !binding.checkBox.isChecked
-                    if (binding.checkBox.isChecked) {
-                        listOfItemSelected.add(item)
-                    } else {
-                        listOfItemSelected.remove(item)
-                    }
-                    onEditItem(listOfItemSelected.toMutableList())
-                }
-            }
-            if (editMode) {
-                binding.option.hide()
-                binding.checkBox.show()
-            } else {
-                binding.option.show()
-                binding.checkBox.hide()
-            }
-            binding.checkBox.setOnClickListener {
-                if (binding.checkBox.isChecked) {
-                    listOfItemSelected.add(item)
-                } else {
-                    listOfItemSelected.remove(item)
-                }
-                onEditItem(listOfItemSelected.toMutableList())
+            else -> {
+                val binding = LayoutItemPersistentOtherFileBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false
+                )
+                return ItemOtherFileViewHolder(binding)
             }
         }
     }
@@ -442,55 +198,39 @@ class AdapterPersistent(
         }
     }
 
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-
-        when (viewType) {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (holder.itemViewType) {
             0 -> {
-                val binding = LayoutItemPersistentPictureBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false
-                )
-
-                return ItemPictureViewHolder(binding)
+                with(holder as ItemPictureViewHolder) {
+                    bind(differ.currentList[position])
+                }
             }
 
             1 -> {
-                val binding = LayoutItemPersistentAudiosBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false
-                )
-                return ItemAudioViewHolder(binding)
+                with(holder as ItemAudioViewHolder) {
+                    bind(differ.currentList[position])
+                }
             }
 
             2 -> {
-                val binding = LayoutItemPersistentVideosBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false
-                )
-                return ItemVideoViewHolder(binding)
+                with(holder as ItemVideoViewHolder) {
+                    bind(differ.currentList[position])
+                }
             }
 
             3 -> {
-                val binding = LayoutItemPersistentFileBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false
-                )
-                return ItemFileViewHolder(binding)
+                with(holder as ItemFileViewHolder) {
+                    bind(differ.currentList[position])
+                }
             }
 
-            else -> {
-                val binding = LayoutItemPersistentOtherFileBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false
-                )
-                return ItemOtherFileViewHolder(binding)
+            4 -> {
+                with(holder as ItemOtherFileViewHolder) {
+                    bind(differ.currentList[position])
+                }
             }
         }
     }
-
-    fun changeToNormalView() {
-        editMode = false
-        listOfItemSelected.clear()
-        showCheckboxAll()
-    }
-
-
     override fun getItemViewType(position: Int): Int = when (mType) {
         Constant.TYPE_PICTURE -> 0
         Constant.TYPE_AUDIOS -> 1
@@ -498,46 +238,316 @@ class AdapterPersistent(
         Constant.TYPE_FILE -> 3
         else -> 4
     }
+    override fun getItemCount(): Int {
+        return differ.currentList.size
+    }
 
-    @SuppressLint("SetTextI18n")
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (holder.itemViewType) {
-            0 -> {
-                with(holder as ItemPictureViewHolder) {
-                    bind(position)
-                }
+    fun submitList(list: List<FileVaultItem>) {
+        differ.submitList(list)
+        list?.let {
+            listItem.clear()
+            listItem.addAll(it)
+        }
+    }
+
+    inner class ItemPictureViewHolder(val binding: LayoutItemPersistentPictureBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: FileVaultItem) {
+            var requestOptions = RequestOptions()
+            requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
+            if (item.thumb != null) {
+                val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
+
+                Glide.with(itemView.context).load(imageByte).placeholder(R.drawable.ic_error_image)
+                    .apply(requestOptions).into(binding.imvThumb)
+            } else {
+                Glide.with(itemView.context).load(R.drawable.ic_error_image).apply(requestOptions)
+                    .into(binding.imvThumb)
             }
 
-            1 -> {
-                with(holder as ItemAudioViewHolder) {
-                    bind(position)
+
+            binding.checkBox.isChecked = item in listOfItemSelected
+
+            binding.root.setOnLongClickListener {
+                if (editMode) {
+                    return@setOnLongClickListener false
+                }
+                editMode = true
+                listOfItemSelected.add(item)
+                onLongClickItem(listOfItemSelected.toMutableList())
+                showCheckboxAll()
+                return@setOnLongClickListener true
+            }
+            binding.root.setOnClickListener {
+                if (!editMode) {
+                    onClickItem.invoke(item)
+                } else {
+                    binding.checkBox.isChecked = !binding.checkBox.isChecked
+                    if (binding.checkBox.isChecked) {
+                        listOfItemSelected.add(item)
+                    } else {
+                        listOfItemSelected.remove(item)
+                    }
+                    onEditItem(listOfItemSelected.toMutableList())
                 }
             }
-
-            2 -> {
-                with(holder as ItemVideoViewHolder) {
-                    bind(position)
+            binding.checkBox.setOnClickListener {
+                if (binding.checkBox.isChecked) {
+                    listOfItemSelected.add(item)
+                } else {
+                    listOfItemSelected.remove(item)
                 }
-            }
-
-            3 -> {
-                with(holder as ItemFileViewHolder) {
-                    bind(position)
-                }
-            }
-
-            4 -> {
-                with(holder as ItemOtherFileViewHolder) {
-                    bind(position)
-                }
-
-
+                onEditItem(listOfItemSelected.toMutableList())
             }
         }
     }
 
+    inner class ItemVideoViewHolder(val binding: LayoutItemPersistentVideosBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: FileVaultItem) {
+            var requestOptions = RequestOptions()
+            requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
+
+            binding.checkBox.isChecked = item in listOfItemSelected
+            if (item.thumb != null) {
+                val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
+                Glide.with(itemView.context).load(imageByte).placeholder(R.drawable.ic_error_video)
+                    .apply(requestOptions).into(binding.imvThumb)
+            } else {
+                Glide.with(itemView.context).load(R.drawable.ic_error_video).apply(requestOptions)
+                    .into(binding.imvThumb)
+            }
+
+
+            binding.tvDuration.text = item.durationLength?.getFormattedDuration()
+            binding.root.setOnLongClickListener {
+                if (editMode) {
+                    return@setOnLongClickListener false
+                }
+                editMode = true
+                listOfItemSelected.add(item)
+                onLongClickItem(listOfItemSelected.toMutableList())
+                showCheckboxAll()
+                return@setOnLongClickListener true
+            }
+            binding.root.setOnClickListener {
+                if (!editMode) {
+                    onClickItem.invoke(item)
+                } else {
+                    binding.checkBox.isChecked = !binding.checkBox.isChecked
+                    if (binding.checkBox.isChecked) {
+                        listOfItemSelected.add(item)
+                    } else {
+                        listOfItemSelected.remove(item)
+                    }
+                    onEditItem(listOfItemSelected.toMutableList())
+                }
+            }
+            binding.checkBox.setOnClickListener {
+                if (binding.checkBox.isChecked) {
+                    listOfItemSelected.add(item)
+                } else {
+                    listOfItemSelected.remove(item)
+                }
+                onEditItem(listOfItemSelected.toMutableList())
+            }
+        }
+    }
+
+    inner class ItemAudioViewHolder(val binding: LayoutItemPersistentAudiosBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        @SuppressLint("SetTextI18n")
+        fun bind(item: FileVaultItem) {
+            binding.tvNameAudio.isSelected = true
+            var requestOptions = RequestOptions()
+            requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
+            if (item.thumb != null) {
+                val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
+                Glide.with(itemView.context).load(imageByte).placeholder(R.drawable.ic_error_image)
+                    .apply(requestOptions).into(binding.imvThumb)
+            } else {
+                Glide.with(itemView.context).load(R.drawable.ic_error_image).apply(requestOptions)
+                    .into(binding.imvThumb)
+            }
+            binding.checkBox.isChecked = item in listOfItemSelected
+            if (editMode) {
+                binding.option.hide()
+                binding.checkBox.show()
+            } else {
+                binding.option.show()
+                binding.checkBox.hide()
+            }
+            binding.tvNameAudio.text = item.name
+            binding.tvDurationAuthor.text =
+                item.durationLength?.getFormattedDuration().toString() + "-" + item.artist
+            binding.option.clickWithDebounce {
+                showPopupWindow(
+                    itemView.context, binding.option, item, onClickItem, onDeleteItem, onOpenDetail
+                )
+            }
+
+
+            binding.root.setOnLongClickListener {
+                if (editMode) {
+                    return@setOnLongClickListener false
+                }
+                editMode = true
+                listOfItemSelected.add(item)
+                onLongClickItem(listOfItemSelected.toMutableList())
+
+                showCheckboxAll()
+
+                return@setOnLongClickListener true
+            }
+            binding.root.setOnClickListener {
+                if (!editMode) {
+                    onClickItem.invoke(item)
+                } else {
+                    binding.checkBox.isChecked = !binding.checkBox.isChecked
+                    if (binding.checkBox.isChecked) {
+                        listOfItemSelected.add(item)
+                    } else {
+                        listOfItemSelected.remove(item)
+                    }
+                    onEditItem(listOfItemSelected.toMutableList())
+                }
+            }
+
+            binding.checkBox.setOnClickListener {
+                if (binding.checkBox.isChecked) {
+                    listOfItemSelected.add(item)
+                } else {
+                    listOfItemSelected.remove(item)
+                }
+                onEditItem(listOfItemSelected.toMutableList())
+            }
+        }
+    }
+
+    inner class ItemFileViewHolder(val binding: LayoutItemPersistentFileBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: FileVaultItem) {
+            Glide.with(itemView.context).load(getImageForItemFile(item))
+                .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+            binding.tvNameDocument.isSelected = true
+            binding.tvNameDocument.text = item.name
+            binding.tvSize.text = item.size.formatSize()
+            binding.option.clickWithDebounce {
+                showPopupWindowFile(
+                    itemView.context, binding.option, item, onClickItem, onDeleteItem, onOpenDetail
+                )
+            }
+            if (editMode) {
+                binding.option.hide()
+                binding.checkBox.show()
+            } else {
+                binding.option.show()
+                binding.checkBox.hide()
+            }
+            binding.checkBox.isChecked = item in listOfItemSelected
+
+            binding.root.setOnLongClickListener {
+                if (editMode) {
+                    return@setOnLongClickListener false
+                }
+                editMode = true
+                listOfItemSelected.add(item)
+                onLongClickItem(listOfItemSelected.toMutableList())
+                showCheckboxAll()
+
+                return@setOnLongClickListener true
+            }
+            binding.root.setOnClickListener {
+                if (!editMode) {
+                    onClickItem.invoke(item)
+                } else {
+                    binding.checkBox.isChecked = !binding.checkBox.isChecked
+                    if (binding.checkBox.isChecked) {
+                        listOfItemSelected.add(item)
+                    } else {
+                        listOfItemSelected.remove(item)
+                    }
+                    onEditItem(listOfItemSelected.toMutableList())
+                }
+            }
+            binding.checkBox.setOnClickListener {
+                if (binding.checkBox.isChecked) {
+                    listOfItemSelected.add(item)
+                } else {
+                    listOfItemSelected.remove(item)
+                }
+                onEditItem(listOfItemSelected.toMutableList())
+            }
+        }
+    }
+
+    inner class ItemOtherFileViewHolder(val binding: LayoutItemPersistentOtherFileBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: FileVaultItem) {
+            Glide.with(itemView.context).load(getImageForItemFile(item))
+                .error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+            binding.checkBox.isChecked = item in listOfItemSelected
+
+            binding.root.setOnLongClickListener {
+                if (editMode) {
+                    return@setOnLongClickListener false
+                }
+                editMode = true
+                listOfItemSelected.add(item)
+                onLongClickItem(listOfItemSelected.toMutableList())
+                showCheckboxAll()
+                return@setOnLongClickListener true
+            }
+            binding.root.setOnClickListener {
+                if (!editMode) {
+                    onClickItem.invoke(item)
+                } else {
+                    binding.checkBox.isChecked = !binding.checkBox.isChecked
+                    if (binding.checkBox.isChecked) {
+                        listOfItemSelected.add(item)
+                    } else {
+                        listOfItemSelected.remove(item)
+                    }
+                    onEditItem(listOfItemSelected.toMutableList())
+                }
+            }
+            if (editMode) {
+                binding.option.hide()
+                binding.checkBox.show()
+            } else {
+                binding.option.show()
+                binding.checkBox.hide()
+            }
+            binding.checkBox.setOnClickListener {
+                if (binding.checkBox.isChecked) {
+                    listOfItemSelected.add(item)
+                } else {
+                    listOfItemSelected.remove(item)
+                }
+                onEditItem(listOfItemSelected.toMutableList())
+            }
+        }
+    }
+    fun changeToNormalView() {
+        editMode = false
+        listOfItemSelected.clear()
+        notifyItemRangeChanged(0, listItem.size, PAYLOAD_CHECK)
+    }
+
 }
 
+//private fun getThumbnail(path: String): Bitmap? {
+//    return try {
+//        val mr = MediaMetadataRetriever()
+//        mr.setDataSource(path)
+//        val byte1 = mr.embeddedPicture
+//        mr.release()
+//        if (byte1 != null) BitmapFactory.decodeByteArray(byte1, 0, byte1.size)
+//        else null
+//    } catch (e: java.lang.Exception) {
+//        null
+//    }
+//}
 
 private fun getImageForItemFile(item: FileVaultItem): Int {
     return when (item.fileRealType) {
@@ -547,26 +557,13 @@ private fun getImageForItemFile(item: FileVaultItem): Int {
         Constant.TYPE_PPT -> R.drawable.ic_ppt
         Constant.TYPE_TEXT -> R.drawable.ic_txt
         Constant.TYPE_ZIP -> R.drawable.ic_zip
-        Constant.TYPE_RAR -> R.drawable.ic_rar
         Constant.TYPE_PPTX -> R.drawable.ic_pptx
         Constant.TYPE_EXCEL -> R.drawable.ic_excel
         Constant.TYPE_PDF -> R.drawable.ic_pdf
-        else -> 0
+        else -> R.drawable.ic_file_unknow
     }
 }
 
-private fun getThumbnail(path: String): Bitmap? {
-    return try {
-        val mr = MediaMetadataRetriever()
-        mr.setDataSource(path)
-        val byte1 = mr.embeddedPicture
-        mr.release()
-        if (byte1 != null) BitmapFactory.decodeByteArray(byte1, 0, byte1.size)
-        else null
-    } catch (e: java.lang.Exception) {
-        null
-    }
-}
 
 private fun showPopupWindow(
     context: Context,

@@ -15,7 +15,8 @@ import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.databinding.DialogAskEncryptionModeBinding
 
 
-class DialogAskEncryptionMode(private val onPressPositive:(selectedEncryption:Int)->Unit) : DialogFragment() {
+class DialogAskEncryptionMode(private val onPressPositive: (selectedEncryption: Int) -> Unit) :
+    DialogFragment() {
     private lateinit var binding: DialogAskEncryptionModeBinding
     private var selectedEncryption = 1
 
@@ -51,6 +52,7 @@ class DialogAskEncryptionMode(private val onPressPositive:(selectedEncryption:In
     private fun initView() {
         initButton()
         binding.checkboxHidden.isChecked = true
+        selectedEncryption = 1
     }
 
     private fun initButton() {
@@ -69,7 +71,6 @@ class DialogAskEncryptionMode(private val onPressPositive:(selectedEncryption:In
         binding.checkboxHidden.setOnClickListener {
             selectedEncryption = EncryptionMode.HIDDEN
         }
-
 
 
     }

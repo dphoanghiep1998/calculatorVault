@@ -74,7 +74,7 @@ class DialogDetail(
         if (fileVaultItem.encryptionType == EncryptionMode.HIDDEN) {
             binding.tvEncryptionModeValue.text = getString(R.string.hidden)
         } else {
-            binding.tvEncryptionModeValue.text = getString(R.string.encryption)
+            binding.tvEncryptionModeValue.text = getString(R.string.encryption_mode)
         }
         initButton()
     }

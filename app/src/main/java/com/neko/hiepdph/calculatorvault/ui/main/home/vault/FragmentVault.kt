@@ -4,7 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.core.content.ContextCompat
@@ -19,12 +24,26 @@ import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.enums.Order
 import com.neko.hiepdph.calculatorvault.common.enums.Sort
-import com.neko.hiepdph.calculatorvault.common.extensions.*
+import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
+import com.neko.hiepdph.calculatorvault.common.extensions.changeBackPressCallBack
+import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.config
+import com.neko.hiepdph.calculatorvault.common.extensions.hide
+import com.neko.hiepdph.calculatorvault.common.extensions.navigateToPage
+import com.neko.hiepdph.calculatorvault.common.extensions.setStatusColor
+import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
 import com.neko.hiepdph.calculatorvault.data.model.VaultDir
-
 import com.neko.hiepdph.calculatorvault.databinding.FragmentVaultBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutMenuOptionBinding
-import com.neko.hiepdph.calculatorvault.dialog.*
+import com.neko.hiepdph.calculatorvault.dialog.AddNewFolderDialogCallBack
+import com.neko.hiepdph.calculatorvault.dialog.DialogAddNewFolder
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
+import com.neko.hiepdph.calculatorvault.dialog.DialogRenameFolder
+import com.neko.hiepdph.calculatorvault.dialog.DialogSort
+import com.neko.hiepdph.calculatorvault.dialog.RenameDialogCallBack
+import com.neko.hiepdph.calculatorvault.dialog.SortDialogCallBack
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityCalculator
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.viewmodel.VaultViewModel
@@ -39,7 +58,7 @@ class FragmentVault : Fragment() {
     private var _binding: FragmentVaultBinding? = null
     private val binding get() = _binding!!
     private lateinit var popupWindow: PopupWindow
-    private  var adapter: AdapterFolder?= null
+    private var adapter: AdapterFolder? = null
     private val viewModel by activityViewModels<VaultViewModel>()
 
 
@@ -50,9 +69,9 @@ class FragmentVault : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        if(!requireContext().config.isSetupPasswordDone){
+        if (!requireContext().config.isSetupPasswordDone) {
             (requireActivity() as ActivityVault).getToolbar().hide()
-        }else{
+        } else {
             (requireActivity() as ActivityVault).getToolbar().show()
         }
     }
@@ -117,14 +136,17 @@ class FragmentVault : Fragment() {
                         showAddFolderDialog()
                         true
                     }
+
                     R.id.option -> {
                         showOptionDialog(menuItemView)
                         true
                     }
+
                     R.id.navigate_calculator -> {
                         navigateToCalculator()
                         true
                     }
+
                     else -> false
                 }
             }
@@ -147,24 +169,28 @@ class FragmentVault : Fragment() {
                     )
                     navigateToPage(R.id.fragmentVault, action)
                 }
+
                 Constant.TYPE_VIDEOS -> {
                     val action = FragmentVaultDirections.actionFragmentVaultToFragmentPersistent(
                         it.type, getString(R.string.videos), it.mPath
                     )
                     navigateToPage(R.id.fragmentVault, action)
                 }
+
                 Constant.TYPE_AUDIOS -> {
                     val action = FragmentVaultDirections.actionFragmentVaultToFragmentPersistent(
                         it.type, getString(R.string.audios), it.mPath
                     )
                     navigateToPage(R.id.fragmentVault, action)
                 }
+
                 Constant.TYPE_FILE -> {
                     val action = FragmentVaultDirections.actionFragmentVaultToFragmentPersistent(
                         it.type, getString(R.string.files), it.mPath
                     )
                     navigateToPage(R.id.fragmentVault, action)
                 }
+
                 else -> {
                     val action = FragmentVaultDirections.actionFragmentVaultToFragmentPersistent(
                         it.type, it.mName, it.mPath
@@ -193,7 +219,7 @@ class FragmentVault : Fragment() {
             dialogConfirm.show(parentFragmentManager, dialogConfirm.tag)
 
         }, onRenamePress = {
-            openRenameDialog(it.mPath)
+            openRenameDialog(it.mName,it.mPath)
         })
         binding.rcvFolder.adapter = adapter
         if (!AdapterFolder.isSwitchView) {
@@ -206,8 +232,8 @@ class FragmentVault : Fragment() {
 
     }
 
-    private fun openRenameDialog(path: String) {
-        val dialogRenameFolder = DialogRenameFolder(object : RenameDialogCallBack {
+    private fun openRenameDialog(name:String,path: String) {
+        val dialogRenameFolder = DialogRenameFolder(name,object : RenameDialogCallBack {
             override fun onPositiveClicked(name: String) {
                 val pattern = Pattern.compile("[a-zA-Z\\d_-]+")
                 val matcher = pattern.matcher(name)
@@ -215,22 +241,18 @@ class FragmentVault : Fragment() {
                     showSnackBar(getString(R.string.require_character), SnackBarType.FAILED)
                     return
                 } else {
-                    viewModel.renameFolder(
-                        File(path),
-                        name,
-                        onSuccess = {
-                            viewModel.getListFolderInVault(
-                                requireContext(), requireContext().filesDir
-                            )
-                            showSnackBar(getString(R.string.rename_successfully), SnackBarType.SUCCESS)
-                        },
-                        onError = {
-                            showSnackBar(
-                                getString(R.string.error_rename),
-                                SnackBarType.FAILED
-                            )
-                        }
-                    )
+                    viewModel.renameFolder(File(path), name, onSuccess = {
+                        viewModel.getListFolderInVault(
+                            requireContext(), requireContext().filesDir
+                        )
+                        showSnackBar(
+                            getString(R.string.rename_successfully), SnackBarType.SUCCESS
+                        )
+                    }, onError = {
+                        showSnackBar(
+                            getString(R.string.error_rename), SnackBarType.FAILED
+                        )
+                    })
                 }
 
             }
@@ -263,9 +285,16 @@ class FragmentVault : Fragment() {
                     )
                 }, onError = {
                     lifecycleScope.launch(Dispatchers.Main) {
-                        showSnackBar(
-                            getString(R.string.create_failed), SnackBarType.FAILED
-                        )
+                        if (it == "FILE_EXISTED_ERROR") {
+                            showSnackBar(
+                                getString(R.string.folder_name_already_exists), SnackBarType.FAILED
+                            )
+                        } else {
+                            showSnackBar(
+                                getString(R.string.create_failed), SnackBarType.FAILED
+                            )
+                        }
+
                     }
                 })
             }
@@ -354,22 +383,27 @@ class FragmentVault : Fragment() {
                     Sort.RANDOM -> {
                         mList.shuffle()
                     }
+
                     Sort.NAME -> {
                         mList.sortBy { it.mName }
                     }
+
                     Sort.SIZE -> {
                         mList.sortBy { it.mChildren }
                     }
                 }
             }
+
             Order.DES -> {
                 when (sortType) {
                     Sort.RANDOM -> {
                         mList.shuffle()
                     }
+
                     Sort.NAME -> {
                         mList.sortByDescending { it.mName }
                     }
+
                     Sort.SIZE -> {
                         mList.sortByDescending { it.mChildren }
                     }

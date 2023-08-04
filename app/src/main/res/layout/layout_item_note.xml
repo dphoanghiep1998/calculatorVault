@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_item_image_corner_16"
-    android:foreground="@drawable/fg_ripple_effect"
+    android:foreground="@drawable/fg_ripple_effect_10"
     android:layout_marginHorizontal="@dimen/_6sdp"
     android:layout_marginVertical="@dimen/_6sdp"
     android:paddingVertical="@dimen/_6sdp"

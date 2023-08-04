@@ -221,13 +221,14 @@
     <string name="select_an_encryption_mode">Select an Encryption Mode</string>
     <string name="hidden">Hidden</string>
     <string name="encryption">Encryption</string>
+    <string name="encryption_mode">Encryption :</string>
     <string name="always_ask">Always ask</string>
     <string name="detail">Detail</string>
     <string name="name_detail">Name:</string>
     <string name="size_detail">Size:</string>
     <string name="resolution_detail">Resolution:</string>
     <string name="time_detail">Time:</string>
-    <string name="time_lock_detail">Time lock</string>
+    <string name="time_lock_detail">Time lock:</string>
     <string name="path_detail">Path:</string>
     <string name="empty_text">No %s!\nPress + to add %s.</string>
     <string name="audio">Audio</string>
@@ -326,5 +327,16 @@
     <string name="unlock_sucess">Unlock success %s files !</string>
     <string name="unlock_failed">Unlock %s file failed, please try again!</string>
     <string name="move_to_recycler_bin_failed">Move failed to recycler bin</string>
+    <string name="decrypt_error">An error occured when decrypting!</string>
+    <string name="encrypting">Encrypting %s file, please wait!</string>
+    <string name="decrypting">Decrypting %s file, please wait!</string>
+    <string name="restoring">Restoring %s file, please wait!</string>
+    <string name="moving_recycler_bin">Moving %s file to Recycler Bin , please wait!</string>
+    <string name="decryption">Decryption</string>
+    <string name="restoration">Restoration</string>
+    <string name="folder_name_already_exists">Folder name already exists</string>
+    <string name="move">Move</string>
+    <string name="use_password">Use password</string>
+
 
 </resources>

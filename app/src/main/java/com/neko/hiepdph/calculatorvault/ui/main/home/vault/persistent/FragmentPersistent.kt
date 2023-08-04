@@ -3,7 +3,12 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -20,19 +25,31 @@ import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.enums.Action
-import com.neko.hiepdph.calculatorvault.common.extensions.*
-import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
+import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
+import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.config
+import com.neko.hiepdph.calculatorvault.common.extensions.hide
+import com.neko.hiepdph.calculatorvault.common.extensions.navigateToPage
+import com.neko.hiepdph.calculatorvault.common.extensions.shareFile
+import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
+import com.neko.hiepdph.calculatorvault.common.extensions.toast
+import com.neko.hiepdph.calculatorvault.common.extensions.toastLocation
 import com.neko.hiepdph.calculatorvault.common.utils.openWith
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentPersistentBinding
-import com.neko.hiepdph.calculatorvault.dialog.*
+import com.neko.hiepdph.calculatorvault.dialog.DialogAddFile
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
+import com.neko.hiepdph.calculatorvault.dialog.DialogDetail
+import com.neko.hiepdph.calculatorvault.dialog.DialogProgress
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityImageDetail
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVideoPlayer
-import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterOtherFolder
-import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterPersistent
+import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterOtherFolderNew
+import com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter.AdapterPersistentNew
 import com.neko.hiepdph.calculatorvault.viewmodel.PersistentViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -44,8 +61,8 @@ class FragmentPersistent : Fragment() {
     private lateinit var binding: FragmentPersistentBinding
     private val args: FragmentPersistentArgs by navArgs()
     private val viewModel by viewModels<PersistentViewModel>()
-    private var adapterPersistent: AdapterPersistent? = null
-    private var adapterOtherFolder: AdapterOtherFolder? = null
+    private var adapterPersistent: AdapterPersistentNew? = null
+    private var adapterOtherFolder: AdapterOtherFolderNew? = null
     private var listItemSelected = mutableListOf<FileVaultItem>()
     private var sizeList = 0
 
@@ -86,6 +103,7 @@ class FragmentPersistent : Fragment() {
         initButton()
         resetAllViewAndData()
     }
+
 
     private fun checkAllItem(status: Boolean) {
         if (status) {
@@ -166,7 +184,7 @@ class FragmentPersistent : Fragment() {
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
-                if (AdapterPersistent.editMode || AdapterOtherFolder.editMode) {
+                if (AdapterPersistentNew.editMode || AdapterOtherFolderNew.editMode) {
                     menu.clear()
                     menuInflater.inflate(R.menu.toolbar_menu_persistent, menu)
                     menu[0].actionView?.findViewById<View>(R.id.checkbox)?.setOnClickListener {
@@ -181,7 +199,7 @@ class FragmentPersistent : Fragment() {
 
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return if (AdapterPersistent.editMode || AdapterOtherFolder.editMode) {
+                return if (AdapterPersistentNew.editMode || AdapterOtherFolderNew.editMode) {
                     when (menuItem.itemId) {
                         android.R.id.home -> {
                             adapterPersistent?.changeToNormalView()
@@ -211,13 +229,16 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun getDataFile() {
-
         viewModel.getAllFileFromFolderEncrypted(args.vaultPath).observe(viewLifecycleOwner) {
             it?.let {
                 if (args.type != Constant.TYPE_ADD_MORE) {
-                    adapterPersistent?.submitList(it)
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        adapterPersistent?.submitList(it)
+                    }
                 } else {
-                    adapterOtherFolder?.submitList(it)
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        adapterOtherFolder?.submitList(it)
+                    }
                 }
                 sizeList = it.size
                 binding.loading.hide()
@@ -455,7 +476,7 @@ class FragmentPersistent : Fragment() {
 
     private fun initRecyclerView() {
         if (args.type != Constant.TYPE_ADD_MORE) {
-            adapterPersistent = AdapterPersistent(args.type, onClickItem = {
+            adapterPersistent = AdapterPersistentNew(args.type, onClickItem = {
                 handleClickItem(it)
             }, onLongClickItem = {
                 listItemSelected.clear()
@@ -494,7 +515,7 @@ class FragmentPersistent : Fragment() {
             }
             binding.rcvItemGroup.layoutManager = gridLayoutManager
         } else {
-            adapterOtherFolder = AdapterOtherFolder(onClickItem = {
+            adapterOtherFolder = AdapterOtherFolderNew(onClickItem = {
                 handleClickItem(it)
             }, onLongClickItem = {
                 listItemSelected.clear()
@@ -522,32 +543,110 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun handleClickItem(item: FileVaultItem) {
+        Log.d("TAG", "handleClickItem: " + item.name)
         val list = mutableListOf<FileVaultItem>()
-        list.add(item)
         if (item.encryptionType == EncryptionMode.HIDDEN) {
             when (item.fileType) {
                 Constant.TYPE_PICTURE -> {
-                    ShareData.getInstance().setListItemImage(list)
-                    val intent = Intent(requireContext(), ActivityImageDetail::class.java)
-                    startActivity(intent)
+                    if (File(item.decodePath).exists()) {
+                        ShareData.getInstance().setListItemImage(list)
+                        val intent = Intent(requireContext(), ActivityImageDetail::class.java)
+                        startActivity(intent)
+
+                    } else {
+                        val dialogProgress = DialogProgress(
+                            listItemSelected = mutableListOf(item),
+                            listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                            listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
+                            onSuccess = {
+                                item.decodePath = it
+                                viewModel.updateFileVault(item)
+                                list.add(item)
+                                ShareData.getInstance().setListItemImage(list)
+                                val intent =
+                                    Intent(requireContext(), ActivityImageDetail::class.java)
+                                startActivity(intent)
+
+                            },
+                            onFailed = {
+                                showSnackBar(getString(R.string.decrypt_error), SnackBarType.FAILED)
+                            },
+                            action = Action.DECRYPT,
+                            encryptionMode = item.encryptionType
+
+                        )
+                        dialogProgress.show(childFragmentManager, dialogProgress.tag)
+                    }
                 }
 
                 Constant.TYPE_AUDIOS -> {
-//                    ShareData.getInstance().setListItemAudio(list)
-//                    val intent = Intent(requireContext(), ActivityAudioPlayer::class.java)
-//                    startActivity(intent)
-                    item.encryptedPath.openWith(requireContext(), Constant.TYPE_AUDIOS, null)
+                    if (File(item.decodePath).exists()) {
+                        item.decodePath.openWith(requireContext(), Constant.TYPE_AUDIOS, null)
+                    } else {
+                        val dialogProgress = DialogProgress(
+                            listItemSelected = mutableListOf(item),
+                            listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                            listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
+                            onSuccess = {
+                                item.decodePath = it
+                                viewModel.updateFileVault(item)
+                                item.decodePath.openWith(
+                                    requireContext(), Constant.TYPE_AUDIOS, null
+                                )
+                            },
+                            onFailed = {
+                                showSnackBar(getString(R.string.decrypt_error), SnackBarType.FAILED)
+                            },
+                            action = Action.DECRYPT,
+                            encryptionMode = item.encryptionType
 
+                        )
+                        dialogProgress.show(childFragmentManager, dialogProgress.tag)
+                    }
                 }
 
                 Constant.TYPE_VIDEOS -> {
-                    if (requireContext().config.playVideoMode) {
-                        ShareData.getInstance().setListItemVideo(list)
-                        val intent = Intent(requireContext(), ActivityVideoPlayer::class.java)
-                        startActivity(intent)
+                    if (File(item.decodePath).exists()) {
+                        if (requireContext().config.playVideoMode) {
+                            ShareData.getInstance().setListItemVideo(mutableListOf(item))
+                            val intent = Intent(requireContext(), ActivityVideoPlayer::class.java)
+                            startActivity(intent)
+                        } else {
+                            item.decodePath.openWith(
+                                requireContext(), Constant.TYPE_VIDEOS, null
+                            )
+                        }
                     } else {
-                        item.encryptedPath.openWith(requireContext(), Constant.TYPE_VIDEOS, null)
+                        val dialogProgress = DialogProgress(
+                            listItemSelected = mutableListOf(item),
+                            listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                            listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
+                            onSuccess = {
+                                item.decodePath = it
+                                viewModel.updateFileVault(item)
+                                list.add(item)
+                                if (requireContext().config.playVideoMode) {
+                                    ShareData.getInstance().setListItemVideo(list)
+                                    val intent =
+                                        Intent(requireContext(), ActivityVideoPlayer::class.java)
+                                    startActivity(intent)
+                                } else {
+                                    item.encryptedPath.openWith(
+                                        requireContext(), Constant.TYPE_VIDEOS, null
+                                    )
+                                }
+
+                            },
+                            onFailed = {
+                                showSnackBar(getString(R.string.decrypt_error), SnackBarType.FAILED)
+                            },
+                            action = Action.DECRYPT,
+                            encryptionMode = item.encryptionType
+
+                        )
+                        dialogProgress.show(childFragmentManager, dialogProgress.tag)
                     }
+
 
                 }
 
@@ -606,8 +705,8 @@ class FragmentPersistent : Fragment() {
 
 
     override fun onDestroy() {
-        AdapterPersistent.editMode = false
-        AdapterOtherFolder.editMode = false
+        AdapterPersistentNew.editMode = false
+        AdapterOtherFolderNew.editMode = false
         super.onDestroy()
 //        _binding = null
     }

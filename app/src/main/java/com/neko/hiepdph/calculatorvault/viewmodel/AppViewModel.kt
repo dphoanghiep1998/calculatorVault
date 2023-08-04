@@ -1,6 +1,7 @@
 package com.neko.hiepdph.calculatorvault.viewmodel
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -63,6 +64,7 @@ class AppViewModel @Inject constructor(
         encryptMode: Int = EncryptionMode.HIDDEN,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
+            Log.d("TAG", "encrypt123: " +encryptMode)
             CopyFiles.encrypt(
                 context,
                 listFile,
@@ -81,6 +83,34 @@ class AppViewModel @Inject constructor(
     }
 
     fun decrypt(
+        context: Context,
+        listFile: List<File>,
+        destination: List<File>,
+        targetName: List<String>,
+        progress: (currentFile: File?) -> Unit,
+        onSuccess: (MutableList<String>) -> Unit,
+        onError: (t: Throwable) -> Unit,
+        encryptMode: Int = EncryptionMode.HIDDEN,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            CopyFiles.decrypt(
+                context,
+                listFile,
+                destination,
+                targetName,
+                0L,
+                progress = { value, currentFile ->
+                    progressValue.postValue(value)
+                    progress(currentFile)
+                },
+                onSuccess,
+                onError,
+                encryptionMode = encryptMode,
+            )
+        }
+    }
+
+    fun unLock(
         context: Context,
         listFile: List<File>,
         destination: List<File>,

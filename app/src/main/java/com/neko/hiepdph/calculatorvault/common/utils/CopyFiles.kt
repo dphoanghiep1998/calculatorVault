@@ -2,8 +2,10 @@ package com.neko.hiepdph.calculatorvault.common.utils
 
 import android.content.Context
 import android.content.Intent
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.text.TextUtils
+import android.util.Log
 import com.google.common.io.Files.getNameWithoutExtension
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.copyFileToAnotherLocation
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.createNewFile
@@ -13,6 +15,7 @@ import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.encryptFileTo
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.getExtension
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.isWritableNormalOrSaf
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.mkdir
+import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.unLockFile
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import java.io.File
 
@@ -48,7 +51,6 @@ object CopyFiles {
                         targetName[index],
                     ).toString()
                 )
-
                 encryptFileToAnotherLocation(
                     context, itemFile, targetFile,
                     // on progress
@@ -61,11 +63,14 @@ object CopyFiles {
                         }
                     },
                     // on finish
-                    { sourceFile, targetFile ->
-                        listOfFile.add(targetFile.name)
+                    { sourceFile, targetFiles ->
+                        listOfFile.add(targetFiles.path)
                         deleteFile(sourceFile, context)
-                        addMedia(context, targetFile)
-                    }, encryptionMode
+                        addMedia(context, targetFiles)
+                        MediaScannerConnection.scanFile(
+                            context, arrayOf(targetFile.path), null, null
+                        )
+                    }, encryptionMode = encryptionMode
                 )
 
             }
@@ -100,10 +105,70 @@ object CopyFiles {
             var currentSize = 0f
             // move file
             files?.forEachIndexed { index, itemFile ->
-                if (File(targetFolders[index], targetName[index]).exists()) {
-                    listOfFile.add(targetFolders[index].path + "/${targetName}")
-                    return@forEachIndexed
-                }
+                val targetFile = File(
+                    createNewFile(
+                        context,
+                        targetFolders[index],
+                        targetName[index],
+                    ).toString()
+                )
+                decryptFileToAnotherLocation(
+                    context, itemFile, targetFile,
+                    // on progress
+                    { len, file ->
+                        run {
+                            currentSize += len
+                            progress(
+                                (currentSize * 100 / totalSize), file
+                            )
+                        }
+                    },
+                    // on finish
+                    { sourceFile, targetFiles ->
+                        listOfFile.add(targetFile.path)
+                        addMedia(context, targetFiles)
+                        MediaScannerConnection.scanFile(
+                            context, arrayOf(targetFiles.path), null, null
+                        )
+                    }, encryptionMode
+                )
+
+            }
+            onSuccess(listOfFile)
+
+
+        } catch (e: Exception) {
+            onError(e)
+        }
+    }
+
+    fun unLock(
+        context: Context,
+        files: List<File>?,
+        targetFolders: List<File>,
+        targetName: List<String>,
+        tSize: Long,
+        progress: (value: Float, currentFile: File?) -> Unit,
+        onSuccess: (MutableList<String>) -> Unit = {},
+        onError: (t: Throwable) -> Unit = {},
+        encryptionMode: Int = EncryptionMode.HIDDEN,
+    ) {
+        try {
+            val listOfFile = mutableListOf<String>()
+
+            if (files?.isEmpty() == true) return
+            var totalSize = 0L
+            if (tSize == 0L) files?.forEach {
+                totalSize += calFolderSize(it)
+            }
+            else totalSize = tSize
+            var currentSize = 0f
+            // move file
+            files?.forEachIndexed { index, itemFile ->
+//                if (File(targetFolders[index], targetName[index]).exists()) {
+//                    listOfFile.add(targetFolders[index].path + "/${targetName}")
+//                    return@forEachIndexed
+//                }
                 val targetFile = File(
                     createNewFile(
                         context,
@@ -112,7 +177,7 @@ object CopyFiles {
                     ).toString()
                 )
 
-                decryptFileToAnotherLocation(
+                unLockFile(
                     context, itemFile, targetFile,
                     // on progress
                     { len, file ->
@@ -164,11 +229,8 @@ object CopyFiles {
                     listOfFile.add(targetFolders[index].path + "/${files[index].name}")
                     return@forEachIndexed
                 }
-                val targetFile = if (itemFile.isDirectory) {
-                    File(createNewFolder(context, targetFolders[index], itemFile.name))
-                } else {
+                val targetFile =
                     File(createNewFile(context, targetFolders[index], itemFile.name).toString())
-                }
                 copyFileToAnotherLocation(context, itemFile, targetFile,
                     // on progress
                     { len, file ->

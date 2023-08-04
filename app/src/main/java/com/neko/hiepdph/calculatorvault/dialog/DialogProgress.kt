@@ -19,6 +19,7 @@ import com.neko.hiepdph.calculatorvault.common.enums.Action
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
+import com.neko.hiepdph.calculatorvault.common.extensions.invisible
 import com.neko.hiepdph.calculatorvault.common.extensions.popBackStack
 import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.extensions.toByteArray
@@ -100,6 +101,30 @@ class DialogProgress(
                     String.format(getString(R.string.deleting), listItemSelected.size.toString())
             }
 
+            Action.ENCRYPT -> {
+                binding.tvTitle.text = getString(R.string.encryption)
+                binding.tvStatus.text =
+                    String.format(getString(R.string.encrypting), listItemSelected.size.toString())
+            }
+
+            Action.DECRYPT -> {
+                binding.tvTitle.text = getString(R.string.decryption)
+                binding.tvStatus.text =
+                    String.format(getString(R.string.decrypting), listItemSelected.size.toString())
+            }
+
+            Action.RESTORE -> {
+                binding.tvTitle.text = getString(R.string.restoration)
+                binding.tvStatus.text =
+                    String.format(getString(R.string.restoring), listItemSelected.size.toString())
+            }
+
+            Action.DELETE_PERMANENT -> {
+                binding.tvTitle.text = getString(R.string.delete)
+                binding.tvStatus.text =
+                    String.format(getString(R.string.deleting), listItemSelected.size.toString())
+            }
+
             else -> {
 
             }
@@ -138,44 +163,64 @@ class DialogProgress(
             } else {
                 viewModel.deleteMultipleFolder(listItemSelected.map { it.encryptedPath },
                     onSuccess = {
-                        viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
-                        onSuccess(getString(R.string.delete_success))
-                        dismiss()
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            viewModel.deleteFileVault(listItemSelected.map { it.id }
+                                .toMutableList())
+                            onSuccess(getString(R.string.delete_success))
+                            dismiss()
+                        }
+
                     },
                     onProgress = { },
                     onError = {
-                        onFailed(getString(R.string.delete_success))
-                        dismiss()
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            onFailed(getString(R.string.delete_success))
+                            dismiss()
+                        }
                     })
             }
 
         }
         if (action == Action.DELETE_PERMANENT) {
             viewModel.deleteMultipleFolder(listItemSelected.map { it.recyclerPath }, onSuccess = {
-                viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
-                onSuccess(getString(R.string.delete_success))
-                dismiss()
-            }, onProgress = { setProgressValue(it.toInt()) }, onError = {
-                onFailed(getString(R.string.delete_success))
-                dismiss()
+                lifecycleScope.launch(Dispatchers.Main) {
+
+                    viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
+                    onSuccess(getString(R.string.delete_success))
+                    dismiss()
+                }
+            }, onProgress = {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    setProgressValue(it.toInt())
+                }
+            }, onError = {
+                lifecycleScope.launch(Dispatchers.Main) {
+
+                    onFailed(getString(R.string.delete_success))
+                    dismiss()
+                }
             })
 
         }
         if (action == Action.DELETE_All_PERMANENT) {
             viewModel.deleteAllRecyclerBin(requireContext().config.recyclerBinFolder.path,
                 onSuccess = {
-                    viewModel.deleteFileVault(listItemSelected.map { it.id })
-                    onSuccess(getString(R.string.delete_success))
-                    dismiss()
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        viewModel.deleteFileVault(listItemSelected.map { it.id })
+                        onSuccess(getString(R.string.delete_success))
+                        dismiss()
+                    }
                 },
                 onError = {
-                    onFailed(getString(R.string.delete_failed))
-                    dismiss()
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        onFailed(getString(R.string.delete_failed))
+                        dismiss()
+                    }
                 })
 
         }
         if (action == Action.UNLOCK) {
-            viewModel.decrypt(requireContext(),
+            viewModel.unLock(requireContext(),
                 listOfSourceFile,
                 listOfTargetParentFolder,
                 listItemSelected.map { it.name },
@@ -183,28 +228,31 @@ class DialogProgress(
 
                 },
                 onSuccess = {
-                    onSuccess.invoke(
-                        String.format(
-                            getString(R.string.unlock_sucess), listItemSelected.size.toString()
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        onSuccess.invoke(
+                            String.format(
+                                getString(R.string.unlock_sucess), listItemSelected.size.toString()
+                            )
                         )
-                    )
-                    dismiss()
-
+                        dismiss()
+                    }
                 },
                 onError = {
-                    onFailed.invoke(
-                        String.format(
-                            getString(R.string.unlock_failed), listItemSelected.size.toString()
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        onFailed.invoke(
+                            String.format(
+                                getString(R.string.unlock_failed), listItemSelected.size.toString()
+                            )
                         )
-                    )
 
-                    dismiss()
+                        dismiss()
+                    }
                 })
         }
-
         if (action == Action.ENCRYPT) {
+            Log.d("TAG", "doAction: " + encryptionMode)
             val listOfEncryptedString = mutableListOf<String>()
-            listItemSelected.let {
+            listItemSelected.let { it ->
                 listOfEncryptedString.addAll(it.map {
                     CryptoCore.getInstance(requireContext())
                         .encryptString(Constant.SECRET_KEY, it.name)
@@ -215,19 +263,37 @@ class DialogProgress(
             listItemSelected.forEachIndexed { index, item ->
                 when (item.fileType) {
                     Constant.TYPE_PICTURE -> {
-                        item.thumb = Base64.encodeToString(
-                            imageToByteArray(item.originalPath), Base64.DEFAULT
-                        )
+                        if (imageToByteArray(item.originalPath) != null) {
+                            item.thumb = Base64.encodeToString(
+                                imageToByteArray(item.originalPath), Base64.DEFAULT
+                            )
+                        }
+
+                    }
+
+                    Constant.TYPE_VIDEOS -> {
+                        if (MediaStoreUtils.getImageThumb(
+                                item.mediaStoreId, requireContext()
+                            ) != null
+                        ) {
+                            item.thumb = Base64.encodeToString(
+                                MediaStoreUtils.getImageThumb(
+                                    item.mediaStoreId, requireContext()
+                                ), Base64.DEFAULT
+                            )
+                        }
+
                     }
 
                     Constant.TYPE_AUDIOS -> {
-                        item.thumb = Base64.encodeToString(
-                            MediaStoreUtils.getThumbnail(item.originalPath)?.toByteArray(),
-                            Base64.DEFAULT
-                        )
+                        val data = MediaStoreUtils.getThumbnail(item.originalPath)?.toByteArray()
+                        if (data != null) {
+                            item.thumb = Base64.encodeToString(
+                                data, Base64.DEFAULT
+                            )
+                        }
                     }
                 }
-
             }
             viewModel.encrypt(
                 requireContext(),
@@ -267,7 +333,38 @@ class DialogProgress(
                         statusFailed()
                     }
                 },
-                requireContext().config.encryptionMode
+                encryptionMode
+            )
+        }
+        if (action == Action.DECRYPT) {
+            viewModel.decrypt(
+                requireContext(),
+                listOfSourceFile,
+                listOfTargetParentFolder,
+                listItemSelected.map { it.name },
+                progress = { _: File? ->
+                },
+                onSuccess = {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        enableCancelable()
+                        showButton()
+                        statusSuccess()
+                        dismiss()
+                        onSuccess(it[0])
+
+                    }
+
+                },
+                onError = {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        enableCancelable()
+                        showButton()
+                        statusFailed()
+                        dismiss()
+                        onFailed("")
+                    }
+                },
+                encryptMode = encryptionMode
             )
         }
     }
@@ -287,7 +384,7 @@ class DialogProgress(
     }
 
     private fun statusSuccess() {
-        binding.progressLoading.hide()
+        binding.progressLoading.invisible()
         binding.tvProgress.hide()
         binding.imvSuccess.show()
     }

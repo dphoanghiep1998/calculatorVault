@@ -28,7 +28,7 @@ class FragmentLanguage : Fragment() {
 
         binding = FragmentLanguageBinding.inflate(inflater, container, false)
         changeBackPressCallBack {
-            requireActivity().finishAffinity()
+
         }
         return binding.root
     }

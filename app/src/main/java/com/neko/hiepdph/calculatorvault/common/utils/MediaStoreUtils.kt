@@ -1,5 +1,6 @@
 package com.neko.hiepdph.calculatorvault.common.utils
 
+import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -27,7 +28,9 @@ import com.neko.hiepdph.calculatorvault.common.Constant.extraDocumentMimeTypes
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.GroupItem
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileInputStream
 import java.util.*
 
 object MediaStoreUtils {
@@ -106,6 +109,7 @@ object MediaStoreUtils {
                                 }
                             }
                         }
+
                         TYPE_VIDEOS -> {
                             if (mimetype == "video") {
 
@@ -148,6 +152,7 @@ object MediaStoreUtils {
                                 }
                             }
                         }
+
                         TYPE_AUDIOS -> {
                             if (mimetype == "audio" || extraAudioMimeTypes.contains(fullMimetype)) {
 
@@ -192,6 +197,7 @@ object MediaStoreUtils {
                                 }
                             }
                         }
+
                         TYPE_FILE -> {
                             if (mimetype == "text" || extraDocumentMimeTypes.contains(fullMimetype) || archiveMimeTypes.contains(
                                     fullMimetype
@@ -301,7 +307,7 @@ object MediaStoreUtils {
                 val childPath = cursor.getStringValue(MediaStore.Images.Media.DATA)
                 val size = cursor.getLongValue(MediaStore.Images.Media.SIZE)
                 val modified = cursor.getLongValue(MediaStore.Images.Media.SIZE) * 1000
-                Log.d("TAG", "getAllImage: "+modified)
+                Log.d("TAG", "getAllImage: " + modified)
                 val name = cursor.getStringValue(MediaStore.Images.Media.DISPLAY_NAME)
 
                 if (childPath.isNotBlank()) {
@@ -354,7 +360,7 @@ object MediaStoreUtils {
                 val childPath = cursor.getStringValue(MediaStore.Images.Media.DATA)
                 val size = cursor.getLongValue(MediaStore.Images.Media.SIZE)
                 val modified = cursor.getLongValue(MediaStore.Images.Media.DATE_MODIFIED) * 1000
-                Log.d("TAG", "getAllImage: "+modified)
+                Log.d("TAG", "getAllImage: " + modified)
 
                 val name = cursor.getStringValue(MediaStore.Images.Media.DISPLAY_NAME)
                 val file = File(childPath)
@@ -409,7 +415,7 @@ object MediaStoreUtils {
                 val id = cursor.getLongValue(MediaStore.Video.Media._ID)
                 val childPath = cursor.getStringValue(MediaStore.Video.Media.DATA)
                 val size = cursor.getLongValue(MediaStore.Video.Media.SIZE)
-                val modified = cursor.getLongValue(MediaStore.Video.Media.DATE_MODIFIED)  * 1000
+                val modified = cursor.getLongValue(MediaStore.Video.Media.DATE_MODIFIED) * 1000
                 val name = cursor.getStringValue(MediaStore.Video.Media.DISPLAY_NAME)
                 val file = File(childPath)
                 if (!file.exists() || file.isHidden || !file.canRead()) return@queryCursor
@@ -464,7 +470,7 @@ object MediaStoreUtils {
                 val id = cursor.getLongValue(MediaStore.Audio.Media._ID)
                 val childPath = cursor.getStringValue(MediaStore.Audio.Media.DATA)
                 val size = cursor.getLongValue(MediaStore.Audio.Media.SIZE)
-                val modified = cursor.getLongValue(MediaStore.Audio.Media.DATE_MODIFIED)  * 1000
+                val modified = cursor.getLongValue(MediaStore.Audio.Media.DATE_MODIFIED) * 1000
                 val name = cursor.getStringValue(MediaStore.Audio.Media.DISPLAY_NAME)
                 val file = File(childPath)
                 if (!file.exists() || file.isHidden || !file.canRead()) return@queryCursor
@@ -497,7 +503,9 @@ object MediaStoreUtils {
         return listAudioChild
     }
 
-    fun getChildFileFromPath(context: Context, path: String, type: String): MutableList<FileVaultItem> {
+    fun getChildFileFromPath(
+        context: Context, path: String, type: String
+    ): MutableList<FileVaultItem> {
         val listFileChild = mutableListOf<FileVaultItem>()
         try {
             val uri = MediaStore.Files.getContentUri("external")
@@ -515,8 +523,9 @@ object MediaStoreUtils {
                 val id = cursor.getLongValue(MediaStore.Files.FileColumns._ID)
                 val childPath = cursor.getStringValue(MediaStore.Files.FileColumns.DATA)
                 val size = cursor.getLongValue(MediaStore.Files.FileColumns.SIZE)
-                val modified = cursor.getLongValue(MediaStore.Files.FileColumns.DATE_MODIFIED) * 1000
-                Log.d("TAG", "getChildFileFromPath: " +modified)
+                val modified =
+                    cursor.getLongValue(MediaStore.Files.FileColumns.DATE_MODIFIED) * 1000
+                Log.d("TAG", "getChildFileFromPath: " + modified)
                 val name = cursor.getStringValue(MediaStore.Files.FileColumns.DISPLAY_NAME)
                 val file = File(childPath)
                 if (!file.exists() || file.isHidden || !file.canRead()) return@queryCursor
@@ -553,6 +562,7 @@ object MediaStoreUtils {
 
                                 }
                             }
+
                             TYPE_PPT, Constant.TYPE_PPTX -> {
                                 if (name.lowercase(Locale.ROOT)
                                         .endsWith(Constant.TYPE_PPTX) || (name.lowercase(Locale.ROOT)
@@ -580,6 +590,7 @@ object MediaStoreUtils {
                                     )
                                 }
                             }
+
                             Constant.TYPE_WORDX, TYPE_WORD -> {
                                 if (name.lowercase(Locale.ROOT)
                                         .endsWith(TYPE_WORD) || name.lowercase(Locale.ROOT)
@@ -607,6 +618,7 @@ object MediaStoreUtils {
                                     )
                                 }
                             }
+
                             TYPE_EXCEL -> {
                                 if (name.lowercase(Locale.ROOT).endsWith(TYPE_EXCEL)) {
                                     listFileChild.add(
@@ -631,6 +643,7 @@ object MediaStoreUtils {
                                     )
                                 }
                             }
+
                             TYPE_CSV -> {
                                 if (name.lowercase(Locale.ROOT).endsWith(TYPE_CSV)) {
                                     listFileChild.add(
@@ -655,6 +668,7 @@ object MediaStoreUtils {
                                     )
                                 }
                             }
+
                             TYPE_TEXT -> {
                                 if (name.lowercase(Locale.ROOT).endsWith(TYPE_TEXT)) {
                                     listFileChild.add(
@@ -679,6 +693,7 @@ object MediaStoreUtils {
                                     )
                                 }
                             }
+
                             TYPE_ZIP -> {
                                 if (name.lowercase(Locale.ROOT)
                                         .endsWith(TYPE_ZIP) || name.lowercase(Locale.ROOT).endsWith(
@@ -707,6 +722,7 @@ object MediaStoreUtils {
                                     )
                                 }
                             }
+
                             else -> {
                                 if (!name.lowercase(Locale.ROOT)
                                         .endsWith(TYPE_PDF) && !name.lowercase(Locale.ROOT)
@@ -758,5 +774,21 @@ object MediaStoreUtils {
         BitmapFactory.decodeFile(imagePath, options)
         return "${options.outWidth}x${options.outHeight}"
     }
+
+     fun getImageThumb(id: Long, context: Context):ByteArray? {
+        val crThumb: ContentResolver = context.contentResolver
+        val options: BitmapFactory.Options = BitmapFactory.Options()
+        options.inSampleSize = 1
+        val curThumb  = MediaStore.Video.Thumbnails.getThumbnail(crThumb,id,MediaStore.Video.Thumbnails.MICRO_KIND, options)
+        if(curThumb != null){
+            val stream = ByteArrayOutputStream()
+            curThumb.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            val byteArray: ByteArray = stream.toByteArray()
+            curThumb.recycle()
+            return byteArray
+        }
+        return null
+    }
+
 
 }

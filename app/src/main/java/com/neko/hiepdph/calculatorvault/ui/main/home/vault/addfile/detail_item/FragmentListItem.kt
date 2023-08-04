@@ -2,7 +2,12 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item
 
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.CheckBox
 import androidx.core.view.MenuProvider
 import androidx.core.view.get
@@ -16,7 +21,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.enums.Action
-import com.neko.hiepdph.calculatorvault.common.extensions.*
+import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.config
+import com.neko.hiepdph.calculatorvault.common.extensions.hide
+import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.common.extensions.toastLocation
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentListItemBinding
@@ -38,7 +47,6 @@ class FragmentListItem : Fragment() {
     private val args: FragmentListItemArgs by navArgs()
     private var listItemSelected = mutableListOf<FileVaultItem>()
     private var sizeList = 0
-    private var currentEncryptionMode = EncryptionMode.HIDDEN
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -96,34 +104,26 @@ class FragmentListItem : Fragment() {
     private fun initButton() {
 
         binding.btnMoveToVault.clickWithDebounce {
-
             if (requireContext().config.encryptionMode != EncryptionMode.ALWAYS_ASK) {
-
-                val dialogProgress = DialogProgress(
-                    listItemSelected,
+                val dialogProgress = DialogProgress(listItemSelected,
                     listItemSelected.map { File(it.originalPath) },
                     listItemSelected.map { File(args.vaultPath) },
                     Action.ENCRYPT,
                     requireContext().config.encryptionMode,
                     args.vaultPath,
                     onSuccess = {},
-                    onFailed = {}
-                )
+                    onFailed = {})
                 dialogProgress.show(childFragmentManager, dialogProgress.tag)
-
             } else {
                 val dialogAskEncryptionMode = DialogAskEncryptionMode(onPressPositive = { enMode ->
-                    currentEncryptionMode = enMode
-                    val dialogProgress = DialogProgress(
-                        listItemSelected,
+                    val dialogProgress = DialogProgress(listItemSelected,
                         listItemSelected.map { File(it.originalPath) },
                         listItemSelected.map { File(args.vaultPath) },
                         Action.ENCRYPT,
-                        currentEncryptionMode,
+                        encryptionMode = enMode,
                         args.vaultPath,
                         onSuccess = {},
-                        onFailed = {}
-                    )
+                        onFailed = {})
                     dialogProgress.show(childFragmentManager, dialogProgress.tag)
                 })
                 dialogAskEncryptionMode.show(childFragmentManager, dialogAskEncryptionMode.tag)
@@ -207,6 +207,9 @@ class FragmentListItem : Fragment() {
             listItemSelected.addAll(it)
             checkListPath()
             checkCheckBoxAll()
+        }, onSelectAll = {
+            listItemSelected.clear()
+            listItemSelected.addAll(it)
         }, args.groupItem.type)
 
         binding.rcvGroupItem.adapter = adapterListItem

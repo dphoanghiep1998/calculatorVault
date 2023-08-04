@@ -26,7 +26,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
-import androidx.navigation.findNavController
+import androidx.navigation.NavGraph
+import androidx.navigation.NavInflater
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -38,6 +39,7 @@ import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
+import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionR
 import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionS
 import com.neko.hiepdph.calculatorvault.common.utils.openLink
 import com.neko.hiepdph.calculatorvault.config.LockType
@@ -66,6 +68,10 @@ class ActivityVault : AppCompatActivity() {
     private var mAccelerometer: Sensor? = null
     private var mShakeDetector: ShakeDetector? = null
     private var dialogRequestPermission: DialogRequestPermission? = null
+    private var navHostFragment: NavHostFragment? = null
+    private var navController: NavController? = null
+    private var inflater: NavInflater? = null
+    private var graph: NavGraph? = null
     private fun setThemeMode() {
         if (config.darkMode) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
@@ -82,7 +88,15 @@ class ActivityVault : AppCompatActivity() {
         } else {
             getToolbar().hide()
         }
-        initNavigationView()
+        if ((application as CustomApplication).firstTimeOpen && (application as CustomApplication).isLockShowed) {
+            initNavigationView()
+            (application as CustomApplication).firstTimeOpen = false
+        }
+        if (!(application as CustomApplication).firstTimeOpen && (application as CustomApplication).changePassFail) {
+            initNavigationView()
+            (application as CustomApplication).changePassFail = false
+        }
+
         checkIntruderByPass()
         mSensorManager?.registerListener(
             mShakeDetector, mAccelerometer, SensorManager.SENSOR_DELAY_UI
@@ -100,26 +114,30 @@ class ActivityVault : AppCompatActivity() {
         //case 4: When user turn on Fake Password -> don't show lock again then pass to fake content
         //case 5: When user turn on Screen Off Action -> Show lock when screen is off
         //case 6: When user turn on Lock when leaving app -> Show lock when app go background
+        if (!(application as CustomApplication).authority && config.fakePassword && (application as CustomApplication).isLockShowed) {
+            //not showLock
+            return
+        }
 
-//            when (config.lockType) {
-//                LockType.PATTERN -> {
-//                    startActivity(Intent(this@ActivityVault, ActivityPatternLock::class.java))
-//                }
-//
-//                LockType.PIN -> {
-//                    startActivity(Intent(this@ActivityVault, ActivityPinLock::class.java))
-//                }
-//            }
+        if (!(application as CustomApplication).authority && !(application as CustomApplication).isLockShowed && config.isSetupPasswordDone) {
+            when (config.lockType) {
+                LockType.PATTERN -> {
+                    startActivity(Intent(this@ActivityVault, ActivityPatternLock::class.java))
+                }
+
+                LockType.PIN -> {
+                    startActivity(Intent(this@ActivityVault, ActivityPinLock::class.java))
+                }
+            }
+        }
+
 
     }
 
     private fun checkPasswordSetDone() {
         Log.d("TAG", "checkPasswordSetDone: " + config.isSetupPasswordDone)
         if (!config.isSetupPasswordDone) {
-            val navHostFragment =
-                supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-            val navController = navHostFragment.navController
-            navController.navigate(R.id.fragmentChangePin)
+            navController?.navigate(R.id.fragmentChangePin)
         }
     }
 
@@ -128,15 +146,32 @@ class ActivityVault : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityVaultBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        setupNav()
         initScreenOffAction()
         setupNavigationDrawer()
         setSupportActionBar(binding.toolbar)
         setupActionBar()
+        initNavigationView()
         checkPermissionAllFileManage()
         initShakeDetector()
         setThemeMode()
         registerBroadcastHideApp()
     }
+
+    private fun setupNav() {
+        navHostFragment =
+            (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment)
+        navController = navHostFragment?.navController
+        inflater = navController?.navInflater
+        graph = inflater?.inflate(R.navigation.nav_graph)
+        graph?.setStartDestination(R.id.fragmentVault)
+        navController?.graph = graph!!
+    }
+
+//    private fun test() {
+//        val source = File("/storage/emulated/0/DCIM/Camera/20230614_111612.mp4")
+//        FileNameUtils.decryptFileToAnotherLocation(this, source, Environment.getExternalStorageDirectory())
+//    }
 
     private fun checkIntruderByPass() {
         if ((application as CustomApplication).authority && config.caughtIntruder) {
@@ -210,32 +245,39 @@ class ActivityVault : AppCompatActivity() {
     }
 
     private fun initNavigationView() {
+
         if (config.fakePassword) {
             if (!(application as CustomApplication).authority) {
                 binding.itemVault.root.hide()
                 binding.itemRecyclerBin.root.hide()
                 binding.itemSetting.root.hide()
                 binding.itemPrivacy.root.hide()
-                (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController.navigate(
-                    R.id.fragmentBrowser
-                )
+                graph?.setStartDestination(R.id.fragmentBrowser)
+                graph?.let { navController?.setGraph(it, intent.extras) }
             } else {
                 binding.itemVault.root.show()
                 binding.itemRecyclerBin.root.show()
                 binding.itemSetting.root.show()
                 binding.itemPrivacy.root.show()
+                graph?.setStartDestination(R.id.fragmentVault)
+                graph?.let { navController?.setGraph(it, intent.extras) }
             }
         } else {
-            binding.itemVault.root.show()
-            binding.itemRecyclerBin.root.show()
-            binding.itemSetting.root.show()
-            binding.itemPrivacy.root.show()
+            if ((application as CustomApplication).authority) {
+                binding.itemVault.root.show()
+                binding.itemRecyclerBin.root.show()
+                binding.itemSetting.root.show()
+                binding.itemPrivacy.root.show()
+                graph?.setStartDestination(R.id.fragmentVault)
+                graph?.let { navController?.setGraph(it, intent.extras) }
+            }
+
         }
         binding.itemVault.apply {
             imvIcon.setImageResource(R.drawable.ic_vault)
             tvContent.text = getString(R.string.vault)
             root.clickWithDebounce {
-                findNavController(R.id.nav_host_fragment).navigate(R.id.fragmentVault)
+                navController?.navigate(R.id.fragmentVault)
                 binding.drawerLayout.closeDrawer(GravityCompat.START)
             }
         }
@@ -243,7 +285,7 @@ class ActivityVault : AppCompatActivity() {
             imvIcon.setImageResource(R.drawable.ic_browser)
             tvContent.text = getString(R.string.browser)
             root.clickWithDebounce {
-                findNavController(R.id.nav_host_fragment).navigate(R.id.fragmentBrowser)
+                navController?.navigate(R.id.fragmentBrowser)
                 binding.drawerLayout.closeDrawer(GravityCompat.START)
             }
         }
@@ -251,7 +293,7 @@ class ActivityVault : AppCompatActivity() {
             imvIcon.setImageResource(R.drawable.ic_note)
             tvContent.text = getString(R.string.note)
             root.clickWithDebounce {
-                findNavController(R.id.nav_host_fragment).navigate(R.id.fragmentNote)
+                navController?.navigate(R.id.fragmentNote)
                 binding.drawerLayout.closeDrawer(GravityCompat.START)
             }
         }
@@ -259,7 +301,7 @@ class ActivityVault : AppCompatActivity() {
             imvIcon.setImageResource(R.drawable.ic_delete)
             tvContent.text = getString(R.string.recycle_bin)
             root.clickWithDebounce {
-                findNavController(R.id.nav_host_fragment).navigate(R.id.fragmentRecycleBin)
+                navController?.navigate(R.id.fragmentRecycleBin)
                 binding.drawerLayout.closeDrawer(GravityCompat.START)
             }
         }
@@ -267,7 +309,7 @@ class ActivityVault : AppCompatActivity() {
             imvIcon.setImageResource(R.drawable.ic_setting)
             tvContent.text = getString(R.string.setting)
             root.clickWithDebounce {
-                findNavController(R.id.nav_host_fragment).navigate(R.id.fragmentSetting)
+                navController?.navigate(R.id.fragmentSetting)
                 binding.drawerLayout.closeDrawer(GravityCompat.START)
             }
         }
@@ -275,7 +317,7 @@ class ActivityVault : AppCompatActivity() {
             imvIcon.setImageResource(R.drawable.ic_language)
             tvContent.text = getString(R.string.language)
             root.clickWithDebounce {
-                findNavController(R.id.nav_host_fragment).navigate(R.id.fragmentLanguage)
+                navController?.navigate(R.id.fragmentLanguage)
                 binding.drawerLayout.closeDrawer(GravityCompat.START)
             }
         }
@@ -325,7 +367,7 @@ class ActivityVault : AppCompatActivity() {
             }
         }
 
-        (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController.addOnDestinationChangedListener { controller, destination, arguments ->
+        navController?.addOnDestinationChangedListener { controller, destination, arguments ->
             when (destination.id) {
                 R.id.fragmentVault -> {
                     resetBackground(binding.itemVault)
@@ -364,6 +406,7 @@ class ActivityVault : AppCompatActivity() {
         }
 
     }
+
 
     private fun shareApp() {
         try {
@@ -447,7 +490,7 @@ class ActivityVault : AppCompatActivity() {
 
     private val launcher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (buildMinVersionS()) {
+            if (buildMinVersionR()) {
                 val hasManageExternalStoragePermission = Environment.isExternalStorageManager()
 
                 if (hasManageExternalStoragePermission) {
@@ -504,8 +547,6 @@ class ActivityVault : AppCompatActivity() {
 
 
     fun setupActionBar() {
-        val navController: NavController =
-            (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController
         appBarConfiguration = AppBarConfiguration.Builder(
             R.id.fragmentVault,
             R.id.fragmentBrowser,
@@ -514,8 +555,10 @@ class ActivityVault : AppCompatActivity() {
             R.id.fragmentSetting,
             R.id.fragmentLanguage,
         ).setOpenableLayout(binding.drawerLayout).build()
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        findViewById<NavigationView>(R.id.nav_view).setupWithNavController(navController)
+        navController?.let {
+            setupActionBarWithNavController(it, appBarConfiguration)
+            findViewById<NavigationView>(R.id.nav_view).setupWithNavController(it)
+        }
     }
 
     private fun initScreenOffAction() {

@@ -30,8 +30,6 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 33
-        versionCode Integer.valueOf(new Date().format('yyyyMMdd', TimeZone.getTimeZone('UTC')))
-        versionName libraryVersion
     }
 
     buildTypes {
@@ -44,6 +42,7 @@ android {
     lintOptions {
         abortOnError false
     }
+    namespace 'com.takwolf.android.lock9'
 
 }
 
