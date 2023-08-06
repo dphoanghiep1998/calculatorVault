@@ -48,13 +48,13 @@ class AdapterPersistentNew(
     }
 
     private fun showCheckboxAll() {
-        notifyItemRangeChanged(0, listItem.size, PAYLOAD_CHECK)
+        notifyItemRangeChanged(0, differ.currentList.size, PAYLOAD_CHECK)
     }
 
     fun selectAll() {
-        listOfItemSelected.addAll(listItem)
+        listOfItemSelected.addAll(differ.currentList)
         onSelectAll.invoke(listOfItemSelected.toMutableList())
-        notifyItemRangeChanged(0, listItem.size, PAYLOAD_CHECK)
+        notifyItemRangeChanged(0, differ.currentList.size, PAYLOAD_CHECK)
     }
 
     fun unSelectAll() {
@@ -62,7 +62,6 @@ class AdapterPersistentNew(
         showCheckboxAll()
     }
 
-    private var listItem = mutableListOf<FileVaultItem>()
     private var listOfItemSelected = mutableSetOf<FileVaultItem>()
     private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<FileVaultItem>() {
 
@@ -127,7 +126,7 @@ class AdapterPersistentNew(
         } else {
             for (payload in payloads) {
                 if (payload == PAYLOAD_CHECK) {
-                    val item = listItem[position]
+                    val item = differ.currentList[position]
                     when (holder.itemViewType) {
                         0 -> {
                             with(holder as ItemPictureViewHolder) {
@@ -231,6 +230,7 @@ class AdapterPersistentNew(
             }
         }
     }
+
     override fun getItemViewType(position: Int): Int = when (mType) {
         Constant.TYPE_PICTURE -> 0
         Constant.TYPE_AUDIOS -> 1
@@ -238,16 +238,13 @@ class AdapterPersistentNew(
         Constant.TYPE_FILE -> 3
         else -> 4
     }
+
     override fun getItemCount(): Int {
         return differ.currentList.size
     }
 
     fun submitList(list: List<FileVaultItem>) {
         differ.submitList(list)
-        list?.let {
-            listItem.clear()
-            listItem.addAll(it)
-        }
     }
 
     inner class ItemPictureViewHolder(val binding: LayoutItemPersistentPictureBinding) :
@@ -528,10 +525,11 @@ class AdapterPersistentNew(
             }
         }
     }
+
     fun changeToNormalView() {
         editMode = false
         listOfItemSelected.clear()
-        notifyItemRangeChanged(0, listItem.size, PAYLOAD_CHECK)
+        notifyItemRangeChanged(0, differ.currentList.size, PAYLOAD_CHECK)
     }
 
 }

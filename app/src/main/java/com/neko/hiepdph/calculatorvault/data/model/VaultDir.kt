@@ -1,6 +1,6 @@
 package com.neko.hiepdph.calculatorvault.data.model
 
-class VaultDir(
+data class VaultDir(
     val mPath: String,
     val mName: String = "",
     val type: String = "",

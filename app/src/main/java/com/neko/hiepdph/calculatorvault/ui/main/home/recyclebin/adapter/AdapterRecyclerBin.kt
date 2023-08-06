@@ -14,6 +14,9 @@ import android.widget.PopupWindow
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.ItemDiffCallback
@@ -79,12 +82,14 @@ class AdapterRecyclerBin(
             val item = listItem[position]
 
             binding.tvNameDocument.isSelected = true
-
+            var requestOptions = RequestOptions()
+            requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
             binding.checkBox.isChecked = item in listOfItemSelected
             when (item.fileType) {
                 Constant.TYPE_PICTURE -> {
                     Glide.with(itemView.context).load(item.recyclerPath).centerCrop()
-                        .error(R.drawable.ic_error_image).into(binding.imvThumb)
+                        .apply(requestOptions).error(R.drawable.ic_error_image)
+                        .into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
                         showPopupWindow(itemView.context, binding.option, item)
@@ -93,7 +98,8 @@ class AdapterRecyclerBin(
 
                 Constant.TYPE_AUDIOS -> {
                     Glide.with(itemView.context).asBitmap().load(getThumbnail(item.recyclerPath))
-                        .centerCrop().error(R.drawable.ic_error_audio).into(binding.imvThumb)
+                        .apply(requestOptions).centerCrop().error(R.drawable.ic_error_audio)
+                        .into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
                         showPopupWindow(itemView.context, binding.option, item)
@@ -102,7 +108,8 @@ class AdapterRecyclerBin(
 
                 Constant.TYPE_VIDEOS -> {
                     Glide.with(itemView.context).load(item.recyclerPath).centerCrop()
-                        .error(R.drawable.ic_error_video).into(binding.imvThumb)
+                        .apply(requestOptions).error(R.drawable.ic_error_video)
+                        .into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
                         showPopupWindow(itemView.context, binding.option, item)
@@ -114,7 +121,7 @@ class AdapterRecyclerBin(
                         getImageForItemFile(
                             item
                         )
-                    ).error(R.drawable.ic_file_unknow).into(binding.imvThumb)
+                    ).error(R.drawable.ic_file_unknow).apply(requestOptions).into(binding.imvThumb)
 
                     binding.option.clickWithDebounce {
                         showPopupWindow(

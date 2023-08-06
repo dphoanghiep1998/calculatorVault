@@ -1,5 +1,6 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.vault
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.DisplayMetrics
 import android.util.Log
@@ -8,11 +9,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.PopupWindow
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.VaultDir
 import com.neko.hiepdph.calculatorvault.databinding.ItemHomeGridLayoutBinding
 import com.neko.hiepdph.calculatorvault.databinding.ItemHomeListLayoutBinding
@@ -32,6 +36,19 @@ class AdapterFolder(
         var isSwitchView = false
     }
 
+    private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<VaultDir>() {
+
+        override fun areItemsTheSame(oldItem: VaultDir, newItem: VaultDir): Boolean {
+            return oldItem.mPath == newItem.mPath
+        }
+
+        override fun areContentsTheSame(oldItem: VaultDir, newItem: VaultDir): Boolean {
+            return oldItem == newItem
+        }
+
+    }
+    private val differ = AsyncListDiffer(this, DIFF_CALLBACK)
+
     init {
         initPopupWindow(context)
     }
@@ -40,18 +57,44 @@ class AdapterFolder(
     private val GRID_ITEM = 1
 
     inner class FolderViewHolderList(val binding: ItemHomeListLayoutBinding) :
-        ViewHolder(binding.root)
+        ViewHolder(binding.root) {
+        @SuppressLint("SetTextI18n")
+        fun bind(item: VaultDir) {
+            binding.imvLogo.setImageResource(getImageLogo(item.type))
+            binding.tvName.text = item.mName
+            binding.imvOption.visibility =
+                if (item.type == Constant.TYPE_ADD_MORE) View.VISIBLE else View.GONE
+            binding.tvCount.text =
+                item.mChildren.toString() + " " + itemView.context.getString(R.string.item)
+            binding.imvOption.clickWithDebounce {
+                showOption(binding.imvOption, item, absoluteAdapterPosition)
+            }
+            binding.root.clickWithDebounce {
+                onItemPress.invoke(item)
+            }
+        }
+    }
 
     inner class FolderViewHolderGrid(val binding: ItemHomeGridLayoutBinding) :
-        ViewHolder(binding.root)
+        ViewHolder(binding.root) {
+        fun bind(item: VaultDir) {
+            binding.imvLogo.setImageResource(getImageLogo(item.type))
+            binding.tvName.text = item.mName
+            binding.imvOption.visibility =
+                if (item.type == Constant.TYPE_ADD_MORE) View.VISIBLE else View.GONE
+            binding.tvCount.text = item.mChildren.toString()
+            binding.imvOption.clickWithDebounce {
+                showOption(binding.imvOption, item, absoluteAdapterPosition)
+            }
+            binding.root.clickWithDebounce {
+                onItemPress.invoke(item)
+            }
+        }
+    }
 
-
-    private var listFolder = mutableListOf<VaultDir>()
 
     fun setData(list: List<VaultDir>) {
-        listFolder.clear()
-        listFolder.addAll(list.toMutableList())
-        notifyDataSetChanged()
+        differ.submitList(list)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -69,42 +112,21 @@ class AdapterFolder(
     }
 
     override fun getItemCount(): Int {
-        return listFolder.size
+        return differ.currentList.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val customFolder = listFolder[position]
         when (holder.itemViewType) {
             LIST_ITEM -> {
                 with(holder as FolderViewHolderList) {
-                    binding.imvLogo.setImageResource(getImageLogo(customFolder.type))
-                    binding.tvName.text = customFolder.mName
-                    binding.imvOption.visibility =
-                        if (customFolder.type == Constant.TYPE_ADD_MORE) View.VISIBLE else View.GONE
-                    binding.tvCount.text =
-                        customFolder.mChildren.toString() + " " + itemView.context.getString(R.string.item)
-                    binding.imvOption.clickWithDebounce {
-                        showOption(binding.imvOption, customFolder, position)
-                    }
-                    binding.root.clickWithDebounce {
-                        onItemPress.invoke(customFolder)
-                    }
+                    bind(differ.currentList[position])
+
                 }
             }
 
             GRID_ITEM -> {
                 with(holder as FolderViewHolderGrid) {
-                    binding.imvLogo.setImageResource(getImageLogo(customFolder.type))
-                    binding.tvName.text = customFolder.mName
-                    binding.imvOption.visibility =
-                        if (customFolder.type == Constant.TYPE_ADD_MORE) View.VISIBLE else View.GONE
-                    binding.tvCount.text = customFolder.mChildren.toString()
-                    binding.imvOption.clickWithDebounce {
-                        showOption(binding.imvOption, customFolder,position)
-                    }
-                    binding.root.clickWithDebounce {
-                        onItemPress.invoke(customFolder)
-                    }
+                    bind(differ.currentList[position])
 
                 }
             }
@@ -159,19 +181,13 @@ class AdapterFolder(
         val positionOfIcon = values[1]
         val displayMetrics: DisplayMetrics = view.context.resources.displayMetrics
         val height = displayMetrics.heightPixels * 2 / 3
-        Log.d("TAG", "showOption: "+positionOfIcon)
-        Log.d("TAG", "showOption: "+height)
         if (positionOfIcon < height) {
             popupWindow?.showAsDropDown(
-                view,
-                0,
-                -view.height + popupWindow!!.height
+                view, 0, -view.height + popupWindow!!.height
             )
-        }else{
+        } else {
             popupWindow?.showAsDropDown(
-                view,
-                0,
-                -400
+                view, 0, -400
             )
         }
     }

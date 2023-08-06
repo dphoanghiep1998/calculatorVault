@@ -28,6 +28,7 @@ import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.LayoutItemPersistentFileBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutPersistentItemFileOptionMenuBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutPersistentItemOptionMenuBinding
+import java.io.File
 
 
 class AdapterOtherFolderNew(
@@ -39,7 +40,6 @@ class AdapterOtherFolderNew(
     private val onDeleteItem: (FileVaultItem) -> Unit
 
 ) : RecyclerView.Adapter<AdapterOtherFolderNew.ItemFileViewHolder>() {
-    private var listItem = mutableListOf<FileVaultItem>()
     private var listOfItemSelected = mutableSetOf<FileVaultItem>()
     private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<FileVaultItem>() {
 
@@ -56,16 +56,12 @@ class AdapterOtherFolderNew(
 
     fun submitList(list: MutableList<FileVaultItem>?) {
         differ.submitList(list)
-        list?.let {
-            listItem.clear()
-            listItem.addAll(it)
-        }
     }
 
     fun selectAll() {
-        listOfItemSelected.addAll(listItem)
+        listOfItemSelected.addAll(differ.currentList)
         onSelectAll.invoke(listOfItemSelected.toMutableList())
-        notifyItemRangeChanged(0, listItem.size, PAYLOAD_CHECK)
+        notifyItemRangeChanged(0, differ.currentList.size, PAYLOAD_CHECK)
     }
 
     fun unSelectAll() {
@@ -81,14 +77,13 @@ class AdapterOtherFolderNew(
     }
 
     private fun showCheckboxAll() {
-        notifyItemRangeChanged(0, listItem.size, PAYLOAD_CHECK)
+        notifyItemRangeChanged(0, differ.currentList.size, PAYLOAD_CHECK)
     }
 
 
     inner class ItemFileViewHolder(val binding: LayoutItemPersistentFileBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(position: Int) {
-            val item = listItem[position]
+        fun bind(item: FileVaultItem) {
             binding.tvNameDocument.isSelected = true
             when (item.fileType) {
                 Constant.TYPE_PICTURE -> {
@@ -218,11 +213,11 @@ class AdapterOtherFolderNew(
     fun changeToNormalView() {
         editMode = false
         listOfItemSelected.clear()
-        notifyItemRangeChanged(0, listItem.size, PAYLOAD_CHECK)
+        notifyItemRangeChanged(0, differ.currentList.size, PAYLOAD_CHECK)
     }
 
 
-    override fun getItemViewType(position: Int): Int = when (listItem[position].fileType) {
+    override fun getItemViewType(position: Int): Int = when (differ.currentList[position].fileType) {
         Constant.TYPE_PICTURE -> 0
         Constant.TYPE_VIDEOS -> 1
         Constant.TYPE_AUDIOS -> 2
@@ -236,7 +231,7 @@ class AdapterOtherFolderNew(
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onBindViewHolder(holder: ItemFileViewHolder, position: Int) {
         with(holder) {
-            bind(position)
+            bind(differ.currentList[position])
         }
     }
 
@@ -248,7 +243,7 @@ class AdapterOtherFolderNew(
         } else {
             for (payload in payloads) {
                 if (payload == PAYLOAD_CHECK) {
-                    val item = listItem[position]
+                    val item = differ.currentList[position]
                     with(holder) {
                         if (editMode) {
                             binding.checkBox.show()
@@ -265,7 +260,6 @@ class AdapterOtherFolderNew(
         }
     }
 }
-
 
 
 private fun getImageForItemFile(item: FileVaultItem): Int {

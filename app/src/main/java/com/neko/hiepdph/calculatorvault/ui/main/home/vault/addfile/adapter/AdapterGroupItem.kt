@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
@@ -15,7 +15,6 @@ import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils.getThumbnail
-import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.GroupItem
 import com.neko.hiepdph.calculatorvault.databinding.LayoutItemAddFileAudioBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutItemAddFileFileBinding
@@ -25,18 +24,27 @@ import com.neko.hiepdph.calculatorvault.databinding.LayoutItemAddFileVideoBindin
 class AdapterGroupItem(
     private val mType: String = Constant.TYPE_PICTURE,
     private val onClickFolderItem: (GroupItem, type: String?) -> Unit,
-) : ListAdapter<GroupItem, RecyclerView.ViewHolder>(ItemDiffCallback()) {
-    private var listGroupItem = mutableListOf<GroupItem>()
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var fileDataFolder = mutableListOf<String>()
 
-    override fun submitList(list: MutableList<GroupItem>?) {
-        super.submitList(list)
+    private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<GroupItem>() {
+
+        override fun areItemsTheSame(oldItem: GroupItem, newItem: GroupItem): Boolean {
+            return oldItem.folderPath == newItem.folderPath
+        }
+
+        override fun areContentsTheSame(oldItem: GroupItem, newItem: GroupItem): Boolean {
+            return oldItem == newItem
+        }
+
+    }
+    private val differ = AsyncListDiffer(this, DIFF_CALLBACK)
+    fun submitList(list: MutableList<GroupItem>?) {
+        differ.submitList(list)
         list?.let { groupItem ->
-            listGroupItem.clear()
-            listGroupItem.addAll(groupItem)
             if (mType == Constant.TYPE_FILE) {
-                if (listGroupItem.isNotEmpty()) {
-                    if (listGroupItem[0].dataTypeList?.isNotEmpty() == true) {
+                if (differ.currentList.isNotEmpty()) {
+                    if (differ.currentList[0].dataTypeList?.isNotEmpty() == true) {
                         list[0].dataTypeList?.toMutableList()?.let {
                             fileDataFolder.clear()
                             fileDataFolder.addAll(it)
@@ -53,29 +61,27 @@ class AdapterGroupItem(
     inner class GroupItemPictureViewHolder(val binding: LayoutItemAddFilePictureBinding) :
         RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
-        fun bind(position: Int) {
-            val model = listGroupItem[position]
+        fun bind(model: GroupItem) {
             val requestOptions = RequestOptions().transforms(CenterCrop(), RoundedCorners(16))
             if (model.dataList.isNotEmpty()) {
                 Glide.with(itemView.context).load(model.dataList[0]).apply(requestOptions).error(
-                        ContextCompat.getDrawable(
-                            itemView.context, R.drawable.ic_error_image
-                        )
-                    ).into(binding.imvThumb)
+                    ContextCompat.getDrawable(
+                        itemView.context, R.drawable.ic_error_image
+                    )
+                ).into(binding.imvThumb)
             }
 
             binding.tvNameQuantity.text = "${model.name} (${model.itemCount})"
 
             binding.root.clickWithDebounce {
-                onClickFolderItem.invoke(listGroupItem[position], null)
+                onClickFolderItem.invoke(model, null)
             }
         }
     }
 
     inner class GroupItemVideoViewHolder(val binding: LayoutItemAddFileVideoBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(position: Int) {
-            val model = listGroupItem[position]
+        fun bind(model: GroupItem) {
             val requestOptions = RequestOptions().transforms(CenterCrop(), RoundedCorners(16))
             Glide.with(itemView.context).load(model.dataList[0]).centerCrop().apply(requestOptions)
                 .error(
@@ -85,15 +91,14 @@ class AdapterGroupItem(
                 ).into(binding.imvThumb)
             binding.tvNameQuantity.text = "${model.name} (${model.itemCount})"
             binding.root.clickWithDebounce {
-                onClickFolderItem.invoke(listGroupItem[position], null)
+                onClickFolderItem.invoke(model, null)
             }
         }
     }
 
     inner class GroupItemAudioViewHolder(val binding: LayoutItemAddFileAudioBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(position: Int) {
-            val model = listGroupItem[position]
+        fun bind(model: GroupItem) {
             val requestOptions = RequestOptions().transforms(CenterCrop(), RoundedCorners(16))
             if (model.dataList.isNotEmpty()) {
                 Glide.with(itemView.context).asBitmap().load(getThumbnail(model.dataList[0]))
@@ -106,7 +111,7 @@ class AdapterGroupItem(
 
             binding.tvNameQuantity.text = "${model.name} (${model.itemCount})"
             binding.root.clickWithDebounce {
-                onClickFolderItem.invoke(listGroupItem[position], null)
+                onClickFolderItem.invoke(model, null)
             }
         }
     }
@@ -156,7 +161,7 @@ class AdapterGroupItem(
                 }
             }
             binding.root.clickWithDebounce {
-                onClickFolderItem.invoke(listGroupItem[0], fileDataFolder[adapterPosition])
+                onClickFolderItem.invoke(differ.currentList[0], fileDataFolder[adapterPosition])
             }
         }
     }
@@ -210,10 +215,10 @@ class AdapterGroupItem(
 
     override fun getItemCount(): Int {
         return if (mType != Constant.TYPE_FILE) {
-            listGroupItem.size
+            differ.currentList.size
         } else {
-            if (listGroupItem.isNotEmpty()) {
-                listGroupItem[0].dataTypeList?.size ?: 0
+            if (differ.currentList.isNotEmpty()) {
+                differ.currentList[0].dataTypeList?.size ?: 0
             } else {
                 0
             }
@@ -224,16 +229,16 @@ class AdapterGroupItem(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder.itemViewType) {
             0 -> {
-                (holder as GroupItemPictureViewHolder).bind(position)
+                (holder as GroupItemPictureViewHolder).bind(differ.currentList[position])
             }
 
             1 -> {
-                (holder as GroupItemVideoViewHolder).bind(position)
+                (holder as GroupItemVideoViewHolder).bind(differ.currentList[position])
 
             }
 
             2 -> {
-                (holder as GroupItemAudioViewHolder).bind(position)
+                (holder as GroupItemAudioViewHolder).bind(differ.currentList[position])
             }
 
             3 -> {
@@ -244,13 +249,3 @@ class AdapterGroupItem(
     }
 }
 
-class ItemDiffCallback : DiffUtil.ItemCallback<GroupItem>() {
-    override fun areItemsTheSame(oldItem: GroupItem, newItem: GroupItem): Boolean {
-        return oldItem.folderPath == newItem.folderPath
-    }
-
-    override fun areContentsTheSame(oldItem: GroupItem, newItem: GroupItem): Boolean {
-        return oldItem == newItem
-    }
-
-}
