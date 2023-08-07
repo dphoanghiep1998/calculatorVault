@@ -68,7 +68,7 @@ class DialogDetail(
             binding.tvResolutionValue.text = fileVaultItem.ratioPicture
         }
 
-        binding.tvTimeLockValue.text = DateTimeUtils.getDateConverted(fileVaultItem.timeLock)
+        binding.tvTimeLockValue.text = DateTimeUtils.getDateTimeConverted(fileVaultItem.timeLock)
         binding.tvPathValue.text = fileVaultItem.encryptedPath
         binding.tvOriginPathValue.text = fileVaultItem.originalPath
         if (fileVaultItem.encryptionType == EncryptionMode.HIDDEN) {

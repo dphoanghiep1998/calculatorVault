@@ -14,6 +14,11 @@ object DateTimeUtils {
         return formatter.format(time).toString()
     }
 
+    fun getDateTimeConverted(time:Long):String{
+        val formatter = SimpleDateFormat("dd/MM/yyyy hh:mm:ss")
+        return formatter.format(time).toString()
+    }
+
     fun getDateConvertedToResult(time: Long): String {
         val formatter = SimpleDateFormat("MMM dd, HH:mm")
         return formatter.format(time).toString()

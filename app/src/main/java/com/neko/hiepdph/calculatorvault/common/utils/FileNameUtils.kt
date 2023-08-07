@@ -184,7 +184,10 @@ object FileNameUtils {
             val filePath = sourceLocation.path
             val fileData = CryptoCore.getInstance(context).readFile(filePath)
             val secretKey = CryptoCore.getInstance(context).getSecretKey(context.config.secretKey)
+            Log.d("TAG", "encryptFileToAnotherLocation: "+fileData.size)
+
             val encodedData = CryptoCore.getInstance(context).encrypt(secretKey, fileData)
+            Log.d("TAG", "encryptFileToAnotherLocation: "+encodedData.size)
             val byteInputStream = ByteArrayInputStream(encodedData)
             while (byteInputStream.read(buf).also { len = it } > 0) {
                 out?.write(buf, 0, len)

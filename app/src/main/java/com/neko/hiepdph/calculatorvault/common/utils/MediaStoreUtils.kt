@@ -8,6 +8,7 @@ import android.media.MediaMetadataRetriever
 import android.provider.MediaStore
 import android.util.Log
 import com.neko.hiepdph.calculatorvault.common.Constant
+import com.neko.hiepdph.calculatorvault.common.Constant.DECRYPT_FOLDER_NAME
 import com.neko.hiepdph.calculatorvault.common.Constant.PRIVACY_FOLDER_NAME
 import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_AUDIOS
 import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_CSV
@@ -25,13 +26,16 @@ import com.neko.hiepdph.calculatorvault.common.Constant.TYPE_ZIP
 import com.neko.hiepdph.calculatorvault.common.Constant.archiveMimeTypes
 import com.neko.hiepdph.calculatorvault.common.Constant.extraAudioMimeTypes
 import com.neko.hiepdph.calculatorvault.common.Constant.extraDocumentMimeTypes
-import com.neko.hiepdph.calculatorvault.common.extensions.*
+import com.neko.hiepdph.calculatorvault.common.extensions.getArtist
+import com.neko.hiepdph.calculatorvault.common.extensions.getDuration
+import com.neko.hiepdph.calculatorvault.common.extensions.getLongValue
+import com.neko.hiepdph.calculatorvault.common.extensions.getStringValue
+import com.neko.hiepdph.calculatorvault.common.extensions.queryCursor
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.GroupItem
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileInputStream
-import java.util.*
+import java.util.Locale
 
 object MediaStoreUtils {
     fun getListGroupItem(context: Context, type: String): List<GroupItem> {
@@ -117,6 +121,8 @@ object MediaStoreUtils {
                                 val parentFolder = File(path).parentFile?.name ?: "No_name"
                                 if (parentFolder.startsWith(".") || parentFolderPath?.contains(
                                         PRIVACY_FOLDER_NAME
+                                    ) == true || parentFolderPath?.contains(
+                                        DECRYPT_FOLDER_NAME
                                     ) == true
                                 ) {
                                     return@queryCursor
@@ -775,12 +781,17 @@ object MediaStoreUtils {
         return "${options.outWidth}x${options.outHeight}"
     }
 
-     fun getImageThumb(id: Long, context: Context):ByteArray? {
+    fun getImageThumb(id: Long, context: Context): ByteArray? {
         val crThumb: ContentResolver = context.contentResolver
         val options: BitmapFactory.Options = BitmapFactory.Options()
         options.inSampleSize = 1
-        val curThumb  = MediaStore.Video.Thumbnails.getThumbnail(crThumb,id,MediaStore.Video.Thumbnails.MICRO_KIND, options)
-        if(curThumb != null){
+        val curThumb = MediaStore.Video.Thumbnails.getThumbnail(
+            crThumb,
+            id,
+            MediaStore.Video.Thumbnails.MICRO_KIND,
+            options
+        )
+        if (curThumb != null) {
             val stream = ByteArrayOutputStream()
             curThumb.compress(Bitmap.CompressFormat.PNG, 100, stream)
             val byteArray: ByteArray = stream.toByteArray()

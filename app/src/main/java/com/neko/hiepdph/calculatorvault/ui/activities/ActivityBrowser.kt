@@ -11,9 +11,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.customview.ChromeProgressBar
+import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
 import com.neko.hiepdph.calculatorvault.data.database.model.BookmarkModel
 import com.neko.hiepdph.calculatorvault.databinding.ActivityBrowserBinding
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
@@ -134,6 +136,7 @@ class ActivityBrowser : AppCompatActivity() {
 
                 bookmarkModel?.let {
                     viewModel.deleteBookmark(it.id)
+                    showSnackBar(getString(R.string.remove_bookmark), type = SnackBarType.SUCCESS)
                 }
             } else {
                 val imageIcon =
@@ -147,6 +150,8 @@ class ActivityBrowser : AppCompatActivity() {
                         false
                     )
                 )
+                showSnackBar(getString(R.string.add_bookmark), type = SnackBarType.SUCCESS)
+
             }
 
         }

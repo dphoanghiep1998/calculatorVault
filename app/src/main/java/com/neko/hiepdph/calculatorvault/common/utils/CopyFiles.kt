@@ -262,9 +262,9 @@ object CopyFiles {
     }
 
 
-    fun addMedia(c: Context, f: File?) {
+    private fun addMedia(c: Context, f: File?) {
         val intent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-        intent.setData(Uri.fromFile(f))
+        intent.data = Uri.fromFile(f)
         c.sendBroadcast(intent)
     }
 
@@ -293,7 +293,6 @@ object CopyFiles {
                         extension
                     )
                 ) "" else ".$extension"
-
 
             val patttern = java.util.regex.Pattern.compile(".*\\([0-9]*\\)\\..*")
 

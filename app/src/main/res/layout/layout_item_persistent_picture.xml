@@ -6,29 +6,29 @@
     android:layout_marginHorizontal="@dimen/_2sdp"
     android:layout_marginVertical="@dimen/_2sdp">
 
-    <com.neko.hiepdph.calculatorvault.common.customview.RoundedImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imv_thumb"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:backgroundTint="@color/neutral_06"
-        android:background="@drawable/bg_item_image_corner_10"
-        app:cornerRadiusBotLeft="10dp"
-        app:cornerRadiusBotRight="10dp"
-        app:cornerRadiusTopLeft="10dp"
-        app:cornerRadiusTopRight="10dp"
+        android:elevation="0dp"
+        android:padding="2dp"
+        android:scaleType="centerCrop"
         app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/circular"
+        app:strokeColor="@color/neutral_04"
+        app:strokeWidth="1dp" />
+
     <CheckBox
-        android:visibility="gone"
         android:id="@+id/check_box"
         android:layout_width="@dimen/_20sdp"
         android:layout_height="@dimen/_20sdp"
+        android:layout_margin="@dimen/_2sdp"
+        android:background="@drawable/bg_checkbox_pick_selector"
         android:button="@null"
         android:minWidth="0dp"
         android:minHeight="0dp"
-        android:layout_margin="@dimen/_2sdp"
-        android:background="@drawable/bg_checkbox_pick_selector"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="@id/imv_thumb"
         app:layout_constraintTop_toTopOf="@id/imv_thumb" />
 

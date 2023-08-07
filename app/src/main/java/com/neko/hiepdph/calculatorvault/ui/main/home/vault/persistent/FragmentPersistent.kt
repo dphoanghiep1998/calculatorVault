@@ -360,24 +360,28 @@ class FragmentPersistent : Fragment() {
             Constant.TYPE_AUDIOS -> getString(R.string.audios)
             else -> getString(R.string.files)
         }
-        val confirmDialog = DialogConfirm(onPositiveClicked = {
+        val confirmDialog = DialogConfirm(
+            onPositiveClicked = {
 
-            val dialogProgress = DialogProgress(listItemSelected = listItemSelected,
-                listOfSourceFile = listItemSelected.map { File(it.encryptedPath) },
-                listOfTargetParentFolder = listItemSelected.map { requireContext().config.recyclerBinFolder },
-                action = Action.DELETE,
-                onSuccess = {
-                    normalView()
-                    showSnackBar(it, SnackBarType.SUCCESS)
+                val dialogProgress = DialogProgress(listItemSelected = listItemSelected,
+                    listOfSourceFile = listItemSelected.map { File(it.encryptedPath) },
+                    listOfTargetParentFolder = listItemSelected.map { requireContext().config.recyclerBinFolder },
+                    action = Action.DELETE,
+                    onSuccess = {
+                        normalView()
+                        showSnackBar(it, SnackBarType.SUCCESS)
 
-                },
-                onFailed = {
-                    normalView()
-                    showSnackBar(it, SnackBarType.FAILED)
+                    },
+                    onFailed = {
+                        normalView()
+                        showSnackBar(it, SnackBarType.FAILED)
 
-                })
-            dialogProgress.show(childFragmentManager, dialogProgress.tag)
-        }, DialogConfirmType.DELETE, name)
+                    })
+                dialogProgress.show(childFragmentManager, dialogProgress.tag)
+            },
+            dialogType = if (requireContext().config.moveToRecyclerBin) DialogConfirmType.DELETE_PERMANENT else DialogConfirmType.DELETE,
+            name
+        )
 
         confirmDialog.show(childFragmentManager, confirmDialog.tag)
     }
@@ -543,146 +547,118 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun handleClickItem(item: FileVaultItem) {
-        Log.d("TAG", "handleClickItem: " + item.name)
+        Log.d("TAG", "handleClickItem: " + item.fileType)
         val list = mutableListOf<FileVaultItem>()
-        if (item.encryptionType == EncryptionMode.HIDDEN) {
-            when (item.fileType) {
-                Constant.TYPE_PICTURE -> {
-                    if (File(item.decodePath).exists()) {
-                        ShareData.getInstance().setListItemImage(list)
-                        val intent = Intent(requireContext(), ActivityImageDetail::class.java)
-                        startActivity(intent)
+        when (item.fileType) {
+            Constant.TYPE_PICTURE -> {
+                if (File(item.decodePath).exists()) {
+                    ShareData.getInstance().setListItemImage(list)
+                    val intent = Intent(requireContext(), ActivityImageDetail::class.java)
+                    startActivity(intent)
 
-                    } else {
-                        val dialogProgress = DialogProgress(
-                            listItemSelected = mutableListOf(item),
-                            listOfSourceFile = mutableListOf(File(item.encryptedPath)),
-                            listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
-                            onSuccess = {
-                                item.decodePath = it
-                                viewModel.updateFileVault(item)
-                                list.add(item)
-                                ShareData.getInstance().setListItemImage(list)
-                                val intent =
-                                    Intent(requireContext(), ActivityImageDetail::class.java)
-                                startActivity(intent)
-
-                            },
-                            onFailed = {
-                                showSnackBar(getString(R.string.decrypt_error), SnackBarType.FAILED)
-                            },
-                            action = Action.DECRYPT,
-                            encryptionMode = item.encryptionType
-
-                        )
-                        dialogProgress.show(childFragmentManager, dialogProgress.tag)
-                    }
-                }
-
-                Constant.TYPE_AUDIOS -> {
-                    if (File(item.decodePath).exists()) {
-                        item.decodePath.openWith(requireContext(), Constant.TYPE_AUDIOS, null)
-                    } else {
-                        val dialogProgress = DialogProgress(
-                            listItemSelected = mutableListOf(item),
-                            listOfSourceFile = mutableListOf(File(item.encryptedPath)),
-                            listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
-                            onSuccess = {
-                                item.decodePath = it
-                                viewModel.updateFileVault(item)
-                                item.decodePath.openWith(
-                                    requireContext(), Constant.TYPE_AUDIOS, null
-                                )
-                            },
-                            onFailed = {
-                                showSnackBar(getString(R.string.decrypt_error), SnackBarType.FAILED)
-                            },
-                            action = Action.DECRYPT,
-                            encryptionMode = item.encryptionType
-
-                        )
-                        dialogProgress.show(childFragmentManager, dialogProgress.tag)
-                    }
-                }
-
-                Constant.TYPE_VIDEOS -> {
-                    if (File(item.decodePath).exists()) {
-                        if (requireContext().config.playVideoMode) {
-                            ShareData.getInstance().setListItemVideo(mutableListOf(item))
-                            val intent = Intent(requireContext(), ActivityVideoPlayer::class.java)
+                } else {
+                    val dialogProgress = DialogProgress(
+                        listItemSelected = mutableListOf(item),
+                        listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                        listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
+                        onSuccess = {
+                            item.decodePath = it
+                            viewModel.updateFileVault(item)
+                            list.add(item)
+                            ShareData.getInstance().setListItemImage(list)
+                            val intent =
+                                Intent(requireContext(), ActivityImageDetail::class.java)
                             startActivity(intent)
-                        } else {
-                            item.decodePath.openWith(
-                                requireContext(), Constant.TYPE_VIDEOS, null
-                            )
-                        }
-                    } else {
-                        val dialogProgress = DialogProgress(
-                            listItemSelected = mutableListOf(item),
-                            listOfSourceFile = mutableListOf(File(item.encryptedPath)),
-                            listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
-                            onSuccess = {
-                                item.decodePath = it
-                                viewModel.updateFileVault(item)
-                                list.add(item)
-                                if (requireContext().config.playVideoMode) {
-                                    ShareData.getInstance().setListItemVideo(list)
-                                    val intent =
-                                        Intent(requireContext(), ActivityVideoPlayer::class.java)
-                                    startActivity(intent)
-                                } else {
-                                    item.encryptedPath.openWith(
-                                        requireContext(), Constant.TYPE_VIDEOS, null
-                                    )
-                                }
 
-                            },
-                            onFailed = {
-                                showSnackBar(getString(R.string.decrypt_error), SnackBarType.FAILED)
-                            },
-                            action = Action.DECRYPT,
-                            encryptionMode = item.encryptionType
+                        },
+                        onFailed = {
+                            showSnackBar(getString(R.string.decrypt_error), SnackBarType.FAILED)
+                        },
+                        action = Action.DECRYPT,
+                        encryptionMode = item.encryptionType
 
-                        )
-                        dialogProgress.show(childFragmentManager, dialogProgress.tag)
-                    }
-
-
-                }
-
-                else -> {
-                    item.encryptedPath.openWith(requireContext(), Constant.TYPE_FILE, null)
+                    )
+                    dialogProgress.show(childFragmentManager, dialogProgress.tag)
                 }
             }
-        } else {
-            if (!File(requireContext().config.decryptFolder, item.name).exists()) {
-                viewModel.decryptFile(
-                    requireContext(),
-                    mutableListOf(File(item.encryptedPath)),
-                    mutableListOf(requireContext().config.decryptFolder),
-                    mutableListOf(item.name),
-                    progress = { value: Float, currentFile: File? -> },
-                    onSuccess = {
-                        Log.d("TAG", "handleClickItem: ")
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            ShareData.getInstance().setListItemImage(list)
-                            val intent = Intent(requireContext(), ActivityImageDetail::class.java)
-                            startActivity(intent)
-                        }
 
-                    },
-                    onError = {},
-                    item.encryptionType,
-                )
+            Constant.TYPE_AUDIOS -> {
+                if (File(item.decodePath).exists()) {
+                    item.decodePath.openWith(requireContext(), Constant.TYPE_AUDIOS, null)
+                } else {
+                    val dialogProgress = DialogProgress(
+                        listItemSelected = mutableListOf(item),
+                        listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                        listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
+                        onSuccess = {
+                            item.decodePath = it
+                            viewModel.updateFileVault(item)
+                            item.decodePath.openWith(
+                                requireContext(), Constant.TYPE_AUDIOS, null
+                            )
+                        },
+                        onFailed = {
+                            showSnackBar(getString(R.string.decrypt_error), SnackBarType.FAILED)
+                        },
+                        action = Action.DECRYPT,
+                        encryptionMode = item.encryptionType
 
-            } else {
-                ShareData.getInstance().setListItemImage(list)
-                val intent = Intent(requireContext(), ActivityImageDetail::class.java)
-                startActivity(intent)
+                    )
+                    dialogProgress.show(childFragmentManager, dialogProgress.tag)
+                }
+            }
+
+            Constant.TYPE_VIDEOS -> {
+                if (File(item.decodePath).exists()) {
+                    if (requireContext().config.playVideoMode) {
+                        ShareData.getInstance().setListItemVideo(mutableListOf(item))
+                        val intent = Intent(requireContext(), ActivityVideoPlayer::class.java)
+                        startActivity(intent)
+                    } else {
+                        item.decodePath.openWith(
+                            requireContext(), Constant.TYPE_VIDEOS, null
+                        )
+                    }
+                } else {
+                    val dialogProgress = DialogProgress(
+                        listItemSelected = mutableListOf(item),
+                        listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                        listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
+                        onSuccess = {
+                            item.decodePath = it
+                            viewModel.updateFileVault(item)
+                            list.add(item)
+                            if (requireContext().config.playVideoMode) {
+                                ShareData.getInstance().setListItemVideo(list)
+                                val intent =
+                                    Intent(requireContext(), ActivityVideoPlayer::class.java)
+                                startActivity(intent)
+                            } else {
+                                item.encryptedPath.openWith(
+                                    requireContext(), Constant.TYPE_VIDEOS, null
+                                )
+                            }
+
+                        },
+                        onFailed = {
+                            showSnackBar(getString(R.string.decrypt_error), SnackBarType.FAILED)
+                        },
+                        action = Action.DECRYPT,
+                        encryptionMode = item.encryptionType
+
+                    )
+                    dialogProgress.show(childFragmentManager, dialogProgress.tag)
+                }
+
+
+            }
+
+            else -> {
+                item.encryptedPath.openWith(requireContext(), Constant.TYPE_FILE, null)
             }
         }
-
     }
+
 
     private fun showController() {
         when (args.type) {

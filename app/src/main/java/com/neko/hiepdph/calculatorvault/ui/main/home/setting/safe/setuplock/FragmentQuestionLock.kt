@@ -8,6 +8,7 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
@@ -103,6 +104,7 @@ class FragmentQuestionLock : Fragment() {
             requireContext().config.securityAnswer = binding.edtAnswer.text.toString()
             if (!requireContext().config.isSetupPasswordDone) {
                 requireContext().config.isSetupPasswordDone = true
+                (requireActivity().application as CustomApplication).authority = true
                 navigateToPage(R.id.fragmentQuestionLock, R.id.fragmentVault)
             } else {
                 popBackStack(R.id.fragmentSetupLock)

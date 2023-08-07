@@ -337,6 +337,10 @@
     <string name="folder_name_already_exists">Folder name already exists</string>
     <string name="move">Move</string>
     <string name="use_password">Use password</string>
+    <string name="date_detail">Date modified:</string>
+    <string name="remove_bookmark">Remove bookmark successfully!</string>
+    <string name="add_bookmark">Add to bookmark successfully!</string>
+    <string name="delete_permanent_instruction">This %s will be deleted permanent.\nAre you sure to continue ?</string>
 
 
 </resources>

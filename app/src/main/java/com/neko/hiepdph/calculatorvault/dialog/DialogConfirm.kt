@@ -29,6 +29,13 @@ enum class DialogConfirmType(
         R.string.cancel,
         R.string.yes
     ),
+    DELETE_PERMANENT(
+        R.string.delete,
+        R.string.delete_permanent_instruction,
+        R.drawable.ic_delete,
+        R.string.cancel,
+        R.string.yes
+    ),
     EMPTY_BIN(
         R.string.delete,
         R.string.empty_bin_instruction,

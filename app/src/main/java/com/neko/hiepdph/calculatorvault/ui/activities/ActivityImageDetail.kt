@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.animation.AccelerateInterpolator
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
@@ -25,7 +26,6 @@ import com.neko.hiepdph.calculatorvault.common.transformer.LeftTransformer
 import com.neko.hiepdph.calculatorvault.common.transformer.RightTransformer
 import com.neko.hiepdph.calculatorvault.common.transformer.RotationTransformer
 import com.neko.hiepdph.calculatorvault.common.transformer.TopTransformer
-import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityImageDetailBinding
@@ -34,6 +34,7 @@ import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.dialog.DialogDetail
 import com.neko.hiepdph.calculatorvault.dialog.DialogProgress
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
+import com.neko.hiepdph.calculatorvault.viewmodel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import `in`.dd4you.animatoo.VpAnimatoo
 import kotlinx.coroutines.Job
@@ -52,6 +53,7 @@ class ActivityImageDetail : AppCompatActivity() {
     private var currentItem: FileVaultItem? = null
     private var currentPage = 0
     private var jobSlide: Job? = null
+    private val viewModel by viewModels<AppViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityImageDetailBinding.inflate(layoutInflater)
@@ -243,26 +245,39 @@ class ActivityImageDetail : AppCompatActivity() {
         }, DialogConfirmType.UNLOCK, name)
 
         confirmDialog.show(supportFragmentManager, confirmDialog.tag)
+
+
     }
 
+
     private fun unLockPicture() {
-        lifecycleScope.launch {
-            CopyFiles.copy(this@ActivityImageDetail,
-                mutableListOf(File(currentItem?.encryptedPath.toString())),
-                mutableListOf(File(currentItem?.encryptedPath.toString())),
-                0L,
-                progress = { _: Float, _: File? -> },
-                onSuccess = {
-                    listItem.remove(currentItem)
-                    if (listItem.isEmpty()) {
-                        ShareData.getInstance().setListItemImage(mutableListOf())
-                        finish()
-                    } else {
-                        ShareData.getInstance().setListItemImage(listItem)
-                    }
-                },
-                onError = {})
-        }
+
+        val dialogProgress = DialogProgress(listItem,
+            mutableListOf(File(currentItem?.encryptedPath.toString())),
+            mutableListOf(File(currentItem?.encryptedPath.toString())),
+            Action.UNLOCK,
+            onSuccess = {
+                viewModel.deleteFileVault(listItem.map { it.id }.toMutableList())
+                runOnUiThread {
+                    showSnackBar(
+                        String.format(it), SnackBarType.SUCCESS
+                    )
+                }
+                listItem.remove(currentItem)
+                if (listItem.isEmpty()) {
+                    ShareData.getInstance().setListItemImage(mutableListOf())
+                    finish()
+                } else {
+                    ShareData.getInstance().setListItemImage(listItem)
+                }
+
+            },
+            onFailed = {
+                runOnUiThread {
+                    showSnackBar((it), SnackBarType.FAILED)
+                }
+            })
+        dialogProgress.show(supportFragmentManager, dialogProgress.tag)
     }
 
 

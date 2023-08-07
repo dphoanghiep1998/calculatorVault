@@ -6,34 +6,38 @@
     android:layout_marginHorizontal="@dimen/_6sdp"
     android:layout_marginVertical="@dimen/_6sdp">
 
-    <com.neko.hiepdph.calculatorvault.common.customview.RoundedImageView
+
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imv_thumb"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@drawable/bg_item_image_corner_16"
-        app:cornerRadiusBotLeft="16dp"
-        app:cornerRadiusBotRight="16dp"
-        app:cornerRadiusTopLeft="16dp"
-        app:cornerRadiusTopRight="16dp"
+        app:strokeWidth="1dp"
+        android:padding="2dp"
+        android:elevation="0dp"
+        app:strokeColor="@color/neutral_04"
+        android:scaleType="centerCrop"
         app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/circular" />
 
     <TextView
         android:id="@+id/tv_name_quantity"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:background="@drawable/bg_blur_corner_bottom"
         android:ellipsize="end"
         android:gravity="center_vertical"
         android:maxLines="1"
-        android:layout_marginHorizontal="3dp"
-        android:paddingVertical="@dimen/_8sdp"
+        android:layout_marginHorizontal="2dp"
+        android:layout_marginBottom="1dp"
         android:paddingHorizontal="@dimen/_6sdp"
-        android:layout_marginBottom="3dp"
+        android:paddingVertical="@dimen/_8sdp"
         android:textColor="@color/neutral_0_persistent"
         android:textSize="@dimen/_10sdp"
         app:layout_constraintBottom_toBottomOf="@id/imv_thumb"
         app:layout_constraintEnd_toEndOf="@id/imv_thumb"
         app:layout_constraintStart_toStartOf="@id/imv_thumb" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

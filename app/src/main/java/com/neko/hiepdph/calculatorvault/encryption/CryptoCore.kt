@@ -2,6 +2,7 @@ package com.neko.hiepdph.calculatorvault.encryption
 
 import android.content.Context
 import android.util.Base64
+import android.util.Log
 import java.io.*
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -43,8 +44,9 @@ class CryptoCore(private val context: Context) {
 
     @Throws(Exception::class)
     fun decrypt(yourKey: SecretKey, fileData: ByteArray): ByteArray {
+        Log.d("TAG", "decrypt: " +fileData.size)
         val decrypted: ByteArray
-        val cipher = Cipher.getInstance("AES", "BC")
+        val cipher = Cipher.getInstance("AES/GCM/NOPADDING", "BC")
         cipher.init(Cipher.DECRYPT_MODE, yourKey, IvParameterSpec(ByteArray(cipher.blockSize)))
         decrypted = cipher.doFinal(fileData)
         return decrypted
@@ -54,8 +56,8 @@ class CryptoCore(private val context: Context) {
     fun encrypt(yourKey: SecretKey, fileData: ByteArray): ByteArray {
         val data = yourKey.encoded
         val skeySpec = SecretKeySpec(data, 0, data.size, "AES")
-        val cipher = Cipher.getInstance("AES", "BC")
-        cipher.init(Cipher.ENCRYPT_MODE, skeySpec, IvParameterSpec(ByteArray(cipher.getBlockSize())))
+        val cipher = Cipher.getInstance("AES/GCM/NOPADDING", "BC")
+        cipher.init(Cipher.ENCRYPT_MODE, skeySpec, IvParameterSpec(ByteArray(cipher.blockSize)))
         return cipher.doFinal(fileData)
     }
 
@@ -66,7 +68,6 @@ class CryptoCore(private val context: Context) {
         val inputBuffer = BufferedInputStream(
             FileInputStream(file)
         )
-
         inputBuffer.read(fileContents)
         inputBuffer.close()
 

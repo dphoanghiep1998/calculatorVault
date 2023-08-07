@@ -91,30 +91,13 @@ class ActivityPatternLock : AppCompatActivity() {
         }
 
         if (config.fingerPrintUnlock == FingerPrintUnlock.ENABLE) {
-            val biometric = biometricConfig {
-                ownerFragmentActivity = this@ActivityPatternLock
-                authenticateSuccess = {
-                    (application as CustomApplication).authority = true
-                    startActivity(
-                        Intent(this@ActivityPatternLock, ActivityVault::class.java)
-                    )
-                    finish()
-                }
-                authenticateFailed = {
-                    (application as CustomApplication).authority = false
+            showBiometric()
+        }
 
-                    if (config.photoIntruder && !takePhotoIntruder) {
-                        takePicture()
-                    }
-                    if (config.fakePassword) {
-                        startActivity(
-                            Intent(this@ActivityPatternLock, ActivityVault::class.java)
-                        )
-                        finish()
-                    }
-                }
-            }
-            biometric.showPrompt()
+        if (config.fingerPrintLockDisplay) {
+            binding.containerFingerPrint.show()
+        } else {
+            binding.containerFingerPrint.hide()
         }
 
         binding.lock9View.apply {
@@ -133,6 +116,33 @@ class ActivityPatternLock : AppCompatActivity() {
                 }
             })
         }
+    }
+
+    private fun showBiometric() {
+        val biometric = biometricConfig {
+            ownerFragmentActivity = this@ActivityPatternLock
+            authenticateSuccess = {
+                (application as CustomApplication).authority = true
+                startActivity(
+                    Intent(this@ActivityPatternLock, ActivityVault::class.java)
+                )
+                finish()
+            }
+            authenticateFailed = {
+                (application as CustomApplication).authority = false
+
+                if (config.photoIntruder && !takePhotoIntruder) {
+                    takePicture()
+                }
+                if (config.fakePassword) {
+                    startActivity(
+                        Intent(this@ActivityPatternLock, ActivityVault::class.java)
+                    )
+                    finish()
+                }
+            }
+        }
+        biometric.showPrompt()
     }
 
     private fun showDialogConfirmSecurityQuestion() {

@@ -1,8 +1,8 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.note.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
@@ -20,23 +20,31 @@ class AdapterNote(
     private val onUnSelect: () -> Unit,
 
     ) : RecyclerView.Adapter<AdapterNote.NoteViewHolder>() {
-
     private var listOfNote: MutableList<NoteModel> = mutableListOf()
     private var dataOfNote: MutableList<NoteModel> = mutableListOf()
     private var listOfId = mutableSetOf<Int>()
 
+    private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<NoteModel>() {
+
+        override fun areItemsTheSame(oldItem: NoteModel, newItem: NoteModel): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: NoteModel, newItem: NoteModel): Boolean {
+            return oldItem == newItem
+        }
+
+    }
+    private val differ = AsyncListDiffer(this, DIFF_CALLBACK)
 
     fun setData(listNote: List<NoteModel>) {
-        val noteDiffCallback = DiffUtil.calculateDiff(NoteDiffCallback(listOfNote, listNote))
-        noteDiffCallback.dispatchUpdatesTo(this)
+        differ.submitList(listNote)
         listOfNote.clear()
         listOfNote.addAll(listNote)
-        dataOfNote.clear()
-        dataOfNote.addAll(listNote)
     }
 
     fun selectAll() {
-        listOfNote.forEach {
+        differ.currentList.forEach {
             listOfId.add(it.id)
         }
         onSelectAll.invoke(listOfId.toMutableList())
@@ -55,24 +63,8 @@ class AdapterNote(
     }
 
     inner class NoteViewHolder(val binding: LayoutItemNoteBinding) :
-        RecyclerView.ViewHolder(binding.root)
-
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
-        val binding =
-            LayoutItemNoteBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return NoteViewHolder(binding)
-
-
-    }
-
-    override fun getItemCount(): Int {
-        return listOfNote.size
-    }
-
-    override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
-        with(holder) {
-            val item = listOfNote[adapterPosition]
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: NoteModel) {
             binding.tvTitle.text = item.title
             binding.tvContent.text = item.content
             binding.tvDate.text = DateTimeUtils.getDateConverted(item.date)
@@ -85,7 +77,7 @@ class AdapterNote(
             binding.root.setOnLongClickListener {
                 editMode = true
                 onLongClickItem()
-                notifyItemRangeChanged(0, listOfNote.size)
+                notifyItemRangeChanged(0, differ.currentList.size)
                 return@setOnLongClickListener true
             }
             binding.root.setOnClickListener {
@@ -113,6 +105,25 @@ class AdapterNote(
         }
     }
 
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
+        val binding =
+            LayoutItemNoteBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return NoteViewHolder(binding)
+
+
+    }
+
+    override fun getItemCount(): Int {
+        return differ.currentList.size
+    }
+
+    override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
+        with(holder) {
+            bind(differ.currentList[position])
+        }
+    }
+
     fun changeToNormalView() {
         editMode = false
         listOfId.clear()
@@ -121,18 +132,12 @@ class AdapterNote(
 
     fun filterNote(query: String) {
         if (query.isEmpty()) {
-            val noteDiffCallback = DiffUtil.calculateDiff(NoteDiffCallback(listOfNote, dataOfNote))
-            noteDiffCallback.dispatchUpdatesTo(this)
-            listOfNote.clear()
-            listOfNote.addAll(dataOfNote)
+            differ.submitList(listOfNote)
         } else {
             val filterList = listOfNote.filter {
                 it.title.lowercase().contains(query) || it.content.lowercase().contains(query)
             }
-            val noteDiffCallback = DiffUtil.calculateDiff(NoteDiffCallback(listOfNote, filterList))
-            noteDiffCallback.dispatchUpdatesTo(this)
-            listOfNote.clear()
-            listOfNote.addAll(filterList)
+            differ.submitList(filterList)
         }
 
     }

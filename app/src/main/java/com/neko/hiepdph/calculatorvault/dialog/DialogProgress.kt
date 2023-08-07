@@ -217,7 +217,6 @@ class DialogProgress(
                         dismiss()
                     }
                 })
-
         }
         if (action == Action.UNLOCK) {
             viewModel.unLock(requireContext(),

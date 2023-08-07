@@ -121,7 +121,7 @@ class AppViewModel @Inject constructor(
         encryptMode: Int = EncryptionMode.HIDDEN,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            CopyFiles.decrypt(
+            CopyFiles.unLock(
                 context,
                 listFile,
                 destination,

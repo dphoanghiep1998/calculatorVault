@@ -112,10 +112,12 @@ class ActivityPinLock : AppCompatActivity() {
         binding.fingerPrint.clickWithDebounce {
             openFingerPrint()
         }
-        if(config.unlockByFingerprint){
+        if (config.unlockByFingerprint) {
             openFingerPrint()
+        }
+        if (config.fingerPrintLockDisplay) {
             binding.containerFingerPrint.show()
-        }else{
+        } else {
             binding.containerFingerPrint.hide()
         }
 
@@ -131,7 +133,7 @@ class ActivityPinLock : AppCompatActivity() {
         }
     }
 
-    private fun openFingerPrint(){
+    private fun openFingerPrint() {
         val biometric = BiometricConfig.biometricConfig {
             ownerFragmentActivity = this@ActivityPinLock
             authenticateSuccess = {

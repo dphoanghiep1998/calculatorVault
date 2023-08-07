@@ -6,19 +6,18 @@
     android:layout_marginHorizontal="@dimen/_2sdp"
     android:layout_marginVertical="@dimen/_2sdp">
 
-    <com.neko.hiepdph.calculatorvault.common.customview.RoundedImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imv_thumb"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@drawable/bg_item_image_corner_10"
-        app:cornerRadiusBotLeft="10dp"
-        app:cornerRadiusBotRight="10dp"
-        app:cornerRadiusTopLeft="10dp"
-        app:cornerRadiusTopRight="10dp"
-        android:backgroundTint="@color/neutral_06"
+        app:strokeWidth="1dp"
+        android:padding="2dp"
+        android:elevation="0dp"
+        app:strokeColor="@color/neutral_04"
+        android:scaleType="centerCrop"
         app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/circular" />
 
     <CheckBox
         android:id="@+id/check_box"
