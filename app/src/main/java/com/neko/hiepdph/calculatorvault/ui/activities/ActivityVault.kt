@@ -39,6 +39,7 @@ import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
+import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionQ
 import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionR
 import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionS
 import com.neko.hiepdph.calculatorvault.common.utils.openLink
@@ -182,7 +183,7 @@ class ActivityVault : AppCompatActivity() {
     }
 
     private fun checkPermissionAllFileManage() {
-        if (buildMinVersionS()) {
+        if (buildMinVersionR()) {
             val hasManageExternalStoragePermission = Environment.isExternalStorageManager()
             if (hasManageExternalStoragePermission) {
                 checkPasswordSetDone()

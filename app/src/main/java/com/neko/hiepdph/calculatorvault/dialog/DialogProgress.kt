@@ -253,7 +253,7 @@ class DialogProgress(
             val listOfEncryptedString = mutableListOf<String>()
             listItemSelected.let { it ->
                 listOfEncryptedString.addAll(it.map {
-                    CryptoCore.getInstance(requireContext())
+                    CryptoCore.getSingleInstance()
                         .encryptString(Constant.SECRET_KEY, it.name)
                 })
             }

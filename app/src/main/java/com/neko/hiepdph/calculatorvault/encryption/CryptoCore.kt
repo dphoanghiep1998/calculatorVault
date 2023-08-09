@@ -13,13 +13,13 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 
-class CryptoCore(private val context: Context) {
+class CryptoCore() {
 
     companion object {
         var instance: CryptoCore? = null
-        fun getInstance(context: Context): CryptoCore {
+        fun getSingleInstance(): CryptoCore {
             if (instance == null) {
-                instance = CryptoCore(context)
+                instance = CryptoCore()
             }
             return instance!!
         }
@@ -43,22 +43,19 @@ class CryptoCore(private val context: Context) {
     }
 
     @Throws(Exception::class)
-    fun decrypt(yourKey: SecretKey, fileData: ByteArray): ByteArray {
-        Log.d("TAG", "decrypt: " +fileData.size)
-        val decrypted: ByteArray
-        val cipher = Cipher.getInstance("AES/GCM/NOPADDING", "BC")
+    fun decrypt(yourKey: SecretKey): Cipher {
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC")
         cipher.init(Cipher.DECRYPT_MODE, yourKey, IvParameterSpec(ByteArray(cipher.blockSize)))
-        decrypted = cipher.doFinal(fileData)
-        return decrypted
+        return cipher
     }
 
     @Throws(Exception::class)
-    fun encrypt(yourKey: SecretKey, fileData: ByteArray): ByteArray {
+    fun encrypt(yourKey: SecretKey): Cipher {
         val data = yourKey.encoded
         val skeySpec = SecretKeySpec(data, 0, data.size, "AES")
-        val cipher = Cipher.getInstance("AES/GCM/NOPADDING", "BC")
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC")
         cipher.init(Cipher.ENCRYPT_MODE, skeySpec, IvParameterSpec(ByteArray(cipher.blockSize)))
-        return cipher.doFinal(fileData)
+        return cipher
     }
 
     @Throws(Exception::class)
@@ -70,7 +67,6 @@ class CryptoCore(private val context: Context) {
         )
         inputBuffer.read(fileContents)
         inputBuffer.close()
-
         return fileContents
     }
 

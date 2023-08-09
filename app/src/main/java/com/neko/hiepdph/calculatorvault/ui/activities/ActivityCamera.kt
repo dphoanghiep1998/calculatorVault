@@ -69,7 +69,7 @@ class ActivityCamera : AppCompatActivity() {
                                 timeLock = Calendar.getInstance().timeInMillis
                                 encryptionType = 1
                                 encryptedPath = "${config.picturePrivacyFolder.path}/${
-                                    CryptoCore.getInstance(this@ActivityCamera)
+                                    CryptoCore.getSingleInstance()
                                         .encryptString(Constant.SECRET_KEY, name)
                                 }"
                             }
@@ -77,8 +77,8 @@ class ActivityCamera : AppCompatActivity() {
                         }
                         val listEncryptedString = mutableListOf<String>()
                         listEncryptedString.addAll(listItemDiff.map { item ->
-                            CryptoCore.getInstance(
-                                this@ActivityCamera
+                            CryptoCore.getSingleInstance(
+
                             ).encryptString(Constant.SECRET_KEY, item.name)
                         })
                         CopyFiles.encrypt(

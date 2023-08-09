@@ -78,6 +78,7 @@ object CopyFiles {
 
 
         } catch (e: Exception) {
+            Log.d("TAG", "encrypt: "+e)
             onError(e)
         }
     }
@@ -132,12 +133,11 @@ object CopyFiles {
                         )
                     }, encryptionMode
                 )
-
             }
             onSuccess(listOfFile)
 
-
         } catch (e: Exception) {
+            Log.d("TAG", "decrypt: "+e)
             onError(e)
         }
     }

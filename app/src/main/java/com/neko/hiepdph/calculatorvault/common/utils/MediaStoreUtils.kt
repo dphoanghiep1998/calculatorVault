@@ -370,7 +370,7 @@ object MediaStoreUtils {
 
                 val name = cursor.getStringValue(MediaStore.Images.Media.DISPLAY_NAME)
                 val file = File(childPath)
-                if (!file.exists() || file.isHidden || !file.canRead()) return@queryCursor
+//                if (!file.exists() || file.isHidden || !file.canRead()) return@queryCursor
 
                 if (childPath.isNotBlank() && childPath != path) {
                     Log.d("TAG", "getChildImageFromPath: " + childPath)

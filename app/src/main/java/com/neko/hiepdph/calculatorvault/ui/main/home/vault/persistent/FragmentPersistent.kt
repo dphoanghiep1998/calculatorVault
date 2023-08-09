@@ -552,6 +552,7 @@ class FragmentPersistent : Fragment() {
         when (item.fileType) {
             Constant.TYPE_PICTURE -> {
                 if (File(item.decodePath).exists()) {
+                    list.add(item)
                     ShareData.getInstance().setListItemImage(list)
                     val intent = Intent(requireContext(), ActivityImageDetail::class.java)
                     startActivity(intent)
