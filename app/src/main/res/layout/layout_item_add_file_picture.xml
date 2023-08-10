@@ -11,33 +11,58 @@
         android:id="@+id/imv_thumb"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:strokeWidth="1dp"
-        android:padding="2dp"
         android:elevation="0dp"
-        app:strokeColor="@color/neutral_04"
+        android:padding="2dp"
         android:scaleType="centerCrop"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintTop_toTopOf="parent"
-        app:shapeAppearanceOverlay="@style/circular" />
+        app:shapeAppearanceOverlay="@style/circular"
+        app:strokeColor="@color/neutral_04"
+        app:strokeWidth="1dp" />
 
-    <TextView
-        android:id="@+id/tv_name_quantity"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@drawable/bg_blur_corner_bottom"
-        android:ellipsize="end"
-        android:gravity="center_vertical"
-        android:maxLines="1"
-        android:layout_marginHorizontal="2dp"
+        android:layout_marginHorizontal="1dp"
         android:layout_marginBottom="1dp"
-        android:paddingHorizontal="@dimen/_6sdp"
-        android:paddingVertical="@dimen/_8sdp"
-        android:textColor="@color/neutral_0_persistent"
-        android:textSize="@dimen/_10sdp"
+        android:background="@drawable/bg_blur_corner_bottom"
         app:layout_constraintBottom_toBottomOf="@id/imv_thumb"
         app:layout_constraintEnd_toEndOf="@id/imv_thumb"
-        app:layout_constraintStart_toStartOf="@id/imv_thumb" />
+        app:layout_constraintStart_toStartOf="@id/imv_thumb">
+
+        <TextView
+            android:id="@+id/tv_name"
+            android:layout_width="0dp"
+            android:maxWidth="@dimen/_50sdp"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintEnd_toStartOf="@id/tv_quantity"
+            android:layout_height="match_parent"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:paddingHorizontal="@dimen/_6sdp"
+            android:paddingVertical="@dimen/_8sdp"
+            android:textColor="@color/neutral_0_persistent"
+            android:textSize="@dimen/_10sdp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_quantity"
+            android:layout_width="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="@dimen/_6sdp"
+            android:paddingVertical="@dimen/_8sdp"
+            android:paddingStart="@dimen/_4sdp"
+            android:maxLines="1"
+            android:textColor="@color/neutral_0_persistent"
+            android:textSize="@dimen/_10sdp"
+            app:layout_constraintStart_toEndOf="@id/tv_name" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

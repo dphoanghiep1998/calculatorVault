@@ -51,10 +51,8 @@ class CryptoCore() {
 
     @Throws(Exception::class)
     fun encrypt(yourKey: SecretKey): Cipher {
-        val data = yourKey.encoded
-        val skeySpec = SecretKeySpec(data, 0, data.size, "AES")
         val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC")
-        cipher.init(Cipher.ENCRYPT_MODE, skeySpec, IvParameterSpec(ByteArray(cipher.blockSize)))
+        cipher.init(Cipher.ENCRYPT_MODE, yourKey, IvParameterSpec(ByteArray(cipher.blockSize)))
         return cipher
     }
 

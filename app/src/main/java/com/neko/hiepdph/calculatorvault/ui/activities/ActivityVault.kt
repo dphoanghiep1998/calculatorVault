@@ -579,14 +579,12 @@ class ActivityVault : AppCompatActivity() {
                                     val intent =
                                         Intent(this@ActivityVault, ActivityPinLock::class.java)
                                     startActivity(intent)
-                                    finish()
                                 }
 
                                 LockType.PATTERN -> {
                                     val intent =
                                         Intent(this@ActivityVault, ActivityPatternLock::class.java)
                                     startActivity(intent)
-                                    finish()
                                 }
 
                                 else -> {

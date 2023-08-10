@@ -203,7 +203,8 @@ class ActivityPatternLock : AppCompatActivity() {
                 }
             }
         } else {
-
+            (application as CustomApplication).authority = true
+            (application as CustomApplication).isLockShowed = true
             finish()
         }
     }

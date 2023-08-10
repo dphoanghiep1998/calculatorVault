@@ -71,7 +71,8 @@ class AdapterGroupItem(
                 ).into(binding.imvThumb)
             }
 
-            binding.tvNameQuantity.text = "${model.name} (${model.itemCount})"
+            binding.tvName.text = model.name
+            binding.tvQuantity.text = "(${model.itemCount})"
 
             binding.root.clickWithDebounce {
                 onClickFolderItem.invoke(model, null)
@@ -89,7 +90,8 @@ class AdapterGroupItem(
                         itemView.context, R.drawable.ic_error_video
                     )
                 ).into(binding.imvThumb)
-            binding.tvNameQuantity.text = "${model.name} (${model.itemCount})"
+            binding.tvName.text = model.name
+            binding.tvQuantity.text = "(${model.itemCount})"
             binding.root.clickWithDebounce {
                 onClickFolderItem.invoke(model, null)
             }
@@ -109,7 +111,8 @@ class AdapterGroupItem(
                     ).into(binding.imvThumb)
             }
 
-            binding.tvNameQuantity.text = "${model.name} (${model.itemCount})"
+            binding.tvName.text = model.name
+            binding.tvQuantity.text = "(${model.itemCount})"
             binding.root.clickWithDebounce {
                 onClickFolderItem.invoke(model, null)
             }

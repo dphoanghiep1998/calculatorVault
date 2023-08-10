@@ -34,6 +34,7 @@ object CopyFiles {
     ) {
         try {
             val listOfFile = mutableListOf<String>()
+            val listOfSourceFile = mutableListOf<String>()
             if (files?.isEmpty() == true) return
             var totalSize = 0L
             if (tSize == 0L) files?.forEach {
@@ -64,21 +65,21 @@ object CopyFiles {
                     },
                     // on finish
                     { sourceFile, targetFiles ->
+                        listOfSourceFile.add(itemFile.path)
                         listOfFile.add(targetFiles.path)
                         deleteFile(sourceFile, context)
                         addMedia(context, targetFiles)
                         MediaScannerConnection.scanFile(
-                            context, arrayOf(targetFile.path), null, null
+                            context, arrayOf(sourceFile.path), null, null
                         )
                     }, encryptionMode = encryptionMode
                 )
-
             }
             onSuccess(listOfFile)
 
 
         } catch (e: Exception) {
-            Log.d("TAG", "encrypt: "+e)
+            Log.d("TAG", "encrypt: " + e)
             onError(e)
         }
     }
@@ -137,7 +138,7 @@ object CopyFiles {
             onSuccess(listOfFile)
 
         } catch (e: Exception) {
-            Log.d("TAG", "decrypt: "+e)
+            e.printStackTrace()
             onError(e)
         }
     }
@@ -193,6 +194,9 @@ object CopyFiles {
                         listOfFile.add(targetFolders[index].name)
                         deleteFile(sourceFile, context)
                         addMedia(context, targetFile)
+                        MediaScannerConnection.scanFile(
+                            context, arrayOf(sourceFile.path), null, null
+                        )
                     }, encryptionMode
                 )
 
@@ -244,8 +248,11 @@ object CopyFiles {
                     // on finish
                     { sourceFile, targetFile ->
                         listOfFile.add(targetFile.name)
-                        deleteFile(sourceFile, context)
+                        Log.d("TAG", "copy: " + deleteFile(sourceFile, context))
                         addMedia(context, targetFile)
+                        MediaScannerConnection.scanFile(
+                            context, arrayOf(targetFile.path), null, null
+                        )
                     })
             }
             onSuccess(listOfFile)

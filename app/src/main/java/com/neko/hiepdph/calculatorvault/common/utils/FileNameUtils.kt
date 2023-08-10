@@ -4,6 +4,7 @@ import android.annotation.TargetApi
 import android.content.ContentValues
 import android.content.Context
 import android.media.MediaMetadataRetriever
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -18,6 +19,7 @@ import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
 import org.apache.commons.io.FileUtils.deleteQuietly
 import java.io.*
 import java.util.*
+import javax.crypto.CipherInputStream
 import javax.crypto.CipherOutputStream
 
 
@@ -54,7 +56,7 @@ object FileNameUtils {
         val bufferOut = BufferedOutputStream(out)
 
         // Copy the bits from instream to outstream
-        val buf = ByteArray(1024)
+        val buf = ByteArray(8192)
         var len: Int = 0
 
         while (bufferIn.read(buf).also { len = it } > 0) {
@@ -86,7 +88,7 @@ object FileNameUtils {
         val out: OutputStream? = getOutputStream(targetFile, context)
 
         // Copy the bits from instream to outstream
-        val buf = ByteArray(1024)
+        val buf = ByteArray(8192)
         var len: Int = 0
 
 
@@ -106,17 +108,16 @@ object FileNameUtils {
             val secretKey = CryptoCore.getSingleInstance().getSecretKey(context.config.secretKey)
             val cipher = CryptoCore.getSingleInstance().decrypt(secretKey)
             val bufferOut = BufferedOutputStream(out)
-            val cipherOutputStream = CipherOutputStream(bufferOut, cipher)
+            val cipherInputStream = CipherInputStream(bufferIn, cipher)
 
-            while (bufferIn.read(buf).also { len = it } > 0) {
-                cipherOutputStream.write(buf, 0, len)
+            while (cipherInputStream.read(buf).also { len = it } > 0) {
+                bufferOut.write(buf, 0, len)
                 progress(len, sourceLocation)
             }
-
-            bufferOut.close()
-            `in`.close()
+            cipherInputStream.close()
             bufferIn.close()
-            cipherOutputStream.close()
+            `in`.close()
+            bufferOut.close()
             out?.close()
             finish(sourceLocation, targetFile)
         }
@@ -140,7 +141,7 @@ object FileNameUtils {
         val out: OutputStream? = getOutputStream(targetFile, context)
 
         // Copy the bits from instream to outstream
-        val buf = ByteArray(1024)
+        val buf = ByteArray(8192)
         var len: Int = 0
 
         if (encryptionMode == EncryptionMode.ENCRYPTION) {
@@ -154,10 +155,11 @@ object FileNameUtils {
                 cipherOutputStream.write(buf, 0, len)
                 progress(len, sourceLocation)
             }
-            bufferOut.close()
-            `in`.close()
-            bufferIn.close()
             cipherOutputStream.close()
+            bufferOut.close()
+            out?.close()
+            bufferIn.close()
+            `in`.close()
         } else {
             val bufferOut = BufferedOutputStream(out)
 
@@ -192,7 +194,7 @@ object FileNameUtils {
         val out: OutputStream? = getOutputStream(targetFile, context)
 
         // Copy the bits from instream to outstream
-        val buf = ByteArray(1024)
+        val buf = ByteArray(8192)
         var len: Int = 0
 
 
@@ -209,6 +211,7 @@ object FileNameUtils {
             finish(sourceLocation, targetFile)
         } else {
             val secretKey = CryptoCore.getSingleInstance().getSecretKey(context.config.secretKey)
+            Log.d("TAG", "encryptFileToAnotherLocation: " + secretKey)
             val encodedDataCipher = CryptoCore.getSingleInstance().encrypt(secretKey)
             val bufferOut = BufferedOutputStream(out)
             val cipherOutputStream = CipherOutputStream(bufferOut, encodedDataCipher)
@@ -217,11 +220,12 @@ object FileNameUtils {
                 cipherOutputStream.write(buf, 0, len)
                 progress(len, sourceLocation)
             }
+            cipherOutputStream.close()
             bufferOut.close()
             bufferIn.close()
             `in`.close()
-            cipherOutputStream.close()
             out?.close()
+
             finish(sourceLocation, targetFile)
         }
 
