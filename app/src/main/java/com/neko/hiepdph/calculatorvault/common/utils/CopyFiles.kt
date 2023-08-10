@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.MediaScannerConnection
 import android.net.Uri
+import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.Log
 import com.google.common.io.Files.getNameWithoutExtension
@@ -69,6 +70,11 @@ object CopyFiles {
                         listOfFile.add(targetFiles.path)
                         deleteFile(sourceFile, context)
                         addMedia(context, targetFiles)
+                        context.contentResolver.delete(
+                            MediaStore.Files.getContentUri("external"),
+                            MediaStore.MediaColumns.DATA + "=?",
+                            arrayOf(sourceFile.path)
+                        )
                         MediaScannerConnection.scanFile(
                             context, arrayOf(sourceFile.path), null, null
                         )

@@ -46,6 +46,7 @@ class AdapterFolder(
             return oldItem == newItem
         }
 
+
     }
     private val differ = AsyncListDiffer(this, DIFF_CALLBACK)
 

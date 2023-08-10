@@ -102,6 +102,7 @@ class FragmentVault : Fragment() {
     private fun observeListFile() {
         viewModel.listFolderInVault.observe(viewLifecycleOwner) {
             adapter?.setData(sortList(it))
+            adapter?.notifyDataSetChanged()
             binding.swipeLayout.isRefreshing = false
         }
     }

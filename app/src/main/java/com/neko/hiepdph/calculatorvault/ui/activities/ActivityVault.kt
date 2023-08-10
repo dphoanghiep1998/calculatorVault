@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.database.CursorWindow
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.net.Uri
@@ -39,9 +40,7 @@ import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
-import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionQ
 import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionR
-import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionS
 import com.neko.hiepdph.calculatorvault.common.utils.openLink
 import com.neko.hiepdph.calculatorvault.config.LockType
 import com.neko.hiepdph.calculatorvault.config.ScreenOffAction
@@ -55,6 +54,7 @@ import com.neko.hiepdph.calculatorvault.shake.ShakeDetector
 import com.neko.hiepdph.calculatorvault.viewmodel.VaultViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
+import java.lang.reflect.Field
 import kotlin.system.exitProcess
 
 
@@ -157,6 +157,13 @@ class ActivityVault : AppCompatActivity() {
         initShakeDetector()
         setThemeMode()
         registerBroadcastHideApp()
+        try {
+            val field: Field = CursorWindow::class.java.getDeclaredField("sCursorWindowSize")
+            field.isAccessible = true
+            field.set(null, 100 * 1024 * 1024) //the 100MB is the new size
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun setupNav() {
