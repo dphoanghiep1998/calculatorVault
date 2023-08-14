@@ -19,7 +19,6 @@ import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.config.FingerPrintLockDisplay
-import com.neko.hiepdph.calculatorvault.config.FingerPrintUnlock
 import com.neko.hiepdph.calculatorvault.databinding.ActivityPatternLockBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
@@ -56,27 +55,7 @@ class ActivityPatternLock : AppCompatActivity() {
             setTextColor(getColor(R.color.neutral_06))
         }
         binding.fingerPrint.clickWithDebounce {
-            val biometric = biometricConfig {
-                ownerFragmentActivity = this@ActivityPatternLock
-                authenticateSuccess = {
-                    (application as CustomApplication).authority = true
-                    (application as CustomApplication).isLockShowed = true
-                    finish()
-                }
-                authenticateFailed = {
-                    (application as CustomApplication).authority = false
-                    (application as CustomApplication).isLockShowed = true
-                    if (config.photoIntruder && !takePhotoIntruder) {
-                        takePicture(action = {
-                            finish()
-                        })
-
-                    } else if (config.fingerprintFailure) {
-                        finishAffinity()
-                    }
-                }
-            }
-            biometric.showPrompt()
+            openFingerPrint()
         }
 
         binding.tvPassword.clickWithDebounce {
@@ -90,8 +69,11 @@ class ActivityPatternLock : AppCompatActivity() {
             confirmDialog.show(supportFragmentManager, confirmDialog.tag)
         }
 
-        if (config.fingerPrintUnlock == FingerPrintUnlock.ENABLE) {
-            showBiometric()
+        if (config.fingerPrintUnlock) {
+            lifecycleScope.launchWhenResumed {
+                delay(500)
+                openFingerPrint()
+            }
         }
 
         if (config.fingerPrintLockDisplay) {
@@ -118,27 +100,28 @@ class ActivityPatternLock : AppCompatActivity() {
         }
     }
 
+    private fun openFingerPrint() {
+        showBiometric()
+    }
+
     private fun showBiometric() {
         val biometric = biometricConfig {
             ownerFragmentActivity = this@ActivityPatternLock
             authenticateSuccess = {
                 (application as CustomApplication).authority = true
-                startActivity(
-                    Intent(this@ActivityPatternLock, ActivityVault::class.java)
-                )
+                (application as CustomApplication).isLockShowed = true
                 finish()
             }
             authenticateFailed = {
                 (application as CustomApplication).authority = false
-
+                (application as CustomApplication).isLockShowed = true
                 if (config.photoIntruder && !takePhotoIntruder) {
-                    takePicture()
-                }
-                if (config.fakePassword) {
-                    startActivity(
-                        Intent(this@ActivityPatternLock, ActivityVault::class.java)
-                    )
-                    finish()
+                    takePicture(action = {
+                        finish()
+                    })
+
+                } else if (config.fingerprintFailure) {
+                    finishAffinity()
                 }
             }
         }
@@ -177,7 +160,6 @@ class ActivityPatternLock : AppCompatActivity() {
                             setTextColor(getColor(R.color.neutral_06))
                         }
                     }
-
                 }
 
                 override fun onAnimationRepeat(p0: Animation?) {

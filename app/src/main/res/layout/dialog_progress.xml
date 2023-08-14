@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/app_font_500"
             android:textColor="@color/neutral_06"
-            android:textSize="@dimen/_14sdp"
+            android:textSize="@dimen/_16sdp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -45,31 +45,26 @@
 
         <ImageView
             android:id="@+id/imv_success"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:src="@drawable/ic_success"
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="@id/progress_loading"
-            app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="@id/progress_loading"
             app:layout_constraintStart_toStartOf="@id/progress_loading"
             app:layout_constraintTop_toTopOf="@id/progress_loading"
-            app:layout_constraintWidth_percent="0.3"
             app:tint="@color/theme_default" />
 
         <ImageView
             android:id="@+id/imv_failed"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="@dimen/_12sdp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:src="@drawable/ic_fail"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/progress_loading"
-            app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="@id/progress_loading"
             app:layout_constraintStart_toStartOf="@id/progress_loading"
             app:layout_constraintTop_toTopOf="@id/progress_loading"
-            app:layout_constraintWidth_percent="0.3"
             app:tint="@color/theme_01" />
 
         <TextView
@@ -97,11 +92,10 @@
             android:id="@+id/tv_status"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/_12sdp"
             android:gravity="center"
             android:paddingVertical="2dp"
             android:textColor="@color/neutral_06"
-            android:textSize="@dimen/_12sdp"
+            android:textSize="@dimen/_14sdp"
             app:layout_constraintBottom_toBottomOf="@id/progress_loading"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/barrier_1"
@@ -133,10 +127,9 @@
             android:id="@+id/btn_ok"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_12sdp"
             android:background="@drawable/bg_primary_corner_10"
             android:fontFamily="@font/app_font_500"
-            android:paddingHorizontal="@dimen/_20sdp"
+            android:paddingHorizontal="@dimen/_30sdp"
             android:paddingVertical="@dimen/_10sdp"
             android:text="@string/custom_ok"
             android:textColor="@color/neutral_02"

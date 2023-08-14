@@ -3,6 +3,7 @@ package com.neko.hiepdph.calculatorvault.ui.activities
 import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -11,14 +12,17 @@ import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
+import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityCameraBinding
 import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
 import com.neko.hiepdph.calculatorvault.viewmodel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
-import java.util.*
+import java.util.Calendar
+import kotlin.system.exitProcess
 
 @AndroidEntryPoint
 class ActivityCamera : AppCompatActivity() {
@@ -46,7 +50,7 @@ class ActivityCamera : AppCompatActivity() {
     private val cameraLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == RESULT_CANCELED) {
-                lifecycleScope.launch {
+                lifecycleScope.launch(Dispatchers.IO) {
                     val newImage = MediaStoreUtils.getAllImage(this@ActivityCamera)
                     val listItemDiff = mutableListOf<FileVaultItem>()
 
@@ -67,13 +71,15 @@ class ActivityCamera : AppCompatActivity() {
                         newList.forEach { item ->
                             item.apply {
                                 timeLock = Calendar.getInstance().timeInMillis
-                                encryptionType = 1
+                                encryptionType = EncryptionMode.HIDDEN
                                 encryptedPath = "${config.picturePrivacyFolder.path}/${
                                     CryptoCore.getSingleInstance()
                                         .encryptString(Constant.SECRET_KEY, name)
                                 }"
                             }
-                            viewModel.insertVaultItem(item)
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                viewModel.insertVaultItem(item)
+                            }
                         }
                         val listEncryptedString = mutableListOf<String>()
                         listEncryptedString.addAll(listItemDiff.map { item ->
@@ -81,23 +87,35 @@ class ActivityCamera : AppCompatActivity() {
 
                             ).encryptString(Constant.SECRET_KEY, item.name)
                         })
-                        CopyFiles.encrypt(
-                            this@ActivityCamera,
-                            listItemDiff.map { item -> File(item.originalPath) },
-                            listItemDiff.map { config.picturePrivacyFolder },
-                            listEncryptedString,
-                            0L,
-                            progress = {  value: Float, currentFile: File? ->
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            CopyFiles.encrypt(
+                                this@ActivityCamera,
+                                listItemDiff.map { item -> File(item.originalPath) },
+                                listItemDiff.map { config.picturePrivacyFolder },
+                                listEncryptedString,
+                                0L,
+                                progress = { value: Float, currentFile: File? ->
 
-                            },
-                            onError = {
-                                finish()
-                            },
-                            onSuccess = {
-                                finish()
-                            },
-                            encryptionMode = 1
-                        )
+                                },
+                                onError = {
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        Log.d("TAG", "abcz ")
+                                        finishActivity(0)
+                                        exitProcess(-1)
+                                    }
+                                },
+                                onSuccess = {
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        Log.d("TAG", "abc ")
+                                        finishActivity(0)
+                                        exitProcess(-1)
+
+                                    }
+                                },
+                                encryptionMode = EncryptionMode.HIDDEN
+                            )
+                        }
+
 
                     } else {
                         finish()

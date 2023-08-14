@@ -1,7 +1,13 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.note
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -13,9 +19,11 @@ import com.neko.hiepdph.calculatorvault.common.extensions.hideSoftKeyboard
 import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
 import com.neko.hiepdph.calculatorvault.data.model.NoteModel
 import com.neko.hiepdph.calculatorvault.databinding.FragmentAddNoteBinding
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.viewmodel.NoteViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.*
+import java.util.Calendar
 
 @AndroidEntryPoint
 class FragmentAddNote : Fragment() {
@@ -29,6 +37,7 @@ class FragmentAddNote : Fragment() {
     ): View? {
         _binding = FragmentAddNoteBinding.inflate(inflater, container, false)
         initToolBar()
+        changeBackPressCallBack()
         return binding.root
     }
 
@@ -45,6 +54,7 @@ class FragmentAddNote : Fragment() {
                         saveNote()
                         true
                     }
+
                     else -> false
 
                 }
@@ -54,7 +64,7 @@ class FragmentAddNote : Fragment() {
 
 
     private fun saveNote() {
-        hideSoftKeyboard(requireActivity(),binding.root)
+        hideSoftKeyboard(requireActivity(), binding.root)
         if (binding.edtTitle.text.isBlank()) {
             showSnackBar(getString(R.string.title_and_content_required), SnackBarType.FAILED)
             return
@@ -64,6 +74,25 @@ class FragmentAddNote : Fragment() {
         val date = Calendar.getInstance().timeInMillis
         viewModel.insertNewNote(NoteModel(-1, title, content, date))
         findNavController().popBackStack()
+    }
+
+    private fun changeBackPressCallBack() {
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (binding.edtTitle.text.isNotBlank() || binding.edtContent.text.isNotBlank()) {
+                        val dialogConfirm =
+                            DialogConfirm(onPositiveClicked = {
+                                findNavController().popBackStack()
+                            }, DialogConfirmType.BACK_NOTE)
+                        dialogConfirm.show(childFragmentManager, dialogConfirm.tag)
+                    }else{
+                        findNavController().popBackStack()
+                    }
+                }
+
+            })
     }
 
     override fun onDestroy() {

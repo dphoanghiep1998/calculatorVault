@@ -33,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileNotFoundException
 import java.util.Calendar
 
 
@@ -169,7 +170,6 @@ class DialogProgress(
                             onSuccess(getString(R.string.delete_success))
                             dismiss()
                         }
-
                     },
                     onProgress = { },
                     onError = {
@@ -253,8 +253,7 @@ class DialogProgress(
             val listOfEncryptedString = mutableListOf<String>()
             listItemSelected.let { it ->
                 listOfEncryptedString.addAll(it.map {
-                    CryptoCore.getSingleInstance()
-                        .encryptString(Constant.SECRET_KEY, it.name)
+                    CryptoCore.getSingleInstance().encryptString(Constant.SECRET_KEY, it.name)
                 })
             }
             disableCancelable()
@@ -326,11 +325,22 @@ class DialogProgress(
 
                 },
                 onError = {
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        enableCancelable()
-                        showButton()
-                        statusFailed()
+                    when (it) {
+                        is FileNotFoundException -> {
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                enableCancelable()
+                                showButton()
+                                statusFailed()
+                                binding.tvStatus.text = getString(R.string.encrypt_failed)
+                            }
+                        }
+                        else -> {
+                            enableCancelable()
+                            showButton()
+                            statusFailed()
+                        }
                     }
+
                 },
                 encryptionMode
             )
@@ -389,7 +399,7 @@ class DialogProgress(
     }
 
     private fun statusFailed() {
-        binding.progressLoading.hide()
+        binding.progressLoading.invisible()
         binding.tvProgress.hide()
         binding.imvFailed.show()
     }

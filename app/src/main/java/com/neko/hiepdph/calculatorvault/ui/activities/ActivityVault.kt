@@ -123,11 +123,15 @@ class ActivityVault : AppCompatActivity() {
         if (!(application as CustomApplication).authority && !(application as CustomApplication).isLockShowed && config.isSetupPasswordDone) {
             when (config.lockType) {
                 LockType.PATTERN -> {
-                    startActivity(Intent(this@ActivityVault, ActivityPatternLock::class.java))
+                    val newIntent = Intent(this@ActivityVault, ActivityPatternLock::class.java)
+                    newIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    startActivity(newIntent)
                 }
 
                 LockType.PIN -> {
-                    startActivity(Intent(this@ActivityVault, ActivityPinLock::class.java))
+                    val newIntent = Intent(this@ActivityVault, ActivityPinLock::class.java)
+                    newIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    startActivity(newIntent)
                 }
             }
         }
@@ -576,6 +580,7 @@ class ActivityVault : AppCompatActivity() {
                     when (config.screenOffAction) {
                         ScreenOffAction.GOTOHOMESCREEN -> {
                             val intent = Intent(this@ActivityVault, ActivityCalculator::class.java)
+                            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                             startActivity(intent)
                             finish()
                         }
@@ -585,12 +590,14 @@ class ActivityVault : AppCompatActivity() {
                                 LockType.PIN -> {
                                     val intent =
                                         Intent(this@ActivityVault, ActivityPinLock::class.java)
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                                     startActivity(intent)
                                 }
 
                                 LockType.PATTERN -> {
                                     val intent =
                                         Intent(this@ActivityVault, ActivityPatternLock::class.java)
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                                     startActivity(intent)
                                 }
 
@@ -665,9 +672,20 @@ class ActivityVault : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController.navigateUp(
-            appBarConfiguration
-        ) || super.onSupportNavigateUp()
+        return if (onBackPressedDispatcher.hasEnabledCallbacks()) {
+            if (navController?.currentDestination?.id == R.id.fragmentAddNote) {
+                onBackPressedDispatcher.onBackPressed()
+            } else {
+                (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController.navigateUp(
+                    appBarConfiguration
+                ) || super.onSupportNavigateUp()
+            }
+            true
+        } else {
+            (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController.navigateUp(
+                appBarConfiguration
+            ) || super.onSupportNavigateUp()
+        }
     }
 
     override fun onDestroy() {

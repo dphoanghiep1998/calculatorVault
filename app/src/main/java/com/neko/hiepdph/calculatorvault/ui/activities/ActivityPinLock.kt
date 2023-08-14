@@ -8,6 +8,7 @@ import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.biometric.BiometricConfig
@@ -28,6 +29,7 @@ import com.neko.hiepdph.calculatorvault.viewmodel.PinLockViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -112,8 +114,11 @@ class ActivityPinLock : AppCompatActivity() {
         binding.fingerPrint.clickWithDebounce {
             openFingerPrint()
         }
-        if (config.unlockByFingerprint) {
-            openFingerPrint()
+        if (config.fingerPrintUnlock) {
+            lifecycleScope.launchWhenResumed {
+                delay(500)
+                openFingerPrint()
+            }
         }
         if (config.fingerPrintLockDisplay) {
             binding.containerFingerPrint.show()

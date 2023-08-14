@@ -72,6 +72,7 @@ class BiometricConfig(
     }
 
     fun showPrompt(){
+        Log.d("TAG", "showPrompt: "+isBiometricFeatureAvailable())
         if(isBiometricFeatureAvailable()){
             buildBiometricPrompt()?.let {
                 biometricPrompt.authenticate(it)
@@ -87,7 +88,7 @@ class BiometricConfig(
 
         override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
             super.onAuthenticationError(errorCode, errString)
-            Log.d("TAG", "onAuthenticationError: " + errString)
+            Log.d("TAG", "onAuthenticationError: " + errorCode)
             if (errorCode != BiometricPrompt.ERROR_USER_CANCELED) {
                 authenticateFailed?.invoke()
             }
