@@ -18,7 +18,7 @@ class MainConfig(val context: Context) {
     var recyclerBinFolder = File(context.filesDir, Constant.RECYCLER_BIN_FOLDER_NAME)
     var intruderFolder = File(context.filesDir, Constant.INTRUDER_FOLDER_NAME)
 
-    var decryptFolder = File(externalStoragePath, Constant.DECRYPT_FOLDER_NAME)
+    var decryptFolder = File(context.filesDir, Constant.DECRYPT_FOLDER_NAME)
     var picturePrivacyFolder = File(context.filesDir, Constant.PICTURE_FOLDER_NAME)
     var filePrivacyFolder = File(context.filesDir, Constant.VIDEOS_FOLDER_NAME)
     var audioPrivacyFolder = File(context.filesDir, Constant.AUDIOS_FOLDER_NAME)

@@ -312,7 +312,7 @@ object MediaStoreUtils {
                 val id = cursor.getLongValue(MediaStore.Images.Media._ID)
                 val childPath = cursor.getStringValue(MediaStore.Images.Media.DATA)
                 val size = cursor.getLongValue(MediaStore.Images.Media.SIZE)
-                val modified = cursor.getLongValue(MediaStore.Images.Media.SIZE) * 1000
+                val modified = cursor.getLongValue(MediaStore.Images.Media.DATE_MODIFIED) * 1000
                 val name = cursor.getStringValue(MediaStore.Images.Media.DISPLAY_NAME)
 
                 if (childPath.isNotBlank()) {

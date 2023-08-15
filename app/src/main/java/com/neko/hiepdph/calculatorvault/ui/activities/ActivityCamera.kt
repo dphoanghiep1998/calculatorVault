@@ -3,6 +3,7 @@ package com.neko.hiepdph.calculatorvault.ui.activities
 import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Base64
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -10,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.config
-import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
@@ -21,8 +21,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileInputStream
 import java.util.Calendar
-import kotlin.system.exitProcess
 
 @AndroidEntryPoint
 class ActivityCamera : AppCompatActivity() {
@@ -38,7 +38,9 @@ class ActivityCamera : AppCompatActivity() {
     }
 
     private fun getDataImage() {
-        listImagePrevious = MediaStoreUtils.getAllImage(this@ActivityCamera).toMutableList()
+        lifecycleScope.launch(Dispatchers.IO){
+            listImagePrevious = MediaStoreUtils.getAllImage(this@ActivityCamera).toMutableList()
+        }
     }
 
     private fun initView() {
@@ -52,71 +54,71 @@ class ActivityCamera : AppCompatActivity() {
             if (it.resultCode == RESULT_CANCELED) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val newImage = MediaStoreUtils.getAllImage(this@ActivityCamera)
+                    Log.d("TAG", "TAGGGGG" + newImage.size)
                     val listItemDiff = mutableListOf<FileVaultItem>()
 
                     for (i in newImage.indices) {
                         if (listImagePrevious.isNotEmpty()) {
                             if (newImage[i] != listImagePrevious[0]) {
-                                listItemDiff.add(newImage[i])
+                                Log.d("TAG", "difff" + newImage[i].originalPath)
+
+                                val newItem = newImage[i].copy()
+                                if (imageToByteArray(newImage[i].originalPath) != null) {
+                                    newItem.thumb = Base64.encodeToString(
+                                        imageToByteArray(newItem.originalPath), Base64.DEFAULT
+                                    )
+                                }
+                                listItemDiff.add(newItem)
                             } else {
                                 break
                             }
                         } else {
-                            listItemDiff.add(newImage[i])
+                            val newItem = newImage[i].copy()
+                            if (imageToByteArray(newImage[i].originalPath) != null) {
+                                newItem.thumb = Base64.encodeToString(
+                                    imageToByteArray(newItem.originalPath), Base64.DEFAULT
+                                )
+                            }
+                            listItemDiff.add(newItem)
                         }
                     }
-
+                    Log.d("TAG", "adasdasd " + listItemDiff.size)
+                    val listNameEncrypt = listItemDiff.map { nitem ->
+                        CryptoCore.getSingleInstance()
+                            .encryptString(Constant.SECRET_KEY, nitem.name)
+                    }.toMutableList()
                     if (listItemDiff.isNotEmpty()) {
-                        val newList = listItemDiff.toMutableList()
-                        newList.forEach { item ->
-                            item.apply {
-                                timeLock = Calendar.getInstance().timeInMillis
-                                encryptionType = EncryptionMode.HIDDEN
-                                encryptedPath = "${config.picturePrivacyFolder.path}/${
-                                    CryptoCore.getSingleInstance()
-                                        .encryptString(Constant.SECRET_KEY, name)
-                                }"
-                            }
-                            lifecycleScope.launch(Dispatchers.Main) {
-                                viewModel.insertVaultItem(item)
-                            }
-                        }
-                        val listEncryptedString = mutableListOf<String>()
-                        listEncryptedString.addAll(listItemDiff.map { item ->
-                            CryptoCore.getSingleInstance(
+                        viewModel.encrypt(
+                            this@ActivityCamera,
+                            listItemDiff.map { mItem -> File(mItem.originalPath) },
+                            listItemDiff.map { config.picturePrivacyFolder },
+                            listNameEncrypt,
+                            progress = { _: File? ->
 
-                            ).encryptString(Constant.SECRET_KEY, item.name)
-                        })
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            CopyFiles.encrypt(
-                                this@ActivityCamera,
-                                listItemDiff.map { item -> File(item.originalPath) },
-                                listItemDiff.map { config.picturePrivacyFolder },
-                                listEncryptedString,
-                                0L,
-                                progress = { value: Float, currentFile: File? ->
+                            },
+                            onSuccess = {
+                                lifecycleScope.launch(Dispatchers.Main) {
+                                    listItemDiff.forEachIndexed { index, item ->
+                                        item.apply {
+                                            recyclerPath =
+                                                "${config.recyclerBinFolder.path}/${listNameEncrypt[index]}"
+                                            timeLock = Calendar.getInstance().timeInMillis
+                                            encryptionType = EncryptionMode.HIDDEN
+                                            encryptedPath = "${config.picturePrivacyFolder}/${
+                                                listNameEncrypt[index]
+                                            }"
+                                        }
 
-                                },
-                                onError = {
-                                    lifecycleScope.launch(Dispatchers.Main) {
-                                        Log.d("TAG", "abcz ")
-                                        finishActivity(0)
-                                        exitProcess(-1)
+                                        viewModel.insertVaultItem(item)
                                     }
-                                },
-                                onSuccess = {
-                                    lifecycleScope.launch(Dispatchers.Main) {
-                                        Log.d("TAG", "abc ")
-                                        finishActivity(0)
-                                        exitProcess(-1)
+                                }
 
-                                    }
-                                },
-                                encryptionMode = EncryptionMode.HIDDEN
-                            )
-                        }
+                            },
+                            onError = {
 
-
+                            },
+                            EncryptionMode.HIDDEN
+                        )
                     } else {
                         finish()
                     }
@@ -127,6 +129,17 @@ class ActivityCamera : AppCompatActivity() {
             }
 
         }
+
+    private fun imageToByteArray(filePath: String): ByteArray {
+        val file = File(filePath)
+        val byteStream = FileInputStream(file)
+        val byteBuffer = ByteArray(file.length().toInt())
+
+        byteStream.read(byteBuffer)
+        byteStream.close()
+
+        return byteBuffer
+    }
 
 
 }

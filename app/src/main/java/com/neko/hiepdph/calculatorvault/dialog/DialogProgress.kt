@@ -266,7 +266,6 @@ class DialogProgress(
                                 imageToByteArray(item.originalPath), Base64.DEFAULT
                             )
                         }
-
                     }
 
                     Constant.TYPE_VIDEOS -> {
@@ -306,8 +305,6 @@ class DialogProgress(
                         enableCancelable()
                         showButton()
                         statusSuccess()
-
-
                         listItemSelected.forEachIndexed { index, item ->
                             item.apply {
                                 recyclerPath =
