@@ -79,11 +79,14 @@ class FragmentIntruder : Fragment() {
         }
 
         binding.itemIntruderSelfie.switchChange.setOnClickListener {
-            if (!binding.itemIntruderSelfie.switchChange.isChecked) {
+            if (binding.itemIntruderSelfie.switchChange.isChecked) {
                 checkPermission {
                     requireContext().config.photoIntruder =
                         binding.itemIntruderSelfie.switchChange.isChecked
                 }
+            }else{
+                requireContext().config.photoIntruder =
+                    binding.itemIntruderSelfie.switchChange.isChecked
             }
 
         }

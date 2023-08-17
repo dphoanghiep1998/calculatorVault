@@ -597,7 +597,6 @@ object FileNameUtils {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             try {
                 mkfile(context, newFile)
-                Log.d("TAG", "createNewFile4: ")
                 newFile.path
 
             } catch (e: Exception) {

@@ -1,14 +1,13 @@
 package com.neko.hiepdph.calculatorvault.dialog
 
 import android.app.Dialog
+import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.fragment.app.DialogFragment
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
@@ -20,41 +19,32 @@ import com.neko.hiepdph.calculatorvault.databinding.DialogDetailBinding
 
 
 class DialogDetail(
-   private val fileVaultItem: FileVaultItem
-) : DialogFragment() {
+    private val context: Context, private val fileVaultItem: FileVaultItem
+) {
     private lateinit var binding: DialogDetailBinding
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val root = ConstraintLayout(requireContext())
+    fun onCreateDialog(): Dialog {
+        val root = ConstraintLayout(context)
         root.layoutParams = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
         )
-        val dialog = DialogCallBack(requireContext(), callback)
+        val dialog = Dialog(context)
+        dialog.setCancelable(true)
+        dialog.setCanceledOnTouchOutside(true)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(root)
-        dialog.window!!.setBackgroundDrawable(ColorDrawable(requireContext().getColor(R.color.blur)))
-
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(context.getColor(R.color.blur)))
+        binding = DialogDetailBinding.inflate(LayoutInflater.from(context))
         dialog.window!!.setLayout(
-            (requireContext().resources.displayMetrics.widthPixels),
-            ViewGroup.LayoutParams.MATCH_PARENT
+            (context.resources.displayMetrics.widthPixels), ViewGroup.LayoutParams.MATCH_PARENT
         )
+        dialog.setContentView(binding.root)
+        initView(dialog)
         return dialog
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
-        binding = DialogDetailBinding.inflate(inflater, container, false)
-        return binding.root
-    }
 
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        initView()
-    }
-
-    private fun initView() {
+    private fun initView(dialog: Dialog) {
         binding.tvTimeValue.text = DateTimeUtils.getDateConverted(fileVaultItem.modified)
 
         binding.tvNameValue.text = fileVaultItem.name
@@ -72,32 +62,23 @@ class DialogDetail(
         binding.tvPathValue.text = fileVaultItem.encryptedPath
         binding.tvOriginPathValue.text = fileVaultItem.originalPath
         if (fileVaultItem.encryptionType == EncryptionMode.HIDDEN) {
-            binding.tvEncryptionModeValue.text = getString(R.string.hidden)
+            binding.tvEncryptionModeValue.text = context.getString(R.string.hidden)
         } else {
-            binding.tvEncryptionModeValue.text = getString(R.string.encryption_mode)
+            binding.tvEncryptionModeValue.text = context.getString(R.string.encryption_mode)
         }
-        initButton()
+        initButton(dialog)
     }
 
-    private fun initButton() {
+    private fun initButton(dialog: Dialog) {
 
         binding.btnConfirm.clickWithDebounce {
-            dismiss()
+            dialog.dismiss()
         }
         binding.root.clickWithDebounce {
-            dismiss()
+            dialog.dismiss()
         }
 
         binding.containerMain.setOnClickListener { }
     }
 
-    private val callback = object : BackPressDialogCallBack {
-        override fun shouldInterceptBackPress(): Boolean {
-            return true
-        }
-
-        override fun onBackPressIntercepted() {
-        }
-
-    }
 }

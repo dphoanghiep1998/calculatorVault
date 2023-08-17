@@ -1,9 +1,10 @@
 package com.neko.hiepdph.calculatorvault.ui.activities
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Base64
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -11,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.config
+import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
@@ -21,8 +23,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
-import java.io.FileInputStream
 import java.util.Calendar
+import kotlin.math.floor
+import kotlin.math.sqrt
+import kotlin.system.exitProcess
 
 @AndroidEntryPoint
 class ActivityCamera : AppCompatActivity() {
@@ -38,7 +42,7 @@ class ActivityCamera : AppCompatActivity() {
     }
 
     private fun getDataImage() {
-        lifecycleScope.launch(Dispatchers.IO){
+        lifecycleScope.launch(Dispatchers.IO) {
             listImagePrevious = MediaStoreUtils.getAllImage(this@ActivityCamera).toMutableList()
         }
     }
@@ -52,6 +56,7 @@ class ActivityCamera : AppCompatActivity() {
     private val cameraLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == RESULT_CANCELED) {
+                binding.containerLoad.show()
                 lifecycleScope.launch(Dispatchers.IO) {
                     val newImage = MediaStoreUtils.getAllImage(this@ActivityCamera)
                     Log.d("TAG", "TAGGGGG" + newImage.size)
@@ -60,29 +65,28 @@ class ActivityCamera : AppCompatActivity() {
                     for (i in newImage.indices) {
                         if (listImagePrevious.isNotEmpty()) {
                             if (newImage[i] != listImagePrevious[0]) {
-                                Log.d("TAG", "difff" + newImage[i].originalPath)
-
                                 val newItem = newImage[i].copy()
-                                if (imageToByteArray(newImage[i].originalPath) != null) {
-                                    newItem.thumb = Base64.encodeToString(
-                                        imageToByteArray(newItem.originalPath), Base64.DEFAULT
-                                    )
-                                }
+                                newItem.thumb =
+                                    imagePathToBitmap(newImage[i].originalPath)?.let { it1 ->
+                                        scaleBitmap(
+                                            it1, 512 * 512
+                                        )
+                                    }
                                 listItemDiff.add(newItem)
                             } else {
                                 break
                             }
                         } else {
                             val newItem = newImage[i].copy()
-                            if (imageToByteArray(newImage[i].originalPath) != null) {
-                                newItem.thumb = Base64.encodeToString(
-                                    imageToByteArray(newItem.originalPath), Base64.DEFAULT
-                                )
-                            }
+                            newItem.thumb =
+                                imagePathToBitmap(newImage[i].originalPath)?.let { it1 ->
+                                    scaleBitmap(
+                                        it1, 512 * 512
+                                    )
+                                }
                             listItemDiff.add(newItem)
                         }
                     }
-                    Log.d("TAG", "adasdasd " + listItemDiff.size)
                     val listNameEncrypt = listItemDiff.map { nitem ->
                         CryptoCore.getSingleInstance()
                             .encryptString(Constant.SECRET_KEY, nitem.name)
@@ -107,15 +111,26 @@ class ActivityCamera : AppCompatActivity() {
                                             encryptedPath = "${config.picturePrivacyFolder}/${
                                                 listNameEncrypt[index]
                                             }"
+                                            decodePath = "${config.decryptFolder}/${
+                                                item.name
+                                            }"
                                         }
 
-                                        viewModel.insertVaultItem(item)
+                                        viewModel.insertVaultItem(item, action = {
+                                            lifecycleScope.launch(Dispatchers.Main) {
+                                                finishAffinity()
+                                                exitProcess(-1)
+                                            }
+                                        })
+
+
                                     }
                                 }
 
                             },
                             onError = {
-
+                                finishAffinity()
+                                exitProcess(-1)
                             },
                             EncryptionMode.HIDDEN
                         )
@@ -130,15 +145,34 @@ class ActivityCamera : AppCompatActivity() {
 
         }
 
-    private fun imageToByteArray(filePath: String): ByteArray {
-        val file = File(filePath)
-        val byteStream = FileInputStream(file)
-        val byteBuffer = ByteArray(file.length().toInt())
+    private fun imagePathToBitmap(filePath: String): Bitmap? {
+        val image = File(filePath)
+        val bmOptions = BitmapFactory.Options()
+        return try {
+            BitmapFactory.decodeFile(image.path, bmOptions)
+        } catch (e: Exception) {
+            null
+        }
+    }
 
-        byteStream.read(byteBuffer)
-        byteStream.close()
-
-        return byteBuffer
+    private fun scaleBitmap(
+        input: Bitmap, maxBytes: Long
+    ): Bitmap? {
+        val currentWidth = input.width
+        val currentHeight = input.height
+        val currentPixels = currentWidth * currentHeight
+        // Get the amount of max pixels:
+        // 1 pixel = 4 bytes (R, G, B, A)
+        val maxPixels = maxBytes / 4 // Floored
+        if (currentPixels <= maxPixels) {
+            // Already correct size:
+            return input
+        }
+        // Scaling factor when maintaining aspect ratio is the square root since x and y have a relation:
+        val scaleFactor = sqrt(maxPixels / currentPixels.toDouble())
+        val newWidthPx = floor(currentWidth * scaleFactor).toInt()
+        val newHeightPx = floor(currentHeight * scaleFactor).toInt()
+        return Bitmap.createScaledBitmap(input, newWidthPx, newHeightPx, true)
     }
 
 

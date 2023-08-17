@@ -16,7 +16,7 @@ interface FileVaultItemDao {
     fun updateFile(fileVaultItem: FileVaultItemEntity)
 
 
-    @Query("SELECT * FROM file_vault WHERE encryptedPath = :name")
+    @Query("SELECT * FROM file_vault WHERE encryptedPath = :name order by id desc")
     fun getFileByEncryptedName(name: String): FileVaultItem?
 
     @Query("delete from file_vault where id=:id")
@@ -25,13 +25,13 @@ interface FileVaultItemDao {
     @Query("delete from file_vault")
     fun deleteAllFile()
 
-    @Query("select * from file_vault")
+    @Query("select * from file_vault order by id desc")
     fun getListFile(): List<FileVaultItem>
 
-    @Query("select * from file_vault where encryptedPath like :folderPath || '%'  and isDeleted = 0")
+    @Query("select * from file_vault where encryptedPath like :folderPath || '%'  and isDeleted = 0 order by id desc")
     fun getListFileEncrypted(folderPath:String): LiveData<MutableList<FileVaultItem>>
 
-    @Query("select * from file_vault where recyclerPath like :folderPath || '%' and isDeleted = 1")
+    @Query("select * from file_vault where recyclerPath like :folderPath || '%' and isDeleted = 1 order by id desc")
     fun getListFileDeleted(folderPath:String): LiveData<MutableList<FileVaultItem>>
 
     @Query("delete from file_vault where id in (:listId) ")

@@ -311,6 +311,8 @@ class ActivityPinLock : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.d("TAG", "onDestroy: ")
+
         if (!(application as CustomApplication).authority) {
             config.caughtIntruder = true
             CoroutineScope(Dispatchers.IO).launch {

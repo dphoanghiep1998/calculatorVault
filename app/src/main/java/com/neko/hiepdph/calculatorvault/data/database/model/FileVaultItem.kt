@@ -1,5 +1,6 @@
 package com.neko.hiepdph.calculatorvault.data.database.model
 
+import android.graphics.Bitmap
 import com.neko.hiepdph.calculatorvault.data.database.entity.FileVaultItemEntity
 
 
@@ -21,7 +22,7 @@ data class FileVaultItem(
     var fileType: String = "",
     var fileRealType: String? = null,
     var isDeleted: Boolean = false,
-    var thumb: String? = null
+    var thumb: Bitmap? = null
 ) {
     fun toFileVaultEntity(): FileVaultItemEntity {
         val fileId = if (id == -1) 0 else id

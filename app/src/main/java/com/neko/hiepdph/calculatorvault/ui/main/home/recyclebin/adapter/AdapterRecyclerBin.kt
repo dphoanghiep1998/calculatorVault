@@ -60,7 +60,7 @@ class AdapterRecyclerBin(
     @SuppressLint("NotifyDataSetChanged")
     fun unSelectAll() {
         listOfItemSelected.clear()
-        notifyItemRangeChanged(0, 1, PAYLOAD_CHECK)
+        notifyItemRangeChanged(0, listItem.size, PAYLOAD_CHECK)
     }
 
 
@@ -72,7 +72,7 @@ class AdapterRecyclerBin(
 
     fun changeToEditView() {
         editMode = true
-        notifyItemRangeChanged(0, 1, PAYLOAD_CHECK)
+        notifyItemRangeChanged(0, listItem.size, PAYLOAD_CHECK)
     }
 
 
@@ -197,6 +197,7 @@ class AdapterRecyclerBin(
     fun changeToNormalView() {
         editMode = false
         listOfItemSelected.clear()
+        onSelectAll.invoke(listOfItemSelected.toMutableList())
         notifyDataSetChanged()
     }
 

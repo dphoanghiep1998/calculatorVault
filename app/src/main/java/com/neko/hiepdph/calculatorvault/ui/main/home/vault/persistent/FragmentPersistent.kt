@@ -2,7 +2,6 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -379,7 +378,7 @@ class FragmentPersistent : Fragment() {
                     })
                 dialogProgress.show(childFragmentManager, dialogProgress.tag)
             },
-            dialogType = if (requireContext().config.moveToRecyclerBin) DialogConfirmType.DELETE_PERMANENT else DialogConfirmType.DELETE,
+            dialogType = if (!requireContext().config.moveToRecyclerBin) DialogConfirmType.DELETE_PERMANENT else DialogConfirmType.DELETE,
             name
         )
 
@@ -387,7 +386,6 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun share() {
-
         viewModel.decryptFile(
             requireContext(),
             listItemSelected.map { File(it.encryptedPath) }.toMutableList(),
@@ -547,7 +545,6 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun handleClickItem(item: FileVaultItem) {
-        Log.d("TAG", "handleClickItem: " + item.fileType)
         val list = mutableListOf<FileVaultItem>()
         when (item.fileType) {
             Constant.TYPE_PICTURE -> {
@@ -567,8 +564,7 @@ class FragmentPersistent : Fragment() {
                             viewModel.updateFileVault(item)
                             list.add(item)
                             ShareData.getInstance().setListItemImage(list)
-                            val intent =
-                                Intent(requireContext(), ActivityImageDetail::class.java)
+                            val intent = Intent(requireContext(), ActivityImageDetail::class.java)
                             startActivity(intent)
 
                         },
@@ -655,7 +651,27 @@ class FragmentPersistent : Fragment() {
             }
 
             else -> {
-                item.encryptedPath.openWith(requireContext(), Constant.TYPE_FILE, null)
+                if (File(item.decodePath).exists()) {
+                    item.decodePath.openWith(requireContext(), Constant.TYPE_FILE, null)
+                } else {
+                    val dialogProgress = DialogProgress(
+                        listItemSelected = mutableListOf(item),
+                        listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                        listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
+                        onSuccess = {
+                            item.decodePath = it
+                            item.decodePath.openWith(requireContext(), Constant.TYPE_FILE, null)
+                        },
+                        onFailed = {
+                            showSnackBar(getString(R.string.decrypt_error), SnackBarType.FAILED)
+                        },
+                        action = Action.DECRYPT,
+                        encryptionMode = item.encryptionType
+                    )
+                    dialogProgress.show(childFragmentManager, dialogProgress.tag)
+                }
+
+
             }
         }
     }
@@ -676,8 +692,8 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun openInformationDialog(item: FileVaultItem) {
-        val dialogDetail = DialogDetail(item)
-        dialogDetail.show(childFragmentManager, dialogDetail.tag)
+        val dialogDetail = DialogDetail(requireContext(), item).onCreateDialog()
+        dialogDetail.show()
     }
 
 

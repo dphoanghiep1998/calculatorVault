@@ -253,9 +253,7 @@ class AdapterPersistentNew(
             var requestOptions = RequestOptions()
             requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
             if (item.thumb != null) {
-                val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
-
-                Glide.with(itemView.context).load(imageByte).placeholder(R.drawable.ic_error_image)
+                Glide.with(itemView.context).asBitmap().load(item.thumb).placeholder(R.drawable.ic_error_image)
                     .apply(requestOptions).into(binding.imvThumb)
             } else {
                 Glide.with(itemView.context).load(R.drawable.ic_error_image).apply(requestOptions)
@@ -307,8 +305,7 @@ class AdapterPersistentNew(
 
             binding.checkBox.isChecked = item in listOfItemSelected
             if (item.thumb != null) {
-                val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
-                Glide.with(itemView.context).load(imageByte).placeholder(R.drawable.ic_error_video)
+                Glide.with(itemView.context).asBitmap().load(item.thumb).placeholder(R.drawable.ic_error_video)
                     .apply(requestOptions).into(binding.imvThumb)
             } else {
                 Glide.with(itemView.context).load(R.drawable.ic_error_video).apply(requestOptions)
@@ -359,8 +356,7 @@ class AdapterPersistentNew(
             var requestOptions = RequestOptions()
             requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
             if (item.thumb != null) {
-                val imageByte = Base64.decode(item.thumb, Base64.DEFAULT)
-                Glide.with(itemView.context).load(imageByte).placeholder(R.drawable.ic_error_image)
+                Glide.with(itemView.context).asBitmap().load(item.thumb).placeholder(R.drawable.ic_error_image)
                     .apply(requestOptions).into(binding.imvThumb)
             } else {
                 Glide.with(itemView.context).load(R.drawable.ic_error_image).apply(requestOptions)

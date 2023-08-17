@@ -1,5 +1,6 @@
 package com.neko.hiepdph.calculatorvault.data.database.entity
 
+import android.graphics.Bitmap
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -23,6 +24,6 @@ class FileVaultItemEntity(
     var fileType: String = "",
     var fileRealType: String? = null,
     var isDeleted :Boolean = false,
-    var thumb: String? = null
+    var thumb: Bitmap? = null
 
 ) {}

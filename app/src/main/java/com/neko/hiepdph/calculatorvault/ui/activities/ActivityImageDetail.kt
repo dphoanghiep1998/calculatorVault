@@ -84,8 +84,8 @@ class ActivityImageDetail : AppCompatActivity() {
     }
 
     private fun openImageInformationDialog() {
-        val dialogDetail = currentItem?.let { DialogDetail(it) }
-        dialogDetail?.show(supportFragmentManager, dialogDetail.tag)
+        val dialogDetail = currentItem?.let { DialogDetail(this, it).onCreateDialog() }
+        dialogDetail?.show()
     }
 
     private fun getData() {

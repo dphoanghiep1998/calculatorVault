@@ -1,9 +1,10 @@
 package com.neko.hiepdph.calculatorvault.dialog
 
 import android.app.Dialog
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,13 +17,14 @@ import androidx.lifecycle.lifecycleScope
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.enums.Action
+import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.invisible
 import com.neko.hiepdph.calculatorvault.common.extensions.popBackStack
 import com.neko.hiepdph.calculatorvault.common.extensions.show
-import com.neko.hiepdph.calculatorvault.common.extensions.toByteArray
+import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
 import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
@@ -32,9 +34,10 @@ import com.neko.hiepdph.calculatorvault.viewmodel.AppViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.util.Calendar
+import kotlin.math.floor
+import kotlin.math.sqrt
 
 
 class DialogProgress(
@@ -261,34 +264,19 @@ class DialogProgress(
             listItemSelected.forEachIndexed { index, item ->
                 when (item.fileType) {
                     Constant.TYPE_PICTURE -> {
-                        if (imageToByteArray(item.originalPath) != null) {
-                            item.thumb = Base64.encodeToString(
-                                imageToByteArray(item.originalPath), Base64.DEFAULT
-                            )
-                        }
+                        item.thumb =
+                            imagePathToBitmap(item.originalPath)?.let { scaleBitmap(it, 512 * 512) }
                     }
 
                     Constant.TYPE_VIDEOS -> {
-                        if (MediaStoreUtils.getImageThumb(
-                                item.mediaStoreId, requireContext()
-                            ) != null
-                        ) {
-                            item.thumb = Base64.encodeToString(
-                                MediaStoreUtils.getImageThumb(
-                                    item.mediaStoreId, requireContext()
-                                ), Base64.DEFAULT
-                            )
-                        }
-
+                        item.thumb = MediaStoreUtils.getImageThumb(
+                            item.mediaStoreId, requireContext()
+                        )?.let { scaleBitmap(it, 512 * 512) }
                     }
 
                     Constant.TYPE_AUDIOS -> {
-                        val data = MediaStoreUtils.getThumbnail(item.originalPath)?.toByteArray()
-                        if (data != null) {
-                            item.thumb = Base64.encodeToString(
-                                data, Base64.DEFAULT
-                            )
-                        }
+                        item.thumb = MediaStoreUtils.getThumbnail(item.originalPath)
+                            ?.let { scaleBitmap(it, 512 * 512) }
                     }
                 }
             }
@@ -331,6 +319,7 @@ class DialogProgress(
                                 binding.tvStatus.text = getString(R.string.encrypt_failed)
                             }
                         }
+
                         else -> {
                             enableCancelable()
                             showButton()
@@ -372,6 +361,32 @@ class DialogProgress(
                 },
                 encryptMode = encryptionMode
             )
+        }
+        if (action == Action.RESTORE) {
+            viewModel.restoreFile(requireContext(),
+                listOfSourceFile,
+                listOfTargetParentFolder,
+                0L,
+                progress = { value: Float, _: File? ->
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        setProgressValue(value.toInt())
+                    }
+                },
+                onSuccess = {
+                    listItemSelected.map {
+                        it.isDeleted = false
+                        viewModel.updateFileVault(it)
+                    }
+
+                    showSnackBar(getString(R.string.restore_successfully), SnackBarType.SUCCESS)
+                    dismiss()
+
+                },
+                onError = {
+                    showSnackBar(getString(R.string.restore_failed), SnackBarType.FAILED)
+                    dismiss()
+
+                })
         }
     }
 
@@ -432,15 +447,34 @@ class DialogProgress(
 
     }
 
-    private fun imageToByteArray(filePath: String): ByteArray {
-        val file = File(filePath)
-        val byteStream = FileInputStream(file)
-        val byteBuffer = ByteArray(file.length().toInt())
+    private fun imagePathToBitmap(filePath: String): Bitmap? {
+        val image = File(filePath)
+        val bmOptions = BitmapFactory.Options()
+        return try {
+            BitmapFactory.decodeFile(image.path, bmOptions)
+        } catch (e: Exception) {
+            null
+        }
+    }
 
-        byteStream.read(byteBuffer)
-        byteStream.close()
-
-        return byteBuffer
+    private fun scaleBitmap(
+        input: Bitmap, maxBytes: Long
+    ): Bitmap? {
+        val currentWidth = input.width
+        val currentHeight = input.height
+        val currentPixels = currentWidth * currentHeight
+        // Get the amount of max pixels:
+        // 1 pixel = 4 bytes (R, G, B, A)
+        val maxPixels = maxBytes / 4 // Floored
+        if (currentPixels <= maxPixels) {
+            // Already correct size:
+            return input
+        }
+        // Scaling factor when maintaining aspect ratio is the square root since x and y have a relation:
+        val scaleFactor = sqrt(maxPixels / currentPixels.toDouble())
+        val newWidthPx = floor(currentWidth * scaleFactor).toInt()
+        val newHeightPx = floor(currentHeight * scaleFactor).toInt()
+        return Bitmap.createScaledBitmap(input, newWidthPx, newHeightPx, true)
     }
 
 

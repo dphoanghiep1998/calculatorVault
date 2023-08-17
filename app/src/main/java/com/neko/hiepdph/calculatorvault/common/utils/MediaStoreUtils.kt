@@ -33,7 +33,6 @@ import com.neko.hiepdph.calculatorvault.common.extensions.getStringValue
 import com.neko.hiepdph.calculatorvault.common.extensions.queryCursor
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.data.model.GroupItem
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.Locale
 
@@ -116,7 +115,6 @@ object MediaStoreUtils {
 
                         TYPE_VIDEOS -> {
                             if (mimetype == "video") {
-
                                 val parentFolderPath = File(path).parentFile?.path
                                 val parentFolder = File(path).parentFile?.name ?: "No_name"
                                 if (parentFolder.startsWith(".") || parentFolderPath?.contains(
@@ -128,6 +126,7 @@ object MediaStoreUtils {
                                     return@queryCursor
                                 }
                                 if (!folders.any { it.first == parentFolder }) {
+                                    Log.d("TAG", "getListGroupItem: " +File(path).parentFile?.path)
                                     folders.add(
                                         Pair(
                                             parentFolder, GroupItem(
@@ -139,6 +138,8 @@ object MediaStoreUtils {
                                         )
                                     )
                                 } else if (!folders.any { it.second.folderPath == parentFolderPath }) {
+                                    Log.d("TAG", "else getListGroupItem: " +parentFolderPath)
+
                                     folders.add(
                                         Pair(
                                             parentFolder, GroupItem(
@@ -411,8 +412,9 @@ object MediaStoreUtils {
                 MediaStore.Video.Media.DATE_MODIFIED,
                 MediaStore.Video.Media._ID,
             )
-            val selection = MediaStore.Video.Media.DATA + " LIKE ?"
-            val selectionArgs = arrayOf("$path/%")
+            val selection =
+                MediaStore.Video.Media.DATA + " LIKE ? AND " + MediaStore.Video.Media.DATA + " NOT LIKE ?"
+            val selectionArgs = arrayOf("$path/%", "$path/%/%")
             context.queryCursor(uri, projection, selection, selectionArgs) { cursor ->
                 val id = cursor.getLongValue(MediaStore.Video.Media._ID)
                 val childPath = cursor.getStringValue(MediaStore.Video.Media.DATA)
@@ -465,9 +467,9 @@ object MediaStoreUtils {
                 MediaStore.Audio.Media.DATE_MODIFIED,
                 MediaStore.Audio.Media._ID,
             )
-            val selection = MediaStore.Audio.Media.DATA + " LIKE ?"
-
-            val selectionArgs = arrayOf("$path/%")
+            val selection =
+                MediaStore.Audio.Media.DATA + " LIKE ? AND " + MediaStore.Audio.Media.DATA + " NOT LIKE ?"
+            val selectionArgs = arrayOf("$path/%", "$path/%/%")
             context.queryCursor(uri, projection, selection, selectionArgs) { cursor ->
                 val id = cursor.getLongValue(MediaStore.Audio.Media._ID)
                 val childPath = cursor.getStringValue(MediaStore.Audio.Media.DATA)
@@ -527,7 +529,6 @@ object MediaStoreUtils {
                 val size = cursor.getLongValue(MediaStore.Files.FileColumns.SIZE)
                 val modified =
                     cursor.getLongValue(MediaStore.Files.FileColumns.DATE_MODIFIED) * 1000
-                Log.d("TAG", "getChildFileFromPath: " + modified)
                 val name = cursor.getStringValue(MediaStore.Files.FileColumns.DISPLAY_NAME)
                 val file = File(childPath)
 //                if (!file.exists() || file.isHidden || !file.canRead()) return@queryCursor
@@ -557,8 +558,8 @@ object MediaStoreUtils {
                                             null,
                                             null,
                                             1,
-                                            TYPE_FILE,
-                                            TYPE_PDF,
+                                            fileType = TYPE_FILE,
+                                            fileRealType = TYPE_PDF,
                                         )
                                     )
 
@@ -777,24 +778,16 @@ object MediaStoreUtils {
         return "${options.outWidth}x${options.outHeight}"
     }
 
-    fun getImageThumb(id: Long, context: Context): ByteArray? {
+    fun getImageThumb(id: Long, context: Context): Bitmap? {
         val crThumb: ContentResolver = context.contentResolver
         val options: BitmapFactory.Options = BitmapFactory.Options()
-        options.inSampleSize = 1
-        val curThumb = MediaStore.Video.Thumbnails.getThumbnail(
+
+        return MediaStore.Video.Thumbnails.getThumbnail(
             crThumb,
             id,
             MediaStore.Video.Thumbnails.MICRO_KIND,
             options
         )
-        if (curThumb != null) {
-            val stream = ByteArrayOutputStream()
-            curThumb.compress(Bitmap.CompressFormat.PNG, 100, stream)
-            val byteArray: ByteArray = stream.toByteArray()
-            curThumb.recycle()
-            return byteArray
-        }
-        return null
     }
 
 

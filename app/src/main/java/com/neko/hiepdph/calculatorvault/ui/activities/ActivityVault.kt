@@ -102,10 +102,10 @@ class ActivityVault : AppCompatActivity() {
         mSensorManager?.registerListener(
             mShakeDetector, mAccelerometer, SensorManager.SENSOR_DELAY_UI
         )
-        Log.d("TAG", "onResume: " + config.isSetupPasswordDone)
-        Log.d("TAG", "onResume: " + (application as CustomApplication).authority)
-        Log.d("TAG", "onResume: " + config.fakePassword)
-        Log.d("TAG", "onResume: " + (application as CustomApplication).isLockShowed)
+//        Log.d("TAG", "onResume: " + config.isSetupPasswordDone)
+//        Log.d("TAG", "onResume: " + (application as CustomApplication).authority)
+//        Log.d("TAG", "onResume: " + config.fakePassword)
+//        Log.d("TAG", "onResume: " + (application as CustomApplication).isLockShowed)
 
         // case that we can pop password secure up or not
 
@@ -138,6 +138,7 @@ class ActivityVault : AppCompatActivity() {
 
 
     }
+
 
     private fun checkPasswordSetDone() {
         Log.d("TAG", "checkPasswordSetDone: " + config.isSetupPasswordDone)
@@ -186,6 +187,8 @@ class ActivityVault : AppCompatActivity() {
 //    }
 
     private fun checkIntruderByPass() {
+        Log.d("TAG", "checkIntruderByPass: "+(application as CustomApplication).authority)
+        Log.d("TAG", "checkIntruderByPass: "+config.caughtIntruder)
         if ((application as CustomApplication).authority && config.caughtIntruder) {
             val dialogShowIntruder = DialogShowIntruder()
             dialogShowIntruder.show(supportFragmentManager, dialogShowIntruder.tag)
@@ -490,7 +493,7 @@ class ActivityVault : AppCompatActivity() {
             viewModel.createFolder(filesDir, Constant.VIDEOS_FOLDER_NAME)
             viewModel.createFolder(filesDir, Constant.AUDIOS_FOLDER_NAME)
             viewModel.createFolder(filesDir, Constant.FILES_FOLDER_NAME)
-            viewModel.createFolder(File(config.externalStoragePath), Constant.DECRYPT_FOLDER_NAME)
+            viewModel.createFolder(filesDir, Constant.DECRYPT_FOLDER_NAME)
             viewModel.createFolder(filesDir, Constant.INTRUDER_FOLDER_NAME)
             viewModel.createFolder(filesDir, Constant.RECYCLER_BIN_FOLDER_NAME)
 

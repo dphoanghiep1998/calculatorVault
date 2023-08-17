@@ -34,9 +34,10 @@ class AppViewModel @Inject constructor(
         }
     }
 
-    fun insertVaultItem(item: FileVaultItem) {
+    fun insertVaultItem(item: FileVaultItem, action: (() -> Unit)? = null) {
         viewModelScope.launch(Dispatchers.IO) {
             appRepo.insertFileVault(item)
+            action?.invoke()
         }
     }
 
@@ -64,7 +65,7 @@ class AppViewModel @Inject constructor(
         encryptMode: Int = EncryptionMode.HIDDEN,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            Log.d("TAG", "encrypt123: " +encryptMode)
+            Log.d("TAG", "encrypt123: " + encryptMode)
             CopyFiles.encrypt(
                 context,
                 listFile,
@@ -137,7 +138,21 @@ class AppViewModel @Inject constructor(
             )
         }
     }
-
+    fun restoreFile(
+        context: Context,
+        files: List<File>?,
+        targetFolder: List<File>,
+        tSize: Long,
+        progress: (value: Float, currentFile: File?) -> Unit,
+        onSuccess: (MutableList<String>) -> Unit,
+        onError: (t: Throwable) -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            CopyFiles.copy(
+                context, files, targetFolder, tSize, progress, onSuccess, onError
+            )
+        }
+    }
     fun copy(
         context: Context,
         listFile: List<File>,
@@ -179,5 +194,9 @@ class AppViewModel @Inject constructor(
             FileUtils.deleteAllChildInDirectory(path, onSuccess, onError)
         }
     }
-
+    fun updateFileVault(fileVaultItem: FileVaultItem){
+        viewModelScope.launch {
+            appRepo.updateFileVault(fileVaultItem)
+        }
+    }
 }
