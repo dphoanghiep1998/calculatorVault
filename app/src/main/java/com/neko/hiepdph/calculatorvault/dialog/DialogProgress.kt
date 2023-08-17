@@ -48,7 +48,8 @@ class DialogProgress(
     private val encryptionMode: Int = EncryptionMode.HIDDEN,
     private val vaultPath: String = "",
     private val onSuccess: (String) -> Unit,
-    private val onFailed: (String) -> Unit
+    private val onFailed: (String) -> Unit,
+    private val onResult: ((String) -> Unit)? = null
 
 ) : DialogFragment() {
     private lateinit var binding: DialogProgressBinding
@@ -187,7 +188,6 @@ class DialogProgress(
         if (action == Action.DELETE_PERMANENT) {
             viewModel.deleteMultipleFolder(listItemSelected.map { it.recyclerPath }, onSuccess = {
                 lifecycleScope.launch(Dispatchers.Main) {
-
                     viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
                     onSuccess(getString(R.string.delete_success))
                     dismiss()
@@ -198,28 +198,49 @@ class DialogProgress(
                 }
             }, onError = {
                 lifecycleScope.launch(Dispatchers.Main) {
-
                     onFailed(getString(R.string.delete_success))
                     dismiss()
                 }
             })
 
         }
-        if (action == Action.DELETE_All_PERMANENT) {
+        if (action == Action.DELETE_All_RECYCLER_BIN_PERMANENT) {
             viewModel.deleteAllRecyclerBin(requireContext().config.recyclerBinFolder.path,
-                onSuccess = {
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        viewModel.deleteFileVault(listItemSelected.map { it.id })
-                        onSuccess(getString(R.string.delete_success))
-                        dismiss()
+                onResult = { listOfFileDeletedSuccess, listOfFileDeletedFailed ->
+                    if (listOfFileDeletedSuccess.size == listOfSourceFile.size) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            viewModel.deleteFileVault(listItemSelected.map { it.id })
+                            onSuccess(getString(R.string.delete_success))
+                            dismiss()
+                        }
                     }
+
+                    if (listOfFileDeletedFailed.size == listOfSourceFile.size) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            onFailed(getString(R.string.delete_failed))
+                            dismiss()
+                        }
+                    } else if (listOfFileDeletedFailed.size > 0) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            viewModel.deleteFileVault(listItemSelected.filter {
+                                it.recyclerPath in listOfFileDeletedSuccess
+                            }.map { it.id })
+                            onResult?.invoke(
+                                String.format(
+                                    getString(R.string.delete_success_condition),
+                                    listOfFileDeletedSuccess.size
+                                ) + " " + String.format(
+                                    getString(R.string.delete_failed_condition),
+                                    listOfFileDeletedFailed.size
+                                )
+                            )
+                            dismiss()
+                        }
+                    }
+
                 },
-                onError = {
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        onFailed(getString(R.string.delete_failed))
-                        dismiss()
-                    }
-                })
+                onProgress = { value -> setProgressValue(value.toInt()) })
+
         }
         if (action == Action.UNLOCK) {
             viewModel.unLock(requireContext(),

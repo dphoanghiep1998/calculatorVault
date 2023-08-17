@@ -72,6 +72,10 @@
     <string name="rename">Rename</string>
     <string name="delete_success">Delete success!</string>
     <string name="delete_failed">Delete failed!</string>
+
+    <string name="delete_success_condition">Delete success %s files!</string>
+    <string name="delete_failed_condition">Delete failed %s files!</string>
+
     <string name="create_success">Create success!</string>
     <string name="create_failed">Create failed</string>
     <string name="invalid_expression">Invalid expression</string>

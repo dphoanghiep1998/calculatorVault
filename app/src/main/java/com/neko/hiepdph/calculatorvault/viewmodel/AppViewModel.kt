@@ -138,6 +138,7 @@ class AppViewModel @Inject constructor(
             )
         }
     }
+
     fun restoreFile(
         context: Context,
         files: List<File>?,
@@ -153,6 +154,7 @@ class AppViewModel @Inject constructor(
             )
         }
     }
+
     fun copy(
         context: Context,
         listFile: List<File>,
@@ -189,12 +191,17 @@ class AppViewModel @Inject constructor(
         }
     }
 
-    fun deleteAllRecyclerBin(path: String, onSuccess: () -> Unit, onError: (e: String) -> Unit) {
+    fun deleteAllRecyclerBin(
+        path: String,
+        onProgress: (value: Float) -> Unit,
+        onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
-            FileUtils.deleteAllChildInDirectory(path, onSuccess, onError)
+            FileUtils.deleteAllChildInDirectory(path, onResult, onProgress)
         }
     }
-    fun updateFileVault(fileVaultItem: FileVaultItem){
+
+    fun updateFileVault(fileVaultItem: FileVaultItem) {
         viewModelScope.launch {
             appRepo.updateFileVault(fileVaultItem)
         }

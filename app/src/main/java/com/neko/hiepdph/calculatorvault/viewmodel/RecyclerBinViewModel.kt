@@ -38,11 +38,6 @@ class RecyclerBinViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel
 
     }
 
-    fun deleteAllRecyclerBin(path: String, onSuccess: () -> Unit, onError: (e: String) -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
-            FileUtils.deleteAllChildInDirectory(path, onSuccess, onError)
-        }
-    }
     fun deleteFileVault(listId:List<Int>){
         viewModelScope.launch {
             appRepo.deleteFile(listId)

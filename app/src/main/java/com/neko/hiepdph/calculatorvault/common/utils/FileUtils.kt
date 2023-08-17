@@ -83,28 +83,35 @@ object FileUtils {
     }
 
     fun deleteAllChildInDirectory(
-        path: String, onSuccess: () -> Unit, onError: (message: String) -> Unit
+        path: String,
+        onResult: (listOfFilePathDeletedSuccess: MutableList<String>, listOfFilePathDeletedFailed: MutableList<String>) -> Unit,
+        onProgress: (value: Float) -> Unit
     ) {
+        val listOfFilePathDeletedSuccess = mutableListOf<String>()
+        val listOfFilePathDeletedFailed = mutableListOf<String>()
         try {
             val folder = File(path)
+            val totalSize = folder.listFiles()?.size ?: 0
+            var count = 0
+
             folder.listFiles()?.let {
-                val size = it.size
-                var count = 0
                 for (file in it) {
                     val delete = file.deleteRecursively()
                     if (delete) {
-                        count++
+                        listOfFilePathDeletedSuccess.add(file.path)
+
+                    } else {
+                        listOfFilePathDeletedFailed.add(file.path)
+                    }
+                    count++
+                    if (totalSize != 0) {
+                        onProgress(count / totalSize.toFloat())
                     }
                 }
-                if (count == size) {
-                    onSuccess()
-                } else {
-                    onError("Can not delete file/folder")
-                }
             }
+            onResult(listOfFilePathDeletedSuccess, listOfFilePathDeletedFailed)
         } catch (e: Exception) {
-            onError(e.message.toString())
-
+            onResult(listOfFilePathDeletedSuccess, listOfFilePathDeletedFailed)
         }
     }
 

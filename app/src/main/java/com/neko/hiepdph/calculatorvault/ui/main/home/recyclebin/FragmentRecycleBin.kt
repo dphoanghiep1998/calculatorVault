@@ -237,6 +237,7 @@ class FragmentRecycleBin : Fragment() {
         Log.d("TAG", "encryptedPath: " + vaultItem.encryptedPath)
         Log.d("TAG", "originalPath: " + vaultItem.originalPath)
         val dialogConfirm = DialogConfirm(onPositiveClicked = {
+
             viewModel.restoreFile(requireContext(),
                 mutableListOf(File(vaultItem.recyclerPath)),
                 mutableListOf(File(vaultItem.encryptedPath).parentFile),
@@ -286,7 +287,6 @@ class FragmentRecycleBin : Fragment() {
                 onSuccess = {
                     viewModel.deleteFileVault(listItemSelected.map { it.id })
                     showSnackBar(it, SnackBarType.SUCCESS)
-
                 },
                 onFailed = {
                     showSnackBar(it, SnackBarType.FAILED)
@@ -330,7 +330,7 @@ class FragmentRecycleBin : Fragment() {
         val dialogConfirm = DialogConfirm(onPositiveClicked = {
             adapterRecycleBin?.selectAll()
             val dialogProgress = DialogProgress(listItemSelected = listItemSelected,
-                action = Action.DELETE_All_PERMANENT,
+                action = Action.DELETE_All_RECYCLER_BIN_PERMANENT,
                 onSuccess = {
                     showSnackBar(it, SnackBarType.SUCCESS)
                 },
