@@ -6,6 +6,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -23,6 +24,7 @@ import com.neko.hiepdph.calculatorvault.common.extensions.shareFile
 import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
 import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
+import com.neko.hiepdph.calculatorvault.config.Status
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityVideoPlayerBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
@@ -30,6 +32,7 @@ import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.dialog.DialogDetail
 import com.neko.hiepdph.calculatorvault.dialog.DialogProgress
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
+import com.neko.hiepdph.calculatorvault.viewmodel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.io.File
@@ -37,6 +40,7 @@ import java.io.File
 @AndroidEntryPoint
 class ActivityVideoPlayer : AppCompatActivity() {
     private lateinit var binding: ActivityVideoPlayerBinding
+    private val viewModel by viewModels<AppViewModel>()
     private var listItem = mutableListOf<FileVaultItem>()
     private var currentItem: FileVaultItem? = null
     private var mPlayer: Player? = null
@@ -69,7 +73,7 @@ class ActivityVideoPlayer : AppCompatActivity() {
     }
 
     private fun openInformationDialog() {
-        val dialogDetail = currentItem?.let { DialogDetail(this,it).onCreateDialog() }
+        val dialogDetail = currentItem?.let { DialogDetail(this, it).onCreateDialog() }
         dialogDetail?.show()
     }
 
@@ -140,51 +144,28 @@ class ActivityVideoPlayer : AppCompatActivity() {
         }
         findViewById<TextView>(R.id.tv_delete).clickWithDebounce {
             val confirmDialog = DialogConfirm(onPositiveClicked = {
-//                if (config.moveToRecyclerBin) {
-//                    CopyFiles.copy(this,
-//                        mutableListOf(File(currentItem?.encryptionType.toString())),
-//                        mutableListOf(config.recyclerBinFolder),
-//                        0L,
-//                        progress = { _: Float, _: File? -> },
-//                        onSuccess = {
-//                            listItem.remove(currentItem)
-//                            if (listItem.isEmpty()) {
-//                                ShareData.getInstance().setListItemImage(mutableListOf())
-//                                finish()
-//                            } else {
-//                                ShareData.getInstance().setListItemImage(listItem)
-//                            }
-//                        },
-//
-//                        onError = {})
-//                } else FileUtils.deleteFolderInDirectory(currentItem?.encryptedPath.toString(),
-//                    onSuccess = {
-//                        listItem.remove(currentItem)
-//                        if (listItem.isEmpty()) {
-//                            ShareData.getInstance().setListItemImage(mutableListOf())
-//                            finish()
-//                        } else {
-//                            ShareData.getInstance().setListItemImage(listItem)
-//                        }
-//                    },
-//                    onError = {})
-               val dialogProgress =  DialogProgress(listItemSelected = mutableListOf(currentItem!!),
+                val dialogProgress = DialogProgress(listItemSelected = mutableListOf(currentItem!!),
                     listOfSourceFile = mutableListOf(File(currentItem!!.encryptedPath)),
                     listOfTargetParentFolder = mutableListOf(config.recyclerBinFolder),
                     action = Action.DELETE,
-                    onSuccess = {
-                        listItem.remove(currentItem)
-                        if (listItem.isEmpty()) {
-                            ShareData.getInstance().setListItemImage(mutableListOf())
-                            finish()
-                        } else {
-                            ShareData.getInstance().setListItemImage(listItem)
+                    onResult = { status, statusText ->
+                        if (status == Status.SUCCESS) {
+                            listItem.remove(currentItem)
+                            if (listItem.isEmpty()) {
+                                ShareData.getInstance().setListItemImage(mutableListOf())
+                                finish()
+                            } else {
+                                ShareData.getInstance().setListItemImage(listItem)
+                            }
+                            showSnackBar(statusText, SnackBarType.SUCCESS)
                         }
-                        showSnackBar(it, SnackBarType.SUCCESS)
+                        if (status == Status.FAILED) {
+                            showSnackBar(statusText, SnackBarType.FAILED)
+                        }
 
-                    },
-                    onFailed = {
-                        showSnackBar(it, SnackBarType.FAILED)
+                        if(status == Status.WARNING){
+                            showSnackBar(statusText, SnackBarType.WARNING)
+                        }
                     })
                 dialogProgress.show(supportFragmentManager, dialogProgress.tag)
             }, DialogConfirmType.DELETE, currentItem?.name)
@@ -204,23 +185,32 @@ class ActivityVideoPlayer : AppCompatActivity() {
     }
 
     private fun unLockVideo() {
-        lifecycleScope.launch {
+        val dialogProgress = DialogProgress(
+            listItemSelected = mutableListOf(currentItem!!),
+            listOfSourceFile = mutableListOf(File(currentItem?.encryptedPath.toString())),
+            listOfTargetParentFolder = mutableListOf(File(currentItem?.originalPath.toString()).parentFile),
+            onResult = { listOfFileDeletedSuccess, listOfFileDeletedFailed ->
 
+            },
+            action = Action.UNLOCK
+        )
+        lifecycleScope.launch {
             CopyFiles.copy(this@ActivityVideoPlayer,
                 mutableListOf(File(currentItem?.encryptedPath.toString())),
                 mutableListOf(File(currentItem?.originalPath.toString())),
                 0L,
                 progress = { _: Float, _: File? -> },
-                onSuccess = {
-                    listItem.remove(currentItem)
-                    if (listItem.isEmpty()) {
-                        ShareData.getInstance().setListItemImage(mutableListOf())
-                        finish()
-                    } else {
-                        ShareData.getInstance().setListItemImage(listItem)
-                    }
-                },
-                onError = {})
+                onResult = { listOfFileDeletedSuccess, listOfFileDeletedFailed -> })
+//                onSuccess = {
+//                    listItem.remove(currentItem)
+//                    if (listItem.isEmpty()) {
+//                        ShareData.getInstance().setListItemImage(mutableListOf())
+//                        finish()
+//                    } else {
+//                        ShareData.getInstance().setListItemImage(listItem)
+//                    }
+//                },
+//                onError = {})
         }
     }
 

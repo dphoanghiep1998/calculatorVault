@@ -37,7 +37,7 @@ enum class InterAds {
 }
 
 enum class SnackBarType {
-    SUCCESS, FAILED
+    SUCCESS, FAILED,WARNING
 }
 //fun Context.pushEvent(name:String){
 //    FirebaseAnalytics.getInstance(this).logEvent(name,null)
@@ -107,6 +107,10 @@ fun Fragment.showSnackBar(text: String, type: SnackBarType) {
             drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_fail)
             snackBar.setBackgroundTint(requireContext().getColor(R.color.theme_01))
         }
+        SnackBarType.WARNING -> {
+            drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_dropdown)
+            snackBar.setBackgroundTint(requireContext().getColor(R.color.theme_09))
+        }
 
     }
     val sbView = snackBar.view
@@ -132,7 +136,10 @@ fun Activity.showSnackBar(text: String, type: SnackBarType) {
             drawable = ContextCompat.getDrawable(this, R.drawable.ic_fail)
             snackBar.setBackgroundTint(this.getColor(R.color.theme_01))
         }
-
+        SnackBarType.WARNING -> {
+            drawable = ContextCompat.getDrawable(this, R.drawable.ic_dropdown)
+            snackBar.setBackgroundTint(this.getColor(R.color.theme_09))
+        }
     }
     val sbView = snackBar.view
     val textView =

@@ -5,9 +5,7 @@ import android.content.Intent
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import com.neko.hiepdph.calculatorvault.common.Constant
-import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import java.io.File
-import java.util.*
 
 
 object FileUtils {
@@ -99,7 +97,6 @@ object FileUtils {
                     val delete = file.deleteRecursively()
                     if (delete) {
                         listOfFilePathDeletedSuccess.add(file.path)
-
                     } else {
                         listOfFilePathDeletedFailed.add(file.path)
                     }
@@ -117,28 +114,28 @@ object FileUtils {
 
     fun deleteMultipleFolderInDirectory(
         pathFolder: List<String>,
+        onResult: (listOfFilePathDeletedSuccess: MutableList<String>, listOfFilePathDeletedFailed: MutableList<String>) -> Unit,
         onProgress: (value: Float) -> Unit,
-        onSuccess: () -> Unit,
-        onError: (message: String) -> Unit
     ) {
+        val listOfFilePathDeletedSuccess = mutableListOf<String>()
+        val listOfFilePathDeletedFailed = mutableListOf<String>()
         try {
             var count = 0
             val sizeFolder = pathFolder.size
             pathFolder.forEach {
+                count++
                 val folder = File(it)
                 val delete = folder.deleteRecursively()
                 if (delete) {
-                    count++
+                    listOfFilePathDeletedSuccess.add(it)
                     onProgress((count / sizeFolder * 100).toFloat())
+                } else {
+                    listOfFilePathDeletedFailed.add(it)
                 }
             }
-            if (count == pathFolder.size) {
-                onSuccess()
-            }
-
-
+            onResult(listOfFilePathDeletedSuccess, listOfFilePathDeletedFailed)
         } catch (e: Exception) {
-            onError(e.message.toString())
+            onResult(listOfFilePathDeletedSuccess, listOfFilePathDeletedFailed)
         }
     }
 

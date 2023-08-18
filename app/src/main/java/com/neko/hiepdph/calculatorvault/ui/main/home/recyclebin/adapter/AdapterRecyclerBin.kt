@@ -180,7 +180,6 @@ class AdapterRecyclerBin(
                 }
                 onEditItem(listOfItemSelected.toMutableList())
             }
-
         }
     }
 

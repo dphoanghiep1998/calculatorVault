@@ -4,7 +4,6 @@ import android.annotation.TargetApi
 import android.content.ContentValues
 import android.content.Context
 import android.media.MediaMetadataRetriever
-import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -42,9 +41,8 @@ object FileNameUtils {
         sourceLocation: File,
         targetLocation: File,
         progress: (value: Int, currentFile: File) -> Unit,
-        finish: (currentFile: File, targetFile: File) -> Unit,
+        finish: (currentFile: File, targetFile: File, isSuccess: Boolean) -> Unit,
     ) {
-
         val `in`: InputStream = FileInputStream(sourceLocation)
         val bufferIn = BufferedInputStream(`in`)
         val targetFile = if (!targetLocation.exists()) targetLocation
@@ -52,22 +50,28 @@ object FileNameUtils {
         else File(
             targetLocation, sourceLocation.name
         )
-        val out: OutputStream? = getOutputStream(targetFile, context)
-        val bufferOut = BufferedOutputStream(out)
+        try {
 
-        // Copy the bits from instream to outstream
-        val buf = ByteArray(8192)
-        var len: Int = 0
+            val out: OutputStream? = getOutputStream(targetFile, context)
+            val bufferOut = BufferedOutputStream(out)
 
-        while (bufferIn.read(buf).also { len = it } > 0) {
-            bufferOut.write(buf, 0, len)
-            progress(len, sourceLocation)
+            // Copy the bits from instream to outstream
+            val buf = ByteArray(8192)
+            var len: Int = 0
+
+            while (bufferIn.read(buf).also { len = it } > 0) {
+                bufferOut.write(buf, 0, len)
+                progress(len, sourceLocation)
+            }
+            bufferOut.close()
+            bufferIn.close()
+            `in`.close()
+            out?.close()
+            finish(sourceLocation, targetFile, true)
+        } catch (e: Exception) {
+            finish(sourceLocation, targetFile, false)
         }
-        bufferOut.close()
-        bufferIn.close()
-        `in`.close()
-        out?.close()
-        finish(sourceLocation, targetFile)
+
     }
 
     fun decryptFileToAnotherLocation(
@@ -75,7 +79,7 @@ object FileNameUtils {
         sourceLocation: File,
         targetLocation: File,
         progress: (value: Int, currentFile: File) -> Unit,
-        finish: (currentFile: File, targetFile: File) -> Unit,
+        finish: (currentFile: File, targetFile: File, isSuccess: Boolean) -> Unit,
         encryptionMode: Int = EncryptionMode.HIDDEN,
     ) {
         val `in`: InputStream = FileInputStream(sourceLocation)
@@ -91,35 +95,38 @@ object FileNameUtils {
         val buf = ByteArray(8192)
         var len: Int = 0
 
+        try {
+            if (encryptionMode == EncryptionMode.HIDDEN) {
+                val bufferOut = BufferedOutputStream(out)
+                while (bufferIn.read(buf).also { len = it } > 0) {
+                    bufferOut.write(buf, 0, len)
+                    progress(len, sourceLocation)
+                }
+                bufferOut.close()
+                bufferIn.close()
+                `in`.close()
+                out?.close()
+                finish(sourceLocation, targetFile, true)
+            } else {
+                val secretKey =
+                    CryptoCore.getSingleInstance().getSecretKey(context.config.secretKey)
+                val cipher = CryptoCore.getSingleInstance().decrypt(secretKey)
+                val bufferOut = BufferedOutputStream(out)
+                val cipherInputStream = CipherInputStream(bufferIn, cipher)
 
-
-        if (encryptionMode == EncryptionMode.HIDDEN) {
-            val bufferOut = BufferedOutputStream(out)
-            while (bufferIn.read(buf).also { len = it } > 0) {
-                bufferOut.write(buf, 0, len)
-                progress(len, sourceLocation)
+                while (cipherInputStream.read(buf).also { len = it } > 0) {
+                    bufferOut.write(buf, 0, len)
+                    progress(len, sourceLocation)
+                }
+                cipherInputStream.close()
+                bufferIn.close()
+                `in`.close()
+                bufferOut.close()
+                out?.close()
+                finish(sourceLocation, targetFile, true)
             }
-            bufferOut.close()
-            bufferIn.close()
-            `in`.close()
-            out?.close()
-            finish(sourceLocation, targetFile)
-        } else {
-            val secretKey = CryptoCore.getSingleInstance().getSecretKey(context.config.secretKey)
-            val cipher = CryptoCore.getSingleInstance().decrypt(secretKey)
-            val bufferOut = BufferedOutputStream(out)
-            val cipherInputStream = CipherInputStream(bufferIn, cipher)
-
-            while (cipherInputStream.read(buf).also { len = it } > 0) {
-                bufferOut.write(buf, 0, len)
-                progress(len, sourceLocation)
-            }
-            cipherInputStream.close()
-            bufferIn.close()
-            `in`.close()
-            bufferOut.close()
-            out?.close()
-            finish(sourceLocation, targetFile)
+        } catch (e: Exception) {
+            finish(sourceLocation, targetFile, false)
         }
     }
 
@@ -128,7 +135,7 @@ object FileNameUtils {
         sourceLocation: File,
         targetLocation: File,
         progress: (value: Int, currentFile: File) -> Unit,
-        finish: (currentFile: File, targetFile: File) -> Unit,
+        finish: (currentFile: File, targetFile: File,isSuccess:Boolean) -> Unit,
         encryptionMode: Int = EncryptionMode.HIDDEN,
     ) {
         val `in`: InputStream = FileInputStream(sourceLocation)
@@ -143,37 +150,41 @@ object FileNameUtils {
         // Copy the bits from instream to outstream
         val buf = ByteArray(8192)
         var len: Int = 0
+        try {
+            if (encryptionMode == EncryptionMode.ENCRYPTION) {
+                val secretKey = CryptoCore.getSingleInstance().getSecretKey(context.config.secretKey)
+                val decodedDataCipher = CryptoCore.getSingleInstance().decrypt(secretKey)
+                val bufferOut = BufferedOutputStream(out)
 
-        if (encryptionMode == EncryptionMode.ENCRYPTION) {
-            val secretKey = CryptoCore.getSingleInstance().getSecretKey(context.config.secretKey)
-            val decodedDataCipher = CryptoCore.getSingleInstance().decrypt(secretKey)
-            val bufferOut = BufferedOutputStream(out)
+                val cipherOutputStream = CipherOutputStream(bufferOut, decodedDataCipher)
 
-            val cipherOutputStream = CipherOutputStream(bufferOut, decodedDataCipher)
+                while (bufferIn.read(buf).also { len = it } > 0) {
+                    cipherOutputStream.write(buf, 0, len)
+                    progress(len, sourceLocation)
+                }
+                cipherOutputStream.close()
+                bufferOut.close()
+                out?.close()
+                bufferIn.close()
+                `in`.close()
+            } else {
+                val bufferOut = BufferedOutputStream(out)
 
-            while (bufferIn.read(buf).also { len = it } > 0) {
-                cipherOutputStream.write(buf, 0, len)
-                progress(len, sourceLocation)
+                while (bufferIn.read(buf).also { len = it } > 0) {
+                    bufferOut.write(buf, 0, len)
+                    progress(len, sourceLocation)
+                }
+                bufferOut.close()
+                `in`.close()
+                bufferIn.close()
             }
-            cipherOutputStream.close()
-            bufferOut.close()
             out?.close()
-            bufferIn.close()
-            `in`.close()
-        } else {
-            val bufferOut = BufferedOutputStream(out)
-
-            while (bufferIn.read(buf).also { len = it } > 0) {
-                bufferOut.write(buf, 0, len)
-                progress(len, sourceLocation)
-            }
-            bufferOut.close()
-            `in`.close()
-            bufferIn.close()
+            finish(sourceLocation, targetFile,true)
+        }catch (e:Exception){
+            out?.close()
+            finish(sourceLocation, targetFile,false)
         }
 
-        out?.close()
-        finish(sourceLocation, targetFile)
     }
 
     fun encryptFileToAnotherLocation(
@@ -181,7 +192,7 @@ object FileNameUtils {
         sourceLocation: File,
         targetLocation: File,
         progress: (value: Int, currentFile: File) -> Unit,
-        finish: (currentFile: File, targetFile: File) -> Unit,
+        finish: (currentFile: File, targetFile: File, isSuccess: Boolean) -> Unit,
         encryptionMode: Int = EncryptionMode.HIDDEN,
     ) {
         val `in`: InputStream = FileInputStream(sourceLocation)
@@ -197,36 +208,42 @@ object FileNameUtils {
         val buf = ByteArray(8192)
         var len: Int = 0
 
+        try {
+            if (encryptionMode == EncryptionMode.HIDDEN) {
+                val bufferOut = BufferedOutputStream(out)
+                while (bufferIn.read(buf).also { len = it } > 0) {
+                    bufferOut.write(buf, 0, len)
+                    progress(len, sourceLocation)
+                }
+                bufferOut.close()
+                bufferIn.close()
+                `in`.close()
+                out?.close()
+                finish(sourceLocation, targetFile, true)
+            } else {
+                val secretKey =
+                    CryptoCore.getSingleInstance().getSecretKey(context.config.secretKey)
+                Log.d("TAG", "encryptFileToAnotherLocation: " + secretKey)
+                val encodedDataCipher = CryptoCore.getSingleInstance().encrypt(secretKey)
+                val bufferOut = BufferedOutputStream(out)
+                val cipherOutputStream = CipherOutputStream(bufferOut, encodedDataCipher)
 
-        if (encryptionMode == EncryptionMode.HIDDEN) {
-            val bufferOut = BufferedOutputStream(out)
-            while (bufferIn.read(buf).also { len = it } > 0) {
-                bufferOut.write(buf, 0, len)
-                progress(len, sourceLocation)
+                while (bufferIn.read(buf).also { len = it } > 0) {
+                    cipherOutputStream.write(buf, 0, len)
+                    progress(len, sourceLocation)
+                }
+                cipherOutputStream.close()
+                bufferOut.close()
+                bufferIn.close()
+                `in`.close()
+                out?.close()
+                finish(sourceLocation, targetFile, true)
+
             }
-            bufferOut.close()
-            bufferIn.close()
-            `in`.close()
-            out?.close()
-            finish(sourceLocation, targetFile)
-        } else {
-            val secretKey = CryptoCore.getSingleInstance().getSecretKey(context.config.secretKey)
-            Log.d("TAG", "encryptFileToAnotherLocation: " + secretKey)
-            val encodedDataCipher = CryptoCore.getSingleInstance().encrypt(secretKey)
-            val bufferOut = BufferedOutputStream(out)
-            val cipherOutputStream = CipherOutputStream(bufferOut, encodedDataCipher)
 
-            while (bufferIn.read(buf).also { len = it } > 0) {
-                cipherOutputStream.write(buf, 0, len)
-                progress(len, sourceLocation)
-            }
-            cipherOutputStream.close()
-            bufferOut.close()
-            bufferIn.close()
-            `in`.close()
-            out?.close()
+        } catch (e: Exception){
+            finish(sourceLocation, targetFile, false)
 
-            finish(sourceLocation, targetFile)
         }
 
 

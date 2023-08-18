@@ -96,7 +96,6 @@ class FragmentRecycleBin : Fragment() {
                             deletePermanent()
                             true
                         }
-
                         else -> false
                     }
                 } else {

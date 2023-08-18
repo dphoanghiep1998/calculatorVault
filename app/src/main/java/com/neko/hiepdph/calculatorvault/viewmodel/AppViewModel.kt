@@ -60,8 +60,7 @@ class AppViewModel @Inject constructor(
         destination: List<File>,
         targetName: List<String>,
         progress: (currentFile: File?) -> Unit,
-        onSuccess: (MutableList<String>) -> Unit,
-        onError: (t: Throwable) -> Unit,
+        onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit,
         encryptMode: Int = EncryptionMode.HIDDEN,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -76,8 +75,7 @@ class AppViewModel @Inject constructor(
                     progressValue.postValue(value)
                     progress(currentFile)
                 },
-                onSuccess,
-                onError,
+                onResult,
                 encryptionMode = encryptMode,
             )
         }
@@ -89,8 +87,7 @@ class AppViewModel @Inject constructor(
         destination: List<File>,
         targetName: List<String>,
         progress: (currentFile: File?) -> Unit,
-        onSuccess: (MutableList<String>) -> Unit,
-        onError: (t: Throwable) -> Unit,
+        onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit,
         encryptMode: Int = EncryptionMode.HIDDEN,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -104,8 +101,7 @@ class AppViewModel @Inject constructor(
                     progressValue.postValue(value)
                     progress(currentFile)
                 },
-                onSuccess,
-                onError,
+                onResult,
                 encryptionMode = encryptMode,
             )
         }
@@ -117,8 +113,7 @@ class AppViewModel @Inject constructor(
         destination: List<File>,
         targetName: List<String>,
         progress: (currentFile: File?) -> Unit,
-        onSuccess: (MutableList<String>) -> Unit,
-        onError: (t: Throwable) -> Unit,
+        onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit,
         encryptMode: Int = EncryptionMode.HIDDEN,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -132,8 +127,7 @@ class AppViewModel @Inject constructor(
                     progressValue.postValue(value)
                     progress(currentFile)
                 },
-                onSuccess,
-                onError,
+                onResult,
                 encryptionMode = encryptMode,
             )
         }
@@ -145,12 +139,11 @@ class AppViewModel @Inject constructor(
         targetFolder: List<File>,
         tSize: Long,
         progress: (value: Float, currentFile: File?) -> Unit,
-        onSuccess: (MutableList<String>) -> Unit,
-        onError: (t: Throwable) -> Unit
+        onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             CopyFiles.copy(
-                context, files, targetFolder, tSize, progress, onSuccess, onError
+                context, files, targetFolder, tSize, progress, onResult
             )
         }
     }
@@ -160,18 +153,13 @@ class AppViewModel @Inject constructor(
         listFile: List<File>,
         destination: List<File>,
         progress: (currentFile: File?) -> Unit,
-        onSuccess: (MutableList<String>) -> Unit,
-        onError: (t: Throwable) -> Unit
+        onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             CopyFiles.copy(context, listFile, destination, 0L, progress = { value, currentFile ->
                 progressValue.postValue(value)
                 progress(currentFile)
-            }, onSuccess = {
-                onSuccess(it)
-            }, onError = {
-                onError(it)
-            })
+            }, onResult)
         }
 
     }
@@ -183,11 +171,10 @@ class AppViewModel @Inject constructor(
     fun deleteMultipleFolder(
         path: List<String>,
         onProgress: (value: Float) -> Unit,
-        onSuccess: () -> Unit,
-        onError: (e: String) -> Unit
+        onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            FileUtils.deleteMultipleFolderInDirectory(path, onProgress, onSuccess, onError)
+            FileUtils.deleteMultipleFolderInDirectory(path, onResult, onProgress)
         }
     }
 

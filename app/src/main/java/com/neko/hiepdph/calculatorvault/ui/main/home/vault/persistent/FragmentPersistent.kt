@@ -36,6 +36,7 @@ import com.neko.hiepdph.calculatorvault.common.extensions.toast
 import com.neko.hiepdph.calculatorvault.common.extensions.toastLocation
 import com.neko.hiepdph.calculatorvault.common.utils.openWith
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
+import com.neko.hiepdph.calculatorvault.config.Status
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentPersistentBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogAddFile
@@ -328,11 +329,19 @@ class FragmentPersistent : Fragment() {
                 listOfSourceFile = mutableListOf(File(item.encryptedPath)),
                 listOfTargetParentFolder = mutableListOf(requireActivity().config.recyclerBinFolder),
                 action = Action.DELETE,
-                onSuccess = {
-                    normalView()
-                    showSnackBar(it, SnackBarType.SUCCESS)
+                onResult = {status, text ->
+                    if(status == Status.SUCCESS){
+                        normalView()
+                        showSnackBar(it, SnackBarType.SUCCESS)
+                    }
+                    if(status == Status.FAILED){
+                        normalView()
+                        showSnackBar(it, SnackBarType.FAILED)
+                    }
 
+                    if(status == Status.)
                 },
+
                 onFailed = {
                     normalView()
                     showSnackBar(it, SnackBarType.FAILED)

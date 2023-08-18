@@ -254,6 +254,10 @@
     <string name="restore_instruction">Do you want to restore this file?</string>
     <string name="restore_successfully">Restore successfully</string>
     <string name="restore_failed">Restore failed !</string>
+
+    <string name="restore_successfully_condition">%s files restore successfully</string>
+    <string name="restore_failed_condition">%s files restore failed !</string>
+
     <string name="selected_file">selected files</string>
     <string name="no_files">No files!</string>
     <string name="rename_successfully">Rename successfully!</string>
@@ -331,7 +335,16 @@
     <string name="unlock_sucess">Unlock success %s files !</string>
     <string name="unlock_failed">Unlock %s file failed, please try again!</string>
     <string name="move_to_recycler_bin_failed">Move failed to recycler bin</string>
+    <string name="move_to_recycler_bin_failed_condition">Move %s files failed</string>
+    <string name="move_to_recycler_bin_success_condition">Move %s files success</string>
+
     <string name="decrypt_error">An error occured when decrypting!</string>
+    <string name="decrypt_sucess">Decrypt files successfully! </string>
+    <string name="decrypt_failed">Decrypt files failed!</string>
+
+    <string name="decrypt_sucess_condition">Decrypt %s files successfully! </string>
+    <string name="decrypt_failed_condition">Decrypt %s files failed!</string>
+
     <string name="encrypting">Encrypting %s file, please wait!</string>
     <string name="decrypting">Decrypting %s file, please wait!</string>
     <string name="restoring">Restoring %s file, please wait!</string>
@@ -348,6 +361,10 @@
     <string name="encrypt_failed">Encrypt failed because file is not exist!</string>
     <string name="back_note_tip">Not completed note found, still back ?</string>
     <string name="processing">App is processing, please wait ...</string>
+
+
+    <string name="encrypt_success">Encrypt success!</string>
+    <string name="encrypt_failed_new">Encrypt failed !</string>
 
 
 </resources>

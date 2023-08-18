@@ -6,7 +6,6 @@ import android.media.MediaScannerConnection
 import android.net.Uri
 import android.provider.MediaStore
 import android.text.TextUtils
-import android.util.Log
 import com.google.common.io.Files.getNameWithoutExtension
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.copyFileToAnotherLocation
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.createNewFile
@@ -29,13 +28,12 @@ object CopyFiles {
         targetName: List<String>,
         tSize: Long,
         progress: (value: Float, currentFile: File?) -> Unit,
-        onSuccess: (MutableList<String>) -> Unit = {},
-        onError: (t: Throwable) -> Unit = {},
+        onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit,
         encryptionMode: Int = EncryptionMode.HIDDEN,
     ) {
+        val listOfFileSuccess = mutableListOf<String>()
+        val listOfFileFailed = mutableListOf<String>()
         try {
-            val listOfFile = mutableListOf<String>()
-            val listOfSourceFile = mutableListOf<String>()
             if (files?.isEmpty() == true) return
             var totalSize = 0L
             if (tSize == 0L) files?.forEach {
@@ -65,28 +63,33 @@ object CopyFiles {
                         }
                     },
                     // on finish
-                    { sourceFile, targetFiles ->
-                        listOfSourceFile.add(itemFile.path)
-                        listOfFile.add(targetFiles.path)
-                        deleteFile(sourceFile, context)
-                        addMedia(context, targetFiles)
-                        context.contentResolver.delete(
-                            MediaStore.Files.getContentUri("external"),
-                            MediaStore.MediaColumns.DATA + "=?",
-                            arrayOf(sourceFile.path)
-                        )
-                        MediaScannerConnection.scanFile(
-                            context, arrayOf(sourceFile.path), null, null
-                        )
+                    { sourceFile, targetFiles, isSuccess ->
+                        if (isSuccess) {
+                            listOfFileSuccess.add(sourceFile.path)
+                            deleteFile(sourceFile, context)
+                            addMedia(context, targetFiles)
+                            context.contentResolver.delete(
+                                MediaStore.Files.getContentUri("external"),
+                                MediaStore.MediaColumns.DATA + "=?",
+                                arrayOf(sourceFile.path)
+                            )
+                            MediaScannerConnection.scanFile(
+                                context, arrayOf(sourceFile.path), null, null
+                            )
+                        } else {
+                            listOfFileFailed.add(sourceFile.path)
+                        }
+
                     }, encryptionMode = encryptionMode
                 )
             }
-            onSuccess(listOfFile)
+            onResult(listOfFileSuccess, listOfFileFailed)
 
 
         } catch (e: Exception) {
-            Log.d("TAG", "encrypt: " + e)
-            onError(e)
+            e.printStackTrace()
+            onResult(listOfFileSuccess, listOfFileFailed)
+
         }
     }
 
@@ -97,13 +100,13 @@ object CopyFiles {
         targetName: List<String>,
         tSize: Long,
         progress: (value: Float, currentFile: File?) -> Unit,
-        onSuccess: (MutableList<String>) -> Unit = {},
-        onError: (t: Throwable) -> Unit = {},
+        onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit,
         encryptionMode: Int = EncryptionMode.HIDDEN,
     ) {
+        val listOfFileSuccess = mutableListOf<String>()
+        val listOfFileFailed = mutableListOf<String>()
+        var tempIndex = 0
         try {
-            val listOfFile = mutableListOf<String>()
-
             if (files?.isEmpty() == true) return
             var totalSize = 0L
             if (tSize == 0L) files?.forEach {
@@ -113,6 +116,7 @@ object CopyFiles {
             var currentSize = 0f
             // move file
             files?.forEachIndexed { index, itemFile ->
+                tempIndex = index
                 val targetFile = File(
                     createNewFile(
                         context,
@@ -132,20 +136,26 @@ object CopyFiles {
                         }
                     },
                     // on finish
-                    { sourceFile, targetFiles ->
-                        listOfFile.add(targetFile.path)
-                        addMedia(context, targetFiles)
-                        MediaScannerConnection.scanFile(
-                            context, arrayOf(targetFiles.path), null, null
-                        )
+                    { sourceFile, targetFiles, isSuccess ->
+                        if (isSuccess) {
+                            listOfFileSuccess.add(targetFile.path)
+                            addMedia(context, targetFiles)
+                            MediaScannerConnection.scanFile(
+                                context, arrayOf(targetFiles.path), null, null
+                            )
+                        } else {
+                            listOfFileFailed.add(targetFile.path)
+                        }
+
                     }, encryptionMode
                 )
             }
-            onSuccess(listOfFile)
+            onResult(listOfFileSuccess, listOfFileFailed)
 
         } catch (e: Exception) {
             e.printStackTrace()
-            onError(e)
+            files?.get(tempIndex)?.let { listOfFileFailed.add(it.path) }
+            onResult(listOfFileSuccess, listOfFileFailed)
         }
     }
 
@@ -156,13 +166,13 @@ object CopyFiles {
         targetName: List<String>,
         tSize: Long,
         progress: (value: Float, currentFile: File?) -> Unit,
-        onSuccess: (MutableList<String>) -> Unit = {},
-        onError: (t: Throwable) -> Unit = {},
+        onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit,
         encryptionMode: Int = EncryptionMode.HIDDEN,
     ) {
+        val listOfFileSuccess = mutableListOf<String>()
+        val listOfFileFailed = mutableListOf<String>()
+        var tempIndex = 0
         try {
-            val listOfFile = mutableListOf<String>()
-
             if (files?.isEmpty() == true) return
             var totalSize = 0L
             if (tSize == 0L) files?.forEach {
@@ -176,6 +186,7 @@ object CopyFiles {
 //                    listOfFile.add(targetFolders[index].path + "/${targetName}")
 //                    return@forEachIndexed
 //                }
+                tempIndex = index
                 val targetFile = File(
                     createNewFile(
                         context,
@@ -196,22 +207,28 @@ object CopyFiles {
                         }
                     },
                     // on finish
-                    { sourceFile, targetFile ->
-                        listOfFile.add(targetFolders[index].name)
-                        deleteFile(sourceFile, context)
-                        addMedia(context, targetFile)
-                        MediaScannerConnection.scanFile(
-                            context, arrayOf(sourceFile.path), null, null
-                        )
+                    { sourceFile, targetFile, isSuccess ->
+                        if (isSuccess) {
+                            listOfFileSuccess.add(sourceFile.path)
+                            deleteFile(sourceFile, context)
+                            addMedia(context, targetFile)
+                            MediaScannerConnection.scanFile(
+                                context, arrayOf(sourceFile.path), null, null
+                            )
+                        } else {
+                            listOfFileFailed.add(sourceFile.path)
+
+                        }
+
                     }, encryptionMode
                 )
 
             }
-            onSuccess(listOfFile)
-
-
+            onResult(listOfFileSuccess, listOfFileFailed)
         } catch (e: Exception) {
-            onError(e)
+            e.printStackTrace()
+            files?.get(tempIndex)?.let { listOfFileFailed.add(it.path) }
+            onResult(listOfFileSuccess, listOfFileFailed)
         }
     }
 
@@ -221,11 +238,13 @@ object CopyFiles {
         targetFolders: List<File>,
         tSize: Long,
         progress: (value: Float, currentFile: File?) -> Unit,
-        onSuccess: (MutableList<String>) -> Unit = {},
-        onError: (t: Throwable) -> Unit = {},
+        onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit
     ) {
+        val listOfFileSuccess = mutableListOf<String>()
+        val listOfFileFailed = mutableListOf<String>()
+        var tempIndex = 0
+
         try {
-            val listOfFile = mutableListOf<String>()
             if (files?.isEmpty() == true) return
             var totalSize = 0L
             if (tSize == 0L) files?.forEach {
@@ -236,9 +255,10 @@ object CopyFiles {
             // move file
             files?.forEachIndexed { index, itemFile ->
                 if (File(targetFolders[index], files[index].name).exists()) {
-                    listOfFile.add(targetFolders[index].path + "/${files[index].name}")
+                    listOfFileSuccess.add(targetFolders[index].path + "/${files[index].name}")
                     return@forEachIndexed
                 }
+                tempIndex = index
                 val targetFile =
                     File(createNewFile(context, targetFolders[index], itemFile.name).toString())
                 copyFileToAnotherLocation(context, itemFile, targetFile,
@@ -252,20 +272,23 @@ object CopyFiles {
                         }
                     },
                     // on finish
-                    { sourceFile, targetFile ->
-                        listOfFile.add(targetFile.name)
-                        Log.d("TAG", "copy: " + deleteFile(sourceFile, context))
+                    { sourceFile, targetFile, isSuccess ->
+                        if (isSuccess) {
+                            listOfFileSuccess.add(targetFile.path)
+                        } else {
+                            listOfFileFailed.add(targetFile.path)
+                        }
                         addMedia(context, targetFile)
                         MediaScannerConnection.scanFile(
                             context, arrayOf(targetFile.path), null, null
                         )
                     })
             }
-            onSuccess(listOfFile)
-
-
+            onResult(listOfFileSuccess, listOfFileFailed)
         } catch (e: Exception) {
-            onError(e)
+            e.printStackTrace()
+            files?.get(tempIndex)?.let { listOfFileFailed.add(it.path) }
+            onResult(listOfFileSuccess, listOfFileFailed)
         }
     }
 

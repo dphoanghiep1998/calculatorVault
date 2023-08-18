@@ -25,10 +25,12 @@ class RecyclerBinViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel
     }
 
     fun deleteMultipleFolder(
-        path: List<String>,onProgress:(value:Float)->Unit, onSuccess: () -> Unit, onError: (e: String) -> Unit
+        path: List<String>,
+        onProgress: (value: Float) -> Unit,
+        onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            FileUtils.deleteMultipleFolderInDirectory(path,onProgress, onSuccess, onError)
+            FileUtils.deleteMultipleFolderInDirectory(path, onResult, onProgress)
         }
     }
 
@@ -49,13 +51,6 @@ class RecyclerBinViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel
         }
     }
 
-    fun deleteSelectedFile(
-        listPath: List<String>,onProgress:(value:Float)->Unit, onSuccess: () -> Unit, onError: (e: String) -> Unit
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            FileUtils.deleteMultipleFolderInDirectory(listPath,onProgress, onSuccess, onError)
-        }
-    }
 
     fun restoreFile(
         context: Context,

@@ -22,11 +22,11 @@ import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.invisible
-import com.neko.hiepdph.calculatorvault.common.extensions.popBackStack
 import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
 import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
+import com.neko.hiepdph.calculatorvault.config.Status
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.DialogProgressBinding
 import com.neko.hiepdph.calculatorvault.encryption.CryptoCore
@@ -47,9 +47,7 @@ class DialogProgress(
     private val action: Action = Action.ENCRYPT,
     private val encryptionMode: Int = EncryptionMode.HIDDEN,
     private val vaultPath: String = "",
-    private val onSuccess: (String) -> Unit,
-    private val onFailed: (String) -> Unit,
-    private val onResult: ((String) -> Unit)? = null
+    private val onResult: (status: Int, String) -> Unit
 
 ) : DialogFragment() {
     private lateinit var binding: DialogProgressBinding
@@ -141,65 +139,117 @@ class DialogProgress(
     private fun doAction() {
         if (action == Action.DELETE) {
             if (requireActivity().config.moveToRecyclerBin) {
-                viewModel.copy(requireContext(),
+                viewModel.copy(
+                    requireContext(),
                     listOfSourceFile,
                     listOfTargetParentFolder,
                     progress = { _: File? -> },
-                    onSuccess = {
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            listItemSelected.forEach {
-                                val item = it
-                                item.isDeleted = true
-                                viewModel.updateVaultItem(item)
+                    onResult = { listOfFileDeletedSuccess, listOfFileDeletedFailed ->
+                        if (listOfFileDeletedSuccess.size == listOfSourceFile.size) {
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                listItemSelected.forEach {
+                                    val item = it
+                                    item.isDeleted = true
+                                    viewModel.updateVaultItem(item)
+                                }
+                                onResult.invoke(
+                                    Status.SUCCESS, getString(R.string.move_to_recycler_bin)
+                                )
+                                dismiss()
                             }
-                            onSuccess.invoke(getString(R.string.move_to_recycler_bin))
-                            dismiss()
                         }
 
+                        if (listOfFileDeletedFailed.size == listOfSourceFile.size) {
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                onResult(
+                                    Status.FAILED, getString(R.string.move_to_recycler_bin_failed)
+                                )
+                                dismiss()
+                            }
+                        } else if (listOfFileDeletedFailed.size > 0) {
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                viewModel.deleteFileVault(listItemSelected.filter {
+                                    it.recyclerPath in listOfFileDeletedSuccess
+                                }.map { it.id })
+                                onResult.invoke(
+                                    Status.WARNING, String.format(
+                                        getString(R.string.move_to_recycler_bin_success_condition),
+                                        listOfFileDeletedSuccess.size
+                                    ) + " " + String.format(
+                                        getString(R.string.move_to_recycler_bin_failed_condition),
+                                        listOfFileDeletedFailed.size
+                                    )
+                                )
+                                dismiss()
+                            }
+                        }
                     },
-                    onError = {
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            onFailed.invoke(getString(R.string.move_to_recycler_bin_failed))
-                            dismiss()
-                        }
-
-                    })
+                )
 
             } else {
-                viewModel.deleteMultipleFolder(listItemSelected.map { it.encryptedPath },
-                    onSuccess = {
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            viewModel.deleteFileVault(listItemSelected.map { it.id }
-                                .toMutableList())
-                            onSuccess(getString(R.string.delete_success))
-                            dismiss()
+                viewModel.deleteMultipleFolder(
+                    listItemSelected.map { it.encryptedPath },
+                    onResult = { listOfFileDeletedSuccess, listOfFileDeletedFailed ->
+                        if (listOfFileDeletedSuccess.size == listOfSourceFile.size) {
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                viewModel.deleteFileVault(listItemSelected.map { it.id }
+                                    .toMutableList())
+                                onResult.invoke(
+                                    Status.SUCCESS, getString(R.string.delete_success)
+                                )
+                                dismiss()
+                            }
+                        }
+                        if (listOfFileDeletedFailed.size == listOfSourceFile.size) {
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                onResult(Status.FAILED, getString(R.string.delete_failed))
+                                dismiss()
+                            }
                         }
                     },
-                    onProgress = { },
-                    onError = {
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            onFailed(getString(R.string.delete_success))
-                            dismiss()
-                        }
-                    })
+
+                    onProgress = {
+                        setProgressValue(it.toInt())
+                    },
+                )
             }
 
         }
         if (action == Action.DELETE_PERMANENT) {
-            viewModel.deleteMultipleFolder(listItemSelected.map { it.recyclerPath }, onSuccess = {
-                lifecycleScope.launch(Dispatchers.Main) {
-                    viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
-                    onSuccess(getString(R.string.delete_success))
-                    dismiss()
-                }
-            }, onProgress = {
+            viewModel.deleteMultipleFolder(listItemSelected.map { it.recyclerPath }, onProgress = {
                 lifecycleScope.launch(Dispatchers.Main) {
                     setProgressValue(it.toInt())
                 }
-            }, onError = {
-                lifecycleScope.launch(Dispatchers.Main) {
-                    onFailed(getString(R.string.delete_success))
-                    dismiss()
+            }, onResult = { listOfFileDeletedSuccess, listOfFileDeletedFailed ->
+                if (listOfFileDeletedSuccess.size == listOfSourceFile.size) {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
+                        onResult.invoke(Status.SUCCESS, getString(R.string.delete_success))
+                        dismiss()
+                    }
+                }
+
+                if (listOfFileDeletedFailed.size == listOfSourceFile.size) {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        onResult(Status.FAILED, getString(R.string.delete_failed))
+                        dismiss()
+                    }
+                } else if (listOfFileDeletedFailed.size > 0) {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        viewModel.deleteFileVault(listItemSelected.filter {
+                            it.recyclerPath in listOfFileDeletedSuccess
+                        }.map { it.id })
+                        onResult.invoke(
+                            Status.WARNING, String.format(
+                                getString(R.string.delete_success_condition),
+                                listOfFileDeletedSuccess.size
+                            ) + " " + String.format(
+                                getString(R.string.delete_failed_condition),
+                                listOfFileDeletedFailed.size
+                            )
+                        )
+                        dismiss()
+                    }
                 }
             })
 
@@ -210,14 +260,14 @@ class DialogProgress(
                     if (listOfFileDeletedSuccess.size == listOfSourceFile.size) {
                         lifecycleScope.launch(Dispatchers.Main) {
                             viewModel.deleteFileVault(listItemSelected.map { it.id })
-                            onSuccess(getString(R.string.delete_success))
+                            onResult.invoke(Status.SUCCESS, getString(R.string.delete_success))
                             dismiss()
                         }
                     }
 
                     if (listOfFileDeletedFailed.size == listOfSourceFile.size) {
                         lifecycleScope.launch(Dispatchers.Main) {
-                            onFailed(getString(R.string.delete_failed))
+                            onResult(Status.FAILED, getString(R.string.delete_failed))
                             dismiss()
                         }
                     } else if (listOfFileDeletedFailed.size > 0) {
@@ -225,8 +275,8 @@ class DialogProgress(
                             viewModel.deleteFileVault(listItemSelected.filter {
                                 it.recyclerPath in listOfFileDeletedSuccess
                             }.map { it.id })
-                            onResult?.invoke(
-                                String.format(
+                            onResult.invoke(
+                                Status.WARNING, String.format(
                                     getString(R.string.delete_success_condition),
                                     listOfFileDeletedSuccess.size
                                 ) + " " + String.format(
@@ -250,25 +300,45 @@ class DialogProgress(
                 progress = { _: File? ->
 
                 },
-                onSuccess = {
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        onSuccess.invoke(
-                            String.format(
-                                getString(R.string.unlock_sucess), listItemSelected.size.toString()
+                onResult = { listOfFileSuccess, listOfFileFailed ->
+                    if (listOfFileSuccess.size == listOfSourceFile.size) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            viewModel.deleteFileVault(listItemSelected.map { it.id })
+                            onResult.invoke(
+                                Status.SUCCESS, String.format(
+                                    getString(R.string.unlock_sucess),
+                                    listItemSelected.size.toString()
+                                )
                             )
-                        )
-                        dismiss()
+                            dismiss()
+                        }
                     }
-                },
-                onError = {
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        onFailed.invoke(
-                            String.format(
-                                getString(R.string.unlock_failed), listItemSelected.size.toString()
+                    if (listOfFileFailed.size == listOfSourceFile.size) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            onResult(
+                                Status.FAILED, String.format(
+                                    getString(R.string.unlock_failed),
+                                    listItemSelected.size.toString()
+                                )
                             )
-                        )
-
-                        dismiss()
+                            dismiss()
+                        }
+                    } else if (listOfFileFailed.size > 0) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            viewModel.deleteFileVault(listItemSelected.filter {
+                                it.recyclerPath in listOfFileSuccess
+                            }.map { it.id })
+                            onResult.invoke(
+                                Status.WARNING, String.format(
+                                    getString(R.string.delete_success_condition),
+                                    listOfFileSuccess.size
+                                ) + " " + String.format(
+                                    getString(R.string.delete_failed_condition),
+                                    listOfFileFailed.size
+                                )
+                            )
+                            dismiss()
+                        }
                     }
                 })
         }
@@ -309,46 +379,39 @@ class DialogProgress(
                 progress = { _: File? ->
 
                 },
-                onSuccess = {
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        enableCancelable()
-                        showButton()
-                        statusSuccess()
-                        listItemSelected.forEachIndexed { index, item ->
-                            item.apply {
-                                recyclerPath =
-                                    "${requireContext().config.recyclerBinFolder.path}/${listOfEncryptedString[index]}"
-                                timeLock = Calendar.getInstance().timeInMillis
-                                encryptionType = encryptionMode
-                                encryptedPath = "$vaultPath/${
-                                    listOfEncryptedString[index]
-                                }"
+                onResult = { listOfFileSuccess, listOfFileFailed ->
+                    if (listOfFileSuccess.size == listOfSourceFile.size) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            enableCancelable()
+                            showButton()
+                            statusSuccess()
+                            listItemSelected.forEachIndexed { index, item ->
+                                item.apply {
+                                    recyclerPath =
+                                        "${requireContext().config.recyclerBinFolder.path}/${listOfEncryptedString[index]}"
+                                    timeLock = Calendar.getInstance().timeInMillis
+                                    encryptionType = encryptionMode
+                                    encryptedPath = "$vaultPath/${
+                                        listOfEncryptedString[index]
+                                    }"
+                                }
+                                viewModel.insertVaultItem(item)
                             }
-                            viewModel.insertVaultItem(item)
+                            onResult.invoke(Status.SUCCESS, getString(R.string.encrypt_success))
                         }
-                        popBackStack(R.id.fragmentListItem)
                     }
 
-                },
-                onError = {
-                    when (it) {
-                        is FileNotFoundException -> {
-                            lifecycleScope.launch(Dispatchers.Main) {
-                                enableCancelable()
-                                showButton()
-                                statusFailed()
-                                binding.tvStatus.text = getString(R.string.encrypt_failed)
-                            }
-                        }
-
-                        else -> {
+                    if (listOfFileFailed.size == listItemSelected.size){
+                        lifecycleScope.launch(Dispatchers.Main) {
                             enableCancelable()
                             showButton()
                             statusFailed()
+                            binding.tvStatus.text = getString(R.string.encrypt_failed)
                         }
                     }
-
                 },
+
+
                 encryptionMode
             )
         }
@@ -360,26 +423,52 @@ class DialogProgress(
                 listItemSelected.map { it.name },
                 progress = { _: File? ->
                 },
-                onSuccess = {
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        enableCancelable()
-                        showButton()
-                        statusSuccess()
-                        dismiss()
-                        onSuccess(it[0])
-
+                onResult = { listOfFileSuccess, listOfFileFailed ->
+                    if (listOfFileSuccess.size == listOfSourceFile.size) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            enableCancelable()
+                            showButton()
+                            statusSuccess()
+                            dismiss()
+                            onResult.invoke(
+                                Status.SUCCESS, String.format(
+                                    getString(R.string.decrypt_sucess),
+                                    listItemSelected.size.toString()
+                                )
+                            )
+                            dismiss()
+                        }
                     }
-
-                },
-                onError = {
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        enableCancelable()
-                        showButton()
-                        statusFailed()
-                        dismiss()
-                        onFailed("")
+                    if (listOfFileFailed.size == listOfSourceFile.size) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            enableCancelable()
+                            showButton()
+                            statusFailed()
+                            dismiss()
+                            onResult(
+                                Status.FAILED, String.format(
+                                    getString(R.string.decrypt_failed),
+                                    listItemSelected.size.toString()
+                                )
+                            )
+                            dismiss()
+                        }
+                    } else if (listOfFileFailed.size > 0) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            onResult.invoke(
+                                Status.WARNING, String.format(
+                                    getString(R.string.decrypt_sucess_condition),
+                                    listOfFileSuccess.size
+                                ) + " " + String.format(
+                                    getString(R.string.decrypt_failed_condition),
+                                    listOfFileFailed.size
+                                )
+                            )
+                            dismiss()
+                        }
                     }
                 },
+
                 encryptMode = encryptionMode
             )
         }
@@ -393,21 +482,42 @@ class DialogProgress(
                         setProgressValue(value.toInt())
                     }
                 },
-                onSuccess = {
-                    listItemSelected.map {
-                        it.isDeleted = false
-                        viewModel.updateFileVault(it)
+                onResult = { listOfFileSuccess, listOfFileFailed ->
+                    if (listOfFileSuccess.size == listOfSourceFile.size) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            listItemSelected.map {
+                                it.isDeleted = false
+                                viewModel.updateFileVault(it)
+                            }
+
+                            showSnackBar(
+                                getString(R.string.restore_successfully), SnackBarType.SUCCESS
+                            )
+                            dismiss()
+                        }
                     }
-
-                    showSnackBar(getString(R.string.restore_successfully), SnackBarType.SUCCESS)
-                    dismiss()
-
-                },
-                onError = {
-                    showSnackBar(getString(R.string.restore_failed), SnackBarType.FAILED)
-                    dismiss()
-
+                    if (listOfFileFailed.size == listOfSourceFile.size) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            showSnackBar(getString(R.string.restore_failed), SnackBarType.FAILED)
+                            dismiss()
+                        }
+                    } else if (listOfFileFailed.size > 0) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            showSnackBar(getString(R.string.restore_failed), SnackBarType.FAILED)
+                            onResult.invoke(
+                                Status.WARNING, String.format(
+                                    getString(R.string.restore_successfully_condition),
+                                    listOfFileSuccess.size
+                                ) + " " + String.format(
+                                    getString(R.string.restore_failed_condition),
+                                    listOfFileFailed.size
+                                )
+                            )
+                            dismiss()
+                        }
+                    }
                 })
+
         }
     }
 
