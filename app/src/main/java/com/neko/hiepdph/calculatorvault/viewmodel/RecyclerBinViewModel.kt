@@ -40,12 +40,13 @@ class RecyclerBinViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel
 
     }
 
-    fun deleteFileVault(listId:List<Int>){
+    fun deleteFileVault(listId: List<Int>) {
         viewModelScope.launch {
             appRepo.deleteFile(listId)
         }
     }
-    fun updateFileVault(fileVaultItem: FileVaultItem){
+
+    fun updateFileVault(fileVaultItem: FileVaultItem) {
         viewModelScope.launch {
             appRepo.updateFileVault(fileVaultItem)
         }
@@ -58,12 +59,11 @@ class RecyclerBinViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel
         targetFolder: List<File>,
         tSize: Long,
         progress: (value: Float, currentFile: File?) -> Unit,
-        onSuccess: (MutableList<String>) -> Unit,
-        onError: (t: Throwable) -> Unit
+        onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             CopyFiles.copy(
-                context, files, targetFolder, tSize, progress, onSuccess, onError
+                context, files, targetFolder, tSize, progress, onResult
             )
         }
     }

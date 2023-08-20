@@ -2,6 +2,7 @@ package com.neko.hiepdph.calculatorvault.common.adapter
 
 import android.content.Context
 import android.util.Base64
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -35,8 +36,8 @@ class ImagePagerAdapter(val context: Context, private val listImage: MutableList
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val photoView = CustomPhotoView(container.context)
-        if(listImage[position].thumb!= null){
-            Glide.with(context).asBitmap().load(listImage[position].decodePath).centerInside().into(photoView)
+        if(listImage[position].decodePath.isNotEmpty()){
+            Glide.with(context).load(listImage[position].decodePath).centerInside().into(photoView)
         }
         container.addView(
             photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT

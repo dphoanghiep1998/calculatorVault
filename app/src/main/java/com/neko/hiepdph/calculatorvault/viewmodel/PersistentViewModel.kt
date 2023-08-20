@@ -39,13 +39,13 @@ class PersistentViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel(
         return appRepo.getAllFileInEnCryptFolder(folderPath)
     }
 
-    fun updateFileVault(fileVaultItem: FileVaultItem){
+    fun updateFileVault(fileVaultItem: FileVaultItem) {
         viewModelScope.launch {
             appRepo.updateFileVault(fileVaultItem)
         }
     }
 
-    fun deleteFileVault(listId:MutableList<Int>){
+    fun deleteFileVault(listId: MutableList<Int>) {
         viewModelScope.launch {
             appRepo.deleteFile(listId)
         }
@@ -60,10 +60,9 @@ class PersistentViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel(
         context: Context,
         listFile: MutableList<File>,
         destination: MutableList<File>,
-        targetName:MutableList<String>,
-        progress: ( value: Float, currentFile: File?) -> Unit,
-        onSuccess: (MutableList<String>) -> Unit,
-        onError: (t: Throwable) -> Unit,
+        targetName: MutableList<String>,
+        progress: (value: Float, currentFile: File?) -> Unit,
+        onResult: (listOfFileDecryptSuccess: MutableList<String>, listOfTargetFileSuccess: MutableList<String>, listOfFileDecryptFailed: MutableList<String>) -> Unit,
         encryptMode: Int = EncryptionMode.HIDDEN,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -74,8 +73,7 @@ class PersistentViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel(
                 targetName,
                 0L,
                 progress,
-                onSuccess,
-                onError,
+                onResult,
                 encryptionMode = encryptMode,
             )
         }

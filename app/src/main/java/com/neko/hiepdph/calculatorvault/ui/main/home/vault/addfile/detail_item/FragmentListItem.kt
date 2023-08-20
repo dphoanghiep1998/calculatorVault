@@ -14,6 +14,7 @@ import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,12 +22,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.enums.Action
+import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
+import com.neko.hiepdph.calculatorvault.common.extensions.popBackStack
 import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
 import com.neko.hiepdph.calculatorvault.common.extensions.toastLocation
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
+import com.neko.hiepdph.calculatorvault.config.Status
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentListItemBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogAskEncryptionMode
@@ -35,6 +40,8 @@ import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import com.neko.hiepdph.calculatorvault.ui.main.home.vault.addfile.detail_item.adapter.AdapterListItem
 import com.neko.hiepdph.calculatorvault.viewmodel.ListItemViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 
 @AndroidEntryPoint
@@ -111,8 +118,25 @@ class FragmentListItem : Fragment() {
                     Action.ENCRYPT,
                     requireContext().config.encryptionMode,
                     args.vaultPath,
-                    onSuccess = {},
-                    onFailed = {})
+                    onResult = { status, text, valuesReturn ->
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            when (status) {
+                                Status.SUCCESS -> {
+                                    showSnackBar(text, SnackBarType.SUCCESS)
+                                }
+
+                                Status.WARNING -> {
+                                    showSnackBar(text, SnackBarType.WARNING)
+                                }
+
+                                Status.FAILED -> {
+                                    showSnackBar(text, SnackBarType.FAILED)
+                                }
+                            }
+                            popBackStack(R.id.fragmentListItem)
+                        }
+
+                    })
                 dialogProgress.show(childFragmentManager, dialogProgress.tag)
             } else {
                 val dialogAskEncryptionMode = DialogAskEncryptionMode(onPressPositive = { enMode ->
@@ -122,8 +146,22 @@ class FragmentListItem : Fragment() {
                         Action.ENCRYPT,
                         encryptionMode = enMode,
                         args.vaultPath,
-                        onSuccess = {},
-                        onFailed = {})
+                        onResult = { status, text, valuesReturn ->
+                            when (status) {
+                                Status.SUCCESS -> {
+                                    showSnackBar(text, SnackBarType.SUCCESS)
+                                }
+
+                                Status.WARNING -> {
+                                    showSnackBar(text, SnackBarType.WARNING)
+                                }
+
+                                Status.FAILED -> {
+                                    showSnackBar(text, SnackBarType.FAILED)
+                                }
+                            }
+                            popBackStack(R.id.fragmentListItem)
+                        })
                     dialogProgress.show(childFragmentManager, dialogProgress.tag)
                 })
                 dialogAskEncryptionMode.show(childFragmentManager, dialogAskEncryptionMode.tag)

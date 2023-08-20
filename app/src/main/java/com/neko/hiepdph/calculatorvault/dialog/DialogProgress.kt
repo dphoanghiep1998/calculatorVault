@@ -47,7 +47,7 @@ class DialogProgress(
     private val action: Action = Action.ENCRYPT,
     private val encryptionMode: Int = EncryptionMode.HIDDEN,
     private val vaultPath: String = "",
-    private val onResult: (status: Int, String) -> Unit
+    private val onResult: (status: Int, String, valuesReturn: MutableList<String>?) -> Unit
 
 ) : DialogFragment() {
     private lateinit var binding: DialogProgressBinding
@@ -128,6 +128,12 @@ class DialogProgress(
                     String.format(getString(R.string.deleting), listItemSelected.size.toString())
             }
 
+            Action.DELETE_All_RECYCLER_BIN_PERMANENT -> {
+                binding.tvTitle.text = getString(R.string.empty_recycler_bin)
+                binding.tvStatus.text =
+                    String.format(getString(R.string.deleting), listItemSelected.size.toString())
+            }
+
             else -> {
 
             }
@@ -153,7 +159,7 @@ class DialogProgress(
                                     viewModel.updateVaultItem(item)
                                 }
                                 onResult.invoke(
-                                    Status.SUCCESS, getString(R.string.move_to_recycler_bin)
+                                    Status.SUCCESS, getString(R.string.move_to_recycler_bin), null
                                 )
                                 dismiss()
                             }
@@ -162,7 +168,9 @@ class DialogProgress(
                         if (listOfFileDeletedFailed.size == listOfSourceFile.size) {
                             lifecycleScope.launch(Dispatchers.Main) {
                                 onResult(
-                                    Status.FAILED, getString(R.string.move_to_recycler_bin_failed)
+                                    Status.FAILED,
+                                    getString(R.string.move_to_recycler_bin_failed),
+                                    null
                                 )
                                 dismiss()
                             }
@@ -178,12 +186,13 @@ class DialogProgress(
                                     ) + " " + String.format(
                                         getString(R.string.move_to_recycler_bin_failed_condition),
                                         listOfFileDeletedFailed.size
-                                    )
+                                    ), null
                                 )
                                 dismiss()
                             }
                         }
                     },
+                    isMove = true
                 )
 
             } else {
@@ -195,21 +204,21 @@ class DialogProgress(
                                 viewModel.deleteFileVault(listItemSelected.map { it.id }
                                     .toMutableList())
                                 onResult.invoke(
-                                    Status.SUCCESS, getString(R.string.delete_success)
+                                    Status.SUCCESS, getString(R.string.delete_success), null
                                 )
                                 dismiss()
                             }
                         }
                         if (listOfFileDeletedFailed.size == listOfSourceFile.size) {
                             lifecycleScope.launch(Dispatchers.Main) {
-                                onResult(Status.FAILED, getString(R.string.delete_failed))
+                                onResult(Status.FAILED, getString(R.string.delete_failed), null)
                                 dismiss()
                             }
                         }
                     },
 
                     onProgress = {
-                        setProgressValue(it.toInt())
+
                     },
                 )
             }
@@ -217,21 +226,19 @@ class DialogProgress(
         }
         if (action == Action.DELETE_PERMANENT) {
             viewModel.deleteMultipleFolder(listItemSelected.map { it.recyclerPath }, onProgress = {
-                lifecycleScope.launch(Dispatchers.Main) {
-                    setProgressValue(it.toInt())
-                }
+
             }, onResult = { listOfFileDeletedSuccess, listOfFileDeletedFailed ->
                 if (listOfFileDeletedSuccess.size == listOfSourceFile.size) {
                     lifecycleScope.launch(Dispatchers.Main) {
                         viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
-                        onResult.invoke(Status.SUCCESS, getString(R.string.delete_success))
+                        onResult.invoke(Status.SUCCESS, getString(R.string.delete_success), null)
                         dismiss()
                     }
                 }
 
                 if (listOfFileDeletedFailed.size == listOfSourceFile.size) {
                     lifecycleScope.launch(Dispatchers.Main) {
-                        onResult(Status.FAILED, getString(R.string.delete_failed))
+                        onResult(Status.FAILED, getString(R.string.delete_failed), null)
                         dismiss()
                     }
                 } else if (listOfFileDeletedFailed.size > 0) {
@@ -246,7 +253,7 @@ class DialogProgress(
                             ) + " " + String.format(
                                 getString(R.string.delete_failed_condition),
                                 listOfFileDeletedFailed.size
-                            )
+                            ), null
                         )
                         dismiss()
                     }
@@ -257,20 +264,28 @@ class DialogProgress(
         if (action == Action.DELETE_All_RECYCLER_BIN_PERMANENT) {
             viewModel.deleteAllRecyclerBin(requireContext().config.recyclerBinFolder.path,
                 onResult = { listOfFileDeletedSuccess, listOfFileDeletedFailed ->
-                    if (listOfFileDeletedSuccess.size == listOfSourceFile.size) {
+                    Log.d("TAG", "doAction: "+listItemSelected.size)
+                    Log.d("TAG", "doAction: "+listOfFileDeletedSuccess.size)
+                    Log.d("TAG", "doAction: "+listOfFileDeletedFailed.size)
+                    if (listOfFileDeletedSuccess.size == listItemSelected.size) {
+                        Log.d("TAG", "doAction: 1")
                         lifecycleScope.launch(Dispatchers.Main) {
                             viewModel.deleteFileVault(listItemSelected.map { it.id })
-                            onResult.invoke(Status.SUCCESS, getString(R.string.delete_success))
+                            onResult.invoke(
+                                Status.SUCCESS, getString(R.string.delete_success), null
+                            )
                             dismiss()
                         }
                     }
 
-                    if (listOfFileDeletedFailed.size == listOfSourceFile.size) {
+                    if (listOfFileDeletedFailed.size == listItemSelected.size) {
+                        Log.d("TAG", "doAction: 2")
                         lifecycleScope.launch(Dispatchers.Main) {
-                            onResult(Status.FAILED, getString(R.string.delete_failed))
+                            onResult(Status.FAILED, getString(R.string.delete_failed), null)
                             dismiss()
                         }
                     } else if (listOfFileDeletedFailed.size > 0) {
+                        Log.d("TAG", "doAction: 3")
                         lifecycleScope.launch(Dispatchers.Main) {
                             viewModel.deleteFileVault(listItemSelected.filter {
                                 it.recyclerPath in listOfFileDeletedSuccess
@@ -282,14 +297,16 @@ class DialogProgress(
                                 ) + " " + String.format(
                                     getString(R.string.delete_failed_condition),
                                     listOfFileDeletedFailed.size
-                                )
+                                ), null
                             )
                             dismiss()
                         }
                     }
 
                 },
-                onProgress = { value -> setProgressValue(value.toInt()) })
+                onProgress = {
+
+                })
 
         }
         if (action == Action.UNLOCK) {
@@ -308,7 +325,7 @@ class DialogProgress(
                                 Status.SUCCESS, String.format(
                                     getString(R.string.unlock_sucess),
                                     listItemSelected.size.toString()
-                                )
+                                ), null
                             )
                             dismiss()
                         }
@@ -319,7 +336,7 @@ class DialogProgress(
                                 Status.FAILED, String.format(
                                     getString(R.string.unlock_failed),
                                     listItemSelected.size.toString()
-                                )
+                                ), null
                             )
                             dismiss()
                         }
@@ -335,7 +352,7 @@ class DialogProgress(
                                 ) + " " + String.format(
                                     getString(R.string.delete_failed_condition),
                                     listOfFileFailed.size
-                                )
+                                ), null
                             )
                             dismiss()
                         }
@@ -397,11 +414,13 @@ class DialogProgress(
                                 }
                                 viewModel.insertVaultItem(item)
                             }
-                            onResult.invoke(Status.SUCCESS, getString(R.string.encrypt_success))
+                            onResult.invoke(
+                                Status.SUCCESS, getString(R.string.encrypt_success), null
+                            )
                         }
                     }
 
-                    if (listOfFileFailed.size == listItemSelected.size){
+                    if (listOfFileFailed.size == listItemSelected.size) {
                         lifecycleScope.launch(Dispatchers.Main) {
                             enableCancelable()
                             showButton()
@@ -423,7 +442,7 @@ class DialogProgress(
                 listItemSelected.map { it.name },
                 progress = { _: File? ->
                 },
-                onResult = { listOfFileSuccess, listOfFileFailed ->
+                onResult = { listOfFileSuccess, lisOfTargetFileSuccess, listOfFileFailed ->
                     if (listOfFileSuccess.size == listOfSourceFile.size) {
                         lifecycleScope.launch(Dispatchers.Main) {
                             enableCancelable()
@@ -434,7 +453,7 @@ class DialogProgress(
                                 Status.SUCCESS, String.format(
                                     getString(R.string.decrypt_sucess),
                                     listItemSelected.size.toString()
-                                )
+                                ), lisOfTargetFileSuccess
                             )
                             dismiss()
                         }
@@ -449,7 +468,7 @@ class DialogProgress(
                                 Status.FAILED, String.format(
                                     getString(R.string.decrypt_failed),
                                     listItemSelected.size.toString()
-                                )
+                                ), null
                             )
                             dismiss()
                         }
@@ -462,7 +481,7 @@ class DialogProgress(
                                 ) + " " + String.format(
                                     getString(R.string.decrypt_failed_condition),
                                     listOfFileFailed.size
-                                )
+                                ), null
                             )
                             dismiss()
                         }
@@ -511,7 +530,7 @@ class DialogProgress(
                                 ) + " " + String.format(
                                     getString(R.string.restore_failed_condition),
                                     listOfFileFailed.size
-                                )
+                                ), null
                             )
                             dismiss()
                         }

@@ -34,6 +34,7 @@ import com.neko.hiepdph.calculatorvault.dialog.DialogProgress
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
 import com.neko.hiepdph.calculatorvault.viewmodel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -148,7 +149,7 @@ class ActivityVideoPlayer : AppCompatActivity() {
                     listOfSourceFile = mutableListOf(File(currentItem!!.encryptedPath)),
                     listOfTargetParentFolder = mutableListOf(config.recyclerBinFolder),
                     action = Action.DELETE,
-                    onResult = { status, statusText ->
+                    onResult = { status, statusText, _ ->
                         if (status == Status.SUCCESS) {
                             listItem.remove(currentItem)
                             if (listItem.isEmpty()) {
@@ -163,7 +164,7 @@ class ActivityVideoPlayer : AppCompatActivity() {
                             showSnackBar(statusText, SnackBarType.FAILED)
                         }
 
-                        if(status == Status.WARNING){
+                        if (status == Status.WARNING) {
                             showSnackBar(statusText, SnackBarType.WARNING)
                         }
                     })
@@ -189,29 +190,28 @@ class ActivityVideoPlayer : AppCompatActivity() {
             listItemSelected = mutableListOf(currentItem!!),
             listOfSourceFile = mutableListOf(File(currentItem?.encryptedPath.toString())),
             listOfTargetParentFolder = mutableListOf(File(currentItem?.originalPath.toString()).parentFile),
-            onResult = { listOfFileDeletedSuccess, listOfFileDeletedFailed ->
+            onResult = { status, text, valueReturn ->
+                lifecycleScope.launch(Dispatchers.Main) {
+                    when (status) {
+                        Status.SUCCESS -> {
+                            listItem.remove(currentItem)
+                            if (listItem.isEmpty()) {
+                                ShareData.getInstance().setListItemImage(mutableListOf())
+                                finish()
+                            } else {
+                                ShareData.getInstance().setListItemImage(listItem)
+                            }
+                        }
+
+                        Status.FAILED -> {
+                            showSnackBar(text, SnackBarType.FAILED)
+                        }
+                    }
+                }
 
             },
             action = Action.UNLOCK
         )
-        lifecycleScope.launch {
-            CopyFiles.copy(this@ActivityVideoPlayer,
-                mutableListOf(File(currentItem?.encryptedPath.toString())),
-                mutableListOf(File(currentItem?.originalPath.toString())),
-                0L,
-                progress = { _: Float, _: File? -> },
-                onResult = { listOfFileDeletedSuccess, listOfFileDeletedFailed -> })
-//                onSuccess = {
-//                    listItem.remove(currentItem)
-//                    if (listItem.isEmpty()) {
-//                        ShareData.getInstance().setListItemImage(mutableListOf())
-//                        finish()
-//                    } else {
-//                        ShareData.getInstance().setListItemImage(listItem)
-//                    }
-//                },
-//                onError = {})
-        }
     }
 
     private fun hideSystemUI() {

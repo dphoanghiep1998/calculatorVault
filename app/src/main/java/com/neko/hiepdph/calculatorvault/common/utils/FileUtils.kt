@@ -2,6 +2,7 @@ package com.neko.hiepdph.calculatorvault.common.utils
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import com.neko.hiepdph.calculatorvault.common.Constant
@@ -95,6 +96,7 @@ object FileUtils {
             folder.listFiles()?.let {
                 for (file in it) {
                     val delete = file.deleteRecursively()
+                    Log.d("TAG", "deleteAllChildInDirectory: "+delete)
                     if (delete) {
                         listOfFilePathDeletedSuccess.add(file.path)
                     } else {
@@ -108,6 +110,7 @@ object FileUtils {
             }
             onResult(listOfFilePathDeletedSuccess, listOfFilePathDeletedFailed)
         } catch (e: Exception) {
+            e.printStackTrace()
             onResult(listOfFilePathDeletedSuccess, listOfFilePathDeletedFailed)
         }
     }

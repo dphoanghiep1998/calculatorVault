@@ -365,6 +365,7 @@
 
     <string name="encrypt_success">Encrypt success!</string>
     <string name="encrypt_failed_new">Encrypt failed !</string>
+    <string name="empty_recycler_bin">Empty recycler bin</string>
 
 
 </resources>

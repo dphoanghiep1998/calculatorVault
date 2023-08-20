@@ -52,7 +52,7 @@ class ActivityCamera : AppCompatActivity() {
         cameraLauncher.launch(intent)
     }
 
-
+//TODO warning
     private val cameraLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == RESULT_CANCELED) {
@@ -100,37 +100,40 @@ class ActivityCamera : AppCompatActivity() {
                             progress = { _: File? ->
 
                             },
-                            onSuccess = {
-                                lifecycleScope.launch(Dispatchers.Main) {
-                                    listItemDiff.forEachIndexed { index, item ->
-                                        item.apply {
-                                            recyclerPath =
-                                                "${config.recyclerBinFolder.path}/${listNameEncrypt[index]}"
-                                            timeLock = Calendar.getInstance().timeInMillis
-                                            encryptionType = EncryptionMode.HIDDEN
-                                            encryptedPath = "${config.picturePrivacyFolder}/${
-                                                listNameEncrypt[index]
-                                            }"
-                                            decodePath = "${config.decryptFolder}/${
-                                                item.name
-                                            }"
-                                        }
-
-                                        viewModel.insertVaultItem(item, action = {
-                                            lifecycleScope.launch(Dispatchers.Main) {
-                                                finishAffinity()
-                                                exitProcess(-1)
+                            onResult = { listSourceSuccess, listSourceFailed ->
+                                if (listSourceSuccess.size == listItemDiff.size) {
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        listItemDiff.forEachIndexed { index, item ->
+                                            item.apply {
+                                                recyclerPath =
+                                                    "${config.recyclerBinFolder.path}/${listNameEncrypt[index]}"
+                                                timeLock = Calendar.getInstance().timeInMillis
+                                                encryptionType = EncryptionMode.HIDDEN
+                                                encryptedPath = "${config.picturePrivacyFolder}/${
+                                                    listNameEncrypt[index]
+                                                }"
                                             }
-                                        })
+
+                                            viewModel.insertVaultItem(item, action = {
+                                                lifecycleScope.launch(Dispatchers.Main) {
+                                                    finishAffinity()
+                                                    exitProcess(-1)
+                                                }
+                                            })
 
 
+                                        }
                                     }
                                 }
 
-                            },
-                            onError = {
-                                finishAffinity()
-                                exitProcess(-1)
+                                if (listSourceFailed.size == listItemDiff.size) {
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        finishAffinity()
+                                        exitProcess(-1)
+                                    }
+                                }
+
+
                             },
                             EncryptionMode.HIDDEN
                         )

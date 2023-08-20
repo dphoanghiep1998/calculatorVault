@@ -2,6 +2,7 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -329,24 +330,24 @@ class FragmentPersistent : Fragment() {
                 listOfSourceFile = mutableListOf(File(item.encryptedPath)),
                 listOfTargetParentFolder = mutableListOf(requireActivity().config.recyclerBinFolder),
                 action = Action.DELETE,
-                onResult = {status, text ->
-                    if(status == Status.SUCCESS){
+                onResult = { status, text, _ ->
+                    lifecycleScope.launch(Dispatchers.Main) {
                         normalView()
-                        showSnackBar(it, SnackBarType.SUCCESS)
-                    }
-                    if(status == Status.FAILED){
-                        normalView()
-                        showSnackBar(it, SnackBarType.FAILED)
-                    }
+                        if (status == Status.SUCCESS) {
+                            showSnackBar(text, SnackBarType.SUCCESS)
+                        }
+                        if (status == Status.FAILED) {
+                            showSnackBar(text, SnackBarType.FAILED)
+                        }
 
-                    if(status == Status.)
-                },
-
-                onFailed = {
-                    normalView()
-                    showSnackBar(it, SnackBarType.FAILED)
+                        if (status == Status.WARNING) {
+                            showSnackBar(text, SnackBarType.WARNING)
+                        }
+                    }
 
                 })
+
+
 
             dialogProgress.show(childFragmentManager, dialogProgress.tag)
         }, DialogConfirmType.DELETE, item.name)
@@ -361,6 +362,7 @@ class FragmentPersistent : Fragment() {
             ).show()
             return
         }
+        Log.d("TAG", "showDialogDelete: "+listItemSelected.size)
         val name = when (args.type) {
             Constant.TYPE_PICTURE -> getString(R.string.pictures)
             Constant.TYPE_VIDEOS -> getString(R.string.videos)
@@ -370,21 +372,30 @@ class FragmentPersistent : Fragment() {
         }
         val confirmDialog = DialogConfirm(
             onPositiveClicked = {
-
                 val dialogProgress = DialogProgress(listItemSelected = listItemSelected,
                     listOfSourceFile = listItemSelected.map { File(it.encryptedPath) },
                     listOfTargetParentFolder = listItemSelected.map { requireContext().config.recyclerBinFolder },
                     action = Action.DELETE,
-                    onSuccess = {
-                        normalView()
-                        showSnackBar(it, SnackBarType.SUCCESS)
+                    onResult = { status, text, _ ->
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            normalView()
+                            when (status) {
+                                Status.SUCCESS -> {
+                                    showSnackBar(text, SnackBarType.SUCCESS)
+                                }
 
-                    },
-                    onFailed = {
-                        normalView()
-                        showSnackBar(it, SnackBarType.FAILED)
+                                Status.FAILED -> {
+                                    showSnackBar(text, SnackBarType.FAILED)
+                                }
+
+                                Status.WARNING -> {
+                                    showSnackBar(text, SnackBarType.WARNING)
+                                }
+                            }
+                        }
 
                     })
+
                 dialogProgress.show(childFragmentManager, dialogProgress.tag)
             },
             dialogType = if (!requireContext().config.moveToRecyclerBin) DialogConfirmType.DELETE_PERMANENT else DialogConfirmType.DELETE,
@@ -395,18 +406,29 @@ class FragmentPersistent : Fragment() {
     }
 
     private fun share() {
-        viewModel.decryptFile(
-            requireContext(),
+        val dialogProgress = DialogProgress(listItemSelected,
             listItemSelected.map { File(it.encryptedPath) }.toMutableList(),
             listItemSelected.map { requireContext().config.decryptFolder }.toMutableList(),
-            listItemSelected.map { it.name }.toMutableList(),
-            progress = { _: Float, _: File? -> },
-            onSuccess = {
-                requireContext().shareFile(it.map { path -> path })
-            },
-            onError = {},
-            EncryptionMode.ENCRYPTION,
-        )
+            action = Action.DECRYPT,
+            onResult = { status, text, valueReturn ->
+                lifecycleScope.launch(Dispatchers.Main) {
+                    if (status == Status.SUCCESS) {
+                        valueReturn?.let {
+                            requireContext().shareFile(it.map { path -> path })
+                        }
+                    }
+                    if (status == Status.FAILED) {
+                        requireActivity().showSnackBar(text, SnackBarType.FAILED)
+                    }
+
+                    if (status == Status.WARNING) {
+                        requireActivity().showSnackBar(text, SnackBarType.FAILED)
+                    }
+                }
+
+            })
+
+        dialogProgress.show(childFragmentManager, dialogProgress.tag)
 
 
     }
@@ -443,22 +465,29 @@ class FragmentPersistent : Fragment() {
             listItemSelected.map { File(it.encryptedPath) },
             listItemSelected.map { File(it.originalPath).parentFile } as List<File>,
             Action.UNLOCK,
-            onSuccess = {
-                viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
-                requireActivity().runOnUiThread {
+            onResult = { status, text, _ ->
+                lifecycleScope.launch(Dispatchers.Main) {
                     normalView()
-                    showSnackBar(
-                        String.format(it), SnackBarType.SUCCESS
-                    )
+                    when (status) {
+                        Status.SUCCESS -> {
+                            showSnackBar(
+                                String.format(text), SnackBarType.SUCCESS
+                            )
+                        }
+
+                        Status.FAILED -> {
+                            showSnackBar((text), SnackBarType.FAILED)
+                        }
+
+                        Status.WARNING -> {
+                            showSnackBar((text), SnackBarType.WARNING)
+                        }
+                    }
                 }
 
-            },
-            onFailed = {
-                requireActivity().runOnUiThread {
-                    showSnackBar((it), SnackBarType.FAILED)
-                    normalView()
-                }
             })
+
+
         dialogProgress.show(childFragmentManager, dialogProgress.tag)
 
     }
@@ -568,17 +597,32 @@ class FragmentPersistent : Fragment() {
                         listItemSelected = mutableListOf(item),
                         listOfSourceFile = mutableListOf(File(item.encryptedPath)),
                         listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
-                        onSuccess = {
-                            item.decodePath = it
-                            viewModel.updateFileVault(item)
-                            list.add(item)
-                            ShareData.getInstance().setListItemImage(list)
-                            val intent = Intent(requireContext(), ActivityImageDetail::class.java)
-                            startActivity(intent)
+                        onResult = { status, text, valueReturn ->
+                            when (status) {
+                                Status.SUCCESS -> {
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        showSnackBar(text, SnackBarType.SUCCESS)
+                                        if (!valueReturn.isNullOrEmpty()) {
+                                            item.decodePath = valueReturn[0]
+                                            viewModel.updateFileVault(item)
+                                            list.add(item)
+                                            ShareData.getInstance().setListItemImage(list)
+                                            val intent = Intent(
+                                                requireContext(), ActivityImageDetail::class.java
+                                            )
+                                            startActivity(intent)
+                                        }
 
-                        },
-                        onFailed = {
-                            showSnackBar(getString(R.string.decrypt_error), SnackBarType.FAILED)
+                                    }
+
+                                }
+
+                                Status.FAILED -> {
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        showSnackBar(text, SnackBarType.FAILED)
+                                    }
+                                }
+                            }
                         },
                         action = Action.DECRYPT,
                         encryptionMode = item.encryptionType
@@ -596,15 +640,25 @@ class FragmentPersistent : Fragment() {
                         listItemSelected = mutableListOf(item),
                         listOfSourceFile = mutableListOf(File(item.encryptedPath)),
                         listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
-                        onSuccess = {
-                            item.decodePath = it
-                            viewModel.updateFileVault(item)
-                            item.decodePath.openWith(
-                                requireContext(), Constant.TYPE_AUDIOS, null
-                            )
-                        },
-                        onFailed = {
-                            showSnackBar(getString(R.string.decrypt_error), SnackBarType.FAILED)
+                        onResult = { status, text, valuesReturn ->
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                when (status) {
+                                    Status.SUCCESS -> {
+                                        if (!valuesReturn.isNullOrEmpty()) {
+                                            item.decodePath = valuesReturn[0]
+                                            viewModel.updateFileVault(item)
+                                            item.decodePath.openWith(
+                                                requireContext(), Constant.TYPE_AUDIOS, null
+                                            )
+                                        }
+
+                                    }
+
+                                    Status.FAILED -> {
+                                        showSnackBar(text, SnackBarType.FAILED)
+                                    }
+                                }
+                            }
                         },
                         action = Action.DECRYPT,
                         encryptionMode = item.encryptionType
@@ -630,24 +684,35 @@ class FragmentPersistent : Fragment() {
                         listItemSelected = mutableListOf(item),
                         listOfSourceFile = mutableListOf(File(item.encryptedPath)),
                         listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
-                        onSuccess = {
-                            item.decodePath = it
-                            viewModel.updateFileVault(item)
-                            list.add(item)
-                            if (requireContext().config.playVideoMode) {
-                                ShareData.getInstance().setListItemVideo(list)
-                                val intent =
-                                    Intent(requireContext(), ActivityVideoPlayer::class.java)
-                                startActivity(intent)
-                            } else {
-                                item.encryptedPath.openWith(
-                                    requireContext(), Constant.TYPE_VIDEOS, null
-                                )
-                            }
+                        onResult = { status, text, valuesReturn ->
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                when (status) {
+                                    Status.SUCCESS -> {
+                                        if (!valuesReturn.isNullOrEmpty()) {
+                                            item.decodePath = valuesReturn[0]
+                                            viewModel.updateFileVault(item)
+                                            list.add(item)
+                                            if (requireContext().config.playVideoMode) {
+                                                ShareData.getInstance().setListItemVideo(list)
+                                                val intent = Intent(
+                                                    requireContext(),
+                                                    ActivityVideoPlayer::class.java
+                                                )
+                                                startActivity(intent)
+                                            } else {
+                                                item.decodePath.openWith(
+                                                    requireContext(), Constant.TYPE_VIDEOS, null
+                                                )
+                                            }
+                                        }
 
-                        },
-                        onFailed = {
-                            showSnackBar(getString(R.string.decrypt_error), SnackBarType.FAILED)
+                                    }
+
+                                    Status.FAILED -> {
+                                        showSnackBar(text, SnackBarType.FAILED)
+                                    }
+                                }
+                            }
                         },
                         action = Action.DECRYPT,
                         encryptionMode = item.encryptionType
@@ -667,12 +732,24 @@ class FragmentPersistent : Fragment() {
                         listItemSelected = mutableListOf(item),
                         listOfSourceFile = mutableListOf(File(item.encryptedPath)),
                         listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
-                        onSuccess = {
-                            item.decodePath = it
-                            item.decodePath.openWith(requireContext(), Constant.TYPE_FILE, null)
-                        },
-                        onFailed = {
-                            showSnackBar(getString(R.string.decrypt_error), SnackBarType.FAILED)
+                        onResult = { status, text, valuesReturn ->
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                when (status) {
+                                    Status.SUCCESS -> {
+                                        if (!valuesReturn.isNullOrEmpty()) {
+                                            item.decodePath = valuesReturn[0]
+                                            item.decodePath.openWith(
+                                                requireContext(), Constant.TYPE_FILE, null
+                                            )
+                                        }
+
+                                    }
+
+                                    Status.FAILED -> {
+                                        showSnackBar(text, SnackBarType.FAILED)
+                                    }
+                                }
+                            }
                         },
                         action = Action.DECRYPT,
                         encryptionMode = item.encryptionType

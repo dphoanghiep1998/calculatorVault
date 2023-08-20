@@ -27,8 +27,10 @@ import com.neko.hiepdph.calculatorvault.common.transformer.RightTransformer
 import com.neko.hiepdph.calculatorvault.common.transformer.RotationTransformer
 import com.neko.hiepdph.calculatorvault.common.transformer.TopTransformer
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
+import com.neko.hiepdph.calculatorvault.config.Status
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityImageDetailBinding
+import com.neko.hiepdph.calculatorvault.di.MainDispatcher
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.dialog.DialogDetail
@@ -37,12 +39,14 @@ import com.neko.hiepdph.calculatorvault.sharedata.ShareData
 import com.neko.hiepdph.calculatorvault.viewmodel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import `in`.dd4you.animatoo.VpAnimatoo
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
 import java.lang.reflect.Field
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
@@ -54,6 +58,7 @@ class ActivityImageDetail : AppCompatActivity() {
     private var currentPage = 0
     private var jobSlide: Job? = null
     private val viewModel by viewModels<AppViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityImageDetailBinding.inflate(layoutInflater)
@@ -144,25 +149,32 @@ class ActivityImageDetail : AppCompatActivity() {
 
         binding.tvDelete.clickWithDebounce {
             val confirmDialog = DialogConfirm(onPositiveClicked = {
-                if (config.moveToRecyclerBin) {
-                    val dialogProgress =
-                        DialogProgress(listItemSelected = mutableListOf(currentItem!!),
-                            listOfSourceFile = mutableListOf(File(currentItem!!.encryptedPath)),
-                            listOfTargetParentFolder = mutableListOf(config.recyclerBinFolder),
-                            action = Action.DELETE,
-                            onSuccess = {
-                                ShareData.getInstance().setListItemImage(mutableListOf())
-                                finish()
-                                showSnackBar(it, SnackBarType.SUCCESS)
+                val dialogProgress = DialogProgress(listItemSelected = mutableListOf(currentItem!!),
+                    listOfSourceFile = mutableListOf(File(currentItem!!.encryptedPath)),
+                    listOfTargetParentFolder = mutableListOf(config.recyclerBinFolder),
+                    action = Action.DELETE,
+                    onResult = { status, text, _ ->
+                        when (status) {
+                            Status.SUCCESS -> {
+                                lifecycleScope.launch(Dispatchers.Main) {
+                                    ShareData.getInstance().setListItemImage(mutableListOf())
+                                    finish()
+                                    showSnackBar(text, SnackBarType.SUCCESS)
+                                }
 
-                            },
-                            onFailed = {
-                                showSnackBar(it, SnackBarType.FAILED)
-                            })
-                    dialogProgress.show(supportFragmentManager, dialogProgress.tag)
-                } else {
+                            }
 
-                }
+                            Status.FAILED -> {
+                                lifecycleScope.launch(Dispatchers.Main) {
+                                    ShareData.getInstance().setListItemImage(mutableListOf())
+                                    finish()
+                                    showSnackBar(text, SnackBarType.FAILED)
+                                }
+
+                            }
+                        }
+                    })
+                dialogProgress.show(supportFragmentManager, dialogProgress.tag)
             }, DialogConfirmType.DELETE, getString(R.string.pictures))
 
 
@@ -256,25 +268,30 @@ class ActivityImageDetail : AppCompatActivity() {
             mutableListOf(File(currentItem?.encryptedPath.toString())),
             mutableListOf(File(currentItem?.encryptedPath.toString())),
             Action.UNLOCK,
-            onSuccess = {
-                viewModel.deleteFileVault(listItem.map { it.id }.toMutableList())
-                runOnUiThread {
-                    showSnackBar(
-                        String.format(it), SnackBarType.SUCCESS
-                    )
-                }
-                listItem.remove(currentItem)
-                if (listItem.isEmpty()) {
-                    ShareData.getInstance().setListItemImage(mutableListOf())
-                    finish()
-                } else {
-                    ShareData.getInstance().setListItemImage(listItem)
-                }
+            onResult = { status, text, valuesReturn ->
+                when (status) {
+                    Status.SUCCESS -> {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            showSnackBar(
+                                String.format(text), SnackBarType.SUCCESS
+                            )
+                            listItem.remove(currentItem)
+                            if (listItem.isEmpty()) {
+                                ShareData.getInstance().setListItemImage(mutableListOf())
+                                finish()
+                            } else {
+                                ShareData.getInstance().setListItemImage(listItem)
+                            }
+                        }
+                    }
 
-            },
-            onFailed = {
-                runOnUiThread {
-                    showSnackBar((it), SnackBarType.FAILED)
+                    Status.FAILED -> {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            showSnackBar(
+                                String.format(text), SnackBarType.SUCCESS
+                            )
+                        }
+                    }
                 }
             })
         dialogProgress.show(supportFragmentManager, dialogProgress.tag)

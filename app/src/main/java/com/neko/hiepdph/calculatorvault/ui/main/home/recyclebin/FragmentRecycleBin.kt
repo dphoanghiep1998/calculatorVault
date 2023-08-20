@@ -11,12 +11,15 @@ import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.enums.Action
 import com.neko.hiepdph.calculatorvault.common.extensions.*
+import com.neko.hiepdph.calculatorvault.common.utils.openWith
+import com.neko.hiepdph.calculatorvault.config.Status
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentRecycleBinBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
@@ -26,9 +29,12 @@ import com.neko.hiepdph.calculatorvault.dialog.DialogProgress
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityImageDetail
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
+import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVideoPlayer
 import com.neko.hiepdph.calculatorvault.ui.main.home.recyclebin.adapter.AdapterRecyclerBin
 import com.neko.hiepdph.calculatorvault.viewmodel.RecyclerBinViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 
 @AndroidEntryPoint
@@ -96,6 +102,7 @@ class FragmentRecycleBin : Fragment() {
                             deletePermanent()
                             true
                         }
+
                         else -> false
                     }
                 } else {
@@ -201,7 +208,7 @@ class FragmentRecycleBin : Fragment() {
 
     private fun openInformationDialog(item: FileVaultItem) {
         Log.d("TAG", "openInformationDialog: ")
-        val dialogDetail = DialogDetail(requireContext(),item).onCreateDialog()
+        val dialogDetail = DialogDetail(requireContext(), item).onCreateDialog()
         dialogDetail.show()
     }
 
@@ -213,19 +220,181 @@ class FragmentRecycleBin : Fragment() {
         }
     }
 
-    private fun handleClickItem(it: FileVaultItem) {
-        when (it.fileType) {
+    private fun handleClickItem(item: FileVaultItem) {
+        val list = mutableListOf<FileVaultItem>()
+        when (item.fileType) {
             Constant.TYPE_PICTURE -> {
-                val list = mutableListOf<FileVaultItem>()
-                list.add(it)
-                ShareData.getInstance().setListItemImage(list)
-                val intent = Intent(requireContext(), ActivityImageDetail::class.java)
-                startActivity(intent)
+                if (File(item.decodePath).exists()) {
+                    list.add(item)
+                    ShareData.getInstance().setListItemImage(list)
+                    val intent = Intent(requireContext(), ActivityImageDetail::class.java)
+                    startActivity(intent)
+
+                } else {
+                    val dialogProgress = DialogProgress(
+                        listItemSelected = mutableListOf(item),
+                        listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                        listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
+                        onResult = { status, text, valueReturn ->
+                            when (status) {
+                                Status.SUCCESS -> {
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        showSnackBar(text, SnackBarType.SUCCESS)
+                                        if (!valueReturn.isNullOrEmpty()) {
+                                            item.decodePath = valueReturn[0]
+                                            viewModel.updateFileVault(item)
+                                            list.add(item)
+                                            ShareData.getInstance().setListItemImage(list)
+                                            val intent = Intent(
+                                                requireContext(), ActivityImageDetail::class.java
+                                            )
+                                            startActivity(intent)
+                                        }
+
+                                    }
+
+                                }
+
+                                Status.FAILED -> {
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        showSnackBar(text, SnackBarType.FAILED)
+                                    }
+                                }
+                            }
+                        },
+                        action = Action.DECRYPT,
+                        encryptionMode = item.encryptionType
+
+                    )
+                    dialogProgress.show(childFragmentManager, dialogProgress.tag)
+                }
             }
 
-            Constant.TYPE_AUDIOS -> {}
-            Constant.TYPE_VIDEOS -> {}
+            Constant.TYPE_AUDIOS -> {
+                if (File(item.decodePath).exists()) {
+                    item.decodePath.openWith(requireContext(), Constant.TYPE_AUDIOS, null)
+                } else {
+                    val dialogProgress = DialogProgress(
+                        listItemSelected = mutableListOf(item),
+                        listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                        listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
+                        onResult = { status, text, valuesReturn ->
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                when (status) {
+                                    Status.SUCCESS -> {
+                                        if (!valuesReturn.isNullOrEmpty()) {
+                                            item.decodePath = valuesReturn[0]
+                                            viewModel.updateFileVault(item)
+                                            item.decodePath.openWith(
+                                                requireContext(), Constant.TYPE_AUDIOS, null
+                                            )
+                                        }
+
+                                    }
+
+                                    Status.FAILED -> {
+                                        showSnackBar(text, SnackBarType.FAILED)
+                                    }
+                                }
+                            }
+                        },
+                        action = Action.DECRYPT,
+                        encryptionMode = item.encryptionType
+
+                    )
+                    dialogProgress.show(childFragmentManager, dialogProgress.tag)
+                }
+            }
+
+            Constant.TYPE_VIDEOS -> {
+                if (File(item.decodePath).exists()) {
+                    if (requireContext().config.playVideoMode) {
+                        ShareData.getInstance().setListItemVideo(mutableListOf(item))
+                        val intent = Intent(requireContext(), ActivityVideoPlayer::class.java)
+                        startActivity(intent)
+                    } else {
+                        item.decodePath.openWith(
+                            requireContext(), Constant.TYPE_VIDEOS, null
+                        )
+                    }
+                } else {
+                    val dialogProgress = DialogProgress(
+                        listItemSelected = mutableListOf(item),
+                        listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                        listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
+                        onResult = { status, text, valuesReturn ->
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                when (status) {
+                                    Status.SUCCESS -> {
+                                        if (!valuesReturn.isNullOrEmpty()) {
+                                            item.decodePath = valuesReturn[0]
+                                            viewModel.updateFileVault(item)
+                                            list.add(item)
+                                            if (requireContext().config.playVideoMode) {
+                                                ShareData.getInstance().setListItemVideo(list)
+                                                val intent = Intent(
+                                                    requireContext(),
+                                                    ActivityVideoPlayer::class.java
+                                                )
+                                                startActivity(intent)
+                                            } else {
+                                                item.decodePath.openWith(
+                                                    requireContext(), Constant.TYPE_VIDEOS, null
+                                                )
+                                            }
+                                        }
+
+                                    }
+
+                                    Status.FAILED -> {
+                                        showSnackBar(text, SnackBarType.FAILED)
+                                    }
+                                }
+                            }
+                        },
+                        action = Action.DECRYPT,
+                        encryptionMode = item.encryptionType
+
+                    )
+                    dialogProgress.show(childFragmentManager, dialogProgress.tag)
+                }
+
+
+            }
+
             else -> {
+                if (File(item.decodePath).exists()) {
+                    item.decodePath.openWith(requireContext(), Constant.TYPE_FILE, null)
+                } else {
+                    val dialogProgress = DialogProgress(
+                        listItemSelected = mutableListOf(item),
+                        listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                        listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
+                        onResult = { status, text, valuesReturn ->
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                when (status) {
+                                    Status.SUCCESS -> {
+                                        if (!valuesReturn.isNullOrEmpty()) {
+                                            item.decodePath = valuesReturn[0]
+                                            item.decodePath.openWith(
+                                                requireContext(), Constant.TYPE_FILE, null
+                                            )
+                                        }
+
+                                    }
+
+                                    Status.FAILED -> {
+                                        showSnackBar(text, SnackBarType.FAILED)
+                                    }
+                                }
+                            }
+                        },
+                        action = Action.DECRYPT,
+                        encryptionMode = item.encryptionType
+                    )
+                    dialogProgress.show(childFragmentManager, dialogProgress.tag)
+                }
+
 
             }
         }
@@ -236,21 +405,31 @@ class FragmentRecycleBin : Fragment() {
         Log.d("TAG", "encryptedPath: " + vaultItem.encryptedPath)
         Log.d("TAG", "originalPath: " + vaultItem.originalPath)
         val dialogConfirm = DialogConfirm(onPositiveClicked = {
-
-            viewModel.restoreFile(requireContext(),
+            val dialogProgress = DialogProgress(listItemSelected = mutableListOf(vaultItem),
                 mutableListOf(File(vaultItem.recyclerPath)),
                 mutableListOf(File(vaultItem.encryptedPath).parentFile),
-                0L,
-                progress = { _: Float, _: File? -> },
-                onSuccess = {
-                    vaultItem.isDeleted = false
-                    viewModel.updateFileVault(vaultItem)
-                    showSnackBar(getString(R.string.restore_successfully), SnackBarType.SUCCESS)
-                },
-                onError = {
-                    showSnackBar(getString(R.string.restore_failed), SnackBarType.FAILED)
+                action = Action.RESTORE,
+                onResult = { status, text, _ ->
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        when (status) {
+                            Status.SUCCESS -> {
+                                showSnackBar(
+                                    text, SnackBarType.SUCCESS
+                                )
+                            }
+
+                            Status.FAILED -> {
+                                showSnackBar(
+                                    text, SnackBarType.FAILED
+                                )
+                            }
+                        }
+                    }
                 })
+
+            dialogProgress.show(childFragmentManager, dialogProgress.tag)
         }, DialogConfirmType.RESTORE, null)
+
 
         dialogConfirm.show(childFragmentManager, dialogConfirm.tag)
     }
@@ -266,11 +445,26 @@ class FragmentRecycleBin : Fragment() {
                 listOfSourceFile = listItemSelected.map { File(it.recyclerPath) },
                 listOfTargetParentFolder = listItemSelected.map { File(it.recyclerPath).parentFile },
                 action = Action.RESTORE,
-                onSuccess = {
+                onResult = { status, text, _ ->
+                    when (status) {
+                        Status.SUCCESS -> {
+                            showSnackBar(
+                                text, SnackBarType.SUCCESS
+                            )
+                        }
 
-                },
-                onFailed = {
+                        Status.WARNING -> {
+                            showSnackBar(
+                                text, SnackBarType.SUCCESS
+                            )
+                        }
 
+                        Status.FAILED -> {
+                            showSnackBar(
+                                text, SnackBarType.FAILED
+                            )
+                        }
+                    }
                 })
             dialogProgress.show(childFragmentManager, dialogProgress.tag)
 
@@ -283,12 +477,19 @@ class FragmentRecycleBin : Fragment() {
         val dialogConfirm = DialogConfirm(onPositiveClicked = {
             val dialogProgress = DialogProgress(listItemSelected = mutableListOf(item),
                 action = Action.DELETE_PERMANENT,
-                onSuccess = {
-                    viewModel.deleteFileVault(listItemSelected.map { it.id })
-                    showSnackBar(it, SnackBarType.SUCCESS)
-                },
-                onFailed = {
-                    showSnackBar(it, SnackBarType.FAILED)
+                onResult = { status, text, valuesReturn ->
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        when (status) {
+                            Status.SUCCESS -> {
+                                showSnackBar(text, SnackBarType.SUCCESS)
+                            }
+
+                            Status.FAILED -> {
+                                showSnackBar(text, SnackBarType.FAILED)
+                            }
+                        }
+                    }
+
                 })
             dialogProgress.show(childFragmentManager, dialogProgress.tag)
         }, DialogConfirmType.DELETE, getString(R.string.selected_file))
@@ -302,17 +503,22 @@ class FragmentRecycleBin : Fragment() {
             return
         }
         val dialogConfirm = DialogConfirm(onPositiveClicked = {
-            Log.d("TAG", "deletePermanent: "+listItemSelected.size)
+            Log.d("TAG", "deletePermanent: " + listItemSelected.size)
             val dialogProgress = DialogProgress(listItemSelected = listItemSelected,
                 action = Action.DELETE_PERMANENT,
-                onSuccess = {
-                    viewModel.deleteFileVault(listItemSelected.map { it.id })
-                    listItemSelected.clear()
-                    showSnackBar(it, SnackBarType.SUCCESS)
+                onResult = { status, text, valuesReturn ->
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        when (status) {
+                            Status.SUCCESS -> {
+                                showSnackBar(text, SnackBarType.SUCCESS)
+                            }
 
-                },
-                onFailed = {
-                    showSnackBar(it, SnackBarType.FAILED)
+                            Status.FAILED -> {
+                                showSnackBar(text, SnackBarType.FAILED)
+                            }
+                        }
+                    }
+
                 })
 
             dialogProgress.show(childFragmentManager, dialogProgress.tag)
@@ -330,11 +536,22 @@ class FragmentRecycleBin : Fragment() {
             adapterRecycleBin?.selectAll()
             val dialogProgress = DialogProgress(listItemSelected = listItemSelected,
                 action = Action.DELETE_All_RECYCLER_BIN_PERMANENT,
-                onSuccess = {
-                    showSnackBar(it, SnackBarType.SUCCESS)
-                },
-                onFailed = {
-                    showSnackBar(it, SnackBarType.FAILED)
+                onResult = { status, text, valuesReturn ->
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        when (status) {
+                            Status.SUCCESS -> {
+                                showSnackBar(text, SnackBarType.SUCCESS)
+                            }
+
+                            Status.WARNING -> {
+                                showSnackBar(text, SnackBarType.WARNING)
+                            }
+
+                            Status.FAILED -> {
+                                showSnackBar(text, SnackBarType.FAILED)
+                            }
+                        }
+                    }
                 })
 
             dialogProgress.show(childFragmentManager, dialogProgress.tag)
