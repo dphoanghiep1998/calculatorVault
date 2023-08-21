@@ -2,13 +2,19 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.setting.safe
 
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.biometric.BiometricUtils
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
@@ -39,11 +45,13 @@ class FragmentSafe : Fragment() {
         initToolBar()
         initView()
     }
+
     private fun initToolBar() {
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
             }
+
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return false
             }
@@ -59,6 +67,14 @@ class FragmentSafe : Fragment() {
     }
 
     private fun initButton() {
+        if (!BiometricUtils.checkBiometricHardwareAvailable(requireContext())) {
+            binding.containerFingerprintUnlock.root.hide()
+            binding.containerFingerprintLockDisplay.root.hide()
+        } else {
+            binding.containerFingerprintUnlock.root.show()
+            binding.containerFingerprintLockDisplay.root.hide()
+        }
+
         binding.containerLock.root.clickWithDebounce {
             findNavController().navigate(R.id.fragmentLock)
         }
@@ -67,7 +83,8 @@ class FragmentSafe : Fragment() {
         }
 
         binding.containerFingerprintUnlock.root.clickWithDebounce {
-            binding.containerFingerprintUnlock.switchChange.isChecked = !binding.containerFingerprintUnlock.switchChange.isChecked
+            binding.containerFingerprintUnlock.switchChange.isChecked =
+                !binding.containerFingerprintUnlock.switchChange.isChecked
             requireContext().config.fingerPrintUnlock =
                 binding.containerFingerprintUnlock.switchChange.isChecked
         }
@@ -76,7 +93,8 @@ class FragmentSafe : Fragment() {
                 binding.containerFingerprintUnlock.switchChange.isChecked
         }
         binding.containerFingerprintLockDisplay.root.clickWithDebounce {
-            binding.containerFingerprintLockDisplay.switchChange.isChecked = !binding.containerFingerprintLockDisplay.switchChange.isChecked
+            binding.containerFingerprintLockDisplay.switchChange.isChecked =
+                !binding.containerFingerprintLockDisplay.switchChange.isChecked
             requireContext().config.fingerPrintLockDisplay =
                 binding.containerFingerprintLockDisplay.switchChange.isChecked
         }
@@ -86,7 +104,8 @@ class FragmentSafe : Fragment() {
         }
 
         binding.containerLockWhenLeaving.root.clickWithDebounce {
-            binding.containerLockWhenLeaving.switchChange.isChecked = !binding.containerLockWhenLeaving.switchChange.isChecked
+            binding.containerLockWhenLeaving.switchChange.isChecked =
+                !binding.containerLockWhenLeaving.switchChange.isChecked
             requireContext().config.lockWhenLeavingApp =
                 binding.containerLockWhenLeaving.switchChange.isChecked
         }

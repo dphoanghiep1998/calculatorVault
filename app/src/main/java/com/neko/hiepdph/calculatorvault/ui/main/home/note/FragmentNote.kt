@@ -1,11 +1,13 @@
 package com.neko.hiepdph.calculatorvault.ui.main.home.note
 
-import android.content.Context
-import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.MenuItem.OnActionExpandListener
+import android.view.View
+import android.view.ViewGroup
 import android.widget.CheckBox
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
@@ -15,12 +17,18 @@ import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.neko.hiepdph.calculatorvault.R
-import com.neko.hiepdph.calculatorvault.common.extensions.*
+import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
+import com.neko.hiepdph.calculatorvault.common.extensions.changeBackPressCallBack
+import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.hide
+import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
 import com.neko.hiepdph.calculatorvault.databinding.FragmentNoteBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
@@ -29,28 +37,15 @@ import com.neko.hiepdph.calculatorvault.ui.main.home.note.adapter.AdapterNote
 import com.neko.hiepdph.calculatorvault.viewmodel.NoteViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
-interface ToolbarChangeListener {
-    fun setToolBarNavigationIcon(drawable: Drawable)
-    fun setOnClickToNavigationIcon(callback: () -> Unit)
-}
-
 @AndroidEntryPoint
 class FragmentNote : Fragment() {
     private var _binding: FragmentNoteBinding? = null
     private val binding get() = _binding!!
     private val viewModel by viewModels<NoteViewModel>()
     private var adapterNote: AdapterNote? = null
-    private var listener: ToolbarChangeListener? = null
     private var normalMenuProvider: MenuProvider? = null
     private var listIdNoteSelected = mutableListOf<Int>()
     private var sizeNote = 0
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is ToolbarChangeListener) {
-            listener = context
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -60,6 +55,8 @@ class FragmentNote : Fragment() {
         changeBackPressCallBack {
             requireActivity().finishAffinity()
         }
+        val actionBar = (requireActivity() as? ActivityVault)?.supportActionBar
+        actionBar?.title = getString(R.string.note)
         return binding.root
     }
 
@@ -80,6 +77,8 @@ class FragmentNote : Fragment() {
             } else {
                 binding.tvEmpty.show()
             }
+            adapterNote?.changeToNormalView()
+            (requireActivity() as ActivityVault).setupActionBar()
         }
     }
 
@@ -98,7 +97,12 @@ class FragmentNote : Fragment() {
     }
 
     private fun initRecyclerView() {
-        adapterNote = AdapterNote(onClickItem = {}, onLongClickItem = {
+        adapterNote = AdapterNote(onClickItem = {
+            lifecycleScope.launchWhenResumed {
+                val action = FragmentNoteDirections.actionFragmentNoteToFragmentAddNote(it)
+                findNavController().navigate(action)
+            }
+        }, onLongClickItem = {
             initToolBar()
             editHome()
 //            (requireActivity() as ActivityVault).getToolbar().setNavigationIcon(R.drawable.ic_exit)
@@ -196,12 +200,14 @@ class FragmentNote : Fragment() {
                             deleteNote()
                             true
                         }
+
                         android.R.id.home -> {
                             adapterNote?.changeToNormalView()
                             (requireActivity() as ActivityVault).setupActionBar()
                             initToolBar()
                             true
                         }
+
                         else -> false
                     }
 
@@ -248,7 +254,6 @@ class FragmentNote : Fragment() {
     }
 
     private fun checkAllNote(status: Boolean) {
-        Log.d("TAG", "checkAllNote: " + status)
         if (status) {
             adapterNote?.selectAll()
         } else {
@@ -271,24 +276,21 @@ class FragmentNote : Fragment() {
         }
     }
 
-    private fun changeToSearchView() {
-
-    }
-
     private fun deleteNote() {
         if (listIdNoteSelected.isEmpty()) {
             showSnackBar(getString(R.string.nothing_to_delete), SnackBarType.FAILED)
         } else {
             val confirmDialog = DialogConfirm(onPositiveClicked = {
                 viewModel.deleteNote(listIdNoteSelected)
-
             }, DialogConfirmType.DELETE, getString(R.string.this_note))
             confirmDialog.show(childFragmentManager, confirmDialog.tag)
         }
     }
 
     private fun addNote() {
-        findNavController().navigate(R.id.action_fragmentNote_to_fragmentAddNote)
+        val action = FragmentNoteDirections.actionFragmentNoteToFragmentAddNote(null)
+
+        findNavController().navigate(action)
     }
 
     override fun onDestroyView() {

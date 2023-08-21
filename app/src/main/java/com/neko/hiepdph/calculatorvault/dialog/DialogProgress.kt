@@ -34,7 +34,6 @@ import com.neko.hiepdph.calculatorvault.viewmodel.AppViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
-import java.io.FileNotFoundException
 import java.util.Calendar
 import kotlin.math.floor
 import kotlin.math.sqrt
@@ -228,7 +227,7 @@ class DialogProgress(
             viewModel.deleteMultipleFolder(listItemSelected.map { it.recyclerPath }, onProgress = {
 
             }, onResult = { listOfFileDeletedSuccess, listOfFileDeletedFailed ->
-                if (listOfFileDeletedSuccess.size == listOfSourceFile.size) {
+                if (listOfFileDeletedSuccess.size == listItemSelected.size) {
                     lifecycleScope.launch(Dispatchers.Main) {
                         viewModel.deleteFileVault(listItemSelected.map { it.id }.toMutableList())
                         onResult.invoke(Status.SUCCESS, getString(R.string.delete_success), null)
@@ -236,7 +235,7 @@ class DialogProgress(
                     }
                 }
 
-                if (listOfFileDeletedFailed.size == listOfSourceFile.size) {
+                if (listOfFileDeletedFailed.size == listItemSelected.size) {
                     lifecycleScope.launch(Dispatchers.Main) {
                         onResult(Status.FAILED, getString(R.string.delete_failed), null)
                         dismiss()
@@ -264,9 +263,9 @@ class DialogProgress(
         if (action == Action.DELETE_All_RECYCLER_BIN_PERMANENT) {
             viewModel.deleteAllRecyclerBin(requireContext().config.recyclerBinFolder.path,
                 onResult = { listOfFileDeletedSuccess, listOfFileDeletedFailed ->
-                    Log.d("TAG", "doAction: "+listItemSelected.size)
-                    Log.d("TAG", "doAction: "+listOfFileDeletedSuccess.size)
-                    Log.d("TAG", "doAction: "+listOfFileDeletedFailed.size)
+                    Log.d("TAG", "doAction: " + listItemSelected.size)
+                    Log.d("TAG", "doAction: " + listOfFileDeletedSuccess.size)
+                    Log.d("TAG", "doAction: " + listOfFileDeletedFailed.size)
                     if (listOfFileDeletedSuccess.size == listItemSelected.size) {
                         Log.d("TAG", "doAction: 1")
                         lifecycleScope.launch(Dispatchers.Main) {
@@ -495,34 +494,35 @@ class DialogProgress(
             viewModel.restoreFile(requireContext(),
                 listOfSourceFile,
                 listOfTargetParentFolder,
-                0L,
                 progress = { value: Float, _: File? ->
                     lifecycleScope.launch(Dispatchers.Main) {
                         setProgressValue(value.toInt())
                     }
                 },
                 onResult = { listOfFileSuccess, listOfFileFailed ->
+                    Log.d("TAG", "doAction: " + listOfSourceFile.size)
+                    Log.d("TAG", "doAction: " + listOfFileSuccess.size)
                     if (listOfFileSuccess.size == listOfSourceFile.size) {
                         lifecycleScope.launch(Dispatchers.Main) {
                             listItemSelected.map {
                                 it.isDeleted = false
                                 viewModel.updateFileVault(it)
                             }
-
-                            showSnackBar(
-                                getString(R.string.restore_successfully), SnackBarType.SUCCESS
+                            onResult(
+                                Status.SUCCESS, getString(R.string.restore_successfully), null
                             )
                             dismiss()
                         }
                     }
                     if (listOfFileFailed.size == listOfSourceFile.size) {
                         lifecycleScope.launch(Dispatchers.Main) {
-                            showSnackBar(getString(R.string.restore_failed), SnackBarType.FAILED)
+                            onResult(
+                                Status.SUCCESS, getString(R.string.restore_failed), null
+                            )
                             dismiss()
                         }
                     } else if (listOfFileFailed.size > 0) {
                         lifecycleScope.launch(Dispatchers.Main) {
-                            showSnackBar(getString(R.string.restore_failed), SnackBarType.FAILED)
                             onResult.invoke(
                                 Status.WARNING, String.format(
                                     getString(R.string.restore_successfully_condition),

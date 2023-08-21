@@ -43,7 +43,7 @@
     <fragment
         android:id="@+id/fragmentNote"
         android:name="com.neko.hiepdph.calculatorvault.ui.main.home.note.FragmentNote"
-        android:label="@string/new_note"
+        android:label="@string/note"
         tools:layout="@layout/fragment_note">
         <action
             android:id="@+id/action_fragmentNote_to_fragmentAddNote"
@@ -107,7 +107,12 @@
     <fragment
         android:id="@+id/fragmentAddNote"
         android:name="com.neko.hiepdph.calculatorvault.ui.main.home.note.FragmentAddNote"
-        tools:layout="@layout/fragment_add_note" />
+        tools:layout="@layout/fragment_add_note" >
+        <argument
+            android:name="noteModel"
+            app:argType="com.neko.hiepdph.calculatorvault.data.model.NoteModel"
+            app:nullable="true" />
+    </fragment>
     <fragment
         android:id="@+id/fragmentSafe"
         android:name="com.neko.hiepdph.calculatorvault.ui.main.home.setting.safe.FragmentSafe"

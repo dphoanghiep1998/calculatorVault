@@ -6,12 +6,14 @@ import android.os.Bundle
 import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.biometric.BiometricConfig
+import com.neko.hiepdph.calculatorvault.biometric.BiometricUtils
 import com.neko.hiepdph.calculatorvault.common.customview.PinFunction
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
@@ -120,7 +122,7 @@ class ActivityPinLock : AppCompatActivity() {
                 openFingerPrint()
             }
         }
-        if (config.fingerPrintLockDisplay) {
+        if (config.fingerPrintLockDisplay && BiometricUtils.checkBiometricEnrolled(this)) {
             binding.containerFingerPrint.show()
         } else {
             binding.containerFingerPrint.hide()
@@ -139,30 +141,36 @@ class ActivityPinLock : AppCompatActivity() {
     }
 
     private fun openFingerPrint() {
-        val biometric = BiometricConfig.biometricConfig {
-            ownerFragmentActivity = this@ActivityPinLock
-            authenticateSuccess = {
-                (application as CustomApplication).authority = true
-                (application as CustomApplication).isLockShowed = true
-                finish()
-            }
-            authenticateFailed = {
-                if (config.fakePassword) {
-                    (application as CustomApplication).authority = false
+        if (BiometricUtils.checkBiometricEnrolled(this)) {
+            val biometric = BiometricConfig.biometricConfig {
+                ownerFragmentActivity = this@ActivityPinLock
+                authenticateSuccess = {
+                    (application as CustomApplication).authority = true
                     (application as CustomApplication).isLockShowed = true
-                    if (config.photoIntruder && !takePhotoIntruder) {
-                        takePicture(action = {
-                            finish()
-                        })
-                    } else {
-                        takePicture(action = {})
+                    finish()
+                }
+                authenticateFailed = {
+                    if (config.fakePassword) {
+                        (application as CustomApplication).authority = false
+                        (application as CustomApplication).isLockShowed = true
+                        if (config.photoIntruder && !takePhotoIntruder) {
+                            takePicture(action = {
+                                finish()
+                            })
+                        } else {
+                            takePicture(action = {})
+                        }
+                    } else if (config.fingerprintFailure) {
+                        finishAffinity()
                     }
-                } else if (config.fingerprintFailure) {
-                    finishAffinity()
                 }
             }
+            biometric.showPrompt()
+        } else {
+            lifecycleScope.launchWhenResumed {
+                Toast.makeText(this@ActivityPinLock,getString(R.string.finger_enrolled),Toast.LENGTH_SHORT).show()
+            }
         }
-        biometric.showPrompt()
     }
 
     private fun takePhotoIntruder(action: (() -> Unit)? = null) {

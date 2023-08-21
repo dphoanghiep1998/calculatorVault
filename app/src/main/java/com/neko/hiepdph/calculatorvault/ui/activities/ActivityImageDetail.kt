@@ -1,5 +1,6 @@
 package com.neko.hiepdph.calculatorvault.ui.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -88,6 +89,10 @@ class ActivityImageDetail : AppCompatActivity() {
         }
     }
 
+    private fun solveListItem(){
+
+    }
+
     private fun openImageInformationDialog() {
         val dialogDetail = currentItem?.let { DialogDetail(this, it).onCreateDialog() }
         dialogDetail?.show()
@@ -96,7 +101,38 @@ class ActivityImageDetail : AppCompatActivity() {
     private fun getData() {
         ShareData.getInstance().listItemImage.observe(this) {
             listItem = it
-            viewPagerAdapter = ImagePagerAdapter(this, it)
+            val newList =
+                listItem.filter { item ->item.decodePath == "" || !File(item.decodePath).exists() }
+            val decodedList =
+                listItem.filter { item -> item.decodePath != "" && File(item.decodePath).exists() }
+            if (newList.isNotEmpty()) {
+                val dialogProgress = DialogProgress(listItemSelected = newList,
+                    listOfSourceFile = newList.map { item -> File(item.encryptedPath) },
+                    listOfTargetParentFolder = newList.map { config.decryptFolder },
+                    Action.DECRYPT,
+                    onResult = { status, text, valueReturn ->
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            when (status) {
+                                Status.SUCCESS -> {
+                                    val newDecodeList = decodedList
+//                                    viewPagerAdapter = ImagePagerAdapter(this@ActivityImageDetail, newDecodeList)
+                                }
+
+                                Status.FAILED -> {
+
+                                }
+
+                                Status.WARNING -> {
+
+                                }
+                            }
+                        }
+
+                    })
+                dialogProgress.show(supportFragmentManager, dialogProgress.tag)
+
+            }
+
             viewPagerAdapter?.setListener(object : TapViewListener {
                 override fun onTap() {
                     jobSlide?.cancel()

@@ -53,7 +53,6 @@ import com.neko.hiepdph.calculatorvault.dialog.RateCallBack
 import com.neko.hiepdph.calculatorvault.shake.ShakeDetector
 import com.neko.hiepdph.calculatorvault.viewmodel.VaultViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.File
 import java.lang.reflect.Field
 import kotlin.system.exitProcess
 
@@ -187,8 +186,8 @@ class ActivityVault : AppCompatActivity() {
 //    }
 
     private fun checkIntruderByPass() {
-        Log.d("TAG", "checkIntruderByPass: "+(application as CustomApplication).authority)
-        Log.d("TAG", "checkIntruderByPass: "+config.caughtIntruder)
+        Log.d("TAG", "checkIntruderByPass: " + (application as CustomApplication).authority)
+        Log.d("TAG", "checkIntruderByPass: " + config.caughtIntruder)
         if ((application as CustomApplication).authority && config.caughtIntruder) {
             val dialogShowIntruder = DialogShowIntruder()
             dialogShowIntruder.show(supportFragmentManager, dialogShowIntruder.tag)
@@ -693,8 +692,10 @@ class ActivityVault : AppCompatActivity() {
 
     override fun onDestroy() {
         removeScreenOffAction()
-        mSensorManager?.unregisterListener(mShakeDetector);
+        mSensorManager?.unregisterListener(mShakeDetector)
+        Log.d("TAG", "onDestroy: ")
         super.onDestroy()
+        exitProcess(-1)
     }
 
 

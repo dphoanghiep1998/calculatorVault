@@ -81,9 +81,16 @@ enum class DialogConfirmType(
     BACK_NOTE(
         R.string.note,
         R.string.back_note_tip,
-        R.drawable.ic_note,
+        R.drawable.ic_info,
         R.string.cancel,
         R.string.yes
+    ),
+    BACK_BROWSER(
+        R.string.exit,
+        R.string.quit_browser,
+        R.drawable.ic_info,
+        R.string.cancel,
+        R.string.custom_ok
     )
 
 }

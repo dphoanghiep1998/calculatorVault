@@ -40,7 +40,5 @@
         app:lock9_padding="@dimen/_90sdp"
         app:lock9_spacing="@dimen/_50sdp"
         app:lock9_nodeAreaExpand="@dimen/_10sdp"
-        app:lock9_nodeSrc="@drawable/ic_dot_pattern"
-
-        tools:layout_editor_absoluteX="0dp" />
+        app:lock9_nodeSrc="@drawable/ic_dot_pattern" />
 </androidx.constraintlayout.widget.ConstraintLayout>

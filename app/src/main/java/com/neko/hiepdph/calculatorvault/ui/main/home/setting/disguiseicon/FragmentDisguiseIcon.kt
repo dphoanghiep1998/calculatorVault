@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import com.neko.hiepdph.calculatorvault.BuildConfig
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.biometric.BiometricUtils
 import com.neko.hiepdph.calculatorvault.changeicon.AppIconNameChanger
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.*
@@ -79,6 +80,14 @@ class FragmentDisguiseIcon : Fragment() {
     }
 
     private fun initButton() {
+        if (!BiometricUtils.checkBiometricHardwareAvailable(requireContext())) {
+            binding.containerUnlockByFingerprint.root.hide()
+            binding.containerUnlockFingerprintFailure.root.hide()
+        } else {
+            binding.containerUnlockByFingerprint.root.show()
+            binding.containerUnlockFingerprintFailure.root.hide()
+        }
+
         binding.containerHideAppIcon.root.clickWithDebounce {
             if (!requireContext().config.hideAppIcon) {
                 val confirmDialog = DialogConfirm(onPositiveClicked = {

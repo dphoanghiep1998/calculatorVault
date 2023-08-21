@@ -38,12 +38,13 @@ class ActivityCamera : AppCompatActivity() {
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
         getDataImage()
-        initView()
     }
-
     private fun getDataImage() {
         lifecycleScope.launch(Dispatchers.IO) {
             listImagePrevious = MediaStoreUtils.getAllImage(this@ActivityCamera).toMutableList()
+            Log.d("TAG", "TAGGGGG" + listImagePrevious.size)
+            initView()
+
         }
     }
 

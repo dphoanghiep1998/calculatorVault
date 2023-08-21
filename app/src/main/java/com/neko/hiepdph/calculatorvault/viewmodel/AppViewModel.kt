@@ -1,7 +1,6 @@
 package com.neko.hiepdph.calculatorvault.viewmodel
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -136,16 +135,15 @@ class AppViewModel @Inject constructor(
         context: Context,
         files: List<File>?,
         targetFolder: List<File>,
-        tSize: Long,
         progress: (value: Float, currentFile: File?) -> Unit,
         onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             CopyFiles.copy(
-                context, files, targetFolder, tSize, progress = { value, currentFile ->
+                context, files, targetFolder, progress = { value, currentFile ->
                     progressValue.postValue(value)
                     progress(value, currentFile)
-                }, onResult
+                }, onResult, isMove = true
             )
         }
     }
@@ -159,7 +157,7 @@ class AppViewModel @Inject constructor(
         isMove: Boolean
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            CopyFiles.copy(context, listFile, destination, 0L, progress = { value, currentFile ->
+            CopyFiles.copy(context, listFile, destination, progress = { value, currentFile ->
                 progressValue.postValue(value)
                 progress(currentFile)
             }, onResult, isMove)

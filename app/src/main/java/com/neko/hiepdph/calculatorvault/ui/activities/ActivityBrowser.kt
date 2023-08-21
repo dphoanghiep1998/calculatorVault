@@ -18,6 +18,8 @@ import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
 import com.neko.hiepdph.calculatorvault.data.database.model.BookmarkModel
 import com.neko.hiepdph.calculatorvault.databinding.ActivityBrowserBinding
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
+import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
 import com.neko.hiepdph.calculatorvault.viewmodel.BrowserViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,7 +39,7 @@ class ActivityBrowser : AppCompatActivity() {
         setContentView(binding.root)
         initView()
         observeListBookmark()
-        ShareData.getInstance().clearBrowser.observe(this){
+        ShareData.getInstance().clearBrowser.observe(this) {
             binding.webView.clearCache(true)
             ShareData.getInstance().setBrowserClear(false)
         }
@@ -181,7 +183,11 @@ class ActivityBrowser : AppCompatActivity() {
         }
 
         binding.btnExit.clickWithDebounce {
-            finish()
+            val dialogConfirm =
+                DialogConfirm(onPositiveClicked = { finish() }, DialogConfirmType.BACK_BROWSER)
+
+            dialogConfirm.show(supportFragmentManager, dialogConfirm.tag)
+
         }
         binding.btnCancel.clickWithDebounce {
             binding.containerTop.show()

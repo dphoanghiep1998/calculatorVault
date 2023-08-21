@@ -2,7 +2,12 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.setting.general
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.core.view.MenuProvider
@@ -45,11 +50,13 @@ class FragmentGeneral : Fragment() {
         setupView()
         initAction()
     }
+
     private fun initToolBar() {
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
             }
+
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return false
             }
@@ -79,6 +86,7 @@ class FragmentGeneral : Fragment() {
                         getString(R.string.random)
                     }
                 }
+
             Constant.KEY_ENCRYPTION_MODE -> {
                 binding.containerSelectAnEncryptionMode.tvStatus.text =
                     when (requireContext().config.encryptionMode) {
@@ -169,7 +177,7 @@ class FragmentGeneral : Fragment() {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
                 binding.containerShakeClose.sensitiveSeekbar.progress = p1
                 binding.containerShakeClose.tvStatus.text = p1.toString()
-                requireContext().config.shakeGravity = p1.toFloat()
+                requireContext().config.shakeGravity = p1.toFloat() + 2
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {

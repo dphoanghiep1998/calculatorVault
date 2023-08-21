@@ -3,7 +3,12 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.recyclebin
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.CheckBox
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
@@ -17,7 +22,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.enums.Action
-import com.neko.hiepdph.calculatorvault.common.extensions.*
+import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
+import com.neko.hiepdph.calculatorvault.common.extensions.changeBackPressCallBack
+import com.neko.hiepdph.calculatorvault.common.extensions.config
+import com.neko.hiepdph.calculatorvault.common.extensions.hide
+import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
+import com.neko.hiepdph.calculatorvault.common.extensions.toast
 import com.neko.hiepdph.calculatorvault.common.utils.openWith
 import com.neko.hiepdph.calculatorvault.config.Status
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
@@ -68,17 +79,20 @@ class FragmentRecycleBin : Fragment() {
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
-                if (AdapterRecyclerBin.editMode) {
-                    menu.clear()
-                    menuInflater.inflate(R.menu.toolbar_menu_recycler_bin_edit_mode, menu)
-                    menu[2].actionView?.findViewById<View>(R.id.checkbox)?.setOnClickListener {
-                        checkAllItem(menu[2].actionView?.findViewById<CheckBox>(R.id.checkbox)?.isChecked == true)
+                if (sizeList > 0) {
+                    if (AdapterRecyclerBin.editMode) {
+                        menu.clear()
+                        menuInflater.inflate(R.menu.toolbar_menu_recycler_bin_edit_mode, menu)
+                        menu[2].actionView?.findViewById<View>(R.id.checkbox)?.setOnClickListener {
+                            checkAllItem(menu[2].actionView?.findViewById<CheckBox>(R.id.checkbox)?.isChecked == true)
+                        }
+                        checkItem()
+                    } else {
+                        menu.clear()
+                        menuInflater.inflate(R.menu.toolbar_menu_recycler_bin, menu)
                     }
-                    checkItem()
-                } else {
-                    menu.clear()
-                    menuInflater.inflate(R.menu.toolbar_menu_recycler_bin, menu)
                 }
+
             }
 
 
@@ -90,6 +104,8 @@ class FragmentRecycleBin : Fragment() {
                             (requireActivity() as ActivityVault).setupActionBar()
                             checkItem()
                             initToolBar()
+//                            val actionBar = (requireActivity() as? ActivityVault)?.supportActionBar
+//                            actionBar?.title = "0/$sizeList"
                             true
                         }
 
@@ -133,6 +149,7 @@ class FragmentRecycleBin : Fragment() {
         adapterRecycleBin?.changeToEditView()
         initToolBar()
         editHome()
+
     }
 
     private fun getData() {
@@ -171,6 +188,8 @@ class FragmentRecycleBin : Fragment() {
             adapterRecycleBin?.unSelectAll()
 
         }
+        val actionBar = (requireActivity() as? ActivityVault)?.supportActionBar
+        actionBar?.title = "${listItemSelected.size}/$sizeList"
     }
 
     private fun initView() {
@@ -186,7 +205,8 @@ class FragmentRecycleBin : Fragment() {
             listItemSelected.addAll(it)
             initToolBar()
             editHome()
-
+            val actionBar = (requireActivity() as? ActivityVault)?.supportActionBar
+            actionBar?.title = "${listItemSelected.size}/$sizeList"
         }, onSelectAll = {
             listItemSelected.clear()
             listItemSelected.addAll(it)
@@ -194,6 +214,8 @@ class FragmentRecycleBin : Fragment() {
             listItemSelected.clear()
             listItemSelected.addAll(it)
             checkItem()
+            val actionBar = (requireActivity() as? ActivityVault)?.supportActionBar
+            actionBar?.title = "${listItemSelected.size}/$sizeList"
         }, onDeleteItem = {
             deletePermanent(it)
         }, onDetailItem = {
@@ -214,6 +236,7 @@ class FragmentRecycleBin : Fragment() {
 
     private fun editHome() {
         val actionBar = (requireActivity() as? ActivityVault)?.supportActionBar
+        actionBar?.title = "0/$sizeList"
         val exitIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_exit)
         exitIcon?.let {
             actionBar?.setHomeAsUpIndicator(it)
@@ -233,7 +256,7 @@ class FragmentRecycleBin : Fragment() {
                 } else {
                     val dialogProgress = DialogProgress(
                         listItemSelected = mutableListOf(item),
-                        listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                        listOfSourceFile = mutableListOf(File(item.recyclerPath)),
                         listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
                         onResult = { status, text, valueReturn ->
                             when (status) {
@@ -439,11 +462,10 @@ class FragmentRecycleBin : Fragment() {
             toast(getString(R.string.require_size_more_than_1))
             return
         }
-
         val dialogConfirm = DialogConfirm(onPositiveClicked = {
             val dialogProgress = DialogProgress(listItemSelected = listItemSelected,
                 listOfSourceFile = listItemSelected.map { File(it.recyclerPath) },
-                listOfTargetParentFolder = listItemSelected.map { File(it.recyclerPath).parentFile },
+                listOfTargetParentFolder = listItemSelected.map { File(it.encryptedPath).parentFile },
                 action = Action.RESTORE,
                 onResult = { status, text, _ ->
                     when (status) {

@@ -366,6 +366,10 @@
     <string name="encrypt_success">Encrypt success!</string>
     <string name="encrypt_failed_new">Encrypt failed !</string>
     <string name="empty_recycler_bin">Empty recycler bin</string>
+    <string name="exit">Exit</string>
+    <string name="quit_browser">Are you sure to exit the browser ?</string>
+    <string name="edit_note">Edit Note</string>
+    <string name="finger_enrolled">Your device not enrolled any finger print!</string>
 
 
 </resources>

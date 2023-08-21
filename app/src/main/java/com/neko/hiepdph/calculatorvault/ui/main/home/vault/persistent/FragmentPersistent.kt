@@ -36,7 +36,6 @@ import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
 import com.neko.hiepdph.calculatorvault.common.extensions.toast
 import com.neko.hiepdph.calculatorvault.common.extensions.toastLocation
 import com.neko.hiepdph.calculatorvault.common.utils.openWith
-import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.config.Status
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentPersistentBinding
@@ -362,7 +361,7 @@ class FragmentPersistent : Fragment() {
             ).show()
             return
         }
-        Log.d("TAG", "showDialogDelete: "+listItemSelected.size)
+        Log.d("TAG", "showDialogDelete: " + listItemSelected.size)
         val name = when (args.type) {
             Constant.TYPE_PICTURE -> getString(R.string.pictures)
             Constant.TYPE_VIDEOS -> getString(R.string.videos)
@@ -435,12 +434,58 @@ class FragmentPersistent : Fragment() {
 
 
     private fun slideShow() {
-        if (listItemSelected.size <= 1) {
+        if (listItemSelected.isEmpty()) {
             toast(getString(R.string.require_size_more_than_1))
         } else {
-            ShareData.getInstance().setListItemImage(listItemSelected)
-            val intent = Intent(requireContext(), ActivityImageDetail::class.java)
-            startActivity(intent)
+            val newList =
+                listItemSelected.filter { it.decodePath == "" || !File(it.decodePath).exists() }
+            val decodedList =
+                listItemSelected.filter { it.decodePath != "" && File(it.decodePath).exists() }
+            if (newList.isNotEmpty()) {
+                val dialogProgress = DialogProgress(listItemSelected = newList,
+                    listOfSourceFile = newList.map { item -> File(item.encryptedPath) },
+                    listOfTargetParentFolder = newList.map { (requireActivity().config.decryptFolder) },
+                    Action.DECRYPT,
+                    onResult = { status, text, valueReturn ->
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            normalView()
+                            when (status) {
+                                Status.SUCCESS -> {
+                                    newList.mapIndexed {index,item ->
+                                        item.decodePath = valueReturn?.get(index).toString()
+                                    }
+                                    val newDecodedList = decodedList + newList
+                                    ShareData.getInstance().setListItemImage(newDecodedList.toMutableList())
+                                    val intent =
+                                        Intent(requireContext(), ActivityImageDetail::class.java)
+                                    startActivity(intent)
+                                }
+
+                                Status.FAILED -> {
+                                    showSnackBar((text), SnackBarType.FAILED)
+                                }
+
+                                Status.WARNING -> {
+                                    newList.mapIndexed {index,item ->
+                                        item.decodePath = valueReturn?.get(index).toString()
+                                    }
+                                    val newDecodedList = decodedList + newList
+                                    ShareData.getInstance().setListItemImage(newDecodedList.toMutableList())
+                                    val intent =
+                                        Intent(requireContext(), ActivityImageDetail::class.java)
+                                    startActivity(intent)
+                                }
+                            }
+                        }
+
+                    })
+                dialogProgress.show(childFragmentManager, dialogProgress.tag)
+
+            } else {
+                ShareData.getInstance().setListItemImage(listItemSelected)
+                val intent = Intent(requireContext(), ActivityImageDetail::class.java)
+                startActivity(intent)
+            }
         }
 
     }

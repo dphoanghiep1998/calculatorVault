@@ -238,7 +238,6 @@ object CopyFiles {
         context: Context,
         files: List<File>?,
         targetFolders: List<File>,
-        tSize: Long,
         progress: (value: Float, currentFile: File?) -> Unit,
         onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit,
         isMove: Boolean = false
@@ -250,10 +249,9 @@ object CopyFiles {
         try {
             if (files?.isEmpty() == true) return
             var totalSize = 0L
-            if (tSize == 0L) files?.forEach {
+            files?.forEach {
                 totalSize += calFolderSize(it)
             }
-            else totalSize = tSize
             var currentSize = 0f
             // move file
             files?.forEachIndexed { index, itemFile ->

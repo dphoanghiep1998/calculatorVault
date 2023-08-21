@@ -8,12 +8,14 @@ import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.Animation.AnimationListener
 import android.view.animation.TranslateAnimation
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.biometric.BiometricConfig.Companion.biometricConfig
+import com.neko.hiepdph.calculatorvault.biometric.BiometricUtils
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
@@ -76,11 +78,12 @@ class ActivityPatternLock : AppCompatActivity() {
             }
         }
 
-        if (config.fingerPrintLockDisplay) {
+        if (config.fingerPrintLockDisplay && BiometricUtils.checkBiometricEnrolled(this)) {
             binding.containerFingerPrint.show()
         } else {
             binding.containerFingerPrint.hide()
         }
+
 
         binding.lock9View.apply {
             setEnableVibrate(config.tactileFeedback)
@@ -105,27 +108,37 @@ class ActivityPatternLock : AppCompatActivity() {
     }
 
     private fun showBiometric() {
-        val biometric = biometricConfig {
-            ownerFragmentActivity = this@ActivityPatternLock
-            authenticateSuccess = {
-                (application as CustomApplication).authority = true
-                (application as CustomApplication).isLockShowed = true
-                finish()
-            }
-            authenticateFailed = {
-                (application as CustomApplication).authority = false
-                (application as CustomApplication).isLockShowed = true
-                if (config.photoIntruder && !takePhotoIntruder) {
-                    takePicture(action = {
-                        finish()
-                    })
+        if(BiometricUtils.checkBiometricEnrolled(this)){
+            Log.d("TAG", "showBiometric: ")
+            val biometric = biometricConfig {
+                ownerFragmentActivity = this@ActivityPatternLock
+                authenticateSuccess = {
+                    (application as CustomApplication).authority = true
+                    (application as CustomApplication).isLockShowed = true
+                    finish()
+                }
+                authenticateFailed = {
+                    (application as CustomApplication).authority = false
+                    (application as CustomApplication).isLockShowed = true
+                    if (config.photoIntruder && !takePhotoIntruder) {
+                        takePicture(action = {
+                            finish()
+                        })
 
-                } else if (config.fingerprintFailure) {
-                    finishAffinity()
+                    } else if (config.fingerprintFailure) {
+                        finishAffinity()
+                    }
                 }
             }
+            biometric.showPrompt()
+        }else{
+            Log.d("TAG", "showBiometric: 1")
+            lifecycleScope.launchWhenResumed {
+                Toast.makeText(this@ActivityPatternLock,getString(R.string.finger_enrolled),Toast.LENGTH_SHORT).show()
+            }
         }
-        biometric.showPrompt()
+
+
     }
 
     private fun showDialogConfirmSecurityQuestion() {
