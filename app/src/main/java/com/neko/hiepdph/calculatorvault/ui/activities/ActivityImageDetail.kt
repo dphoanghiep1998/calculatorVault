@@ -101,45 +101,14 @@ class ActivityImageDetail : AppCompatActivity() {
     private fun getData() {
         ShareData.getInstance().listItemImage.observe(this) {
             listItem = it
-            val newList =
-                listItem.filter { item ->item.decodePath == "" || !File(item.decodePath).exists() }
-            val decodedList =
-                listItem.filter { item -> item.decodePath != "" && File(item.decodePath).exists() }
-            if (newList.isNotEmpty()) {
-                val dialogProgress = DialogProgress(listItemSelected = newList,
-                    listOfSourceFile = newList.map { item -> File(item.encryptedPath) },
-                    listOfTargetParentFolder = newList.map { config.decryptFolder },
-                    Action.DECRYPT,
-                    onResult = { status, text, valueReturn ->
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            when (status) {
-                                Status.SUCCESS -> {
-                                    val newDecodeList = decodedList
-//                                    viewPagerAdapter = ImagePagerAdapter(this@ActivityImageDetail, newDecodeList)
-                                }
-
-                                Status.FAILED -> {
-
-                                }
-
-                                Status.WARNING -> {
-
-                                }
-                            }
-                        }
-
-                    })
-                dialogProgress.show(supportFragmentManager, dialogProgress.tag)
-
-            }
-
+            viewPagerAdapter = ImagePagerAdapter(this@ActivityImageDetail, it)
             viewPagerAdapter?.setListener(object : TapViewListener {
                 override fun onTap() {
                     jobSlide?.cancel()
                     showController()
-//                    viewPagerAdapter = ImagePagerAdapter(this@ActivityImageDetail, it)
-//                    binding.imageViewPager.adapter = viewPagerAdapter
-//                    binding.imageViewPager.setCurrentItem(currentPage, false)
+                    viewPagerAdapter = ImagePagerAdapter(this@ActivityImageDetail, it)
+                    binding.imageViewPager.adapter = viewPagerAdapter
+                    binding.imageViewPager.setCurrentItem(currentPage, false)
 
                 }
             })
