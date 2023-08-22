@@ -214,6 +214,11 @@ object CopyFiles {
                             listOfFileSuccess.add(sourceFile.path)
                             deleteFile(sourceFile, context)
                             addMedia(context, targetFile)
+                            context.contentResolver.delete(
+                                MediaStore.Files.getContentUri("external"),
+                                MediaStore.MediaColumns.DATA + "=?",
+                                arrayOf(sourceFile.path)
+                            )
                             MediaScannerConnection.scanFile(
                                 context, arrayOf(sourceFile.path), null, null
                             )

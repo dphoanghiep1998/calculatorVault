@@ -584,7 +584,13 @@ class FragmentPersistent : Fragment() {
     private fun handleClickItem(item: FileVaultItem) {
         val list = mutableListOf<FileVaultItem>()
         when (item.fileType) {
-//            Constant.TYPE_PICTURE -> {
+            Constant.TYPE_PICTURE -> {
+                list.add(item)
+                ShareData.getInstance().setListItemImage(list)
+                val intent = Intent(
+                    requireContext(), ActivityImageDetail::class.java
+                )
+                startActivity(intent)
 //                if (File(item.decodePath).exists()) {
 //                    list.add(item)
 //                    ShareData.getInstance().setListItemImage(list)
@@ -629,7 +635,7 @@ class FragmentPersistent : Fragment() {
 //                    )
 //                    dialogProgress.show(childFragmentManager, dialogProgress.tag)
 //                }
-//            }
+            }
 
             Constant.TYPE_AUDIOS -> {
                 if (File(item.decodePath).exists()) {

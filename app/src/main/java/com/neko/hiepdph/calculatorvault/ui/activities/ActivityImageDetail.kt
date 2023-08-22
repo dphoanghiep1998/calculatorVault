@@ -2,8 +2,10 @@ package com.neko.hiepdph.calculatorvault.ui.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.animation.AccelerateInterpolator
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -106,10 +108,10 @@ class ActivityImageDetail : AppCompatActivity() {
                 override fun onTap() {
                     jobSlide?.cancel()
                     showController()
-                    viewPagerAdapter = ImagePagerAdapter(this@ActivityImageDetail, it)
-                    binding.imageViewPager.adapter = viewPagerAdapter
-                    binding.imageViewPager.setCurrentItem(currentPage, false)
-
+//                    viewPagerAdapter = ImagePagerAdapter(this@ActivityImageDetail, it)
+//                    binding.imageViewPager.adapter = viewPagerAdapter
+//                    binding.imageViewPager.setCurrentItem(currentPage, false)
+                    Log.d("TAG", "onTap: ")
                 }
             })
             binding.imageViewPager.adapter = viewPagerAdapter
@@ -210,12 +212,11 @@ class ActivityImageDetail : AppCompatActivity() {
     }
 
     private fun autoScroll() {
-        val mScroller: Field = ViewPager::class.java.getDeclaredField("mScroller")
-        mScroller.isAccessible = true
-        val sInterpolator = AccelerateInterpolator()
-        val scroller = FixedSpeedScroller(this, sInterpolator)
-
-        mScroller.set(binding.imageViewPager, scroller)
+//        val mScroller: Field = ViewPager::class.java.getDeclaredField("mScroller")
+//        mScroller.isAccessible = true
+//        val sInterpolator = AccelerateInterpolator()
+//        val scroller = FixedSpeedScroller(this, sInterpolator)
+//        mScroller.set(binding.imageViewPager, scroller)
 
         when (config.slideShowTransition) {
             0 -> {}
@@ -245,8 +246,14 @@ class ActivityImageDetail : AppCompatActivity() {
     }
 
     private fun showController() {
-        binding.containerController.show()
-        binding.actionBar.show()
+        if(binding.containerController.visibility == View.GONE){
+            binding.containerController.show()
+            binding.actionBar.show()
+        }else{
+            binding.containerController.hide()
+            binding.actionBar.hide()
+        }
+
     }
 
     override fun onDestroy() {
@@ -268,10 +275,10 @@ class ActivityImageDetail : AppCompatActivity() {
 
 
     private fun unLockPicture() {
-
-        val dialogProgress = DialogProgress(listItem,
+        val dialogProgress = DialogProgress(
+            mutableListOf(currentItem!!),
             mutableListOf(File(currentItem?.encryptedPath.toString())),
-            mutableListOf(File(currentItem?.encryptedPath.toString())),
+            mutableListOf(File(currentItem?.originalPath.toString()).parentFile),
             Action.UNLOCK,
             onResult = { status, text, valuesReturn ->
                 when (status) {

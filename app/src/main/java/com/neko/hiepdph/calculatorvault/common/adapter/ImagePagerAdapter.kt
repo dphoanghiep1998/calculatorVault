@@ -60,9 +60,9 @@ class ImagePagerAdapter(val context: Context, private val listImage: MutableList
         container.removeView(`object` as View)
     }
 
-//    override fun getItemPosition(`object`: Any): Int {
-//        return POSITION_NONE
-//    }
+    //    override fun getItemPosition(`object`: Any): Int {
+    //        return POSITION_NONE
+    //    }
 
 
     fun rotate(position: Int) {
