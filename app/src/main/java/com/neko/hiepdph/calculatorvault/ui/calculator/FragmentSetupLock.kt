@@ -9,10 +9,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
 import com.neko.hiepdph.calculatorvault.common.extensions.changeBackPressCallBack
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.popBackStack
+import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.databinding.FragmentSetupLockBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -73,6 +75,7 @@ class FragmentSetupLock : Fragment() {
             requireContext().config.securityAnswer = binding.edtAnswer.text.toString()
             requireContext().config.isSetupPasswordDone = true
             (requireActivity().application as CustomApplication).authority = true
+            showSnackBar(getString(R.string.question_setup_successfully), SnackBarType.SUCCESS)
             popBackStack(R.id.fragmentSetupLock)
         }
     }

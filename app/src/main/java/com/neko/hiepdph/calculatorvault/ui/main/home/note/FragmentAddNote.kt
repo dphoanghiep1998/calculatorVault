@@ -87,7 +87,7 @@ class FragmentAddNote : Fragment() {
     private fun saveNote() {
         hideSoftKeyboard(requireActivity(), binding.root)
         if (binding.edtTitle.text.isBlank()) {
-            showSnackBar(getString(R.string.title_and_content_required), SnackBarType.FAILED)
+            showSnackBar(getString(R.string.title_required), SnackBarType.FAILED)
             return
         }
         val title = binding.edtTitle.text.toString()

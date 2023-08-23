@@ -2,6 +2,7 @@ package com.neko.hiepdph.calculatorvault.common.customview
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.neko.hiepdph.calculatorvault.R
@@ -88,6 +89,8 @@ class CalculatorMain @JvmOverloads constructor(
         binding.btnTimes.changeTextColor(sharedPreferences.getThemeColor(context.getColor(R.color.primary)))
         binding.btnSubtract.changeTextColor(sharedPreferences.getThemeColor(context.getColor(R.color.primary)))
         binding.btnPlus.changeTextColor(sharedPreferences.getThemeColor(context.getColor(R.color.primary)))
+        binding.btnFlexDeg.changeTextColor(sharedPreferences.getThemeColor(context.getColor(R.color.primary)))
+        binding.btnFlexDeg.changeBackgroundTint(sharedPreferences.getThemeColor(context.getColor(R.color.primary)))
 //        binding.btnEqual.changeTextColor(sharedPreferences.getThemeColor(context.getColor(R.color.primary)))
     }
 
@@ -237,6 +240,8 @@ class CalculatorMain @JvmOverloads constructor(
     }
 
     fun setColorButton(color: Int) {
+        Log.d("TAG", "setColorButton: ")
+
         binding.btnReset.changeTextColor(color)
         binding.btnDelete.changeTextColor(color)
         binding.btnPercent.changeTextColor(color)
@@ -244,7 +249,8 @@ class CalculatorMain @JvmOverloads constructor(
         binding.btnTimes.changeTextColor(color)
         binding.btnSubtract.changeTextColor(color)
         binding.btnPlus.changeTextColor(color)
-        binding.btnEqual.changeBackgroundTint(color)
+        binding.btnEqual.changeTextColor(color)
+        binding.btnFlexDeg.changeTextColor(color)
         binding.btnFlexDeg.changeBackgroundTint(color)
     }
 

@@ -72,7 +72,7 @@ class FragmentSafe : Fragment() {
             binding.containerFingerprintLockDisplay.root.hide()
         } else {
             binding.containerFingerprintUnlock.root.show()
-            binding.containerFingerprintLockDisplay.root.hide()
+            binding.containerFingerprintLockDisplay.root.show()
         }
 
         binding.containerLock.root.clickWithDebounce {

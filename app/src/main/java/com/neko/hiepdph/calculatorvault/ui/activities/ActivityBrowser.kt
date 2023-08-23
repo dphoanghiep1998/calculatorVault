@@ -224,7 +224,10 @@ class ActivityBrowser : AppCompatActivity() {
         if (binding.webView.canGoBack()) {
             binding.webView.goBack()
         } else {
-            finish()
+            val dialogConfirm =
+                DialogConfirm(onPositiveClicked = { finish() }, DialogConfirmType.BACK_BROWSER)
+
+            dialogConfirm.show(supportFragmentManager, dialogConfirm.tag)
         }
     }
 }

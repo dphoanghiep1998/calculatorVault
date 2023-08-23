@@ -76,7 +76,7 @@
         <activity
             android:windowSoftInputMode="adjustResize"
             android:name=".ui.activities.ActivityVault"
-            android:excludeFromRecents="false"
+            android:autoRemoveFromRecents="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -87,7 +87,6 @@
 
         <activity
             android:name=".ui.activities.ActivityCalculator"
-            android:excludeFromRecents="false"
             android:exported="true">
 <!--            <intent-filter>-->
 <!--                <category android:name="android.intent.category.LAUNCHER" />-->

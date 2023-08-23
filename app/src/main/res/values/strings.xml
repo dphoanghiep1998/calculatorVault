@@ -141,7 +141,7 @@
     <string name="title">Title :</string>
     <string name="content">Content :</string>
     <string name="new_note">New note</string>
-    <string name="title_and_content_required">Note\'s title and Note\'s content are required!</string>
+    <string name="title_required">Note\'s title is required!</string>
     <string name="nothing_to_delete">Nothing to delete !</string>
     <string name="lock">Lock</string>
     <string name="password_recovery_question">Password Recovery Question</string>
@@ -370,6 +370,8 @@
     <string name="quit_browser">Are you sure to exit the browser ?</string>
     <string name="edit_note">Edit Note</string>
     <string name="finger_enrolled">Your device not enrolled any finger print!</string>
+    <string name="question_setup_successfully">Question lock setup successfully</string>
+    <string name="change_question_lock_successfully">Change security question successfully</string>
 
 
 </resources>

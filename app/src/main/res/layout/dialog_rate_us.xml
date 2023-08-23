@@ -43,6 +43,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_8sdp"
             android:gravity="center"
+            android:lineSpacingExtra="@dimen/_6sdp"
+            android:includeFontPadding="true"
             android:paddingHorizontal="@dimen/_12sdp"
             android:text="@string/ask_for_rate"
             android:textColor="@color/neutral_06"

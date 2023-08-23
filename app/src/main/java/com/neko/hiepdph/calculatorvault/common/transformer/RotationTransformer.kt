@@ -6,7 +6,7 @@ import kotlin.math.abs
 
 class RotationTransformer : ViewPager.PageTransformer {
     companion object {
-        private const val ROTATION_MAX = 20.0f
+        private const val ROTATION_MAX = 60.0f
     }
 
     override fun transformPage(page: View, position: Float) {

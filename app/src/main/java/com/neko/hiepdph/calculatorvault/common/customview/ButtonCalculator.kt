@@ -2,6 +2,7 @@ package com.neko.hiepdph.calculatorvault.common.customview
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
@@ -47,9 +48,10 @@ class ButtonCalculator @JvmOverloads constructor(
     }
 
     fun changeBackgroundTint(color: Int){
-        DrawableCompat.setTint(
-            binding.root.background, color
-        )
+//        DrawableCompat.setTint(
+//            background, color
+//        )
+        backgroundTintList = ColorStateList.valueOf(color)
     }
 
     fun setTint(color: Int) {

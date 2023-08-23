@@ -1,29 +1,38 @@
 package com.neko.hiepdph.calculatorvault.common.adapter
 
 import android.content.Context
-import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.viewpager.widget.PagerAdapter
 import com.bumptech.glide.Glide
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.customview.CustomPhotoView
-import com.neko.hiepdph.calculatorvault.common.extensions.config
-import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 
-
-interface TapViewListener {
-    fun onTap()
-}
 
 class ImagePagerAdapter(val context: Context, private val listImage: MutableList<FileVaultItem>) :
     PagerAdapter() {
     private var listPhotoView: MutableList<CustomPhotoView> = mutableListOf()
     private var mListener: TapViewListener? = null
 
+    init {
+        listImage.forEachIndexed { index, _ ->
+            val photoView = CustomPhotoView(context)
+            if (!listImage[index].isDeleted) {
+                Glide.with(context).load(listImage[index].encryptedPath)
+                    .error(R.drawable.ic_error_image).centerInside().into(photoView)
+            } else {
+                Glide.with(context).load(listImage[index].recyclerPath)
+                    .error(R.drawable.ic_error_image).centerInside().into(photoView)
+            }
+            photoView.setOnViewTapListener { view, x, y ->
+                mListener?.onTap()
+            }
+            listPhotoView.add(photoView)
+        }
+
+    }
 
     fun setListener(listener: TapViewListener) {
         this.mListener = listener
@@ -35,21 +44,10 @@ class ImagePagerAdapter(val context: Context, private val listImage: MutableList
     }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        val photoView = CustomPhotoView(container.context)
-        if(!listImage[position].isDeleted){
-            Glide.with(context).load(listImage[position].encryptedPath).error(R.drawable.ic_error_image).centerInside().into(photoView)
-        }else{
-            Glide.with(context).load(listImage[position].recyclerPath).error(R.drawable.ic_error_image).centerInside().into(photoView)
-        }
         container.addView(
-            photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
+            listPhotoView[position], ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
         )
-
-        photoView.setOnViewTapListener { view, x, y ->
-            mListener?.onTap()
-        }
-        listPhotoView.add(photoView)
-        return photoView
+        return  listPhotoView[position]
     }
 
     override fun isViewFromObject(view: View, `object`: Any): Boolean {
@@ -60,10 +58,6 @@ class ImagePagerAdapter(val context: Context, private val listImage: MutableList
         container.removeView(`object` as View)
     }
 
-    //    override fun getItemPosition(`object`: Any): Int {
-    //        return POSITION_NONE
-    //    }
-
 
     fun rotate(position: Int) {
         listPhotoView[position].toggleRotate()
@@ -71,4 +65,8 @@ class ImagePagerAdapter(val context: Context, private val listImage: MutableList
     }
 
 
+}
+
+interface TapViewListener {
+    fun onTap()
 }

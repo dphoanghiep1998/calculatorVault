@@ -53,7 +53,6 @@ class FragmentRecycleBin : Fragment() {
     private var _binding: FragmentRecycleBinBinding? = null
     private val binding get() = _binding!!
     private val viewModel by viewModels<RecyclerBinViewModel>()
-
     private var adapterRecycleBin: AdapterRecyclerBin? = null
     private var listItemSelected: MutableList<FileVaultItem> = mutableListOf()
     private var sizeList = 0
@@ -246,52 +245,12 @@ class FragmentRecycleBin : Fragment() {
     private fun handleClickItem(item: FileVaultItem) {
         val list = mutableListOf<FileVaultItem>()
         when (item.fileType) {
-//            Constant.TYPE_PICTURE -> {
-//                if (File(item.decodePath).exists()) {
-//                    list.add(item)
-//                    ShareData.getInstance().setListItemImage(list)
-//                    val intent = Intent(requireContext(), ActivityImageDetail::class.java)
-//                    startActivity(intent)
-//
-//                } else {
-//                    val dialogProgress = DialogProgress(
-//                        listItemSelected = mutableListOf(item),
-//                        listOfSourceFile = mutableListOf(File(item.recyclerPath)),
-//                        listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
-//                        onResult = { status, text, valueReturn ->
-//                            when (status) {
-//                                Status.SUCCESS -> {
-//                                    lifecycleScope.launch(Dispatchers.Main) {
-//                                        showSnackBar(text, SnackBarType.SUCCESS)
-//                                        if (!valueReturn.isNullOrEmpty()) {
-//                                            item.decodePath = valueReturn[0]
-//                                            viewModel.updateFileVault(item)
-//                                            list.add(item)
-//                                            ShareData.getInstance().setListItemImage(list)
-//                                            val intent = Intent(
-//                                                requireContext(), ActivityImageDetail::class.java
-//                                            )
-//                                            startActivity(intent)
-//                                        }
-//
-//                                    }
-//
-//                                }
-//
-//                                Status.FAILED -> {
-//                                    lifecycleScope.launch(Dispatchers.Main) {
-//                                        showSnackBar(text, SnackBarType.FAILED)
-//                                    }
-//                                }
-//                            }
-//                        },
-//                        action = Action.DECRYPT,
-//                        encryptionMode = item.encryptionType
-//
-//                    )
-//                    dialogProgress.show(childFragmentManager, dialogProgress.tag)
-//                }
-//            }
+            Constant.TYPE_PICTURE -> {
+                list.add(item)
+                ShareData.getInstance().setListItemImage(list)
+                val intent = Intent(requireContext(), ActivityImageDetail::class.java)
+                startActivity(intent)
+            }
 
             Constant.TYPE_AUDIOS -> {
                 if (File(item.decodePath).exists()) {
@@ -299,7 +258,7 @@ class FragmentRecycleBin : Fragment() {
                 } else {
                     val dialogProgress = DialogProgress(
                         listItemSelected = mutableListOf(item),
-                        listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                        listOfSourceFile = mutableListOf(File(item.recyclerPath)),
                         listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
                         onResult = { status, text, valuesReturn ->
                             lifecycleScope.launch(Dispatchers.Main) {
@@ -343,7 +302,7 @@ class FragmentRecycleBin : Fragment() {
                 } else {
                     val dialogProgress = DialogProgress(
                         listItemSelected = mutableListOf(item),
-                        listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                        listOfSourceFile = mutableListOf(File(item.recyclerPath)),
                         listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
                         onResult = { status, text, valuesReturn ->
                             lifecycleScope.launch(Dispatchers.Main) {
@@ -391,7 +350,7 @@ class FragmentRecycleBin : Fragment() {
                 } else {
                     val dialogProgress = DialogProgress(
                         listItemSelected = mutableListOf(item),
-                        listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                        listOfSourceFile = mutableListOf(File(item.recyclerPath)),
                         listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
                         onResult = { status, text, valuesReturn ->
                             lifecycleScope.launch(Dispatchers.Main) {

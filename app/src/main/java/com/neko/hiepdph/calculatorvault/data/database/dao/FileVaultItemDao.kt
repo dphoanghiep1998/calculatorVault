@@ -28,10 +28,10 @@ interface FileVaultItemDao {
     @Query("select * from file_vault order by id desc")
     fun getListFile(): List<FileVaultItem>
 
-    @Query("select * from file_vault where encryptedPath like :folderPath || '%'  and isDeleted = 0 order by id desc")
+    @Query("select * from file_vault where encryptedPath like :folderPath || '%'  and isDeleted = 0 order by modified desc")
     fun getListFileEncrypted(folderPath:String): LiveData<MutableList<FileVaultItem>>
 
-    @Query("select * from file_vault where recyclerPath like :folderPath || '%' and isDeleted = 1 order by id desc")
+    @Query("select * from file_vault where recyclerPath like :folderPath || '%' and isDeleted = 1 order by modified desc")
     fun getListFileDeleted(folderPath:String): LiveData<MutableList<FileVaultItem>>
 
     @Query("delete from file_vault where id in (:listId) ")

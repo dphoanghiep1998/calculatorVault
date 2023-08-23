@@ -2,15 +2,28 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.setting.safe.setuplock
 
 import android.app.Activity
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
-import com.neko.hiepdph.calculatorvault.common.extensions.*
+import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
+import com.neko.hiepdph.calculatorvault.common.extensions.changeBackPressCallBack
+import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.config
+import com.neko.hiepdph.calculatorvault.common.extensions.hide
+import com.neko.hiepdph.calculatorvault.common.extensions.navigateToPage
+import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.databinding.FragmentQuestionLockBinding
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
@@ -56,6 +69,7 @@ class FragmentQuestionLock : Fragment() {
 
         }, viewLifecycleOwner, Lifecycle.State.CREATED)
     }
+
     private fun hideSoftKeyboard(activity: Activity, view: View) {
         val inputMethodManager: InputMethodManager = activity.getSystemService(
             Activity.INPUT_METHOD_SERVICE
@@ -67,9 +81,10 @@ class FragmentQuestionLock : Fragment() {
         }
         view.clearFocus()
     }
+
     private fun initView() {
         binding.root.setOnClickListener {
-            hideSoftKeyboard(requireActivity(),binding.root)
+            hideSoftKeyboard(requireActivity(), binding.root)
         }
         initDropdown()
         initData()
@@ -100,14 +115,21 @@ class FragmentQuestionLock : Fragment() {
 
 
         binding.btnConfim.clickWithDebounce {
+            if (binding.edtAnswer.text.isBlank()) {
+                showSnackBar(getString(R.string.require_answer), SnackBarType.FAILED)
+                return@clickWithDebounce
+            }
             requireContext().config.securityQuestion = binding.question.text.toString()
             requireContext().config.securityAnswer = binding.edtAnswer.text.toString()
             if (!requireContext().config.isSetupPasswordDone) {
                 requireContext().config.isSetupPasswordDone = true
                 (requireActivity().application as CustomApplication).authority = true
+                showSnackBar(getString(R.string.question_setup_successfully), SnackBarType.SUCCESS)
                 navigateToPage(R.id.fragmentQuestionLock, R.id.fragmentVault)
             } else {
-                popBackStack(R.id.fragmentSetupLock)
+                showSnackBar(getString(R.string.change_question_lock_successfully), SnackBarType.SUCCESS)
+                findNavController().popBackStack()
+
             }
         }
     }

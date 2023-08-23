@@ -695,7 +695,6 @@ class ActivityVault : AppCompatActivity() {
         mSensorManager?.unregisterListener(mShakeDetector)
         Log.d("TAG", "onDestroy: ")
         super.onDestroy()
-        exitProcess(-1)
     }
 
 

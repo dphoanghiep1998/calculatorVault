@@ -17,13 +17,11 @@ import androidx.lifecycle.lifecycleScope
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.enums.Action
-import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.invisible
 import com.neko.hiepdph.calculatorvault.common.extensions.show
-import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
 import com.neko.hiepdph.calculatorvault.common.utils.MediaStoreUtils
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
 import com.neko.hiepdph.calculatorvault.config.Status
@@ -155,6 +153,7 @@ class DialogProgress(
                                 listItemSelected.forEach {
                                     val item = it
                                     item.isDeleted = true
+                                    item.modified = Calendar.getInstance().timeInMillis
                                     viewModel.updateVaultItem(item)
                                 }
                                 onResult.invoke(
@@ -359,79 +358,88 @@ class DialogProgress(
                 })
         }
         if (action == Action.ENCRYPT) {
+            disableCancelable()
             Log.d("TAG", "doAction: " + encryptionMode)
             val listOfEncryptedString = mutableListOf<String>()
-            listItemSelected.let { it ->
-                listOfEncryptedString.addAll(it.map {
-                    CryptoCore.getSingleInstance().encryptString(Constant.SECRET_KEY, it.name)
-                })
-            }
-            disableCancelable()
+            lifecycleScope.launch(Dispatchers.Default) {
+                listItemSelected.let { it ->
+                    listOfEncryptedString.addAll(it.map {
+                        CryptoCore.getSingleInstance().encryptString(Constant.SECRET_KEY, it.name)
+                    })
+                }
 
-            listItemSelected.forEachIndexed { index, item ->
-                when (item.fileType) {
-                    Constant.TYPE_PICTURE -> {
-                        item.thumb =
-                            imagePathToBitmap(item.originalPath)?.let { scaleBitmap(it, 512 * 512) }
-                    }
+                listItemSelected.forEachIndexed { index, item ->
+                    when (item.fileType) {
+                        Constant.TYPE_PICTURE -> {
+                            item.thumb = imagePathToBitmap(item.originalPath)?.let {
+                                scaleBitmap(
+                                    it, 512 * 512
+                                )
+                            }
+                        }
 
-                    Constant.TYPE_VIDEOS -> {
-                        item.thumb = MediaStoreUtils.getImageThumb(
-                            item.mediaStoreId, requireContext()
-                        )?.let { scaleBitmap(it, 512 * 512) }
-                    }
+                        Constant.TYPE_VIDEOS -> {
+                            item.thumb = MediaStoreUtils.getImageThumb(
+                                item.mediaStoreId, requireContext()
+                            )?.let { scaleBitmap(it, 512 * 512) }
+                        }
 
-                    Constant.TYPE_AUDIOS -> {
-                        item.thumb = MediaStoreUtils.getThumbnail(item.originalPath)
-                            ?.let { scaleBitmap(it, 512 * 512) }
+                        Constant.TYPE_AUDIOS -> {
+                            item.thumb = MediaStoreUtils.getThumbnail(item.originalPath)
+                                ?.let { scaleBitmap(it, 512 * 512) }
+                        }
                     }
                 }
-            }
-            viewModel.encrypt(
-                requireContext(),
-                listOfSourceFile,
-                listOfTargetParentFolder,
-                listOfEncryptedString,
-                progress = { _: File? ->
+                lifecycleScope.launch(Dispatchers.IO) {
+                    viewModel.encrypt(
+                        requireContext(),
+                        listOfSourceFile,
+                        listOfTargetParentFolder,
+                        listOfEncryptedString,
+                        progress = { _: File? ->
 
-                },
-                onResult = { listOfFileSuccess, listOfFileFailed ->
-                    if (listOfFileSuccess.size == listOfSourceFile.size) {
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            enableCancelable()
-                            showButton()
-                            statusSuccess()
-                            listItemSelected.forEachIndexed { index, item ->
-                                item.apply {
-                                    recyclerPath =
-                                        "${requireContext().config.recyclerBinFolder.path}/${listOfEncryptedString[index]}"
-                                    timeLock = Calendar.getInstance().timeInMillis
-                                    encryptionType = encryptionMode
-                                    encryptedPath = "$vaultPath/${
-                                        listOfEncryptedString[index]
-                                    }"
+                        },
+                        onResult = { listOfFileSuccess, listOfFileFailed ->
+                            if (listOfFileSuccess.size == listOfSourceFile.size) {
+                                lifecycleScope.launch(Dispatchers.Main) {
+                                    enableCancelable()
+                                    showButton()
+                                    statusSuccess()
+                                    listItemSelected.forEachIndexed { index, item ->
+                                        item.apply {
+                                            recyclerPath =
+                                                "${requireContext().config.recyclerBinFolder.path}/${listOfEncryptedString[index]}"
+                                            timeLock = Calendar.getInstance().timeInMillis
+                                            encryptionType = encryptionMode
+                                            encryptedPath = "$vaultPath/${
+                                                listOfEncryptedString[index]
+                                            }"
+                                        }
+                                        viewModel.insertVaultItem(item)
+                                    }
+                                    onResult.invoke(
+                                        Status.SUCCESS, getString(R.string.encrypt_success), null
+                                    )
                                 }
-                                viewModel.insertVaultItem(item)
                             }
-                            onResult.invoke(
-                                Status.SUCCESS, getString(R.string.encrypt_success), null
-                            )
-                        }
-                    }
 
-                    if (listOfFileFailed.size == listItemSelected.size) {
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            enableCancelable()
-                            showButton()
-                            statusFailed()
-                            binding.tvStatus.text = getString(R.string.encrypt_failed)
-                        }
-                    }
-                },
+                            if (listOfFileFailed.size == listItemSelected.size) {
+                                lifecycleScope.launch(Dispatchers.Main) {
+                                    enableCancelable()
+                                    showButton()
+                                    statusFailed()
+                                    binding.tvStatus.text = getString(R.string.encrypt_failed)
+                                }
+                            }
+                        },
 
 
-                encryptionMode
-            )
+                        encryptionMode
+                    )
+                }
+            }
+
+
         }
         if (action == Action.DECRYPT) {
             viewModel.decrypt(

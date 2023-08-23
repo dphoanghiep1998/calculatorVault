@@ -7,6 +7,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.AccelerateInterpolator
+import android.view.animation.LinearInterpolator
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -61,7 +62,9 @@ class ActivityImageDetail : AppCompatActivity() {
     private var currentPage = 0
     private var jobSlide: Job? = null
     private val viewModel by viewModels<AppViewModel>()
+    companion object {
 
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityImageDetailBinding.inflate(layoutInflater)
@@ -91,10 +94,6 @@ class ActivityImageDetail : AppCompatActivity() {
         }
     }
 
-    private fun solveListItem(){
-
-    }
-
     private fun openImageInformationDialog() {
         val dialogDetail = currentItem?.let { DialogDetail(this, it).onCreateDialog() }
         dialogDetail?.show()
@@ -108,9 +107,7 @@ class ActivityImageDetail : AppCompatActivity() {
                 override fun onTap() {
                     jobSlide?.cancel()
                     showController()
-//                    viewPagerAdapter = ImagePagerAdapter(this@ActivityImageDetail, it)
-//                    binding.imageViewPager.adapter = viewPagerAdapter
-//                    binding.imageViewPager.setCurrentItem(currentPage, false)
+
                     Log.d("TAG", "onTap: ")
                 }
             })
@@ -123,6 +120,7 @@ class ActivityImageDetail : AppCompatActivity() {
             } else {
                 supportActionBar?.title = String.EMPTY
             }
+
 
             binding.imageViewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
                 override fun onPageScrolled(
@@ -212,11 +210,11 @@ class ActivityImageDetail : AppCompatActivity() {
     }
 
     private fun autoScroll() {
-//        val mScroller: Field = ViewPager::class.java.getDeclaredField("mScroller")
-//        mScroller.isAccessible = true
-//        val sInterpolator = AccelerateInterpolator()
-//        val scroller = FixedSpeedScroller(this, sInterpolator)
-//        mScroller.set(binding.imageViewPager, scroller)
+        val mScroller: Field = ViewPager::class.java.getDeclaredField("mScroller")
+        mScroller.isAccessible = true
+        val sInterpolator = LinearInterpolator()
+        val scroller = FixedSpeedScroller(this, sInterpolator)
+        mScroller.set(binding.imageViewPager, scroller)
 
         when (config.slideShowTransition) {
             0 -> {}
@@ -249,6 +247,7 @@ class ActivityImageDetail : AppCompatActivity() {
         if(binding.containerController.visibility == View.GONE){
             binding.containerController.show()
             binding.actionBar.show()
+
         }else{
             binding.containerController.hide()
             binding.actionBar.hide()
