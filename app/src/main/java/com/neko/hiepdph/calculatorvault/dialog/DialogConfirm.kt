@@ -79,11 +79,7 @@ enum class DialogConfirmType(
         R.string.custom_ok
     ),
     BACK_NOTE(
-        R.string.note,
-        R.string.back_note_tip,
-        R.drawable.ic_info,
-        R.string.cancel,
-        R.string.yes
+        R.string.note, R.string.back_note_tip, R.drawable.ic_info, R.string.cancel, R.string.yes
     ),
     BACK_BROWSER(
         R.string.exit,
@@ -91,15 +87,24 @@ enum class DialogConfirmType(
         R.drawable.ic_info,
         R.string.cancel,
         R.string.custom_ok
+    ),
+    PROHIBIT_TITLE(
+        R.string.prohibit_press_title,
+        R.string.prohibit_press_content,
+        R.drawable.ic_tips,
+        R.string.cancel,
+        R.string.custom_ok
     )
+
 
 }
 
 
 class DialogConfirm(
     private val onPositiveClicked: () -> Unit,
-
-    private val dialogType: DialogConfirmType, val name: String? = null
+    private val dialogType: DialogConfirmType,
+    val name: String? = null,
+    private val onNegativeClicked: (() -> Unit)? = null
 ) : DialogFragment() {
     private lateinit var binding: DialogConfirmBinding
 
@@ -153,9 +158,11 @@ class DialogConfirm(
             dismiss()
         }
         binding.btnCancel.clickWithDebounce {
+            onNegativeClicked?.invoke()
             dismiss()
         }
         binding.root.clickWithDebounce {
+            onNegativeClicked?.invoke()
             dismiss()
         }
         binding.containerMain.clickWithDebounce {

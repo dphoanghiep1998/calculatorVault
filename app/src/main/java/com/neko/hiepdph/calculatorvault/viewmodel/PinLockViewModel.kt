@@ -26,4 +26,10 @@ class PinLockViewModel @Inject constructor(val repo: AppRepo) : ViewModel() {
         }
     }
 
+    fun deleteLastRow(){
+        viewModelScope.launch {
+            repo.deleteLastRow()
+        }
+    }
+
 }

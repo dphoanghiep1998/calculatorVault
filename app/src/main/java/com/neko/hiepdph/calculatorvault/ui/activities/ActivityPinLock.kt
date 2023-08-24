@@ -19,6 +19,7 @@ import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityPinLockBinding
@@ -27,6 +28,7 @@ import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.dialog.DialogPassword
 import com.neko.hiepdph.calculatorvault.dialog.DialogShowPassword
 import com.neko.hiepdph.calculatorvault.dialog.SetupPassWordCallBack
+import com.neko.hiepdph.calculatorvault.viewmodel.AppViewModel
 import com.neko.hiepdph.calculatorvault.viewmodel.PinLockViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -44,6 +46,8 @@ class ActivityPinLock : AppCompatActivity() {
     private var takePhotoIntruder = false
     private var camera: Camera? = null
     private val viewModel by viewModels<PinLockViewModel>()
+    private val appViewModel by viewModels<AppViewModel>()
+    private var name = ""
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -155,10 +159,35 @@ class ActivityPinLock : AppCompatActivity() {
                         (application as CustomApplication).isLockShowed = true
                         if (config.photoIntruder && !takePhotoIntruder) {
                             takePicture(action = {
+                                config.caughtIntruder = true
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    if (!config.intruderFolder.exists()) {
+                                        config.intruderFolder.mkdirs()
+                                    }
+                                    val name =
+                                        "lmao_intruder_${config.intruderFolder.listFiles().size}.jpeg"
+                                    val file = File(
+                                        config.intruderFolder, name
+                                    )
+                                    val fos = FileOutputStream(file)
+                                    fos.write(byteArray)
+                                    fos.close()
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        viewModel.insertFileToRoom(
+                                            FileVaultItem(
+                                                0,
+                                                "${config.intruderFolder.path}/" + name,
+                                                "${config.intruderFolder.path}/" + name,
+                                                name = name
+                                            )
+                                        )
+                                    }
+
+                                }
                                 finish()
                             })
                         } else {
-                            takePicture(action = {})
+
                         }
                     } else if (config.fingerprintFailure) {
                         finishAffinity()
@@ -168,7 +197,9 @@ class ActivityPinLock : AppCompatActivity() {
             biometric.showPrompt()
         } else {
             lifecycleScope.launchWhenResumed {
-                Toast.makeText(this@ActivityPinLock,getString(R.string.finger_enrolled),Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@ActivityPinLock, getString(R.string.finger_enrolled), Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -213,7 +244,33 @@ class ActivityPinLock : AppCompatActivity() {
             anim.repeatCount = 2 // repeat animation 2 times
             binding.tvStatus.startAnimation(anim)
             if (config.photoIntruder && !takePhotoIntruder) {
-                takePicture()
+                takePicture(action = {
+                    config.caughtIntruder = true
+                    CoroutineScope(Dispatchers.IO).launch {
+                        if (!config.intruderFolder.exists()) {
+                            config.intruderFolder.mkdirs()
+                        }
+                        val name = "lmao_intruder_${config.intruderFolder.listFiles().size}.jpeg"
+                        val file = File(
+                            config.intruderFolder, name
+                        )
+                        val fos = FileOutputStream(file)
+                        fos.write(byteArray)
+                        fos.close()
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            viewModel.insertFileToRoom(
+                                FileVaultItem(
+                                    0,
+                                    "${config.intruderFolder.path}/" + name,
+                                    "${config.intruderFolder.path}/" + name,
+                                    name = name
+                                )
+                            )
+                        }
+
+                    }
+                    finish()
+                })
             }
             return
         }
@@ -226,6 +283,31 @@ class ActivityPinLock : AppCompatActivity() {
             }
             if (config.photoIntruder && !takePhotoIntruder) {
                 takePicture(action = {
+                    config.caughtIntruder = true
+
+                    CoroutineScope(Dispatchers.IO).launch {
+                        if (!config.intruderFolder.exists()) {
+                            config.intruderFolder.mkdirs()
+                        }
+                        val name = "lmao_intruder_${config.intruderFolder.listFiles().size}.jpeg"
+                        val file = File(
+                            config.intruderFolder, name
+                        )
+                        val fos = FileOutputStream(file)
+                        fos.write(byteArray)
+                        fos.close()
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            viewModel.insertFileToRoom(
+                                FileVaultItem(
+                                    0,
+                                    "${config.intruderFolder.path}/" + name,
+                                    "${config.intruderFolder.path}/" + name,
+                                    name = name
+                                )
+                            )
+                        }
+
+                    }
                     finish()
                 })
             } else {
@@ -240,10 +322,35 @@ class ActivityPinLock : AppCompatActivity() {
             anim.duration = 100 // set animation duration to 500 milliseconds
             anim.repeatMode = Animation.REVERSE // repeat animation in reverse mode
             anim.repeatCount = 2 // repeat animation 2 times
-
+            AppSharePreference.getInstance(this).saveSessionCount(0)
             binding.tvStatus.startAnimation(anim)
             if (config.photoIntruder && !takePhotoIntruder) {
-                takePicture()
+                takePicture(action = {
+                    config.caughtIntruder = true
+                    CoroutineScope(Dispatchers.IO).launch {
+                        if (!config.intruderFolder.exists()) {
+                            config.intruderFolder.mkdirs()
+                        }
+                        name = "lmao_intruder_${config.intruderFolder.listFiles().size}.jpeg"
+                        val file = File(
+                            config.intruderFolder, name
+                        )
+                        val fos = FileOutputStream(file)
+                        fos.write(byteArray)
+                        fos.close()
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            viewModel.insertFileToRoom(
+                                FileVaultItem(
+                                    0,
+                                    "${config.intruderFolder.path}/" + name,
+                                    "${config.intruderFolder.path}/" + name,
+                                    name = name
+                                )
+                            )
+                        }
+
+                    }
+                })
             }
             return
         }
@@ -251,6 +358,7 @@ class ActivityPinLock : AppCompatActivity() {
         if (config.secretPin == currentPassword) {
             (application as CustomApplication).authority = true
             (application as CustomApplication).isLockShowed = true
+
             finish()
         }
     }
@@ -317,35 +425,23 @@ class ActivityPinLock : AppCompatActivity() {
         return camId
     }
 
+    //session == 0 == current session
+    //session > 0 == previous session
     override fun onDestroy() {
         super.onDestroy()
         Log.d("TAG", "onDestroy: ")
-
-        if (!(application as CustomApplication).authority) {
-            config.caughtIntruder = true
-            CoroutineScope(Dispatchers.IO).launch {
-                if (!config.intruderFolder.exists()) {
-                    config.intruderFolder.mkdirs()
-                }
-                val name = "lmao_intruder_${config.intruderFolder.listFiles().size}.jpeg"
-                val file = File(
-                    config.intruderFolder, name
-                )
-                val fos = FileOutputStream(file)
-                fos.write(byteArray)
-                fos.close()
-                viewModel.insertFileToRoom(
-                    FileVaultItem(
-                        0,
-                        "${config.intruderFolder.path}/" + name,
-                        "${config.intruderFolder.path}/" + name,
-                        name = name
-                    )
-                )
-            }
-
-        }
         stopCamera()
+        val session = AppSharePreference.getInstance(this).getSessionCount(0)
+//        if ((application as CustomApplication).authority && session == 0 && config.caughtIntruder) {
+//            config.caughtIntruder = false
+//            AppSharePreference.getInstance(this).saveSessionCount(1)
+//            appViewModel.deleteMultipleFolder(mutableListOf("${config.intruderFolder}/$name"),
+//                onProgress = { value: Float -> },
+//                onResult = { listOfFileDeletedSuccess, listOfFileDeletedFailed ->
+//                    viewModel.deleteLastRow()
+//                })
+//
+//        }
 
     }
 

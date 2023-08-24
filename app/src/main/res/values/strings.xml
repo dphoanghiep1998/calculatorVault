@@ -372,6 +372,8 @@
     <string name="finger_enrolled">Your device not enrolled any finger print!</string>
     <string name="question_setup_successfully">Question lock setup successfully</string>
     <string name="change_question_lock_successfully">Change security question successfully</string>
+    <string name="prohibit_press_title">Prohibit Unlocking by Long Press Title</string>
+    <string name="prohibit_press_content">Once enabled, you will not be able to enter the Calculator Vault by long pressing the title from the calculator interface. Are you sure you want to enable it?</string>
 
 
 </resources>

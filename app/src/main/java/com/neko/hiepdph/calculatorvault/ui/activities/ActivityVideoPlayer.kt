@@ -212,6 +212,7 @@ class ActivityVideoPlayer : AppCompatActivity() {
             },
             action = Action.UNLOCK
         )
+        dialogProgress.show(supportFragmentManager,dialogProgress.tag)
     }
 
     private fun hideSystemUI() {

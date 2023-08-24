@@ -1,7 +1,6 @@
 package com.neko.hiepdph.calculatorvault.common.adapter
 
 import android.content.Context
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.viewpager.widget.PagerAdapter
@@ -19,13 +18,9 @@ class ImagePagerAdapter(val context: Context, private val listImage: MutableList
     init {
         listImage.forEachIndexed { index, _ ->
             val photoView = CustomPhotoView(context)
-            if (!listImage[index].isDeleted) {
-                Glide.with(context).load(listImage[index].encryptedPath)
-                    .error(R.drawable.ic_error_image).centerInside().into(photoView)
-            } else {
-                Glide.with(context).load(listImage[index].recyclerPath)
-                    .error(R.drawable.ic_error_image).centerInside().into(photoView)
-            }
+
+            Glide.with(context).load(listImage[index].decodePath).error(R.drawable.ic_error_image)
+                .centerInside().into(photoView)
             photoView.setOnViewTapListener { view, x, y ->
                 mListener?.onTap()
             }
@@ -45,9 +40,11 @@ class ImagePagerAdapter(val context: Context, private val listImage: MutableList
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         container.addView(
-            listPhotoView[position], ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
+            listPhotoView[position],
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
         )
-        return  listPhotoView[position]
+        return listPhotoView[position]
     }
 
     override fun isViewFromObject(view: View, `object`: Any): Boolean {

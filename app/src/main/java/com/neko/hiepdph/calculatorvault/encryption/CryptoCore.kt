@@ -14,7 +14,6 @@ import javax.crypto.spec.SecretKeySpec
 
 
 class CryptoCore() {
-
     companion object {
         var instance: CryptoCore? = null
         fun getSingleInstance(): CryptoCore {

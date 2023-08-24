@@ -88,7 +88,7 @@ class AdapterRecyclerBin(
             binding.checkBox.isChecked = item in listOfItemSelected
             when (item.fileType) {
                 Constant.TYPE_PICTURE -> {
-                    Glide.with(itemView.context).load(item.recyclerPath).centerCrop()
+                    Glide.with(itemView.context).load(item.decodePath).centerCrop()
                         .apply(requestOptions).error(R.drawable.ic_error_image)
                         .into(binding.imvThumb)
 

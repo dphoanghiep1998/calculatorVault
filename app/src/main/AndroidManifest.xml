@@ -41,19 +41,23 @@
         </provider>
 
         <activity
+            android:excludeFromRecents="true"
             android:name=".ui.activities.ActivityVideoPlayer"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="false" />
 
         <activity
+            android:excludeFromRecents="true"
             android:name=".ui.activities.ActivityAudioPlayer"
             android:exported="false"
             android:screenOrientation="portrait" />
 
         <activity
+            android:excludeFromRecents="true"
             android:name=".ui.activities.ActivityImageDetail"
             android:exported="false" />
         <activity
+            android:excludeFromRecents="true"
             android:name=".ui.activities.ActivityCamera"
             android:exported="true">
             <intent-filter>
@@ -64,19 +68,22 @@
             </intent-filter>
         </activity>
         <activity
+            android:excludeFromRecents="true"
             android:name=".ui.activities.ActivityBrowser"
             android:exported="false" />
         <activity
+            android:excludeFromRecents="true"
             android:name=".ui.activities.ActivityPatternLock"
             android:exported="false" />
         <activity
+            android:excludeFromRecents="true"
             android:name=".ui.activities.ActivityPinLock"
             android:exported="false" />
 
         <activity
             android:windowSoftInputMode="adjustResize"
             android:name=".ui.activities.ActivityVault"
-            android:autoRemoveFromRecents="true"
+            android:excludeFromRecents="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -87,6 +94,7 @@
 
         <activity
             android:name=".ui.activities.ActivityCalculator"
+            android:excludeFromRecents="true"
             android:exported="true">
 <!--            <intent-filter>-->
 <!--                <category android:name="android.intent.category.LAUNCHER" />-->

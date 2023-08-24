@@ -58,6 +58,11 @@ class AppRepo @Inject constructor(
         fileVaultService.fileVaultItemDao.insertFile(fileVaultItem.toFileVaultEntity())
     }
 
+    suspend fun deleteLastRow() = withContext(dispatcher) {
+        fileVaultService.fileVaultItemDao.deleteLastRow()
+    }
+
+
     suspend fun updateFileVault(fileVaultItem: FileVaultItem) = withContext(dispatcher) {
         fileVaultService.fileVaultItemDao.updateFile(fileVaultItem.toFileVaultEntity())
     }

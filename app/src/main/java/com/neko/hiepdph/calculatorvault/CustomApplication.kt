@@ -20,29 +20,24 @@ import android.app.Application
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.util.Log
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
-import com.neko.hiepdph.calculatorvault.common.utils.isScreenOn
 import com.neko.hiepdph.calculatorvault.ui.activities.ActivityCalculator
-import com.neko.hiepdph.calculatorvault.ui.activities.ActivityPatternLock
-import com.neko.hiepdph.calculatorvault.ui.activities.ActivityPinLock
-import com.neko.hiepdph.calculatorvault.ui.activities.ActivityVault
 import dagger.hilt.android.HiltAndroidApp
-import java.util.*
-import kotlin.math.log
 
 @HiltAndroidApp
-class CustomApplication : Application(), Application.ActivityLifecycleCallbacks, LifecycleObserver {
+class CustomApplication : Application(), Application.ActivityLifecycleCallbacks {
     private var currentActivity: Activity? = null
-     var authority = false
-     var isLockShowed = false
-     var firstTimeOpen = true
-     var changePassFail = false
+    var authority = false
+    var isLockShowed = false
+    var firstTimeOpen = true
+    var changePassFail = false
+    var resumeFromApp = false
+
+
 //    private var appOpenAdsManager: AppOpenAdManager? = null
 //    var shouldDestroyApp = false
 //    var showAdsClickBottomNav = false
@@ -50,15 +45,63 @@ class CustomApplication : Application(), Application.ActivityLifecycleCallbacks,
 //    var interAdsIntro: InterstitialPreloadAdManager? = null
 //    var settingLanguageLocale = ""
 
+    companion object {
+        lateinit var app: CustomApplication
+    }
 
     override fun onCreate() {
         super.onCreate()
+        app = this
         AppSharePreference.getInstance(applicationContext)
+        prepareApp()
 
-//        settingLanguageLocale =
-//            AppSharePreference.INSTANCE.getSavedLanguage(Locale.getDefault().language)
+        val lifecycleEventObserver = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> {
+
+                }
+
+                Lifecycle.Event.ON_RESUME -> {
+                    if (currentActivity !is ActivityCalculator && !resumeFromApp) {
+                        if (config.lockWhenLeavingApp) {
+                            authority = false
+                            isLockShowed = false
+                            val intent = Intent(applicationContext, ActivityCalculator::class.java)
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            startActivity(intent)
+                        } else {
+                            val intent = Intent(applicationContext, ActivityCalculator::class.java)
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            startActivity(intent)
+                        }
+
+                    }
+                    if (resumeFromApp) {
+                        resumeFromApp = false
+                    }
+
+
+                }
+
+                Lifecycle.Event.ON_STOP -> {
+
+                }
+
+                Lifecycle.Event.ON_CREATE -> {
+
+                }
+
+                Lifecycle.Event.ON_DESTROY -> {
+
+                }
+
+                else -> {
+
+                }
+            }
+        }
         registerActivityLifecycleCallbacks(this)
-        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+        ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleEventObserver)
 //        MobileAds.initialize(this) { MobileAds.setAppMuted(true) }
 //        val requestConfiguration =
 //            RequestConfiguration.Builder().setTestDeviceIds(Constants.testDevices()).build()
@@ -67,6 +110,11 @@ class CustomApplication : Application(), Application.ActivityLifecycleCallbacks,
 //        initFBApp()
         initApplovinMediation()
         initOpenAds()
+    }
+
+    private fun prepareApp() {
+
+        applicationContext.config
     }
 
     private fun initFBApp() {
@@ -97,46 +145,18 @@ class CustomApplication : Application(), Application.ActivityLifecycleCallbacks,
 //        appOpenAdsManager?.loadAd()
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-    private fun onMoveToForeground() {
-        if(currentActivity !is ActivityPinLock && currentActivity !is ActivityPatternLock && currentActivity !is ActivityCalculator){
-            if(authority && config.lockWhenLeavingApp && isLockShowed){
-                val intent  = Intent(applicationContext,ActivityPinLock::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                startActivity(intent)
-            }
-        }
-
-
-//        if (!InterstitialPreloadAdManager.isShowingAds && !InterstitialSingleReqAdManager.isShowingAds) {
-//            currentActivity?.let {
-//                if (currentActivity is MainActivity) {
-//                    appOpenAdsManager?.showAdIfAvailable(it)
-//                }
-//            }
-//        }
-
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    private fun onChangePause() {
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    private fun onChangeStop() {
-    }
 
     override fun onActivityCreated(p0: Activity, p1: Bundle?) {
 
     }
 
     override fun onActivityStarted(p0: Activity) {
-
+        currentActivity = p0
+//        Adjust.onResume()
     }
 
     override fun onActivityResumed(p0: Activity) {
-        currentActivity = p0
-//        Adjust.onResume()
+
 
     }
 

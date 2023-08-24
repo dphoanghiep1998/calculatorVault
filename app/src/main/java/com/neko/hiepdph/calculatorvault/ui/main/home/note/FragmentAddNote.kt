@@ -77,7 +77,7 @@ class FragmentAddNote : Fragment() {
             Log.d("TAG", "initToolBar: ")
             val actionBar = (requireActivity() as? ActivityVault)?.supportActionBar
             actionBar?.title = getString(R.string.edit_note)
-        }else{
+        } else {
             val actionBar = (requireActivity() as? ActivityVault)?.supportActionBar
             actionBar?.title = getString(R.string.new_note)
         }
@@ -106,17 +106,29 @@ class FragmentAddNote : Fragment() {
     }
 
     private fun changeBackPressCallBack() {
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner,
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    if (binding.edtTitle.text.isNotBlank() || binding.edtContent.text.isNotBlank()) {
-                        val dialogConfirm = DialogConfirm(onPositiveClicked = {
-                            findNavController().popBackStack()
-                        }, DialogConfirmType.BACK_NOTE)
-                        dialogConfirm.show(childFragmentManager, dialogConfirm.tag)
+                    if (noteModel != null) {
+                        if (binding.edtTitle.text.toString() != noteModel!!.title && binding.edtContent.text.toString() != noteModel!!.content) {
+                            val dialogConfirm = DialogConfirm(onPositiveClicked = {
+                                findNavController().popBackStack()
+                            }, DialogConfirmType.BACK_NOTE)
+                            dialogConfirm.show(childFragmentManager, dialogConfirm.tag)
+                        }
+
                     } else {
-                        findNavController().popBackStack()
+                        if (binding.edtTitle.text.isBlank()) {
+                            val dialogConfirm = DialogConfirm(onPositiveClicked = {
+                                findNavController().popBackStack()
+                            }, DialogConfirmType.BACK_NOTE)
+                            dialogConfirm.show(childFragmentManager, dialogConfirm.tag)
+                        } else {
+                            findNavController().popBackStack()
+                        }
                     }
+
                 }
 
             })

@@ -36,4 +36,7 @@ interface FileVaultItemDao {
 
     @Query("delete from file_vault where id in (:listId) ")
     fun deleteFile(listId:List<Int>)
+
+    @Query("delete from file_vault where id = (SELECT MAX (id) from file_vault)")
+    fun deleteLastRow()
 }

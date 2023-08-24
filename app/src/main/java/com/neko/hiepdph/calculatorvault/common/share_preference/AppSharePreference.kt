@@ -145,6 +145,15 @@ class AppSharePreference(private val context: Context?) {
         return getString(Constant.KEY_LANGUAGE, defaultValues)
     }
 
+    fun saveSessionCount(values: Int) {
+        saveInt(Constant.KEY_SESSION, values)
+    }
+
+    fun getSessionCount(defaultValues: Int): Int {
+        return getInt(Constant.KEY_SESSION, defaultValues)
+    }
+
+
 
     fun saveListNote(values: List<String>) {
         saveStringList(Constant.KEY_NOTE_LIST, values)

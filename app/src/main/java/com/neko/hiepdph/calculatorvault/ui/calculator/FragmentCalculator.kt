@@ -12,7 +12,11 @@ import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.customview.CalculatorFunction
-import com.neko.hiepdph.calculatorvault.common.extensions.*
+import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
+import com.neko.hiepdph.calculatorvault.common.extensions.config
+import com.neko.hiepdph.calculatorvault.common.extensions.getColor
+import com.neko.hiepdph.calculatorvault.common.extensions.hide
+import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import com.neko.hiepdph.calculatorvault.common.utils.DIVIDE_SYMBOL
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
@@ -84,9 +88,14 @@ class FragmentCalculator : Fragment() {
             dialogChangeTheme.show(childFragmentManager, dialogChangeTheme.tag)
         }
         binding.tvCalculator.setOnLongClickListener {
-            startActivity(Intent(requireContext(), ActivityVault::class.java))
-            requireActivity().finish()
-            return@setOnLongClickListener true
+            if (requireActivity().config.prohibitUnlockingByLongPressTitle && requireActivity().config.buttonToUnlock != ButtonToUnlock.NONE && !requireActivity().config.unlockByFingerprint) {
+                return@setOnLongClickListener false
+            } else {
+                startActivity(Intent(requireContext(), ActivityVault::class.java))
+                requireActivity().finish()
+                return@setOnLongClickListener true
+            }
+
         }
 
         binding.tvCalculatorHighlight.setOnLongClickListener {

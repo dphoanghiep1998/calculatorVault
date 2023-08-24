@@ -19,6 +19,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.enums.Action
@@ -246,13 +247,55 @@ class FragmentRecycleBin : Fragment() {
         val list = mutableListOf<FileVaultItem>()
         when (item.fileType) {
             Constant.TYPE_PICTURE -> {
-                list.add(item)
-                ShareData.getInstance().setListItemImage(list)
-                val intent = Intent(requireContext(), ActivityImageDetail::class.java)
-                startActivity(intent)
+                if (File(item.decodePath).exists()) {
+                    list.add(item)
+                    ShareData.getInstance().setListItemImage(list)
+                    val intent = Intent(requireContext(), ActivityImageDetail::class.java)
+                    startActivity(intent)
+
+                } else {
+                    val dialogProgress = DialogProgress(
+                        listItemSelected = mutableListOf(item),
+                        listOfSourceFile = mutableListOf(File(item.recyclerPath)),
+                        listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
+                        onResult = { status, text, valueReturn ->
+                            when (status) {
+                                Status.SUCCESS -> {
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        showSnackBar(text, SnackBarType.SUCCESS)
+                                        if (!valueReturn.isNullOrEmpty()) {
+                                            item.decodePath = valueReturn[0]
+                                            viewModel.updateFileVault(item)
+                                            list.add(item)
+                                            ShareData.getInstance().setListItemImage(list)
+                                            val intent = Intent(
+                                                requireContext(), ActivityImageDetail::class.java
+                                            )
+                                            startActivity(intent)
+                                        }
+
+                                    }
+
+                                }
+
+                                Status.FAILED -> {
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        showSnackBar(text, SnackBarType.FAILED)
+                                    }
+                                }
+                            }
+                        },
+                        action = Action.DECRYPT,
+                        encryptionMode = item.encryptionType
+
+                    )
+                    dialogProgress.show(childFragmentManager, dialogProgress.tag)
+                }
             }
 
             Constant.TYPE_AUDIOS -> {
+                CustomApplication.app.resumeFromApp = true
+
                 if (File(item.decodePath).exists()) {
                     item.decodePath.openWith(requireContext(), Constant.TYPE_AUDIOS, null)
                 } else {
@@ -289,17 +332,22 @@ class FragmentRecycleBin : Fragment() {
             }
 
             Constant.TYPE_VIDEOS -> {
+
                 if (File(item.decodePath).exists()) {
                     if (requireContext().config.playVideoMode) {
                         ShareData.getInstance().setListItemVideo(mutableListOf(item))
                         val intent = Intent(requireContext(), ActivityVideoPlayer::class.java)
                         startActivity(intent)
                     } else {
+                        CustomApplication.app.resumeFromApp = true
+
                         item.decodePath.openWith(
                             requireContext(), Constant.TYPE_VIDEOS, null
                         )
                     }
                 } else {
+                    CustomApplication.app.resumeFromApp = true
+
                     val dialogProgress = DialogProgress(
                         listItemSelected = mutableListOf(item),
                         listOfSourceFile = mutableListOf(File(item.recyclerPath)),
@@ -345,6 +393,8 @@ class FragmentRecycleBin : Fragment() {
             }
 
             else -> {
+                CustomApplication.app.resumeFromApp = true
+
                 if (File(item.decodePath).exists()) {
                     item.decodePath.openWith(requireContext(), Constant.TYPE_FILE, null)
                 } else {

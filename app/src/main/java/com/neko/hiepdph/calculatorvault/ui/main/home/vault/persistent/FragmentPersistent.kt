@@ -22,6 +22,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.enums.Action
@@ -437,9 +438,44 @@ class FragmentPersistent : Fragment() {
         if (listItemSelected.isEmpty()) {
             toast(getString(R.string.require_size_more_than_1))
         } else {
-            ShareData.getInstance().setListItemImage(listItemSelected)
-            val intent = Intent(requireContext(), ActivityImageDetail::class.java)
-            startActivity(intent)
+            val list = mutableListOf<FileVaultItem>()
+            val dialogProgress = DialogProgress(
+                listItemSelected = listItemSelected,
+                listOfSourceFile = listItemSelected.map { File(it.encryptedPath) },
+                listOfTargetParentFolder = listItemSelected.map { requireActivity().config.decryptFolder },
+                onResult = { status, text, valueReturn ->
+                    when (status) {
+                        Status.SUCCESS -> {
+
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                showSnackBar(text, SnackBarType.SUCCESS)
+                                if (!valueReturn.isNullOrEmpty()) {
+                                    listItemSelected.map { item ->
+                                        item.decodePath = valueReturn[0]
+                                        viewModel.updateFileVault(item)
+                                        list.add(item)
+                                    }
+                                    ShareData.getInstance().setListItemImage(list)
+                                    val intent = Intent(
+                                        requireContext(), ActivityImageDetail::class.java
+                                    )
+                                    startActivity(intent)
+                                }
+
+                            }
+
+                        }
+
+                        Status.FAILED -> {
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                showSnackBar(text, SnackBarType.FAILED)
+                            }
+                        }
+                    }
+                },
+                action = Action.DECRYPT,
+            )
+            dialogProgress.show(childFragmentManager, dialogProgress.tag)
         }
 
     }
@@ -585,59 +621,55 @@ class FragmentPersistent : Fragment() {
         val list = mutableListOf<FileVaultItem>()
         when (item.fileType) {
             Constant.TYPE_PICTURE -> {
-                list.add(item)
-                ShareData.getInstance().setListItemImage(list)
-                val intent = Intent(
-                    requireContext(), ActivityImageDetail::class.java
-                )
-                startActivity(intent)
-//                if (File(item.decodePath).exists()) {
-//                    list.add(item)
-//                    ShareData.getInstance().setListItemImage(list)
-//                    val intent = Intent(requireContext(), ActivityImageDetail::class.java)
-//                    startActivity(intent)
-//
-//                } else {
-//                    val dialogProgress = DialogProgress(
-//                        listItemSelected = mutableListOf(item),
-//                        listOfSourceFile = mutableListOf(File(item.encryptedPath)),
-//                        listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
-//                        onResult = { status, text, valueReturn ->
-//                            when (status) {
-//                                Status.SUCCESS -> {
-//                                    lifecycleScope.launch(Dispatchers.Main) {
-//                                        showSnackBar(text, SnackBarType.SUCCESS)
-//                                        if (!valueReturn.isNullOrEmpty()) {
-//                                            item.decodePath = valueReturn[0]
-//                                            viewModel.updateFileVault(item)
-//                                            list.add(item)
-//                                            ShareData.getInstance().setListItemImage(list)
-//                                            val intent = Intent(
-//                                                requireContext(), ActivityImageDetail::class.java
-//                                            )
-//                                            startActivity(intent)
-//                                        }
-//
-//                                    }
-//
-//                                }
-//
-//                                Status.FAILED -> {
-//                                    lifecycleScope.launch(Dispatchers.Main) {
-//                                        showSnackBar(text, SnackBarType.FAILED)
-//                                    }
-//                                }
-//                            }
-//                        },
-//                        action = Action.DECRYPT,
-//                        encryptionMode = item.encryptionType
-//
-//                    )
-//                    dialogProgress.show(childFragmentManager, dialogProgress.tag)
-//                }
+                if (File(item.decodePath).exists()) {
+                    list.add(item)
+                    ShareData.getInstance().setListItemImage(list)
+                    val intent = Intent(requireContext(), ActivityImageDetail::class.java)
+                    startActivity(intent)
+
+                } else {
+                    val dialogProgress = DialogProgress(
+                        listItemSelected = mutableListOf(item),
+                        listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                        listOfTargetParentFolder = mutableListOf(requireActivity().config.decryptFolder),
+                        onResult = { status, text, valueReturn ->
+                            when (status) {
+                                Status.SUCCESS -> {
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        showSnackBar(text, SnackBarType.SUCCESS)
+                                        if (!valueReturn.isNullOrEmpty()) {
+                                            item.decodePath = valueReturn[0]
+                                            viewModel.updateFileVault(item)
+                                            list.add(item)
+                                            ShareData.getInstance().setListItemImage(list)
+                                            val intent = Intent(
+                                                requireContext(), ActivityImageDetail::class.java
+                                            )
+                                            startActivity(intent)
+                                        }
+
+                                    }
+
+                                }
+
+                                Status.FAILED -> {
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        showSnackBar(text, SnackBarType.FAILED)
+                                    }
+                                }
+                            }
+                        },
+                        action = Action.DECRYPT,
+                        encryptionMode = item.encryptionType
+
+                    )
+                    dialogProgress.show(childFragmentManager, dialogProgress.tag)
+                }
             }
 
             Constant.TYPE_AUDIOS -> {
+                CustomApplication.app.resumeFromApp = true
+                ((requireActivity() as ActivityVault).application as CustomApplication).authority
                 if (File(item.decodePath).exists()) {
                     item.decodePath.openWith(requireContext(), Constant.TYPE_AUDIOS, null)
                 } else {
@@ -680,11 +712,15 @@ class FragmentPersistent : Fragment() {
                         val intent = Intent(requireContext(), ActivityVideoPlayer::class.java)
                         startActivity(intent)
                     } else {
+                        CustomApplication.app.resumeFromApp = true
+
                         item.decodePath.openWith(
                             requireContext(), Constant.TYPE_VIDEOS, null
                         )
                     }
                 } else {
+                    CustomApplication.app.resumeFromApp = true
+
                     val dialogProgress = DialogProgress(
                         listItemSelected = mutableListOf(item),
                         listOfSourceFile = mutableListOf(File(item.encryptedPath)),
@@ -730,7 +766,9 @@ class FragmentPersistent : Fragment() {
             }
 
             else -> {
+                CustomApplication.app.resumeFromApp = true
                 if (File(item.decodePath).exists()) {
+
                     item.decodePath.openWith(requireContext(), Constant.TYPE_FILE, null)
                 } else {
                     val dialogProgress = DialogProgress(

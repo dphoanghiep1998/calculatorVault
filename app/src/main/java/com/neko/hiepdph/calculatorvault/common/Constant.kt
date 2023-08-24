@@ -82,6 +82,7 @@ object Constant {
     const val KEY_HISTORY_MODEL = "KEY_HISTORY_MODEL_SUGAR_V2"
     const val KEY_NOTE_LIST = "KEY_NOTE_LIST_SUGAR_V2"
     const val KEY_LANGUAGE = "KEY_LANGUAGE_SUGAR_V2"
+    const val KEY_SESSION = "KEY_SESSION"
     const val MAIL_TO = "nekosoft.feedback.app@gmail.com"
     const val URL_PRIVACY = "https://sites.google.com/view/nksoftpolicy/home"
 //    const val URL_APP =

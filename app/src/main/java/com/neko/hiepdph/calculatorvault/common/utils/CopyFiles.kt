@@ -33,17 +33,17 @@ object CopyFiles {
     ) {
         val listOfFileSuccess = mutableListOf<String>()
         val listOfFileFailed = mutableListOf<String>()
-        try {
-            if (files?.isEmpty() == true) return
-            var totalSize = 0L
-            if (tSize == 0L) files?.forEach {
-                totalSize += calFolderSize(it)
-            }
-            else totalSize = tSize
-            var currentSize = 0f
-            // move file
-            files?.forEachIndexed { index, itemFile ->
+        if (files?.isEmpty() == true) return
+        var totalSize = 0L
+        if (tSize == 0L) files?.forEach {
+            totalSize += calFolderSize(it)
+        }
+        else totalSize = tSize
+        var currentSize = 0f
+        // move file
 
+        files?.forEachIndexed { index, itemFile ->
+            try {
                 val targetFile = File(
                     createNewFile(
                         context,
@@ -82,15 +82,11 @@ object CopyFiles {
 
                     }, encryptionMode = encryptionMode
                 )
+            } catch (e: Exception) {
+                listOfFileFailed.add(itemFile.path)
             }
-            onResult(listOfFileSuccess, listOfFileFailed)
-
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            onResult(listOfFileSuccess, listOfFileFailed)
-
         }
+        onResult(listOfFileSuccess, listOfFileFailed)
     }
 
     fun decrypt(
@@ -107,16 +103,17 @@ object CopyFiles {
         val listOfFileTargetSuccess = mutableListOf<String>()
         val listOfFileFailed = mutableListOf<String>()
         var tempIndex = 0
-        try {
-            if (files?.isEmpty() == true) return
-            var totalSize = 0L
-            if (tSize == 0L) files?.forEach {
-                totalSize += calFolderSize(it)
-            }
-            else totalSize = tSize
-            var currentSize = 0f
-            // move file
-            files?.forEachIndexed { index, itemFile ->
+        if (files?.isEmpty() == true) return
+        var totalSize = 0L
+        if (tSize == 0L) files?.forEach {
+            totalSize += calFolderSize(it)
+        }
+        else totalSize = tSize
+        var currentSize = 0f
+        // move file
+        files?.forEachIndexed { index, itemFile ->
+            try {
+
                 tempIndex = index
                 val targetFile = File(
                     createNewFile(
@@ -151,14 +148,11 @@ object CopyFiles {
 
                     }, encryptionMode
                 )
+            } catch (e: Exception) {
+                listOfFileFailed.add(itemFile.path)
             }
-            onResult(listOfFileSuccess, listOfFileTargetSuccess, listOfFileFailed)
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            files?.get(tempIndex)?.let { listOfFileFailed.add(it.path) }
-            onResult(listOfFileSuccess, listOfFileTargetSuccess, listOfFileFailed)
         }
+        onResult(listOfFileSuccess, listOfFileTargetSuccess, listOfFileFailed)
     }
 
     fun unLock(
@@ -173,22 +167,16 @@ object CopyFiles {
     ) {
         val listOfFileSuccess = mutableListOf<String>()
         val listOfFileFailed = mutableListOf<String>()
-        var tempIndex = 0
-        try {
-            if (files?.isEmpty() == true) return
-            var totalSize = 0L
-            if (tSize == 0L) files?.forEach {
-                totalSize += calFolderSize(it)
-            }
-            else totalSize = tSize
-            var currentSize = 0f
-            // move file
-            files?.forEachIndexed { index, itemFile ->
-//                if (File(targetFolders[index], targetName[index]).exists()) {
-//                    listOfFile.add(targetFolders[index].path + "/${targetName}")
-//                    return@forEachIndexed
-//                }
-                tempIndex = index
+        if (files?.isEmpty() == true) return
+        var totalSize = 0L
+        if (tSize == 0L) files?.forEach {
+            totalSize += calFolderSize(it)
+        }
+        else totalSize = tSize
+        var currentSize = 0f
+        // move file
+        files?.forEachIndexed { index, itemFile ->
+            try {
                 val targetFile = File(
                     createNewFile(
                         context,
@@ -230,13 +218,11 @@ object CopyFiles {
                     }, encryptionMode
                 )
 
+            } catch (e: Exception) {
+                listOfFileFailed.add(itemFile.path)
             }
-            onResult(listOfFileSuccess, listOfFileFailed)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            files?.get(tempIndex)?.let { listOfFileFailed.add(it.path) }
-            onResult(listOfFileSuccess, listOfFileFailed)
         }
+        onResult(listOfFileSuccess, listOfFileFailed)
     }
 
     fun copy(
@@ -249,22 +235,20 @@ object CopyFiles {
     ) {
         val listOfFileSuccess = mutableListOf<String>()
         val listOfFileFailed = mutableListOf<String>()
-        var tempIndex = 0
 
-        try {
-            if (files?.isEmpty() == true) return
-            var totalSize = 0L
-            files?.forEach {
-                totalSize += calFolderSize(it)
-            }
-            var currentSize = 0f
-            // move file
-            files?.forEachIndexed { index, itemFile ->
+        if (files?.isEmpty() == true) return
+        var totalSize = 0L
+        files?.forEach {
+            totalSize += calFolderSize(it)
+        }
+        var currentSize = 0f
+        // move file
+        files?.forEachIndexed { index, itemFile ->
+            try {
                 if (File(targetFolders[index], files[index].name).exists()) {
                     listOfFileSuccess.add(targetFolders[index].path + "/${files[index].name}")
                     return@forEachIndexed
                 }
-                tempIndex = index
                 val targetFile =
                     File(createNewFile(context, targetFolders[index], itemFile.name).toString())
                 copyFileToAnotherLocation(context, itemFile, targetFile,
@@ -281,7 +265,7 @@ object CopyFiles {
                     { sourceFile, targetFile, isSuccess ->
                         if (isSuccess) {
                             listOfFileSuccess.add(targetFile.path)
-                            if(isMove){
+                            if (isMove) {
                                 deleteFile(sourceFile, context)
                             }
                         } else {
@@ -292,13 +276,12 @@ object CopyFiles {
                             context, arrayOf(targetFile.path), null, null
                         )
                     })
+            } catch (e: Exception) {
+                listOfFileFailed.add(itemFile.path)
             }
-            onResult(listOfFileSuccess, listOfFileFailed)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            files?.get(tempIndex)?.let { listOfFileFailed.add(it.path) }
-            onResult(listOfFileSuccess, listOfFileFailed)
         }
+        onResult(listOfFileSuccess, listOfFileFailed)
+
     }
 
 

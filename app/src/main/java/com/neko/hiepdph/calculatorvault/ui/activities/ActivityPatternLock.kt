@@ -1,6 +1,5 @@
 package com.neko.hiepdph.calculatorvault.ui.activities
 
-import android.content.Intent
 import android.graphics.SurfaceTexture
 import android.hardware.Camera
 import android.os.Bundle
@@ -21,13 +20,17 @@ import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.config.FingerPrintLockDisplay
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityPatternLockBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.dialog.DialogPassword
 import com.neko.hiepdph.calculatorvault.dialog.SetupPassWordCallBack
+import com.neko.hiepdph.calculatorvault.viewmodel.AppViewModel
 import com.neko.hiepdph.calculatorvault.viewmodel.PinLockViewModel
 import com.takwolf.android.lock9.Lock9View
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
@@ -39,6 +42,8 @@ class ActivityPatternLock : AppCompatActivity() {
     private var takePhotoIntruder = false
     private var camera: Camera? = null
     private val viewModel by viewModels<PinLockViewModel>()
+    private val appViewModel by viewModels<AppViewModel>()
+    private var name = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,13 +113,17 @@ class ActivityPatternLock : AppCompatActivity() {
     }
 
     private fun showBiometric() {
-        if(BiometricUtils.checkBiometricEnrolled(this)){
+        if (BiometricUtils.checkBiometricEnrolled(this)) {
             Log.d("TAG", "showBiometric: ")
             val biometric = biometricConfig {
                 ownerFragmentActivity = this@ActivityPatternLock
                 authenticateSuccess = {
                     (application as CustomApplication).authority = true
                     (application as CustomApplication).isLockShowed = true
+                    if (config.caughtIntruder) {
+                        config.caughtIntruder = false
+
+                    }
                     finish()
                 }
                 authenticateFailed = {
@@ -122,7 +131,31 @@ class ActivityPatternLock : AppCompatActivity() {
                     (application as CustomApplication).isLockShowed = true
                     if (config.photoIntruder && !takePhotoIntruder) {
                         takePicture(action = {
-                            finish()
+                            config.caughtIntruder = true
+                            CoroutineScope(Dispatchers.IO).launch {
+                                if (!config.intruderFolder.exists()) {
+                                    config.intruderFolder.mkdirs()
+                                }
+                                name =
+                                    "lmao_intruder_${config.intruderFolder.listFiles().size}.jpeg"
+                                val file = File(
+                                    config.intruderFolder, name
+                                )
+                                val fos = FileOutputStream(file)
+                                fos.write(byteArray)
+                                fos.close()
+                                lifecycleScope.launch(Dispatchers.Main) {
+                                    viewModel.insertFileToRoom(
+                                        FileVaultItem(
+                                            0,
+                                            "${config.intruderFolder.path}/" + name,
+                                            "${config.intruderFolder.path}/" + name,
+                                            name = name
+                                        )
+                                    )
+                                }
+
+                            }
                         })
 
                     } else if (config.fingerprintFailure) {
@@ -131,10 +164,14 @@ class ActivityPatternLock : AppCompatActivity() {
                 }
             }
             biometric.showPrompt()
-        }else{
+        } else {
             Log.d("TAG", "showBiometric: 1")
             lifecycleScope.launchWhenResumed {
-                Toast.makeText(this@ActivityPatternLock,getString(R.string.finger_enrolled),Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@ActivityPatternLock,
+                    getString(R.string.finger_enrolled),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
@@ -189,17 +226,53 @@ class ActivityPatternLock : AppCompatActivity() {
             if (config.fakePassword) {
                 if (config.photoIntruder && !takePhotoIntruder) {
                     takePicture(action = {
-                        finish()
+                        config.caughtIntruder = true
+                        CoroutineScope(Dispatchers.IO).launch {
+                            if (!config.intruderFolder.exists()) {
+                                config.intruderFolder.mkdirs()
+                            }
+                            val name =
+                                "lmao_intruder_${config.intruderFolder.listFiles().size}.jpeg"
+                            val file = File(
+                                config.intruderFolder, name
+                            )
+                            try {
+                                val fos = FileOutputStream(file)
+                                fos.write(byteArray)
+                                fos.close()
+                                lifecycleScope.launch(Dispatchers.Main) {
+                                    viewModel.insertFileToRoom(
+                                        FileVaultItem(
+                                            0,
+                                            "${config.intruderFolder.path}/" + name,
+                                            "${config.intruderFolder.path}/" + name,
+                                            name = name
+                                        )
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+
+
+                        }
                     })
-                } else {
-                    if (config.photoIntruder && !takePhotoIntruder) {
-                        takePicture(action = {})
-                    }
+                } else if (config.fakePassword) {
+                    finish()
                 }
             }
         } else {
             (application as CustomApplication).authority = true
             (application as CustomApplication).isLockShowed = true
+            if (config.caughtIntruder) {
+                config.caughtIntruder = false
+                appViewModel.deleteMultipleFolder(mutableListOf("${config.intruderFolder}/$name"),
+                    onProgress = { value: Float -> },
+                    onResult = { listOfFileDeletedSuccess, listOfFileDeletedFailed ->
+                        viewModel.deleteLastRow()
+                    })
+
+            }
             finish()
         }
     }
@@ -267,19 +340,6 @@ class ActivityPatternLock : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         stopCamera()
-        if (!(application as CustomApplication).authority) {
-            config.caughtIntruder = true
-            if (!config.intruderFolder.exists()) {
-                config.intruderFolder.mkdirs()
-            }
-            val file = File(
-                config.intruderFolder,
-                "lmao_intruder_${config.intruderFolder.listFiles().size}.jpeg"
-            )
-            val fos = FileOutputStream(file)
-            fos.write(byteArray)
-            fos.close()
-        }
     }
 
     override fun onBackPressed() {
