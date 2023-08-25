@@ -88,31 +88,23 @@ class ActivityCamera : AppCompatActivity() {
                             listItemDiff.add(newItem)
                         }
                     }
-                    val listNameEncrypt = listItemDiff.map { nitem ->
-                        CryptoCore.getSingleInstance()
-                            .encryptString(Constant.SECRET_KEY, nitem.name)
-                    }.toMutableList()
+
                     if (listItemDiff.isNotEmpty()) {
                         viewModel.encrypt(
                             this@ActivityCamera,
-                            listItemDiff.map { mItem -> File(mItem.originalPath) },
+                            listItemDiff,
                             listItemDiff.map { config.picturePrivacyFolder },
-                            listNameEncrypt,
+                            listItemDiff.map { it.name },
                             progress = { _: File? ->
 
                             },
                             onResult = { listSourceSuccess, listSourceFailed ->
                                 if (listSourceSuccess.size == listItemDiff.size) {
                                     lifecycleScope.launch(Dispatchers.Main) {
-                                        listItemDiff.forEachIndexed { index, item ->
+                                        listSourceSuccess.forEachIndexed { index, item ->
                                             item.apply {
-                                                recyclerPath =
-                                                    "${config.recyclerBinFolder.path}/${listNameEncrypt[index]}"
                                                 timeLock = Calendar.getInstance().timeInMillis
                                                 encryptionType = EncryptionMode.HIDDEN
-                                                encryptedPath = "${config.picturePrivacyFolder}/${
-                                                    listNameEncrypt[index]
-                                                }"
                                             }
 
                                             viewModel.insertVaultItem(item, action = {

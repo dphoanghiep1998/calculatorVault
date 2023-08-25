@@ -2,11 +2,14 @@ package com.neko.hiepdph.calculatorvault.common.utils
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.provider.MediaStore
 import android.text.TextUtils
 import com.google.common.io.Files.getNameWithoutExtension
+import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.copyFileToAnotherLocation
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.createNewFile
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.decryptFileToAnotherLocation
@@ -17,33 +20,58 @@ import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.isWritableNor
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.mkdir
 import com.neko.hiepdph.calculatorvault.common.utils.FileNameUtils.unLockFile
 import com.neko.hiepdph.calculatorvault.config.EncryptionMode
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import java.io.File
+import kotlin.math.floor
+import kotlin.math.sqrt
 
 
 object CopyFiles {
     fun encrypt(
         context: Context,
-        files: List<File>?,
+        sourceFileVault: List<FileVaultItem>,
         targetFolders: List<File>,
         targetName: List<String>,
         tSize: Long,
         progress: (value: Float, currentFile: File?) -> Unit,
-        onResult: (listOfFileSuccess: MutableList<String>, listOfFileFailed: MutableList<String>) -> Unit,
+        onResult: (listOfFileSuccess: MutableList<FileVaultItem>, listOfFileFailed: MutableList<FileVaultItem>) -> Unit,
         encryptionMode: Int = EncryptionMode.HIDDEN,
     ) {
-        val listOfFileSuccess = mutableListOf<String>()
-        val listOfFileFailed = mutableListOf<String>()
-        if (files?.isEmpty() == true) return
+        val listOfFileSuccess = mutableListOf<FileVaultItem>()
+        val listOfFileFailed = mutableListOf<FileVaultItem>()
+        if (sourceFileVault.isEmpty()) return
+        val sourceFiles = sourceFileVault.map { File(it.originalPath) }
         var totalSize = 0L
-        if (tSize == 0L) files?.forEach {
+        if (tSize == 0L) sourceFiles.forEach {
             totalSize += calFolderSize(it)
         }
         else totalSize = tSize
         var currentSize = 0f
         // move file
 
-        files?.forEachIndexed { index, itemFile ->
+        sourceFiles.forEachIndexed { index, itemFile ->
             try {
+                val item = sourceFileVault[index].copy()
+                when (item.fileType) {
+                    Constant.TYPE_PICTURE -> {
+                        item.thumb = imagePathToBitmap(item.originalPath)?.let {
+                            scaleBitmap(
+                                it, 1024 * 1024
+                            )
+                        }
+                    }
+
+                    Constant.TYPE_VIDEOS -> {
+                        item.thumb = MediaStoreUtils.getImageThumb(
+                            item.mediaStoreId, context
+                        )?.let { scaleBitmap(it, 1024 * 1024) }
+                    }
+
+                    Constant.TYPE_AUDIOS -> {
+                        item.thumb = MediaStoreUtils.getThumbnail(item.originalPath)
+                            ?.let { scaleBitmap(it, 1024 * 1024) }
+                    }
+                }
                 val targetFile = File(
                     createNewFile(
                         context,
@@ -65,7 +93,8 @@ object CopyFiles {
                     // on finish
                     { sourceFile, targetFiles, isSuccess ->
                         if (isSuccess) {
-                            listOfFileSuccess.add(sourceFile.path)
+                            item.encryptedPath = targetFiles.path
+                            listOfFileSuccess.add(item)
                             deleteFile(sourceFile, context)
                             addMedia(context, targetFiles)
                             context.contentResolver.delete(
@@ -77,13 +106,13 @@ object CopyFiles {
                                 context, arrayOf(sourceFile.path), null, null
                             )
                         } else {
-                            listOfFileFailed.add(sourceFile.path)
+                            listOfFileFailed.add(sourceFileVault[index])
                         }
 
                     }, encryptionMode = encryptionMode
                 )
             } catch (e: Exception) {
-                listOfFileFailed.add(itemFile.path)
+                listOfFileFailed.add(sourceFileVault[index])
             }
         }
         onResult(listOfFileSuccess, listOfFileFailed)
@@ -91,91 +120,95 @@ object CopyFiles {
 
     fun decrypt(
         context: Context,
-        files: List<File>?,
+        files: List<FileVaultItem>,
         targetFolders: List<File>,
         targetName: List<String>,
         tSize: Long,
         progress: (value: Float, currentFile: File?) -> Unit,
-        onResult: (listOfFileDecryptSuccess: MutableList<String>, listOfTargetFile: MutableList<String>, listOfFileDecryptFailed: MutableList<String>) -> Unit,
-        encryptionMode: Int = EncryptionMode.HIDDEN,
+        onResult: (listOfFileVaultSuccess: MutableList<FileVaultItem>, listOfFileVaultFailed: MutableList<FileVaultItem>) -> Unit,
     ) {
-        val listOfFileSuccess = mutableListOf<String>()
-        val listOfFileTargetSuccess = mutableListOf<String>()
-        val listOfFileFailed = mutableListOf<String>()
-        var tempIndex = 0
-        if (files?.isEmpty() == true) return
+        val listOfFileVaultSuccess = mutableListOf<FileVaultItem>()
+        val listOfFileVaultFailed = mutableListOf<FileVaultItem>()
+        if (files.isEmpty()) return
+        val listSourceFiles =
+            files.map { if (it.isDeleted) File(it.recyclerPath) else File(it.encryptedPath) }
         var totalSize = 0L
-        if (tSize == 0L) files?.forEach {
+        if (tSize == 0L) listSourceFiles.forEach {
             totalSize += calFolderSize(it)
         }
         else totalSize = tSize
         var currentSize = 0f
         // move file
-        files?.forEachIndexed { index, itemFile ->
+        listSourceFiles.forEachIndexed { index, itemFile ->
             try {
+                if (files[index].decodePath != "" && File(files[index].decodePath).exists()) {
+                    listOfFileVaultSuccess.add(files[index])
+                } else {
+                    val targetFile = File(
+                        createNewFile(
+                            context,
+                            targetFolders[index],
+                            targetName[index],
+                        ).toString()
+                    )
+                    decryptFileToAnotherLocation(
+                        context, itemFile, targetFile,
+                        // on progress
+                        { len, file ->
+                            run {
+                                currentSize += len
+                                progress(
+                                    (currentSize * 100 / totalSize), file
+                                )
+                            }
+                        },
+                        // on finish
+                        { _, targetFiles, isSuccess ->
+                            if (isSuccess) {
+                                val newItem = files[index].copy()
+                                newItem.decodePath = targetFiles.path
+                                listOfFileVaultSuccess.add(newItem)
+                                addMedia(context, targetFiles)
+                                MediaScannerConnection.scanFile(
+                                    context, arrayOf(targetFiles.path), null, null
+                                )
+                            } else {
+                                listOfFileVaultFailed.add(files[index])
+                            }
 
-                tempIndex = index
-                val targetFile = File(
-                    createNewFile(
-                        context,
-                        targetFolders[index],
-                        targetName[index],
-                    ).toString()
-                )
-                decryptFileToAnotherLocation(
-                    context, itemFile, targetFile,
-                    // on progress
-                    { len, file ->
-                        run {
-                            currentSize += len
-                            progress(
-                                (currentSize * 100 / totalSize), file
-                            )
-                        }
-                    },
-                    // on finish
-                    { sourceFile, targetFiles, isSuccess ->
-                        if (isSuccess) {
-                            listOfFileSuccess.add(sourceFile.path)
-                            listOfFileTargetSuccess.add(targetFiles.path)
-                            addMedia(context, targetFiles)
-                            MediaScannerConnection.scanFile(
-                                context, arrayOf(targetFiles.path), null, null
-                            )
-                        } else {
-                            listOfFileFailed.add(sourceFile.path)
-                        }
+                        }, files[index].encryptionType
+                    )
+                }
 
-                    }, encryptionMode
-                )
             } catch (e: Exception) {
-                listOfFileFailed.add(itemFile.path)
+                listOfFileVaultFailed.add(files[index])
             }
         }
-        onResult(listOfFileSuccess, listOfFileTargetSuccess, listOfFileFailed)
+        onResult(listOfFileVaultSuccess, listOfFileVaultFailed)
     }
 
     fun unLock(
         context: Context,
-        files: List<File>?,
+        files: List<FileVaultItem>,
         targetFolders: List<File>,
         targetName: List<String>,
         tSize: Long,
         progress: (value: Float, currentFile: File?) -> Unit,
-        onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit,
-        encryptionMode: Int = EncryptionMode.HIDDEN,
+        onResult: (listOfFileDeletedSuccess: MutableList<FileVaultItem>, listOfFileDeletedFailed: MutableList<FileVaultItem>) -> Unit,
     ) {
-        val listOfFileSuccess = mutableListOf<String>()
-        val listOfFileFailed = mutableListOf<String>()
-        if (files?.isEmpty() == true) return
+        val listOfFileSuccess = mutableListOf<FileVaultItem>()
+        val listOfFileFailed = mutableListOf<FileVaultItem>()
+        if (files.isEmpty()) return
+        val listOfFile =
+            files.map { if (it.isDeleted) File(it.recyclerPath) else File(it.encryptedPath) }
         var totalSize = 0L
-        if (tSize == 0L) files?.forEach {
+        if (tSize == 0L) listOfFile.forEach {
             totalSize += calFolderSize(it)
         }
         else totalSize = tSize
         var currentSize = 0f
         // move file
-        files?.forEachIndexed { index, itemFile ->
+        listOfFile.forEachIndexed { index, itemFile ->
             try {
                 val targetFile = File(
                     createNewFile(
@@ -199,7 +232,7 @@ object CopyFiles {
                     // on finish
                     { sourceFile, targetFile, isSuccess ->
                         if (isSuccess) {
-                            listOfFileSuccess.add(sourceFile.path)
+                            listOfFileSuccess.add(files[index])
                             deleteFile(sourceFile, context)
                             addMedia(context, targetFile)
                             context.contentResolver.delete(
@@ -211,15 +244,15 @@ object CopyFiles {
                                 context, arrayOf(sourceFile.path), null, null
                             )
                         } else {
-                            listOfFileFailed.add(sourceFile.path)
+                            listOfFileFailed.add(files[index])
 
                         }
 
-                    }, encryptionMode
+                    }, files[index].encryptionType
                 )
 
             } catch (e: Exception) {
-                listOfFileFailed.add(itemFile.path)
+                listOfFileFailed.add(files[index])
             }
         }
         onResult(listOfFileSuccess, listOfFileFailed)
@@ -227,28 +260,26 @@ object CopyFiles {
 
     fun copy(
         context: Context,
-        files: List<File>?,
+        files: List<FileVaultItem>,
         targetFolders: List<File>,
         progress: (value: Float, currentFile: File?) -> Unit,
-        onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit,
+        onResult: (listOfFileDeletedSuccess: MutableList<FileVaultItem>, listOfFileDeletedFailed: MutableList<FileVaultItem>) -> Unit,
         isMove: Boolean = false
     ) {
-        val listOfFileSuccess = mutableListOf<String>()
-        val listOfFileFailed = mutableListOf<String>()
+        val listOfFileSuccess = mutableListOf<FileVaultItem>()
+        val listOfFileFailed = mutableListOf<FileVaultItem>()
 
-        if (files?.isEmpty() == true) return
+        if (files.isEmpty()) return
         var totalSize = 0L
-        files?.forEach {
+        val newListFile =
+            files.map { if (it.isDeleted) File(it.recyclerPath) else File(it.encryptedPath) }
+        newListFile.forEach {
             totalSize += calFolderSize(it)
         }
         var currentSize = 0f
         // move file
-        files?.forEachIndexed { index, itemFile ->
+        newListFile.forEachIndexed { index, itemFile ->
             try {
-                if (File(targetFolders[index], files[index].name).exists()) {
-                    listOfFileSuccess.add(targetFolders[index].path + "/${files[index].name}")
-                    return@forEachIndexed
-                }
                 val targetFile =
                     File(createNewFile(context, targetFolders[index], itemFile.name).toString())
                 copyFileToAnotherLocation(context, itemFile, targetFile,
@@ -264,12 +295,12 @@ object CopyFiles {
                     // on finish
                     { sourceFile, targetFile, isSuccess ->
                         if (isSuccess) {
-                            listOfFileSuccess.add(targetFile.path)
+                            listOfFileSuccess.add(files[index])
                             if (isMove) {
                                 deleteFile(sourceFile, context)
                             }
                         } else {
-                            listOfFileFailed.add(targetFile.path)
+                            listOfFileFailed.add(files[index])
                         }
                         addMedia(context, targetFile)
                         MediaScannerConnection.scanFile(
@@ -277,7 +308,64 @@ object CopyFiles {
                         )
                     })
             } catch (e: Exception) {
-                listOfFileFailed.add(itemFile.path)
+                listOfFileFailed.add(files[index])
+            }
+        }
+        onResult(listOfFileSuccess, listOfFileFailed)
+
+    }
+
+    fun delete(
+        context: Context,
+        files: List<FileVaultItem>,
+        targetFolders: List<File>,
+        progress: (value: Float, currentFile: File?) -> Unit,
+        onResult: (listOfFileDeletedSuccess: MutableList<FileVaultItem>, listOfFileDeletedFailed: MutableList<FileVaultItem>) -> Unit,
+    ) {
+        val listOfFileSuccess = mutableListOf<FileVaultItem>()
+        val listOfFileFailed = mutableListOf<FileVaultItem>()
+
+        if (files.isEmpty()) return
+        var totalSize = 0L
+        val newListFile =
+            files.map { if (it.isDeleted) File(it.recyclerPath) else File(it.encryptedPath) }
+        newListFile.forEach {
+            totalSize += calFolderSize(it)
+        }
+        var currentSize = 0f
+        // move file
+        newListFile.forEachIndexed { index, itemFile ->
+            try {
+                val targetFile =
+                    File(createNewFile(context, targetFolders[index], itemFile.name).toString())
+                copyFileToAnotherLocation(context, itemFile, targetFile,
+                    // on progress
+                    { len, file ->
+                        run {
+                            currentSize += len
+                            progress(
+                                (currentSize * 100 / totalSize), file
+                            )
+                        }
+                    },
+                    // on finish
+                    { sourceFile, targetFile, isSuccess ->
+                        if (isSuccess) {
+                            val newItem = files[index].copy().apply {
+                                recyclerPath = targetFile.path
+                            }
+                            listOfFileSuccess.add(newItem)
+                            deleteFile(sourceFile, context)
+                        } else {
+                            listOfFileFailed.add(files[index])
+                        }
+                        addMedia(context, targetFile)
+                        MediaScannerConnection.scanFile(
+                            context, arrayOf(targetFile.path), null, null
+                        )
+                    })
+            } catch (e: Exception) {
+                listOfFileFailed.add(files[index])
             }
         }
         onResult(listOfFileSuccess, listOfFileFailed)
@@ -351,4 +439,36 @@ object CopyFiles {
             name
         }
     }
+
+    private fun imagePathToBitmap(filePath: String): Bitmap? {
+        val image = File(filePath)
+        val bmOptions = BitmapFactory.Options()
+        return try {
+            BitmapFactory.decodeFile(image.path, bmOptions)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun scaleBitmap(
+        input: Bitmap, maxBytes: Long
+    ): Bitmap? {
+        val currentWidth = input.width
+        val currentHeight = input.height
+        val currentPixels = currentWidth * currentHeight
+        // Get the amount of max pixels:
+        // 1 pixel = 4 bytes (R, G, B, A)
+        val maxPixels = maxBytes / 4 // Floored
+        if (currentPixels <= maxPixels) {
+            // Already correct size:
+            return input
+        }
+        // Scaling factor when maintaining aspect ratio is the square root since x and y have a relation:
+        val scaleFactor = sqrt(maxPixels / currentPixels.toDouble())
+        val newWidthPx = floor(currentWidth * scaleFactor).toInt()
+        val newHeightPx = floor(currentHeight * scaleFactor).toInt()
+        return Bitmap.createScaledBitmap(input, newWidthPx, newHeightPx, true)
+    }
+
+
 }

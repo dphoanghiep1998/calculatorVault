@@ -53,18 +53,4 @@ class RecyclerBinViewModel @Inject constructor(val appRepo: AppRepo) : ViewModel
     }
 
 
-    fun restoreFile(
-        context: Context,
-        files: List<File>?,
-        targetFolder: List<File>,
-        progress: (value: Float, currentFile: File?) -> Unit,
-        onResult: (listOfFileDeletedSuccess: MutableList<String>, listOfFileDeletedFailed: MutableList<String>) -> Unit
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            CopyFiles.copy(
-                context, files, targetFolder, progress, onResult
-            )
-        }
-    }
-
 }

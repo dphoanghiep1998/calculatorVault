@@ -18,7 +18,6 @@ class ImagePagerAdapter(val context: Context, private val listImage: MutableList
     init {
         listImage.forEachIndexed { index, _ ->
             val photoView = CustomPhotoView(context)
-
             Glide.with(context).load(listImage[index].decodePath).error(R.drawable.ic_error_image)
                 .centerInside().into(photoView)
             photoView.setOnViewTapListener { view, x, y ->

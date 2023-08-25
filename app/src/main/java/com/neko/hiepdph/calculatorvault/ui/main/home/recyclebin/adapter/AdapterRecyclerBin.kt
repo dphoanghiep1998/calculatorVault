@@ -88,7 +88,7 @@ class AdapterRecyclerBin(
             binding.checkBox.isChecked = item in listOfItemSelected
             when (item.fileType) {
                 Constant.TYPE_PICTURE -> {
-                    Glide.with(itemView.context).load(item.decodePath).centerCrop()
+                    Glide.with(itemView.context).load(item.thumb).centerCrop()
                         .apply(requestOptions).error(R.drawable.ic_error_image)
                         .into(binding.imvThumb)
 
@@ -98,7 +98,7 @@ class AdapterRecyclerBin(
                 }
 
                 Constant.TYPE_AUDIOS -> {
-                    Glide.with(itemView.context).asBitmap().load(getThumbnail(item.recyclerPath))
+                    Glide.with(itemView.context).asBitmap().load(item.thumb)
                         .apply(requestOptions).centerCrop().error(R.drawable.ic_error_audio)
                         .into(binding.imvThumb)
 
@@ -108,7 +108,7 @@ class AdapterRecyclerBin(
                 }
 
                 Constant.TYPE_VIDEOS -> {
-                    Glide.with(itemView.context).load(item.recyclerPath).centerCrop()
+                    Glide.with(itemView.context).load(item.thumb).centerCrop()
                         .apply(requestOptions).error(R.drawable.ic_error_video)
                         .into(binding.imvThumb)
 

@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,23 +14,32 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
+import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.FragmentIntruderBinding
+import com.neko.hiepdph.calculatorvault.sharedata.ShareData
+import com.neko.hiepdph.calculatorvault.ui.activities.ActivityImageDetail
+import com.neko.hiepdph.calculatorvault.viewmodel.AppViewModel
 import com.neko.hiepdph.calculatorvault.viewmodel.IntruderViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.File
 
 @AndroidEntryPoint
 class FragmentIntruder : Fragment() {
     private lateinit var binding: FragmentIntruderBinding
     private var adapter: AdapterIntruder? = null
     private val viewModel by activityViewModels<IntruderViewModel>()
+    private val appViewModel by activityViewModels<AppViewModel>()
     private var action: (() -> Unit)? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -45,11 +55,12 @@ class FragmentIntruder : Fragment() {
     }
 
     private fun observeData() {
-        viewModel.getItemListFromFolder(requireContext().config.intruderFolder.path).observe(viewLifecycleOwner) {
-            it?.let {
-                adapter?.setData(it)
+        viewModel.getItemListFromFolder(requireContext().config.intruderFolder.path)
+            .observe(viewLifecycleOwner) {
+                it?.let {
+                    adapter?.setData(it)
+                }
             }
-        }
     }
 
     private fun initView() {
@@ -60,7 +71,36 @@ class FragmentIntruder : Fragment() {
 
     private fun initRecyclerView() {
         adapter = AdapterIntruder {
+            Log.d("TAG", "initRecyclerView: ")
+            val listItem = mutableListOf<FileVaultItem>()
+            appViewModel.decrypt(
+                requireContext(),
+                mutableListOf(it),
+                mutableListOf(requireActivity().config.decryptFolder),
+                mutableListOf(it.name),
+                progress = { _: File? ->
+                },
+                onResult = { listOfFileVaultSuccess, listOfFileVaultFailed ->
+                    if (listOfFileVaultSuccess.size == 1) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            listOfFileVaultSuccess.map {
+                                listItem.add(it)
+                            }
+                            ShareData.getInstance().setListItemImage(listItem)
+                            val bundle = Bundle()
 
+                            val intent = Intent(requireContext(), ActivityImageDetail::class.java)
+                            startActivity(intent)
+                        }
+                    }
+                    if (listOfFileVaultFailed.size == 1) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+
+                        }
+                    }
+
+                },
+            )
         }
         binding.rcvIntruder.adapter = adapter
         binding.rcvIntruder.layoutManager =
@@ -84,7 +124,7 @@ class FragmentIntruder : Fragment() {
                     requireContext().config.photoIntruder =
                         binding.itemIntruderSelfie.switchChange.isChecked
                 }
-            }else{
+            } else {
                 requireContext().config.photoIntruder =
                     binding.itemIntruderSelfie.switchChange.isChecked
             }
@@ -120,6 +160,7 @@ class FragmentIntruder : Fragment() {
                     )
                 )
             } else {
+                CustomApplication.app.resumeFromApp = true
                 launcher.launch(Manifest.permission.CAMERA)
 
             }
@@ -133,6 +174,10 @@ class FragmentIntruder : Fragment() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (requireContext().checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                 action()
+            } else {
+                binding.itemIntruderSelfie.switchChange.isChecked = false
+                requireContext().config.photoIntruder =
+                    binding.itemIntruderSelfie.switchChange.isChecked
             }
         }.launch(intent)
     }
@@ -141,6 +186,10 @@ class FragmentIntruder : Fragment() {
     private val launcher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
         if (requireContext().checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             action?.invoke()
+        } else {
+            binding.itemIntruderSelfie.switchChange.isChecked = false
+            requireContext().config.photoIntruder =
+                binding.itemIntruderSelfie.switchChange.isChecked
         }
     }
 }

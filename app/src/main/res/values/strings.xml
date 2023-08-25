@@ -359,6 +359,8 @@
     <string name="add_bookmark">Add to bookmark successfully!</string>
     <string name="delete_permanent_instruction">This %s will be deleted permanent.\nAre you sure to continue ?</string>
     <string name="encrypt_failed">Encrypt failed because file is not exist!</string>
+    <string name="encrypt_failed_condition">Encrypt failed %s files</string>
+    <string name="encrypt_success_condition">Encrypt successfully %s files</string>
     <string name="back_note_tip">Not completed note found, still back ?</string>
     <string name="processing">App is processing, please wait ...</string>
 

@@ -264,14 +264,16 @@ class FragmentRecycleBin : Fragment() {
                                     lifecycleScope.launch(Dispatchers.Main) {
                                         showSnackBar(text, SnackBarType.SUCCESS)
                                         if (!valueReturn.isNullOrEmpty()) {
-                                            item.decodePath = valueReturn[0]
-                                            viewModel.updateFileVault(item)
-                                            list.add(item)
-                                            ShareData.getInstance().setListItemImage(list)
-                                            val intent = Intent(
-                                                requireContext(), ActivityImageDetail::class.java
-                                            )
-                                            startActivity(intent)
+                                            valueReturn.map { item ->
+                                                list.add(item)
+                                                ShareData.getInstance().setListItemImage(list)
+                                                val intent = Intent(
+                                                    requireContext(),
+                                                    ActivityImageDetail::class.java
+                                                )
+                                                startActivity(intent)
+                                            }
+
                                         }
 
                                     }
@@ -308,11 +310,12 @@ class FragmentRecycleBin : Fragment() {
                                 when (status) {
                                     Status.SUCCESS -> {
                                         if (!valuesReturn.isNullOrEmpty()) {
-                                            item.decodePath = valuesReturn[0]
-                                            viewModel.updateFileVault(item)
-                                            item.decodePath.openWith(
-                                                requireContext(), Constant.TYPE_AUDIOS, null
-                                            )
+                                            valuesReturn.map { item ->
+                                                item.decodePath.openWith(
+                                                    requireContext(), Constant.TYPE_AUDIOS, null
+                                                )
+                                            }
+
                                         }
 
                                     }
@@ -357,21 +360,22 @@ class FragmentRecycleBin : Fragment() {
                                 when (status) {
                                     Status.SUCCESS -> {
                                         if (!valuesReturn.isNullOrEmpty()) {
-                                            item.decodePath = valuesReturn[0]
-                                            viewModel.updateFileVault(item)
-                                            list.add(item)
-                                            if (requireContext().config.playVideoMode) {
-                                                ShareData.getInstance().setListItemVideo(list)
-                                                val intent = Intent(
-                                                    requireContext(),
-                                                    ActivityVideoPlayer::class.java
-                                                )
-                                                startActivity(intent)
-                                            } else {
-                                                item.decodePath.openWith(
-                                                    requireContext(), Constant.TYPE_VIDEOS, null
-                                                )
+                                            valuesReturn.map { item ->
+                                                list.add(item)
+                                                if (requireContext().config.playVideoMode) {
+                                                    ShareData.getInstance().setListItemVideo(list)
+                                                    val intent = Intent(
+                                                        requireContext(),
+                                                        ActivityVideoPlayer::class.java
+                                                    )
+                                                    startActivity(intent)
+                                                } else {
+                                                    item.decodePath.openWith(
+                                                        requireContext(), Constant.TYPE_VIDEOS, null
+                                                    )
+                                                }
                                             }
+
                                         }
 
                                     }
@@ -407,10 +411,12 @@ class FragmentRecycleBin : Fragment() {
                                 when (status) {
                                     Status.SUCCESS -> {
                                         if (!valuesReturn.isNullOrEmpty()) {
-                                            item.decodePath = valuesReturn[0]
-                                            item.decodePath.openWith(
-                                                requireContext(), Constant.TYPE_FILE, null
-                                            )
+                                            valuesReturn.map { item ->
+                                                item.decodePath.openWith(
+                                                    requireContext(), Constant.TYPE_FILE, null
+                                                )
+                                            }
+
                                         }
 
                                     }

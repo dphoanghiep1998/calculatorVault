@@ -1,12 +1,7 @@
 package com.neko.hiepdph.calculatorvault.ui.activities
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.Handler
-import android.os.IBinder
 import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
@@ -14,6 +9,7 @@ import android.view.animation.RotateAnimation
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.exoplayer2.DefaultRenderersFactory
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
@@ -25,23 +21,22 @@ import com.neko.hiepdph.calculatorvault.config.RepeatMode
 import com.neko.hiepdph.calculatorvault.databinding.ActivityAudioPlayerBinding
 import com.neko.hiepdph.calculatorvault.sharedata.ShareData
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.*
+import java.util.Objects
 
 @AndroidEntryPoint
 class ActivityAudioPlayer : AppCompatActivity() {
     private lateinit var binding: ActivityAudioPlayerBinding
-
-    companion object {
-        private var player: ExoPlayer? = null
-    }
-
-    private var isBound = false
+    private var player: Player? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAudioPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        val defaultRenderersFactory = DefaultRenderersFactory(this)
+        defaultRenderersFactory.forceDisableMediaCodecAsynchronousQueueing()
+        player = ExoPlayer.Builder(this).setRenderersFactory(defaultRenderersFactory)
+            .setSeekForwardIncrementMs(15000).build()
         initToolbar()
         initView()
         initButton()
@@ -51,11 +46,12 @@ class ActivityAudioPlayer : AppCompatActivity() {
         player?.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
-                if(isPlaying){
+                if (isPlaying) {
                     binding.tvAudioNameFull.text = Objects.requireNonNull(
                         player!!.currentMediaItem
                     )?.mediaMetadata?.title
-                    binding.progressDuration.text = getReadableTime(player!!.currentPosition.toInt())
+                    binding.progressDuration.text =
+                        getReadableTime(player!!.currentPosition.toInt())
                     binding.audioProgress.progress = player!!.currentPosition.toInt()
                     binding.totalDuration.text = getReadableTime(player!!.duration.toInt())
                     binding.audioProgress.max = player!!.duration.toInt()
@@ -65,6 +61,7 @@ class ActivityAudioPlayer : AppCompatActivity() {
                     binding.imvThumbCircle.animation = loadRotation()
                 }
             }
+
             override fun onPlaybackStateChanged(playbackState: Int) {
                 super.onPlaybackStateChanged(playbackState)
                 Log.d("TAG", "onPlaybackStateChanged: " + playbackState)
@@ -108,8 +105,8 @@ class ActivityAudioPlayer : AppCompatActivity() {
             }
         })
         //checking if the player is playing
-        Log.d("TAG", "initPlayer: "+ player)
-        Log.d("TAG", "initPlayer: "+ player?.isPlaying)
+        Log.d("TAG", "initPlayer: " + player)
+        Log.d("TAG", "initPlayer: " + player?.isPlaying)
         if (player?.isPlaying == true) {
             binding.tvAudioNameFull.text = Objects.requireNonNull(
                 player!!.currentMediaItem
@@ -170,10 +167,12 @@ class ActivityAudioPlayer : AppCompatActivity() {
                 player?.repeatMode = Player.REPEAT_MODE_ALL
                 binding.btnRepeat.setImageResource(R.drawable.ic_repeat)
             }
+
             RepeatMode.REPEAT_ONE -> {
                 player?.repeatMode = Player.REPEAT_MODE_ONE
                 binding.btnRepeat.setImageResource(R.drawable.ic_repeat_1)
             }
+
             else -> {
                 player?.repeatMode = Player.REPEAT_MODE_OFF
                 binding.btnRepeat.setImageResource(R.drawable.ic_shuffle)
@@ -192,11 +191,13 @@ class ActivityAudioPlayer : AppCompatActivity() {
                     config.repeat = RepeatMode.REPEAT_ONE
                     binding.btnRepeat.setImageResource(R.drawable.ic_repeat_1)
                 }
+
                 RepeatMode.REPEAT_ONE -> {
                     player?.repeatMode = Player.REPEAT_MODE_OFF
                     config.repeat = RepeatMode.SUFFLE
                     binding.btnRepeat.setImageResource(R.drawable.ic_shuffle)
                 }
+
                 else -> {
                     player?.repeatMode = Player.REPEAT_MODE_ALL
                     config.repeat = RepeatMode.REPEAT_ALL

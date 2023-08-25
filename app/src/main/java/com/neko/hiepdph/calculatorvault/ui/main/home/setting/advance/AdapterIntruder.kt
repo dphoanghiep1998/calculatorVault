@@ -36,7 +36,7 @@ class AdapterIntruder(private val onClickItem: (FileVaultItem) -> Unit) :
             binding.checkBox.hide()
             Glide.with(itemView.context).load(item.encryptedPath).error(R.drawable.ic_error_image)
                 .into(binding.imvThumb)
-            binding.root.clickWithDebounce {
+            binding.imvThumb.clickWithDebounce {
                 onClickItem(item)
             }
         }

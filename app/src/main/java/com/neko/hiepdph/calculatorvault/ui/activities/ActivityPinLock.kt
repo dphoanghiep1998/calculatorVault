@@ -431,17 +431,6 @@ class ActivityPinLock : AppCompatActivity() {
         super.onDestroy()
         Log.d("TAG", "onDestroy: ")
         stopCamera()
-        val session = AppSharePreference.getInstance(this).getSessionCount(0)
-//        if ((application as CustomApplication).authority && session == 0 && config.caughtIntruder) {
-//            config.caughtIntruder = false
-//            AppSharePreference.getInstance(this).saveSessionCount(1)
-//            appViewModel.deleteMultipleFolder(mutableListOf("${config.intruderFolder}/$name"),
-//                onProgress = { value: Float -> },
-//                onResult = { listOfFileDeletedSuccess, listOfFileDeletedFailed ->
-//                    viewModel.deleteLastRow()
-//                })
-//
-//        }
 
     }
 

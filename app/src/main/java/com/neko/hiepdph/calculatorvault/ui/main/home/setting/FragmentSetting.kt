@@ -17,6 +17,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.*
 import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionO
@@ -192,6 +193,7 @@ class FragmentSetting : Fragment() {
                     )
                 )
             } else {
+                CustomApplication.app.resumeFromApp = true
                 launcher.launch(Manifest.permission.CAMERA)
 
             }

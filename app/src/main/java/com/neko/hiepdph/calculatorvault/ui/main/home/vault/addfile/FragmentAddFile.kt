@@ -101,7 +101,6 @@ class FragmentAddFile : Fragment() {
 
     private fun observeListGroupData() {
         viewModel.listItemListGroupFile.observe(viewLifecycleOwner) {
-            Log.d("TAG", "observeListGroupData: " + it)
             it?.let {
                 adapter.submitList(it)
                 binding.loading.hide()

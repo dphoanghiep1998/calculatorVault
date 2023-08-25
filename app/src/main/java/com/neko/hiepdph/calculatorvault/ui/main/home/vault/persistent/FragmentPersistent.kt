@@ -414,7 +414,7 @@ class FragmentPersistent : Fragment() {
                 lifecycleScope.launch(Dispatchers.Main) {
                     if (status == Status.SUCCESS) {
                         valueReturn?.let {
-                            requireContext().shareFile(it.map { path -> path })
+                            requireContext().shareFile(it.map { item -> item.encryptedPath })
                         }
                     }
                     if (status == Status.FAILED) {
@@ -446,13 +446,10 @@ class FragmentPersistent : Fragment() {
                 onResult = { status, text, valueReturn ->
                     when (status) {
                         Status.SUCCESS -> {
-
                             lifecycleScope.launch(Dispatchers.Main) {
                                 showSnackBar(text, SnackBarType.SUCCESS)
                                 if (!valueReturn.isNullOrEmpty()) {
-                                    listItemSelected.map { item ->
-                                        item.decodePath = valueReturn[0]
-                                        viewModel.updateFileVault(item)
+                                    valueReturn.map { item ->
                                         list.add(item)
                                     }
                                     ShareData.getInstance().setListItemImage(list)
@@ -638,14 +635,16 @@ class FragmentPersistent : Fragment() {
                                     lifecycleScope.launch(Dispatchers.Main) {
                                         showSnackBar(text, SnackBarType.SUCCESS)
                                         if (!valueReturn.isNullOrEmpty()) {
-                                            item.decodePath = valueReturn[0]
-                                            viewModel.updateFileVault(item)
-                                            list.add(item)
-                                            ShareData.getInstance().setListItemImage(list)
-                                            val intent = Intent(
-                                                requireContext(), ActivityImageDetail::class.java
-                                            )
-                                            startActivity(intent)
+                                            valueReturn.map { item ->
+                                                list.add(item)
+                                                ShareData.getInstance().setListItemImage(list)
+                                                val intent = Intent(
+                                                    requireContext(),
+                                                    ActivityImageDetail::class.java
+                                                )
+                                                startActivity(intent)
+                                            }
+
                                         }
 
                                     }
@@ -682,11 +681,12 @@ class FragmentPersistent : Fragment() {
                                 when (status) {
                                     Status.SUCCESS -> {
                                         if (!valuesReturn.isNullOrEmpty()) {
-                                            item.decodePath = valuesReturn[0]
-                                            viewModel.updateFileVault(item)
-                                            item.decodePath.openWith(
-                                                requireContext(), Constant.TYPE_AUDIOS, null
-                                            )
+                                            valuesReturn.map {
+                                                it.decodePath.openWith(
+                                                    requireContext(), Constant.TYPE_AUDIOS, null
+                                                )
+                                            }
+
                                         }
 
                                     }
@@ -730,21 +730,22 @@ class FragmentPersistent : Fragment() {
                                 when (status) {
                                     Status.SUCCESS -> {
                                         if (!valuesReturn.isNullOrEmpty()) {
-                                            item.decodePath = valuesReturn[0]
-                                            viewModel.updateFileVault(item)
-                                            list.add(item)
-                                            if (requireContext().config.playVideoMode) {
-                                                ShareData.getInstance().setListItemVideo(list)
-                                                val intent = Intent(
-                                                    requireContext(),
-                                                    ActivityVideoPlayer::class.java
-                                                )
-                                                startActivity(intent)
-                                            } else {
-                                                item.decodePath.openWith(
-                                                    requireContext(), Constant.TYPE_VIDEOS, null
-                                                )
+                                            valuesReturn.map { item ->
+                                                list.add(item)
+                                                if (requireContext().config.playVideoMode) {
+                                                    ShareData.getInstance().setListItemVideo(list)
+                                                    val intent = Intent(
+                                                        requireContext(),
+                                                        ActivityVideoPlayer::class.java
+                                                    )
+                                                    startActivity(intent)
+                                                } else {
+                                                    item.decodePath.openWith(
+                                                        requireContext(), Constant.TYPE_VIDEOS, null
+                                                    )
+                                                }
                                             }
+
                                         }
 
                                     }
@@ -780,10 +781,13 @@ class FragmentPersistent : Fragment() {
                                 when (status) {
                                     Status.SUCCESS -> {
                                         if (!valuesReturn.isNullOrEmpty()) {
-                                            item.decodePath = valuesReturn[0]
-                                            item.decodePath.openWith(
-                                                requireContext(), Constant.TYPE_FILE, null
-                                            )
+                                            valuesReturn.map { item ->
+
+                                                item.decodePath.openWith(
+                                                    requireContext(), Constant.TYPE_FILE, null
+                                                )
+                                            }
+
                                         }
 
                                     }

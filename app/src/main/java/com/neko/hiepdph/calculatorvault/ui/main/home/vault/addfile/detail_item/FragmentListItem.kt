@@ -117,7 +117,6 @@ class FragmentListItem : Fragment() {
                     listItemSelected.map { File(args.vaultPath) },
                     Action.ENCRYPT,
                     requireContext().config.encryptionMode,
-                    args.vaultPath,
                     onResult = { status, text, valuesReturn ->
                         lifecycleScope.launch(Dispatchers.Main) {
                             when (status) {
@@ -145,7 +144,6 @@ class FragmentListItem : Fragment() {
                         listItemSelected.map { File(args.vaultPath) },
                         Action.ENCRYPT,
                         encryptionMode = enMode,
-                        args.vaultPath,
                         onResult = { status, text, valuesReturn ->
                             when (status) {
                                 Status.SUCCESS -> {

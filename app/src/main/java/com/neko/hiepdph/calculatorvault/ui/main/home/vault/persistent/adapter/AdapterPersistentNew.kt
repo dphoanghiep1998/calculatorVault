@@ -2,8 +2,8 @@ package com.neko.hiepdph.calculatorvault.ui.main.home.vault.persistent.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Base64
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -48,6 +48,7 @@ class AdapterPersistentNew(
     }
 
     private fun showCheckboxAll() {
+        Log.d("TAG", "showCheckboxAll: "+differ.currentList.size)
         notifyItemRangeChanged(0, differ.currentList.size, PAYLOAD_CHECK)
     }
 
@@ -123,6 +124,38 @@ class AdapterPersistentNew(
     ) {
         if (payloads.isEmpty()) {
             super.onBindViewHolder(holder, position, payloads)
+            when (holder.itemViewType) {
+                0 -> {
+                    with(holder as ItemPictureViewHolder) {
+                        bind(differ.currentList[position])
+                    }
+                }
+
+                1 -> {
+                    with(holder as ItemAudioViewHolder) {
+                        bind(differ.currentList[position])
+                    }
+                }
+
+                2 -> {
+                    with(holder as ItemVideoViewHolder) {
+                        bind(differ.currentList[position])
+                    }
+                }
+
+                3 -> {
+                    with(holder as ItemFileViewHolder) {
+                        bind(differ.currentList[position])
+                    }
+                }
+
+                else -> {
+                    with(holder as ItemOtherFileViewHolder) {
+                        bind(differ.currentList[position])
+                    }
+                }
+            }
+
         } else {
             for (payload in payloads) {
                 if (payload == PAYLOAD_CHECK) {
@@ -132,7 +165,6 @@ class AdapterPersistentNew(
                             with(holder as ItemPictureViewHolder) {
                                 if (editMode) {
                                     binding.checkBox.show()
-
                                 } else {
                                     binding.checkBox.hide()
                                 }
@@ -198,37 +230,6 @@ class AdapterPersistentNew(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (holder.itemViewType) {
-            0 -> {
-                with(holder as ItemPictureViewHolder) {
-                    bind(differ.currentList[position])
-                }
-            }
-
-            1 -> {
-                with(holder as ItemAudioViewHolder) {
-                    bind(differ.currentList[position])
-                }
-            }
-
-            2 -> {
-                with(holder as ItemVideoViewHolder) {
-                    bind(differ.currentList[position])
-                }
-            }
-
-            3 -> {
-                with(holder as ItemFileViewHolder) {
-                    bind(differ.currentList[position])
-                }
-            }
-
-            4 -> {
-                with(holder as ItemOtherFileViewHolder) {
-                    bind(differ.currentList[position])
-                }
-            }
-        }
     }
 
     override fun getItemViewType(position: Int): Int = when (mType) {
@@ -253,13 +254,18 @@ class AdapterPersistentNew(
             var requestOptions = RequestOptions()
             requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
             if (item.thumb != null) {
-                Glide.with(itemView.context).asBitmap().load(item.thumb).placeholder(R.drawable.ic_error_image)
-                    .apply(requestOptions).into(binding.imvThumb)
+                Glide.with(itemView.context).asBitmap().load(item.thumb)
+                    .placeholder(R.drawable.ic_error_image).apply(requestOptions)
+                    .into(binding.imvThumb)
             } else {
                 Glide.with(itemView.context).load(R.drawable.ic_error_image).apply(requestOptions)
                     .into(binding.imvThumb)
             }
-
+            if (editMode) {
+                binding.checkBox.show()
+            } else {
+                binding.checkBox.hide()
+            }
 
             binding.checkBox.isChecked = item in listOfItemSelected
 
@@ -305,8 +311,9 @@ class AdapterPersistentNew(
 
             binding.checkBox.isChecked = item in listOfItemSelected
             if (item.thumb != null) {
-                Glide.with(itemView.context).asBitmap().load(item.thumb).placeholder(R.drawable.ic_error_video)
-                    .apply(requestOptions).into(binding.imvThumb)
+                Glide.with(itemView.context).asBitmap().load(item.thumb)
+                    .placeholder(R.drawable.ic_error_video).apply(requestOptions)
+                    .into(binding.imvThumb)
             } else {
                 Glide.with(itemView.context).load(R.drawable.ic_error_video).apply(requestOptions)
                     .into(binding.imvThumb)
@@ -356,8 +363,9 @@ class AdapterPersistentNew(
             var requestOptions = RequestOptions()
             requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
             if (item.thumb != null) {
-                Glide.with(itemView.context).asBitmap().load(item.thumb).placeholder(R.drawable.ic_error_image)
-                    .apply(requestOptions).into(binding.imvThumb)
+                Glide.with(itemView.context).asBitmap().load(item.thumb)
+                    .placeholder(R.drawable.ic_error_image).apply(requestOptions)
+                    .into(binding.imvThumb)
             } else {
                 Glide.with(itemView.context).load(R.drawable.ic_error_image).apply(requestOptions)
                     .into(binding.imvThumb)
