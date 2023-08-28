@@ -126,7 +126,7 @@ object MediaStoreUtils {
                                     return@queryCursor
                                 }
                                 if (!folders.any { it.first == parentFolder }) {
-                                    Log.d("TAG", "getListGroupItem: " +File(path).parentFile?.path)
+                                    Log.d("TAG", "getListGroupItem: " + File(path).parentFile?.path)
                                     folders.add(
                                         Pair(
                                             parentFolder, GroupItem(
@@ -138,7 +138,7 @@ object MediaStoreUtils {
                                         )
                                     )
                                 } else if (!folders.any { it.second.folderPath == parentFolderPath }) {
-                                    Log.d("TAG", "else getListGroupItem: " +parentFolderPath)
+                                    Log.d("TAG", "else getListGroupItem: " + parentFolderPath)
 
                                     folders.add(
                                         Pair(
@@ -167,6 +167,8 @@ object MediaStoreUtils {
                                 val parentFolder = File(path).parentFile?.name ?: "No_name"
                                 if (parentFolder.startsWith(".") || parentFolderPath?.contains(
                                         PRIVACY_FOLDER_NAME
+                                    ) == true || parentFolderPath?.contains(
+                                        DECRYPT_FOLDER_NAME
                                     ) == true
                                 ) {
                                     return@queryCursor
@@ -783,10 +785,7 @@ object MediaStoreUtils {
         val options: BitmapFactory.Options = BitmapFactory.Options()
 
         return MediaStore.Video.Thumbnails.getThumbnail(
-            crThumb,
-            id,
-            MediaStore.Video.Thumbnails.MICRO_KIND,
-            options
+            crThumb, id, MediaStore.Video.Thumbnails.MICRO_KIND, options
         )
     }
 

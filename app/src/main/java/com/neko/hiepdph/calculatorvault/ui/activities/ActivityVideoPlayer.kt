@@ -2,6 +2,7 @@ package com.neko.hiepdph.calculatorvault.ui.activities
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
@@ -16,13 +17,13 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.enums.Action
 import com.neko.hiepdph.calculatorvault.common.extensions.SnackBarType
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.shareFile
 import com.neko.hiepdph.calculatorvault.common.extensions.showSnackBar
-import com.neko.hiepdph.calculatorvault.common.utils.CopyFiles
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.config.Status
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
@@ -55,6 +56,7 @@ class ActivityVideoPlayer : AppCompatActivity() {
         supportActionBar?.title = String.EMPTY
         getData()
         initView()
+        initControllerExo()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -78,6 +80,10 @@ class ActivityVideoPlayer : AppCompatActivity() {
         dialogDetail?.show()
     }
 
+    private fun getDataFromIntent(): Int {
+        return intent.getIntExtra(Constant.KEY_VIDEO_INDEX, 0)
+    }
+
 
     private fun setupActionBar() {
         setSupportActionBar(binding.toolbar)
@@ -88,17 +94,49 @@ class ActivityVideoPlayer : AppCompatActivity() {
         }
     }
 
+    private fun initControllerExo() {
+        findViewById<ImageView>(R.id.video_next).clickWithDebounce {
+            if (listItem.isEmpty()) {
+                return@clickWithDebounce
+            } else {
+                var index = listItem.indexOf(currentItem) ?: -1
+                if (index == listItem.lastIndex) {
+                    return@clickWithDebounce
+                }
+                Log.d("TAG", "initControllerExo: " + index)
+                if (index != -1 && index < listItem.lastIndex) {
+                    index += 1
+                    setupPlayer(listItem[index])
+                }
+            }
+        }
+        findViewById<ImageView>(R.id.video_prev).clickWithDebounce {
+            if (listItem.isEmpty()) {
+                return@clickWithDebounce
+            } else {
+                var index = listItem.indexOf(currentItem) ?: -1
+                Log.d("TAG", "initControllerExo: " + index)
+
+                if (index == 0) {
+                    return@clickWithDebounce
+                }
+                if (index != -1 && index < listItem.lastIndex) {
+                    index -= 1
+                    setupPlayer(listItem[index])
+                }
+            }
+        }
+    }
+
     private fun getData() {
         ShareData.getInstance().listItemVideo.observe(this) {
             listItem.clear()
             listItem.addAll(it)
 
             if (it.isNotEmpty()) {
-                currentItem = listItem[0]
+                currentItem = listItem[getDataFromIntent()]
                 supportActionBar?.title = currentItem?.name
-                setupPlayer(it.map { item ->
-                    item.decodePath
-                })
+                setupPlayer(currentItem!!)
             }
         }
     }
@@ -212,7 +250,7 @@ class ActivityVideoPlayer : AppCompatActivity() {
             },
             action = Action.UNLOCK
         )
-        dialogProgress.show(supportFragmentManager,dialogProgress.tag)
+        dialogProgress.show(supportFragmentManager, dialogProgress.tag)
     }
 
     private fun hideSystemUI() {
@@ -231,20 +269,55 @@ class ActivityVideoPlayer : AppCompatActivity() {
         ).show(WindowInsetsCompat.Type.systemBars())
     }
 
-    private fun setupPlayer(listPath: List<String?>) {
+    private fun setupPlayer(item: FileVaultItem) {
         try {
-            val listMediaItem = mutableListOf<MediaItem>()
-            listPath.forEach {
-                listMediaItem.add(MediaItem.fromUri(it ?: ""))
+            if (item.decodePath == "" || File(item.decodePath).exists()) {
+                val dialogProgress = DialogProgress(
+                    listItemSelected = mutableListOf(item),
+                    listOfSourceFile = mutableListOf(File(item.encryptedPath)),
+                    listOfTargetParentFolder = mutableListOf(config.decryptFolder),
+                    onResult = { status, text, valuesReturn ->
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            when (status) {
+                                Status.SUCCESS -> {
+                                    if (!valuesReturn.isNullOrEmpty()) {
+                                        valuesReturn.map { item ->
+                                            val mediaItem = MediaItem.fromUri(item.decodePath)
+                                            mPlayer?.setMediaItem(mediaItem)
+                                            mPlayer?.prepare()
+                                            mPlayer?.playWhenReady = true
+                                            currentItem = item
+                                            val newItem = listItem.find { it.id == item.id }
+                                            newItem?.decodePath = item.decodePath
+                                        }
+
+                                    }
+
+                                }
+
+                                Status.FAILED -> {
+                                    showSnackBar(text, SnackBarType.FAILED)
+                                }
+                            }
+                        }
+                    },
+                    action = Action.DECRYPT,
+                    encryptionMode = item.encryptionType
+
+                )
+                dialogProgress.show(supportFragmentManager, dialogProgress.tag)
+            } else {
+                val mediaItem = MediaItem.fromUri(item.decodePath)
+                mPlayer?.setMediaItem(mediaItem)
+                mPlayer?.prepare()
+                mPlayer?.playWhenReady = true
+                currentItem = item
             }
 
-            mPlayer?.addMediaItems(listMediaItem)
-            mPlayer?.prepare()
-            mPlayer?.playWhenReady = true
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
     }
 
     override fun onPause() {

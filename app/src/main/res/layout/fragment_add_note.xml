@@ -7,7 +7,6 @@
     tools:context=".ui.main.home.note.FragmentAddNote">
 
     <EditText
-        android:background="@color/neutral_01"
         android:id="@+id/edt_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -21,7 +20,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:background="@color/neutral_01"
         android:id="@+id/edt_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

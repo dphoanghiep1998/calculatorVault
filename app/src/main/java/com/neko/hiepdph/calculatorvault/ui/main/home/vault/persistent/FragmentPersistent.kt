@@ -548,8 +548,8 @@ class FragmentPersistent : Fragment() {
 
     private fun initRecyclerView() {
         if (args.type != Constant.TYPE_ADD_MORE) {
-            adapterPersistent = AdapterPersistentNew(args.type, onClickItem = {
-                handleClickItem(it)
+            adapterPersistent = AdapterPersistentNew(args.type, onClickItem = { item, index ->
+                handleClickItem(item, index)
             }, onLongClickItem = {
                 listItemSelected.clear()
                 listItemSelected.addAll(it)
@@ -587,8 +587,8 @@ class FragmentPersistent : Fragment() {
             }
             binding.rcvItemGroup.layoutManager = gridLayoutManager
         } else {
-            adapterOtherFolder = AdapterOtherFolderNew(onClickItem = {
-                handleClickItem(it)
+            adapterOtherFolder = AdapterOtherFolderNew(onClickItem = { item, index ->
+                handleClickItem(item, index)
             }, onLongClickItem = {
                 listItemSelected.clear()
                 listItemSelected.addAll(it)
@@ -614,7 +614,7 @@ class FragmentPersistent : Fragment() {
         }
     }
 
-    private fun handleClickItem(item: FileVaultItem) {
+    private fun handleClickItem(item: FileVaultItem, index: Int) {
         val list = mutableListOf<FileVaultItem>()
         when (item.fileType) {
             Constant.TYPE_PICTURE -> {
@@ -706,18 +706,15 @@ class FragmentPersistent : Fragment() {
             }
 
             Constant.TYPE_VIDEOS -> {
-                if (File(item.decodePath).exists()) {
-                    if (requireContext().config.playVideoMode) {
-                        ShareData.getInstance().setListItemVideo(mutableListOf(item))
-                        val intent = Intent(requireContext(), ActivityVideoPlayer::class.java)
-                        startActivity(intent)
-                    } else {
-                        CustomApplication.app.resumeFromApp = true
+                if (requireContext().config.playVideoMode) {
+                    adapterPersistent?.selectAll()
+                    adapterOtherFolder?.selectAll()
+                    list.addAll(listItemSelected)
+                    ShareData.getInstance().setListItemVideo(list)
 
-                        item.decodePath.openWith(
-                            requireContext(), Constant.TYPE_VIDEOS, null
-                        )
-                    }
+                    val intent = Intent(requireContext(), ActivityVideoPlayer::class.java)
+                    intent.putExtra(Constant.KEY_VIDEO_INDEX, index)
+                    startActivity(intent)
                 } else {
                     CustomApplication.app.resumeFromApp = true
 
@@ -731,19 +728,9 @@ class FragmentPersistent : Fragment() {
                                     Status.SUCCESS -> {
                                         if (!valuesReturn.isNullOrEmpty()) {
                                             valuesReturn.map { item ->
-                                                list.add(item)
-                                                if (requireContext().config.playVideoMode) {
-                                                    ShareData.getInstance().setListItemVideo(list)
-                                                    val intent = Intent(
-                                                        requireContext(),
-                                                        ActivityVideoPlayer::class.java
-                                                    )
-                                                    startActivity(intent)
-                                                } else {
-                                                    item.decodePath.openWith(
-                                                        requireContext(), Constant.TYPE_VIDEOS, null
-                                                    )
-                                                }
+                                                item.decodePath.openWith(
+                                                    requireContext(), Constant.TYPE_VIDEOS, null
+                                                )
                                             }
 
                                         }
@@ -762,8 +749,6 @@ class FragmentPersistent : Fragment() {
                     )
                     dialogProgress.show(childFragmentManager, dialogProgress.tag)
                 }
-
-
             }
 
             else -> {
@@ -782,7 +767,6 @@ class FragmentPersistent : Fragment() {
                                     Status.SUCCESS -> {
                                         if (!valuesReturn.isNullOrEmpty()) {
                                             valuesReturn.map { item ->
-
                                                 item.decodePath.openWith(
                                                     requireContext(), Constant.TYPE_FILE, null
                                                 )

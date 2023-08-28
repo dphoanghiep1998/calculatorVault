@@ -154,7 +154,6 @@ class AppSharePreference(private val context: Context?) {
     }
 
 
-
     fun saveListNote(values: List<String>) {
         saveStringList(Constant.KEY_NOTE_LIST, values)
     }
@@ -357,6 +356,14 @@ class AppSharePreference(private val context: Context?) {
 
     fun setPatternLock(patternLock: List<Int>) {
         saveStringList(Constant.KEY_PATTERN_LOCK, patternLock.map { it.toString() })
+    }
+
+    fun getTemporaryTime(defaultValues: Int): Int {
+        return getInt(Constant.KEY_TEMPORARY_DELETION_TIME, defaultValues)
+    }
+
+    fun setTemporaryTime(values: Int) {
+        saveInt(Constant.KEY_TEMPORARY_DELETION_TIME, values)
     }
 
     fun getShowLock(defaultValues: Boolean): Boolean {

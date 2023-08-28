@@ -44,6 +44,7 @@ import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionR
 import com.neko.hiepdph.calculatorvault.common.utils.openLink
 import com.neko.hiepdph.calculatorvault.config.LockType
 import com.neko.hiepdph.calculatorvault.config.ScreenOffAction
+import com.neko.hiepdph.calculatorvault.config.TemporaryTimeDeletion
 import com.neko.hiepdph.calculatorvault.databinding.ActivityVaultBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutItemNavigationViewBinding
 import com.neko.hiepdph.calculatorvault.dialog.DialogRateUs
@@ -120,6 +121,9 @@ class ActivityVault : AppCompatActivity() {
         }
 
         if (!(application as CustomApplication).authority && !(application as CustomApplication).isLockShowed && config.isSetupPasswordDone) {
+            if (!CustomApplication.app.firstTimeOpen && config.temporaryFileDeletionTime == TemporaryTimeDeletion.LOCKED) {
+                viewModel.deleteFolder(config.decryptFolder.path, onSuccess = {}, onError = {})
+            }
             when (config.lockType) {
                 LockType.PATTERN -> {
                     val newIntent = Intent(this@ActivityVault, ActivityPatternLock::class.java)

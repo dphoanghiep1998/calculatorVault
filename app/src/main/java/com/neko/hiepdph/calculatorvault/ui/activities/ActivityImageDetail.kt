@@ -1,18 +1,18 @@
 package com.neko.hiepdph.calculatorvault.ui.activities
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.animation.AccelerateInterpolator
 import android.view.animation.LinearInterpolator
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
+import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.adapter.ImagePagerAdapter
 import com.neko.hiepdph.calculatorvault.common.adapter.TapViewListener
 import com.neko.hiepdph.calculatorvault.common.customview.FixedSpeedScroller
@@ -34,7 +34,6 @@ import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.config.Status
 import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.ActivityImageDetailBinding
-import com.neko.hiepdph.calculatorvault.di.MainDispatcher
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirm
 import com.neko.hiepdph.calculatorvault.dialog.DialogConfirmType
 import com.neko.hiepdph.calculatorvault.dialog.DialogDetail
@@ -50,7 +49,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
 import java.lang.reflect.Field
-import javax.inject.Inject
 
 
 @AndroidEntryPoint
@@ -62,9 +60,7 @@ class ActivityImageDetail : AppCompatActivity() {
     private var currentPage = 0
     private var jobSlide: Job? = null
     private val viewModel by viewModels<AppViewModel>()
-    companion object {
 
-    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityImageDetailBinding.inflate(layoutInflater)
@@ -75,6 +71,7 @@ class ActivityImageDetail : AppCompatActivity() {
             finish()
         }
         initView()
+        getIntentData()
         getData()
     }
 
@@ -91,6 +88,17 @@ class ActivityImageDetail : AppCompatActivity() {
             }
 
             else -> false
+        }
+    }
+
+    private fun getIntentData() {
+        val fromIntruder = intent.getBooleanExtra(Constant.KEY_INTRUDER, false)
+        if (fromIntruder) {
+            binding.tvSlideshow.hide()
+            binding.tvUnlock.hide()
+        }else{
+            binding.tvSlideshow.show()
+            binding.tvUnlock.show()
         }
     }
 
@@ -189,6 +197,7 @@ class ActivityImageDetail : AppCompatActivity() {
         binding.tvShare.clickWithDebounce {
             val listPath = mutableListOf<String>()
             listPath.add(currentItem!!.decodePath)
+            CustomApplication.app.resumeFromApp = true
             shareFile(listPath)
         }
 
@@ -244,11 +253,11 @@ class ActivityImageDetail : AppCompatActivity() {
     }
 
     private fun showController() {
-        if(binding.containerController.visibility == View.GONE){
+        if (binding.containerController.visibility == View.GONE) {
             binding.containerController.show()
             binding.actionBar.show()
 
-        }else{
+        } else {
             binding.containerController.hide()
             binding.actionBar.hide()
         }
@@ -274,8 +283,7 @@ class ActivityImageDetail : AppCompatActivity() {
 
 
     private fun unLockPicture() {
-        val dialogProgress = DialogProgress(
-            mutableListOf(currentItem!!),
+        val dialogProgress = DialogProgress(mutableListOf(currentItem!!),
             mutableListOf(File(currentItem?.encryptedPath.toString())),
             mutableListOf(File(currentItem?.originalPath.toString()).parentFile),
             Action.UNLOCK,

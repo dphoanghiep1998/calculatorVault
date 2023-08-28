@@ -7,7 +7,7 @@ import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreferen
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.common.utils.buildMinVersionQ
 import java.io.File
-import java.util.*
+import java.util.Locale
 
 class MainConfig(val context: Context) {
     companion object {
@@ -31,7 +31,8 @@ class MainConfig(val context: Context) {
 
     var isSetupPasswordDone: Boolean
         get() = AppSharePreference.getInstance(context).getSetupPasswordDone(false)
-        set(isSetupPasswordDone) = AppSharePreference.getInstance(context).setSetupPasswordDone(isSetupPasswordDone)
+        set(isSetupPasswordDone) = AppSharePreference.getInstance(context)
+            .setSetupPasswordDone(isSetupPasswordDone)
 
     var lockType: Int
         get() = AppSharePreference.getInstance(context).getLockType(LockType.PIN)
@@ -96,6 +97,10 @@ class MainConfig(val context: Context) {
 //        get() = AppSharePreference.getInstance(context).getShowLock(false)
 //        set(isShowLock) = AppSharePreference.getInstance(context).setShowLock(isShowLock)
 
+    var temporaryFileDeletionTime: Int
+        get() = AppSharePreference.getInstance(context)
+            .getTemporaryTime(TemporaryTimeDeletion.EXIT_APP)
+        set(patternLock) = AppSharePreference.getInstance(context).setTemporaryTime(patternLock)
     var slideShowInterval: Int
         get() = AppSharePreference.getInstance(context).getSlideShowInterval(3)
         set(slideShowInterval) = AppSharePreference.getInstance(context)
@@ -138,7 +143,6 @@ class MainConfig(val context: Context) {
             .setExternalStoragePath(externalStoragePath)
 
 
-
     var hideAppIcon: Boolean
         get() = AppSharePreference.getInstance(context).getHideAppIcon(HideAppIcon.OFF)
         set(hideAppIcon) = AppSharePreference.getInstance(context).setHideAppIcon(hideAppIcon)
@@ -156,8 +160,7 @@ class MainConfig(val context: Context) {
             .setChangeCalculatorIcon(changeCalculatorIcon)
 
     var buttonToUnlock: Int
-        get() = AppSharePreference.getInstance(context)
-            .getButtonToUnlock(ButtonToUnlock.NONE)
+        get() = AppSharePreference.getInstance(context).getButtonToUnlock(ButtonToUnlock.NONE)
         set(buttonToUnlock) = AppSharePreference.getInstance(context)
             .setButtonToUnlock(buttonToUnlock)
 
@@ -213,7 +216,8 @@ class MainConfig(val context: Context) {
 
     var caughtIntruder: Boolean
         get() = AppSharePreference.getInstance(context).getCaughtIntruder(false)
-        set(caughtIntruder) = AppSharePreference.getInstance(context).setCaughtIntruder(caughtIntruder)
+        set(caughtIntruder) = AppSharePreference.getInstance(context)
+            .setCaughtIntruder(caughtIntruder)
 
 
     var darkMode: Boolean

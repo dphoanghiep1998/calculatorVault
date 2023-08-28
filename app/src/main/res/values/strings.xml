@@ -376,6 +376,8 @@
     <string name="change_question_lock_successfully">Change security question successfully</string>
     <string name="prohibit_press_title">Prohibit Unlocking by Long Press Title</string>
     <string name="prohibit_press_content">Once enabled, you will not be able to enter the Calculator Vault by long pressing the title from the calculator interface. Are you sure you want to enable it?</string>
+    <string name="delete_when_app_locked">Delete the decrypted temporary file, after the app is locked</string>
+    <string name="delete_when_app_exit">Delete the decrypted temporary file, after exiting the app</string>
 
 
 </resources>

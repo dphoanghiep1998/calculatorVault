@@ -311,6 +311,9 @@ class ActivityPatternLock : AppCompatActivity() {
                 it.setPreviewTexture(dummy)
                 it.startPreview()
             }
+            val params: Camera.Parameters = camera!!.parameters
+            params.setRotation(270)
+            camera!!.parameters = params
         } catch (e: RuntimeException) {
             e.printStackTrace()
         }

@@ -42,6 +42,7 @@ object Constant {
     const val KEY_URL = "KEY_URL"
     const val KEY_SHOW_LOCK = "KEY_SHOW_LOCK"
     const val KEY_PATTERN_LOCK = "KEY_PATTERN_LOCK"
+    const val KEY_TEMPORARY_DELETION_TIME = "KEY_TEMPORARY_DELETION_TIME"
     const val KEY_SECRET_PIN = "KEY_SECRET_PIN"
     const val KEY_TACTILE_FEEDBACK = "KEY_TACTILE_FEEDBACK"
     const val KEY_VISIBLE_PATTERN = "KEY_VISIBLE_PATTERN"
@@ -91,6 +92,8 @@ object Constant {
 
     const val KEY_SECURITY_QUESTION = "KEY_SECURITY_QUESTION"
     const val KEY_SECURITY_ANSWER = "KEY_SECURITY_ANSWER"
+    const val KEY_INTRUDER = "KEY_INTRUDER"
+    const val KEY_VIDEO_INDEX = "KEY_VIDEO_INDEX"
 
 
     const val SECRET_KEY = "9CVC6123A23"

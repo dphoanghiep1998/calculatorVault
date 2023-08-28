@@ -75,6 +75,7 @@ class DialogProgress(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initView()
+        viewModel.progressValue.postValue(0f)
         lifecycleScope.launch(Dispatchers.Main) {
             viewModel.progressValue.observe(viewLifecycleOwner) {
                 setProgressValue(it.toInt())

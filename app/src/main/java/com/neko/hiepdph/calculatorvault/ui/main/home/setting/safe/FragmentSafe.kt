@@ -22,7 +22,9 @@ import com.neko.hiepdph.calculatorvault.common.extensions.hide
 import com.neko.hiepdph.calculatorvault.common.extensions.show
 import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreference
 import com.neko.hiepdph.calculatorvault.config.ScreenOffAction
+import com.neko.hiepdph.calculatorvault.config.TemporaryTimeDeletion
 import com.neko.hiepdph.calculatorvault.databinding.FragmentSafeBinding
+import com.neko.hiepdph.calculatorvault.dialog.DialogTemporaryFileDeletionTime
 
 class FragmentSafe : Fragment() {
     private var _binding: FragmentSafeBinding? = null
@@ -116,6 +118,15 @@ class FragmentSafe : Fragment() {
         binding.containerPasswordRecoveryQuestion.root.clickWithDebounce {
             findNavController().navigate(R.id.fragmentQuestionLock)
         }
+
+        binding.containerTemporaryFileDeletionTime.root.clickWithDebounce {
+            val dialogTemporaryFileDeletionTime = DialogTemporaryFileDeletionTime(
+                requireActivity(), requireActivity().config.temporaryFileDeletionTime
+            ).onCreateDialog(
+                requireActivity()
+            )
+            dialogTemporaryFileDeletionTime.show()
+        }
     }
 
     private fun setupView() {
@@ -159,11 +170,11 @@ class FragmentSafe : Fragment() {
             switchChange.show()
             switchChange.isChecked = requireContext().config.lockWhenLeavingApp
         }
-//        binding.containerTemporaryFileDeletionTime.apply {
-//            imvIcon.setImageResource(R.drawable.ic_delete_temporary)
-//            tvContent.text = getString(R.string.temporary_file_deletion_time)
-//            tvContent2.text = getString(R.string.content_2_temporary_file_deletion_time)
-//        }
+        binding.containerTemporaryFileDeletionTime.apply {
+            imvIcon.setImageResource(R.drawable.ic_delete_temporary)
+            tvContent.text = getString(R.string.temporary_file_deletion_time)
+            tvContent2.text = getTemporaryAction(requireActivity().config.temporaryFileDeletionTime)
+        }
     }
 
     private fun getScreenOffAction(values: Int): String {
@@ -172,6 +183,16 @@ class FragmentSafe : Fragment() {
             ScreenOffAction.GOTOHOMESCREEN -> getString(R.string.go_to_homescreen)
             ScreenOffAction.LOCKAGAIN -> getString(R.string.lock_again)
             else -> getString(R.string.no_action)
+        }
+    }
+
+    private fun getTemporaryAction(values: Int): String {
+        return when (values) {
+            TemporaryTimeDeletion.LOCKED -> getString(R.string.delete_when_app_locked)
+            TemporaryTimeDeletion.EXIT_APP -> getString(R.string.delete_when_app_exit)
+            else -> {
+                getString(R.string.delete_when_app_exit)
+            }
         }
     }
 
@@ -185,6 +206,10 @@ class FragmentSafe : Fragment() {
         if (key == Constant.KEY_SCREEN_OFF_ACTION) {
             binding.containerScreenOffAction.tvStatus.text =
                 getScreenOffAction(requireContext().config.screenOffAction)
+        }
+        if (key == Constant.KEY_TEMPORARY_DELETION_TIME) {
+            binding.containerTemporaryFileDeletionTime.tvContent2.text =
+                getTemporaryAction(requireContext().config.temporaryFileDeletionTime)
         }
     }
 

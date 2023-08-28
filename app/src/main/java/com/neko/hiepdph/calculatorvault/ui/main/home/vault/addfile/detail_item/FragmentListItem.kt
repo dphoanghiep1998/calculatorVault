@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -106,8 +107,13 @@ class FragmentListItem : Fragment() {
     private fun initView() {
         initRecycleView()
         initButton()
+        initSwipeView()
     }
-
+    private fun initSwipeView() {
+        binding.swipeLayout.setOnRefreshListener {
+            observeData()
+        }
+    }
     private fun initButton() {
 
         binding.btnMoveToVault.clickWithDebounce {
@@ -132,7 +138,7 @@ class FragmentListItem : Fragment() {
                                     showSnackBar(text, SnackBarType.FAILED)
                                 }
                             }
-                            popBackStack(R.id.fragmentListItem)
+                            findNavController().popBackStack()
                         }
 
                     })
@@ -171,7 +177,6 @@ class FragmentListItem : Fragment() {
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
-                Log.d("TAG", "onCreateMenu: " + size)
                 if (size != null && size > 0) {
                     menuInflater.inflate(R.menu.toolbar_menu_pick, menu)
                     menu[0].actionView?.findViewById<View>(R.id.checkbox)?.setOnClickListener {
@@ -225,6 +230,7 @@ class FragmentListItem : Fragment() {
         viewModel.listItemList.observe(viewLifecycleOwner) {
             it?.let {
                 adapterListItem?.submitList(it)
+                adapterListItem?.unSelectAll()
                 sizeList = it.size
                 binding.loading.hide()
                 if (it.isNotEmpty()) {
@@ -234,6 +240,7 @@ class FragmentListItem : Fragment() {
                 }
             }
             initToolBar(it?.size)
+            binding.swipeLayout.isRefreshing = false
         }
     }
 

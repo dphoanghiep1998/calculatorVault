@@ -4,6 +4,7 @@ import android.graphics.SurfaceTexture
 import android.hardware.Camera
 import android.os.Bundle
 import android.util.Log
+import android.view.Surface
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.widget.Toast
@@ -37,6 +38,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
+import java.util.Collections.rotate
+
+
+
 
 @AndroidEntryPoint
 class ActivityPinLock : AppCompatActivity() {
@@ -399,6 +404,9 @@ class ActivityPinLock : AppCompatActivity() {
                 it.setPreviewTexture(dummy)
                 it.startPreview()
             }
+            val params: Camera.Parameters = camera!!.parameters
+            params.setRotation(270)
+            camera!!.parameters = params
         } catch (e: RuntimeException) {
             e.printStackTrace()
         }

@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
+import com.neko.hiepdph.calculatorvault.common.Constant
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.common.extensions.config
 import com.neko.hiepdph.calculatorvault.common.extensions.hide
@@ -71,7 +72,6 @@ class FragmentIntruder : Fragment() {
 
     private fun initRecyclerView() {
         adapter = AdapterIntruder {
-            Log.d("TAG", "initRecyclerView: ")
             val listItem = mutableListOf<FileVaultItem>()
             appViewModel.decrypt(
                 requireContext(),
@@ -87,9 +87,9 @@ class FragmentIntruder : Fragment() {
                                 listItem.add(it)
                             }
                             ShareData.getInstance().setListItemImage(listItem)
-                            val bundle = Bundle()
 
                             val intent = Intent(requireContext(), ActivityImageDetail::class.java)
+                            intent.putExtra(Constant.KEY_INTRUDER,true)
                             startActivity(intent)
                         }
                     }

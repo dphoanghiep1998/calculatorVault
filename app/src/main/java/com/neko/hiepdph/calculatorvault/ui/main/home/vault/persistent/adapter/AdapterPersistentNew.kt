@@ -34,7 +34,7 @@ import com.neko.hiepdph.calculatorvault.databinding.LayoutPersistentItemOptionMe
 
 class AdapterPersistentNew(
     private var mType: String = Constant.TYPE_PICTURE,
-    private val onClickItem: (FileVaultItem) -> Unit,
+    private val onClickItem: (FileVaultItem, Int) -> Unit,
     private val onLongClickItem: (List<FileVaultItem>) -> Unit,
     private val onEditItem: (List<FileVaultItem>) -> Unit,
     private val onSelectAll: (List<FileVaultItem>) -> Unit,
@@ -48,7 +48,7 @@ class AdapterPersistentNew(
     }
 
     private fun showCheckboxAll() {
-        Log.d("TAG", "showCheckboxAll: "+differ.currentList.size)
+        Log.d("TAG", "showCheckboxAll: " + differ.currentList.size)
         notifyItemRangeChanged(0, differ.currentList.size, PAYLOAD_CHECK)
     }
 
@@ -281,7 +281,7 @@ class AdapterPersistentNew(
             }
             binding.root.setOnClickListener {
                 if (!editMode) {
-                    onClickItem.invoke(item)
+                    onClickItem.invoke(item, absoluteAdapterPosition)
                 } else {
                     binding.checkBox.isChecked = !binding.checkBox.isChecked
                     if (binding.checkBox.isChecked) {
@@ -333,7 +333,7 @@ class AdapterPersistentNew(
             }
             binding.root.setOnClickListener {
                 if (!editMode) {
-                    onClickItem.invoke(item)
+                    onClickItem.invoke(item, absoluteAdapterPosition)
                 } else {
                     binding.checkBox.isChecked = !binding.checkBox.isChecked
                     if (binding.checkBox.isChecked) {
@@ -364,10 +364,10 @@ class AdapterPersistentNew(
             requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(10))
             if (item.thumb != null) {
                 Glide.with(itemView.context).asBitmap().load(item.thumb)
-                    .placeholder(R.drawable.ic_error_image).apply(requestOptions)
+                    .placeholder(R.drawable.ic_error_audio).apply(requestOptions)
                     .into(binding.imvThumb)
             } else {
-                Glide.with(itemView.context).load(R.drawable.ic_error_image).apply(requestOptions)
+                Glide.with(itemView.context).load(R.drawable.ic_error_audio).apply(requestOptions)
                     .into(binding.imvThumb)
             }
             binding.checkBox.isChecked = item in listOfItemSelected
@@ -382,8 +382,14 @@ class AdapterPersistentNew(
             binding.tvDurationAuthor.text =
                 item.durationLength?.getFormattedDuration().toString() + "-" + item.artist
             binding.option.clickWithDebounce {
-                showPopupWindow(
-                    itemView.context, binding.option, item, onClickItem, onDeleteItem, onOpenDetail
+                showPopupWindowFile(
+                    itemView.context,
+                    binding.option,
+                    item,
+                    onClickItem,
+                    onDeleteItem,
+                    onOpenDetail,
+                    absoluteAdapterPosition
                 )
             }
 
@@ -402,7 +408,8 @@ class AdapterPersistentNew(
             }
             binding.root.setOnClickListener {
                 if (!editMode) {
-                    onClickItem.invoke(item)
+                    onClickItem.invoke(item, absoluteAdapterPosition)
+
                 } else {
                     binding.checkBox.isChecked = !binding.checkBox.isChecked
                     if (binding.checkBox.isChecked) {
@@ -435,7 +442,13 @@ class AdapterPersistentNew(
             binding.tvSize.text = item.size.formatSize()
             binding.option.clickWithDebounce {
                 showPopupWindowFile(
-                    itemView.context, binding.option, item, onClickItem, onDeleteItem, onOpenDetail
+                    itemView.context,
+                    binding.option,
+                    item,
+                    onClickItem,
+                    onDeleteItem,
+                    onOpenDetail,
+                    absoluteAdapterPosition
                 )
             }
             if (editMode) {
@@ -460,7 +473,7 @@ class AdapterPersistentNew(
             }
             binding.root.setOnClickListener {
                 if (!editMode) {
-                    onClickItem.invoke(item)
+                    onClickItem.invoke(item, absoluteAdapterPosition)
                 } else {
                     binding.checkBox.isChecked = !binding.checkBox.isChecked
                     if (binding.checkBox.isChecked) {
@@ -501,7 +514,7 @@ class AdapterPersistentNew(
             }
             binding.root.setOnClickListener {
                 if (!editMode) {
-                    onClickItem.invoke(item)
+                    onClickItem.invoke(item, absoluteAdapterPosition)
                 } else {
                     binding.checkBox.isChecked = !binding.checkBox.isChecked
                     if (binding.checkBox.isChecked) {
@@ -567,13 +580,14 @@ private fun getImageForItemFile(item: FileVaultItem): Int {
 }
 
 
-private fun showPopupWindow(
+fun showPopupWindow(
     context: Context,
     view: View,
     item: FileVaultItem,
-    onClickItem: (FileVaultItem) -> Unit,
+    onClickItem: (FileVaultItem, Int) -> Unit,
     onDeleteItem: (FileVaultItem) -> Unit,
-    onOpenDetail: (FileVaultItem) -> Unit
+    onOpenDetail: (FileVaultItem) -> Unit,
+    index: Int
 ) {
     val inflater: LayoutInflater =
         (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater?)!!
@@ -589,7 +603,7 @@ private fun showPopupWindow(
         popupWindow.dismiss()
     }
     bindingLayout.containerPlay.clickWithDebounce {
-        onClickItem(item)
+        onClickItem(item, index)
         popupWindow.dismiss()
     }
     bindingLayout.containerDelete.clickWithDebounce {

@@ -28,11 +28,10 @@ import com.neko.hiepdph.calculatorvault.data.database.model.FileVaultItem
 import com.neko.hiepdph.calculatorvault.databinding.LayoutItemPersistentFileBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutPersistentItemFileOptionMenuBinding
 import com.neko.hiepdph.calculatorvault.databinding.LayoutPersistentItemOptionMenuBinding
-import java.io.File
 
 
 class AdapterOtherFolderNew(
-    private val onClickItem: (FileVaultItem) -> Unit,
+    private val onClickItem: (FileVaultItem, Int) -> Unit,
     private val onLongClickItem: (List<FileVaultItem>) -> Unit,
     private val onEditItem: (List<FileVaultItem>) -> Unit,
     private val onSelectAll: (List<FileVaultItem>) -> Unit,
@@ -100,7 +99,8 @@ class AdapterOtherFolderNew(
                             item,
                             onClickItem,
                             onDeleteItem,
-                            onOpenDetail
+                            onOpenDetail,
+                            absoluteAdapterPosition
                         )
                     }
                 }
@@ -119,7 +119,8 @@ class AdapterOtherFolderNew(
                             item,
                             onClickItem,
                             onDeleteItem,
-                            onOpenDetail
+                            onOpenDetail,
+                            absoluteAdapterPosition
                         )
                     }
                 }
@@ -137,7 +138,8 @@ class AdapterOtherFolderNew(
                             item,
                             onClickItem,
                             onDeleteItem,
-                            onOpenDetail
+                            onOpenDetail,
+                            absoluteAdapterPosition
                         )
                     }
                 }
@@ -156,7 +158,8 @@ class AdapterOtherFolderNew(
                             item,
                             onClickItem,
                             onDeleteItem,
-                            onOpenDetail
+                            onOpenDetail,
+                            absoluteAdapterPosition
                         )
                     }
                 }
@@ -177,7 +180,7 @@ class AdapterOtherFolderNew(
 
             binding.root.setOnClickListener {
                 if (!editMode) {
-                    onClickItem.invoke(item)
+                    onClickItem.invoke(item, absoluteAdapterPosition)
                 } else {
                     binding.checkBox.isChecked = !binding.checkBox.isChecked
                     if (binding.checkBox.isChecked) {
@@ -217,12 +220,13 @@ class AdapterOtherFolderNew(
     }
 
 
-    override fun getItemViewType(position: Int): Int = when (differ.currentList[position].fileType) {
-        Constant.TYPE_PICTURE -> 0
-        Constant.TYPE_VIDEOS -> 1
-        Constant.TYPE_AUDIOS -> 2
-        else -> 3
-    }
+    override fun getItemViewType(position: Int): Int =
+        when (differ.currentList[position].fileType) {
+            Constant.TYPE_PICTURE -> 0
+            Constant.TYPE_VIDEOS -> 1
+            Constant.TYPE_AUDIOS -> 2
+            else -> 3
+        }
 
     override fun getItemCount(): Int {
         return differ.currentList.size
@@ -289,64 +293,14 @@ private fun getThumbnail(path: String): Bitmap? {
         null
     }
 }
-
-private fun showPopupWindow(
+fun showPopupWindowFile(
     context: Context,
     view: View,
     item: FileVaultItem,
-    onClickItem: (FileVaultItem) -> Unit,
+    onClickItem: (FileVaultItem, Int) -> Unit,
     onDeleteItem: (FileVaultItem) -> Unit,
-    onOpenDetail: (FileVaultItem) -> Unit
-) {
-    val inflater: LayoutInflater =
-        (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater?)!!
-    val bindingLayout = LayoutPersistentItemOptionMenuBinding.inflate(inflater, null, false)
-
-    val popupWindow = PopupWindow(
-        bindingLayout.root,
-        LinearLayout.LayoutParams.WRAP_CONTENT,
-        LinearLayout.LayoutParams.WRAP_CONTENT,
-        true
-    )
-    bindingLayout.root.clickWithDebounce {
-        popupWindow.dismiss()
-    }
-    bindingLayout.containerPlay.clickWithDebounce {
-        onClickItem(item)
-        popupWindow.dismiss()
-    }
-    bindingLayout.containerDelete.clickWithDebounce {
-        onDeleteItem(item)
-        popupWindow.dismiss()
-    }
-    bindingLayout.containerInfo.clickWithDebounce {
-        onOpenDetail(item)
-        popupWindow.dismiss()
-    }
-    val values = IntArray(2)
-    view.getLocationInWindow(values)
-    val positionOfIcon = values[1]
-    val displayMetrics: DisplayMetrics = view.context.resources.displayMetrics
-    val height = displayMetrics.heightPixels * 2 / 3
-
-    if (positionOfIcon < height) {
-        popupWindow.showAsDropDown(
-            view, 0, -view.height + popupWindow.height
-        )
-    } else {
-        popupWindow.showAsDropDown(
-            view, 0, -400
-        )
-    }
-}
-
-private fun showPopupWindowFile(
-    context: Context,
-    view: View,
-    item: FileVaultItem,
-    onClickItem: (FileVaultItem) -> Unit,
-    onDeleteItem: (FileVaultItem) -> Unit,
-    onOpenDetail: (FileVaultItem) -> Unit
+    onOpenDetail: (FileVaultItem) -> Unit,
+    index: Int
 ) {
     val inflater: LayoutInflater =
         (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater?)!!
@@ -363,7 +317,7 @@ private fun showPopupWindowFile(
     }
 
     bindingLayout.containerOpen.clickWithDebounce {
-        onClickItem(item)
+        onClickItem(item, index)
         popupWindow.dismiss()
     }
     bindingLayout.containerDelete.clickWithDebounce {

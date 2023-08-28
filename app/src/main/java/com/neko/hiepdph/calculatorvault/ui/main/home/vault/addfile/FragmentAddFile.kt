@@ -40,12 +40,8 @@ class FragmentAddFile : Fragment() {
     ): View {
         _binding = FragmentAddFileBinding.inflate(inflater, container, false)
         toastLocation()
-        return binding.root
-    }
-
-    override fun onResume() {
-        super.onResume()
         getDataGroupFile(args.type)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -77,6 +73,7 @@ class FragmentAddFile : Fragment() {
 
     private fun initView() {
         initRecyclerView()
+        initSwipeView()
     }
 
     private fun getDataGroupFile(type: String) {
@@ -98,6 +95,11 @@ class FragmentAddFile : Fragment() {
         }
         binding.rcvGroupItem.layoutManager = gridLayoutManager
     }
+    private fun initSwipeView() {
+        binding.swipeLayout.setOnRefreshListener {
+            observeListGroupData()
+        }
+    }
 
     private fun observeListGroupData() {
         viewModel.listItemListGroupFile.observe(viewLifecycleOwner) {
@@ -110,6 +112,7 @@ class FragmentAddFile : Fragment() {
                     binding.tvEmpty.show()
                 }
             }
+            binding.swipeLayout.isRefreshing = false
         }
 
     }
