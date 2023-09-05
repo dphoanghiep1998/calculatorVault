@@ -40,7 +40,7 @@ class MainConfig(val context: Context) {
 
     var lockPressType: Int
         get() = AppSharePreference.getInstance(context).getLockPressType(LockPressType.NORMAL)
-        set(lockType) = AppSharePreference.getInstance(context).saveLockPressType(lockType)
+        set(lockPressType) = AppSharePreference.getInstance(context).saveLockPressType(lockPressType)
 
     var fingerPrintUnlock: Boolean
         get() = AppSharePreference.getInstance(context)

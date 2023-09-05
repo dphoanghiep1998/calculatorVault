@@ -269,7 +269,7 @@ class FragmentPersistent : Fragment() {
             }
 
             if (args.type == Constant.TYPE_ADD_MORE) {
-                val dialogFloatingButton = DialogAddFile(onClickPicture = {
+                val dialogFloatingButton = DialogAddFile(requireContext(),onClickPicture = {
                     val action =
                         FragmentPersistentDirections.actionFragmentPersistentToFragmentAddFile(
                             Constant.TYPE_PICTURE, getString(R.string.library), args.vaultPath
@@ -293,8 +293,8 @@ class FragmentPersistent : Fragment() {
                             Constant.TYPE_FILE, getString(R.string.files), args.vaultPath
                         )
                     navigateToPage(R.id.fragmentPersistent, action)
-                })
-                dialogFloatingButton.show(childFragmentManager, dialogFloatingButton.tag)
+                }).onCreateDialog(requireActivity())
+                dialogFloatingButton.show()
             } else {
                 val action = FragmentPersistentDirections.actionFragmentPersistentToFragmentAddFile(
                     args.type, name, args.vaultPath

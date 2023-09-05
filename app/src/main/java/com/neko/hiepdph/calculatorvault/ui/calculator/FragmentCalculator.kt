@@ -4,9 +4,11 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.widget.TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration
 import androidx.fragment.app.Fragment
 import com.neko.hiepdph.calculatorvault.CustomApplication
 import com.neko.hiepdph.calculatorvault.R
@@ -386,15 +388,19 @@ class FragmentCalculator : Fragment() {
 
     private fun changeLayoutToShowResult() {
         binding.tvResult.textSize = 60f
-        binding.tvResult.setTextColor(getColor(R.color.neutral_06))
         binding.tvInput.textSize = 40f
+
+        binding.tvResult.setTextColor(getColor(R.color.neutral_06))
         binding.tvInput.setTextColor(getColor(R.color.neutral_04))
     }
 
     private fun changeLayoutToInput() {
         binding.tvResult.textSize = 40f
-        binding.tvResult.setTextColor(getColor(R.color.neutral_04))
         binding.tvInput.textSize = 60f
+        setAutoSizeTextTypeUniformWithConfiguration(binding.tvResult, 12,
+            60, 1, TypedValue.COMPLEX_UNIT_DIP)
+
+        binding.tvResult.setTextColor(getColor(R.color.neutral_04))
         binding.tvInput.setTextColor(getColor(R.color.neutral_06))
     }
 

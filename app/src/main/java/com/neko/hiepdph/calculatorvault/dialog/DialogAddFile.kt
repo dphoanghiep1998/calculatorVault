@@ -1,95 +1,88 @@
 package com.neko.hiepdph.calculatorvault.dialog
 
+import android.app.Activity
 import android.app.Dialog
+import android.content.Context
 import android.graphics.drawable.ColorDrawable
-import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.Window
+import android.view.WindowManager
 import android.view.animation.OvershootInterpolator
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.DialogFragment
 import com.neko.hiepdph.calculatorvault.R
 import com.neko.hiepdph.calculatorvault.common.extensions.clickWithDebounce
 import com.neko.hiepdph.calculatorvault.databinding.DialogAddFileBinding
 
 
 class DialogAddFile(
+    private val context: Context,
     private val onClickPicture: (() -> Unit)? = null,
     private val onClickVideo: (() -> Unit)? = null,
     private val onClickAudio: (() -> Unit)? = null,
     private val onClickFile: (() -> Unit)? = null,
-) : DialogFragment() {
+) {
 
     private lateinit var binding: DialogAddFileBinding
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val root = ConstraintLayout(requireContext())
-        root.layoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
-        )
-        val dialog = Dialog(requireContext())
+
+    fun onCreateDialog(activity: Activity): Dialog {
+        val dialog = Dialog(activity)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        dialog.setContentView(root)
-        dialog.window!!.setBackgroundDrawable(ColorDrawable(requireContext().getColor(R.color.transparent)))
+
+        val window = dialog.window
+        val wlp = window!!.attributes
+        wlp.gravity = Gravity.CENTER
+        dialog.setCancelable(false)
+        dialog.setCanceledOnTouchOutside(false)
+        binding = DialogAddFileBinding.inflate(LayoutInflater.from(context))
+        dialog.setContentView(binding.root)
+        window.attributes = wlp
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(context.getColor(R.color.transparent)))
+        dialog.window!!.decorView.systemUiVisibility =
+            (View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
         dialog.window!!.setLayout(
-            (requireContext().resources.displayMetrics.widthPixels),
-            ViewGroup.LayoutParams.MATCH_PARENT
+            WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT
         )
+        initView(dialog)
         return dialog
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
-        binding = DialogAddFileBinding.inflate(inflater, container, false)
-        initFloatButton()
-        return binding.root
-    }
 
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        initView()
-
-    }
-
-    private fun initView() {
-
-
+    private fun initView(dialog: Dialog) {
         binding.root.clickWithDebounce(1000) {
-            closeMenu()
+            closeMenu(dialog)
         }
         openMenu()
-        initButton()
+        initButton(dialog)
+        initFloatButton(dialog)
 
     }
 
-    private fun initButton() {
+    private fun initButton(dialog: Dialog) {
         binding.picture.root.clickWithDebounce {
             binding.root.setOnClickListener {}
-            closeMenu(action = {
+            closeMenu(dialog, action = {
                 onClickPicture?.invoke()
             })
 
         }
         binding.video.root.clickWithDebounce {
             binding.root.setOnClickListener {}
-            closeMenu(action = {
+            closeMenu(dialog, action = {
                 onClickVideo?.invoke()
             })
         }
         binding.audio.root.clickWithDebounce {
             binding.root.setOnClickListener {}
-            closeMenu(action = {
+            closeMenu(dialog, action = {
                 onClickAudio?.invoke()
             })
         }
         binding.file.root.clickWithDebounce {
             binding.root.setOnClickListener {}
-            closeMenu(action = {
+            closeMenu(dialog, action = {
                 onClickFile?.invoke()
             })
         }
@@ -105,71 +98,37 @@ class DialogAddFile(
             animate().translationY(0f).alpha(1f).setInterpolator(interpolator).setDuration(500)
                 .start()
         }
-//
-//        binding.audio.root.apply {
-//            isEnabled = true
-//            animate().translationY(0f).alpha(1f).setInterpolator(interpolator).setDuration(300)
-//                .start()
-//        }
-//        binding.video.root.apply {
-//            isEnabled = true
-//            animate().translationY(0f).alpha(1f).setInterpolator(interpolator).setDuration(400)
-//                .start()
-//        }
-//        binding.picture.root.apply {
-//            isEnabled = true
-//            animate().translationY(0f).alpha(1f).setInterpolator(interpolator).setDuration(500)
-//                .start()
-//        }
     }
 
-    private fun closeMenu(action: (() -> Unit)? = null) {
+    private fun closeMenu(dialog: Dialog, action: (() -> Unit)? = null) {
         val interpolator = OvershootInterpolator()
         binding.containerItem.apply {
             isEnabled = false
             animate().translationY(100f).alpha(0f).setInterpolator(interpolator).setDuration(500)
-                .withEndAction{
-                    dismiss()
+                .withEndAction {
+                    dialog.dismiss()
                     action?.invoke()
                 }.start()
         }
-//        binding.video.root.apply {
-//            isEnabled = false
-//            animate().translationY(100f).alpha(0f).setInterpolator(interpolator).setDuration(300)
-//                .withEndAction {
-//                    dismiss()
-//                    action?.invoke()
-//                }.start()
-//        }
-//        binding.audio.root.apply {
-//            isEnabled = false
-//            animate().translationY(100f).alpha(0f).setInterpolator(interpolator).setDuration(400)
-//                .start()
-//        }
-//        binding.file.root.apply {
-//            isEnabled = false
-//            animate().translationY(100f).alpha(0f).setInterpolator(interpolator).setDuration(500)
-//                .start()
-//        }
     }
 
-    private fun initFloatButton() {
+    private fun initFloatButton(dialog: Dialog) {
         val listOfFloatMember = listOf(
             Pair(
-                getString(R.string.pictures),
-                ContextCompat.getDrawable(requireContext(), R.drawable.ic_add_file_picture)
+                context.getString(R.string.pictures),
+                ContextCompat.getDrawable(context, R.drawable.ic_add_file_picture)
             ),
             Pair(
-                getString(R.string.videos),
-                ContextCompat.getDrawable(requireContext(), R.drawable.ic_add_file_video)
+                context.getString(R.string.videos),
+                ContextCompat.getDrawable(context, R.drawable.ic_add_file_video)
             ),
             Pair(
-                getString(R.string.audios),
-                ContextCompat.getDrawable(requireContext(), R.drawable.ic_add_file_audio)
+                context.getString(R.string.audios),
+                ContextCompat.getDrawable(context, R.drawable.ic_add_file_audio)
             ),
             Pair(
-                getString(R.string.files),
-                ContextCompat.getDrawable(requireContext(), R.drawable.ic_add_file_file)
+                context.getString(R.string.files),
+                ContextCompat.getDrawable(context, R.drawable.ic_add_file_file)
             ),
         )
         val listButton = listOf(
@@ -186,7 +145,7 @@ class DialogAddFile(
             item.tvTitle.text = listOfFloatMember[index].first
         }
         binding.floatingActionButton.clickWithDebounce(200) {
-            closeMenu()
+            closeMenu(dialog)
         }
 
     }

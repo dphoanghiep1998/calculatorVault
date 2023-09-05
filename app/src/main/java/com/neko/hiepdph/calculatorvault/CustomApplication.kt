@@ -62,7 +62,7 @@ class CustomApplication : Application(), Application.ActivityLifecycleCallbacks 
                 }
 
                 Lifecycle.Event.ON_RESUME -> {
-                    if (currentActivity !is ActivityCalculator && !resumeFromApp) {
+                    if (currentActivity !is ActivityCalculator && !resumeFromApp && config.isSetupPasswordDone) {
                         if (config.lockWhenLeavingApp) {
                             authority = false
                             isLockShowed = false

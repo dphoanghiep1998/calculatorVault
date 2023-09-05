@@ -18,6 +18,7 @@ import com.neko.hiepdph.calculatorvault.common.share_preference.AppSharePreferen
 import com.neko.hiepdph.calculatorvault.common.utils.EMPTY
 import com.neko.hiepdph.calculatorvault.config.LockType
 import com.neko.hiepdph.calculatorvault.databinding.FragmentLockBinding
+import java.util.concurrent.locks.Lock
 
 
 class FragmentLock : Fragment() {
@@ -41,7 +42,7 @@ class FragmentLock : Fragment() {
     }
 
     private fun handlePatternNotSet() {
-        if (requireContext().config.patternLock.isEmpty()) {
+        if (requireContext().config.patternLock.isEmpty() && requireActivity().config.lockType != LockType.NONE) {
             requireContext().config.lockType = LockType.PIN
             binding.containerLockType.tvStatus.text = getPattern(requireContext().config.lockType)
             binding.containerChangeUnlock.tvContent.text =
@@ -65,6 +66,7 @@ class FragmentLock : Fragment() {
     }
 
     private fun initView() {
+        Log.d("TAG", "initView: "+requireActivity().config.lockType)
         lifecycleScope.launchWhenResumed {
             setupView()
         }
@@ -179,8 +181,9 @@ class FragmentLock : Fragment() {
 
     private val listener = OnSharedPreferenceChangeListener { sharedPreferences, key ->
         if (key == Constant.KEY_LOCK_TYPE) {
+            Log.d("TAG", "qweqweqwe: " + requireContext().config.lockType)
+
             if (requireContext().config.lockType == LockType.PATTERN && requireContext().config.patternLock.isEmpty()) {
-                Log.d("TAG", "qweqweqwe: ")
                 Handler().postDelayed({
                     navigateToPage(
                         R.id.fragmentLock, R.id.action_fragmentLock_to_fragmentChangePattern

@@ -20,16 +20,19 @@
 
     <TextView
         android:id="@+id/tv_name"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_12sdp"
-        android:ellipsize="end"
+        android:scrollHorizontally="true"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:ellipsize="marquee"
+        android:singleLine="true"
         android:fontFamily="@font/app_font_400"
-        android:maxLines="2"
         android:text="@string/pictures"
         android:textColor="@color/neutral_06"
         android:textSize="@dimen/_16sdp"
         app:layout_constraintBottom_toTopOf="@id/tv_count"
+        app:layout_constraintEnd_toStartOf="@id/imv_option"
         app:layout_constraintStart_toEndOf="@id/imv_logo"
         app:layout_constraintTop_toTopOf="@id/imv_logo" />
 

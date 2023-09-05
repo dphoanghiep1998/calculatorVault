@@ -73,6 +73,7 @@ class AdapterFolder(
             binding.root.clickWithDebounce {
                 onItemPress.invoke(item)
             }
+            binding.tvName.requestFocus()
         }
     }
 
@@ -90,6 +91,8 @@ class AdapterFolder(
             binding.root.clickWithDebounce {
                 onItemPress.invoke(item)
             }
+
+            binding.tvName.requestFocus()
         }
     }
 

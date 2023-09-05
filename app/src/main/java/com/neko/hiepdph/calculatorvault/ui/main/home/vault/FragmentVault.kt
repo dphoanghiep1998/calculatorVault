@@ -272,7 +272,7 @@ class FragmentVault : Fragment() {
     }
 
     private fun showAddFolderDialog() {
-        val dialogAddNewFolder = DialogAddNewFolder(object : AddNewFolderDialogCallBack {
+        val dialogAddNewFolder = DialogAddNewFolder(requireContext(),object : AddNewFolderDialogCallBack {
             override fun onPositiveClicked(name: String) {
                 viewModel.createFolder(requireContext().filesDir, name, onSuccess = {
                     lifecycleScope.launch(Dispatchers.Main) {
@@ -299,8 +299,8 @@ class FragmentVault : Fragment() {
                 })
             }
 
-        })
-        dialogAddNewFolder.show(parentFragmentManager, dialogAddNewFolder.tag)
+        }).onCreateDialog(requireActivity())
+        dialogAddNewFolder.show()
     }
 
     private fun initPopupWindow() {

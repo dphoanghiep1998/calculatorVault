@@ -29,7 +29,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/tv_calculator" />
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tv_input"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -44,16 +44,18 @@
         app:layout_constraintBottom_toTopOf="@id/tv_result"
         app:layout_constraintTop_toBottomOf="@id/imv_change_theme" />
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tv_result"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginHorizontal="@dimen/_12sdp"
         android:layout_marginBottom="@dimen/_12sdp"
         android:fontFamily="@font/app_font_400"
+        android:singleLine="false"
         android:gravity="end|bottom"
         android:textColor="@color/neutral_05"
-        android:textSize="@dimen/_26sdp"
+        android:textSize="@dimen/_20sdp"
+        app:autoSizeTextType="uniform"
         app:layout_constraintBottom_toTopOf="@id/layout_calculator"
         app:layout_constraintTop_toBottomOf="@id/tv_input" />
 
@@ -68,7 +70,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/blur"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/tv_calculator_highlight"
